@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('rental_post_images', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('rental_post_id')->constrained('rental_posts')->onDelete('cascade');
+            $table->string('image_path');
+            $table->boolean('is_thumbnail')->default(false);
+            $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
     }
