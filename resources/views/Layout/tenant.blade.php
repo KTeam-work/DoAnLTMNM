@@ -29,7 +29,7 @@
         <li class="nav-item"><a class="app-nav-link" href="#">Yêu thích</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
       </ul>
 
       <div class="navbar-actions">
