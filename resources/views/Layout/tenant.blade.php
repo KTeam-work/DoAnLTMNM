@@ -30,6 +30,7 @@
         <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
       </ul>
 
       <div class="navbar-actions">
