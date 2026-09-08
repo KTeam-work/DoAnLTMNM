@@ -31,6 +31,7 @@
         <li class="nav-item"><a class="app-nav-link" href="#">Người thuê</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="#">Giao dịch</a></li>
       </ul>
 
       <div class="navbar-actions">
