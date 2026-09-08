@@ -99,6 +99,8 @@
         <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
         <li class="nav-item"><a class="app-nav-link active" href="{{ url('/tenant/invoices') }}">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link active" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
       </ul>
       <div class="navbar-actions">
         <a href="#" class="user-chip skeleton-box">

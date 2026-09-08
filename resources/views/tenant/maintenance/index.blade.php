@@ -50,6 +50,7 @@
         <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
         <li class="nav-item"><a class="app-nav-link active" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
       </ul>
       <div class="navbar-actions">
         <a href="#" class="user-chip skeleton-box"><span class="user-avatar hide-on-skeleton">TH</span><span class="user-name hide-on-skeleton">Thanh Huyền</span></a>
