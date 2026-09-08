@@ -52,8 +52,23 @@
         <li class="nav-item"><a class="app-nav-link active" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
       </ul>
-      <div class="navbar-actions">
-        <a href="#" class="user-chip skeleton-box"><span class="user-avatar hide-on-skeleton">TH</span><span class="user-name hide-on-skeleton">Thanh Huyền</span></a>
+     <div class="navbar-actions skeleton-box">
+        <div class="hide-on-skeleton d-flex align-items-center gap-3">
+          <!-- Thêm text-decoration-none vào class -->
+          <a href="{{ route('tenant.notifications.index') }}" class="notif-btn text-decoration-none">
+            🔔<span class="notif-dot"></span>
+          </a>
+          
+          <!-- Thêm text-decoration-none vào class -->
+          <a href="#" class="user-chip text-decoration-none">
+            <span class="user-avatar">TH</span>
+            <span class="user-meta">
+              <span class="user-name d-block" style="text-decoration: none;">Thanh Huyền</span>
+              <span class="user-role">Người thuê</span>
+            </span>
+            <span class="caret">▾</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>

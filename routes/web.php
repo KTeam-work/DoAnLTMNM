@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MaintenanceController; 
 use App\Http\Controllers\ReviewController; 
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('Layout.tenant');
@@ -23,3 +24,10 @@ Route::get('/tenant/maintenance/{id}', [MaintenanceController::class, 'show'])->
 // Thêm 2 dòng này vào nhóm route của Tenant:
 Route::get('/tenant/reviews', [ReviewController::class, 'index'])->name('tenant.reviews.index');
 Route::post('/tenant/reviews/store', [ReviewController::class, 'store'])->name('tenant.reviews.store');
+
+
+
+
+// Thêm vào nhóm Tenant:
+Route::get('/tenant/notifications', [NotificationController::class, 'index'])->name('tenant.notifications.index');
+Route::post('/tenant/notifications/mark-read', [NotificationController::class, 'markAllAsRead'])->name('tenant.notifications.mark_read');

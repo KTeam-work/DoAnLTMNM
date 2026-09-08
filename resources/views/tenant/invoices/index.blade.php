@@ -93,20 +93,32 @@
     <a class="logo" href="{{ url('/') }}">Trọ <span>Ơi</span></a>
     <div class="collapse navbar-collapse" id="mainMenu">
     <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant') }}">Trang chủ</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#rooms">Tìm phòng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Yêu thích</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link active" href="{{ url('/tenant/invoices') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link active" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+        <li class="nav-item"><a class="app-nav-link active" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
       </ul>
-      <div class="navbar-actions">
-        <a href="#" class="user-chip skeleton-box">
-          <span class="user-avatar hide-on-skeleton">TH</span>
-          <span class="user-meta hide-on-skeleton"><span class="user-name d-block">Thanh Huyền</span></span>
-        </a>
+     <div class="navbar-actions skeleton-box">
+        <div class="hide-on-skeleton d-flex align-items-center gap-3">
+          <!-- Thêm text-decoration-none vào class -->
+          <a href="{{ route('tenant.notifications.index') }}" class="notif-btn text-decoration-none">
+            🔔<span class="notif-dot"></span>
+          </a>
+          
+          <!-- Thêm text-decoration-none vào class -->
+          <a href="#" class="user-chip text-decoration-none">
+            <span class="user-avatar">TH</span>
+            <span class="user-meta">
+              <span class="user-name d-block" style="text-decoration: none;">Thanh Huyền</span>
+              <span class="user-role">Người thuê</span>
+            </span>
+            <span class="caret">▾</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>
