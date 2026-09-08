@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\MaintenanceController; // <-- Đưa lên trên cùng ở đây
+use App\Http\Controllers\MaintenanceController; 
+use App\Http\Controllers\ReviewController; 
 
 Route::get('/', function () {
     return view('Layout.tenant');
@@ -17,3 +18,8 @@ Route::get('/tenant/maintenance', [MaintenanceController::class, 'index'])->name
 Route::get('/tenant/maintenance/create', [MaintenanceController::class, 'create'])->name('tenant.maintenance.create');
 Route::post('/tenant/maintenance/store', [MaintenanceController::class, 'store'])->name('tenant.maintenance.store');
 Route::get('/tenant/maintenance/{id}', [MaintenanceController::class, 'show'])->name('tenant.maintenance.show');
+
+
+// Thêm 2 dòng này vào nhóm route của Tenant:
+Route::get('/tenant/reviews', [ReviewController::class, 'index'])->name('tenant.reviews.index');
+Route::post('/tenant/reviews/store', [ReviewController::class, 'store'])->name('tenant.reviews.store');
