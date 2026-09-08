@@ -197,6 +197,7 @@
         <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
         <li class="nav-item"><a class="app-nav-link active" href="{{ route('owner.invoices.index') }}">Hóa đơn</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('owner.payments.index') }}">Giao dịch</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ url('/owner/maintenance') }}">Sửa chữa</a></li>
       </ul>
 
       <div class="navbar-actions">

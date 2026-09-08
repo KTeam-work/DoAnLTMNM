@@ -7,6 +7,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
 use App\Http\Controllers\Owner\PaymentController as OwnerPaymentController;
+use App\Http\Controllers\Owner\MaintenanceController as OwnerMaintenanceController;
 
 Route::get('/', function () {
     return view('Layout.tenant');
@@ -39,3 +40,4 @@ Route::post('/tenant/notifications/mark-read', [NotificationController::class, '
 //khu vực Route dành cho Chủ trọ 
 Route::get('/owner/invoices', [OwnerInvoiceController::class, 'index'])->name('owner.invoices.index');
 Route::get('/owner/payments', [OwnerPaymentController::class, 'index'])->name('owner.payments.index');
+Route::get('/owner/maintenance', [OwnerMaintenanceController::class, 'index'])->name('owner.maintenance.index');
