@@ -5,6 +5,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MaintenanceController; 
 use App\Http\Controllers\ReviewController; 
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
 
 Route::get('/', function () {
     return view('Layout.tenant');
@@ -31,3 +32,8 @@ Route::post('/tenant/reviews/store', [ReviewController::class, 'store'])->name('
 // Thêm vào nhóm Tenant:
 Route::get('/tenant/notifications', [NotificationController::class, 'index'])->name('tenant.notifications.index');
 Route::post('/tenant/notifications/mark-read', [NotificationController::class, 'markAllAsRead'])->name('tenant.notifications.mark_read');
+
+
+
+//khu vực Route dành cho Chủ trọ 
+Route::get('/owner/invoices', [OwnerInvoiceController::class, 'index'])->name('owner.invoices.index');
