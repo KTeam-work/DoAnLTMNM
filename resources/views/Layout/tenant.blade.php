@@ -49,7 +49,14 @@
 
       <ul class="navbar-nav mx-auto align-items-lg-center">
 
-        <li class="nav-item">
+
+
+
+      
+
+
+
+         <li class="nav-item">
           <a
             class="app-nav-link active"
             href="{{ url('/tenant') }}"
@@ -58,8 +65,8 @@
           </a>
         </li>
 
-
-        <li class="nav-item">
+        
+         <li class="nav-item">
           <a
             class="app-nav-link"
             href="{{ route('rooms.index') }}"
@@ -67,9 +74,8 @@
             Tìm phòng
           </a>
         </li>
-
-
-        <li class="nav-item">
+        
+         <li class="nav-item">
           <a
             class="app-nav-link"
             href="{{ route('favorites.index') }}"
@@ -77,9 +83,8 @@
             Yêu thích
           </a>
         </li>
-
-
-        <li class="nav-item">
+        
+         <li class="nav-item">
           <a
             class="app-nav-link"
             href="{{ route('appointments.index') }}"
@@ -87,27 +92,10 @@
             Lịch xem phòng
           </a>
         </li>
-
-
-        <li class="nav-item">
-          <a
-            class="app-nav-link"
-            href="#"
-          >
-            Hợp đồng
-          </a>
-        </li>
-
-
-        <li class="nav-item">
-          <a
-            class="app-nav-link"
-            href="#"
-          >
-            Hóa đơn
-          </a>
-        </li>
-
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
       </ul>
 
 

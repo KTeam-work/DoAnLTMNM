@@ -28,9 +28,20 @@
         <li class="nav-item"><a class="app-nav-link" href="#">Nhà &amp; Phòng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Tin đăng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Người thuê</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
+        <li class="nav-item">
+          <a class="app-nav-link" href="{{ route('owner.tenants.manage') }}">Người thuê</a>
+        </li>
+        <li class="nav-item">
+          <a class="app-nav-link" href="{{ route('owner.contracts.index') }}">Hợp đồng</a>
+        </li>
+         <li class="nav-item">
+          <a class="app-nav-link" href="{{ route('owner.services.index') }}">Dịch vụ</a>
+        </li>
+          <li class="nav-item">
+          <a class="app-nav-link" href="{{ route('owner.utilities.index') }}">Điện nước</a>
+        </li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="#">Giao dịch</a></li>
       </ul>
 
       <div class="navbar-actions">
