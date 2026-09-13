@@ -9,10 +9,12 @@ use App\Http\Controllers\ContractController;
 use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
 use App\Http\Controllers\Owner\PaymentController as OwnerPaymentController;
 use App\Http\Controllers\Owner\MaintenanceController as OwnerMaintenanceController;
+use App\Http\Controllers\Owner\ReviewController as OwnerReviewController;
 use App\Http\Controllers\Owner\OwnerTenantsController as OwnerTenantsController;
 use App\Http\Controllers\OwnerContractController as OwnerContractController;
 use App\Http\Controllers\Owner\OwnerServiceController as OwnerServiceController;
 use App\Http\Controllers\Owner\OwnerUtilitiesController as OwnerUtilitiesController;
+
 
 Route::get('/', function () {
     return view('Layout.landlord');
@@ -77,3 +79,5 @@ Route::post('/tenant/notifications/mark-read', [NotificationController::class, '
 Route::get('/owner/invoices', [OwnerInvoiceController::class, 'index'])->name('owner.invoices.index');
 Route::get('/owner/payments', [OwnerPaymentController::class, 'index'])->name('owner.payments.index');
 Route::get('/owner/maintenance', [OwnerMaintenanceController::class, 'index'])->name('owner.maintenance.index');
+Route::get('/owner/reviews', [OwnerReviewController::class, 'index']);
+
