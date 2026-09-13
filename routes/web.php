@@ -16,7 +16,61 @@ use App\Http\Controllers\Owner\OwnerServiceController as OwnerServiceController;
 use App\Http\Controllers\Owner\OwnerUtilitiesController as OwnerUtilitiesController;
 
 
+/*
+|--------------------------------------------------------------------------
+| TRANG CHỦ TENANT
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', function () {
+    return view('Layout.tenant');
+})->name('tenant');
+
+
+/*
+|--------------------------------------------------------------------------
+| PHÒNG
+|--------------------------------------------------------------------------
+*/
+
+// Danh sách phòng
+Route::get('/rooms', function () {
+    return view('rooms.index');
+})->name('rooms.index');
+
+// Chi tiết phòng
+Route::get('/rooms/{id}', function ($id) {
+    return view('rooms.show', compact('id'));
+})->name('rooms.show');
+
+
+/*
+|--------------------------------------------------------------------------
+| YÊU THÍCH
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/favorites', function () {
+    return view('favorites.index');
+})->name('favorites.index');
+
+
+/*
+|--------------------------------------------------------------------------
+| LỊCH XEM PHÒNG
+|--------------------------------------------------------------------------
+*/
+
+// Danh sách lịch xem phòng
+Route::get('/appointments', function () {
+    return view('appointments.index');
+})->name('appointments.index');
+
+// Trang đặt lịch xem phòng
+Route::get('/appointments/create', function () {
+    return view('appointments.create');
+})->name('appointments.create');
+
     return view('Layout.landlord');
 })->name('tenant.home');
 
@@ -80,4 +134,5 @@ Route::get('/owner/invoices', [OwnerInvoiceController::class, 'index'])->name('o
 Route::get('/owner/payments', [OwnerPaymentController::class, 'index'])->name('owner.payments.index');
 Route::get('/owner/maintenance', [OwnerMaintenanceController::class, 'index'])->name('owner.maintenance.index');
 Route::get('/owner/reviews', [OwnerReviewController::class, 'index']);
+
 
