@@ -10,8 +10,13 @@ class ContractController extends Controller
         return view('tenant.contracts.index');
     }
 
-    public function show(){
-        return view('tenant.contracts.show');
+   public function show($id)
+    {
+       
+        
+
+       
+        return view('tenant.contracts.show', compact('id'));
     }
   
 }

@@ -45,6 +45,7 @@
         <li class="nav-item"><a class="app-nav-link {{ request()->is('owner/tenants*') ? 'active' : '' }}" href="{{ url('/owner/tenants') }}">Người thuê</a></li>
         <li class="nav-item"><a class="app-nav-link {{ request()->is('owner/contracts*') ? 'active' : '' }}" href="{{ url('/owner/contracts') }}">Hợp đồng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="#">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="#">Giao dịch</a></li>
       </ul>
       <div class="navbar-actions">
         <button class="notif-btn">🔔<span class="notif-dot"></span></button>
