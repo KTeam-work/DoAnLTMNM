@@ -226,7 +226,7 @@
         <!-- Logo -->
         <div class="auth-brand">
 
-            <a href="{{ url('/') }}" class="auth-logo">
+            <a href="{{ route('home') }}" class="auth-logo">
                 Trọ <span>Ơi</span>
                 <small>QUẢN LÝ & CHO THUÊ PHÒNG TRỌ</small>
             </a>

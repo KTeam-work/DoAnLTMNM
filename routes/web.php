@@ -14,6 +14,12 @@ use App\Http\Controllers\Owner\OwnerTenantsController as OwnerTenantsController;
 use App\Http\Controllers\OwnerContractController as OwnerContractController;
 use App\Http\Controllers\Owner\OwnerServiceController as OwnerServiceController;
 use App\Http\Controllers\Owner\OwnerUtilitiesController as OwnerUtilitiesController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Owner\OwnerRoomController as OwnerRoomRoomController;
+use App\Http\Controllers\Owner\OwnerRentailController as OwnerRentailController;
+use App\Http\Controllers\Owner\OwnerApptionmentController as OwnerApptionmentController;   
+use App\Http\Controllers\Owner\OwnerpropertiesController;        
+use App\Http\Controllers\Owner\OwnerReivewController;    
 
 /*
 |--------------------------------------------------------------------------
@@ -21,16 +27,21 @@ use App\Http\Controllers\Owner\OwnerUtilitiesController as OwnerUtilitiesControl
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return view('auth.login');
-});
+    return view('layout.landlord');
+})->name('home');
+
+// Post
+
+
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/login', function () {
     return view('auth.login');
-});
+})->name('login');
 
 Route::get('/register', function () {
     return view('auth.register');
-});
+})->name('register');
 
 Route::get('/admin/dashboard', function () {
     return view('admin.dashboard');
@@ -122,3 +133,20 @@ Route::get('/owner/invoices', [OwnerInvoiceController::class, 'index'])->name('o
 Route::get('/owner/payments', [OwnerPaymentController::class, 'index'])->name('owner.payments.index');
 Route::get('/owner/maintenance', [OwnerMaintenanceController::class, 'index'])->name('owner.maintenance.index');
 Route::get('/owner/reviews', [OwnerReviewController::class, 'index']);
+
+
+Route::get('/owner/rooms', [OwnerRoomRoomController::class,'index'])->name('owner.rooms.index');
+
+Route::get('/owner/rental-posts', [OwnerRentailController::class,'index'])->name('owner.rental-posts.index');
+
+Route::get('/owner/appointments', [OwnerApptionmentController::class,'index'])->name('owner.appointments.index');
+
+Route::get('/owner/reviews', [OwnerReivewController::class,'index'])->name('owner.reviews.index');
+
+
+Route::get('/owner/properties', [OwnerpropertiesController::class,'index'])->name('owner.properties.index');
+
+Route::get('/owner/home', function () {
+    
+    return view('Layout.landlord'); 
+})->name('landlord.home'); 

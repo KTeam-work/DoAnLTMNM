@@ -1,4 +1,4 @@
-```blade
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -58,7 +58,7 @@
         <!-- LOGO -->
         <a
             class="logo"
-            href="{{ route('tenant') }}"
+            href="{{ route('tenant.home') }}"
         >
             Trọ <span>Ơi</span>
         </a>
@@ -87,7 +87,7 @@
 
                     <a
                         class="app-nav-link"
-                        href="{{ route('tenant') }}"
+                        href="{{ route('tenant.home') }}"
                     >
                         Trang chủ
                     </a>
@@ -131,28 +131,11 @@
                 </li>
 
 
-                <li class="nav-item">
+               <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
+               <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
 
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Hợp đồng
-                    </a>
-
-                </li>
-
-
-                <li class="nav-item">
-
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Hóa đơn
-                    </a>
-
-                </li>
+              <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+              <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
 
             </ul>
 

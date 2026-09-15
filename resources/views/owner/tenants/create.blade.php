@@ -215,55 +215,112 @@
 
 <body>
 
+<!-- NAVBAR ĐÃ SỬA LỖI -->
 <nav class="navbar navbar-expand-lg app-navbar">
-    <div class="container-fluid px-4">
+  <div class="container-fluid">
+    <a class="logo" href="{{ route('landlord.home') }}">Trọ <span>Ơi</span></a>
 
-        <a class="navbar-brand app-brand" href="{{ url('/owner/dashboard') }}">
-            Trọ Ơi
-        </a>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+    </button>
 
-        <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#ownerNavbar">
-            <span class="navbar-toggler-icon"></span>
+    <div class="collapse navbar-collapse" id="mainMenu">
+      <ul class="navbar-nav mx-auto align-items-lg-center">
+        
+        <!-- 1. TỔNG QUAN -->
+        <li class="nav-item">
+          <a class="app-nav-link " href="{{ url('/landlord') }}">Tổng quan</a>
+        </li>
+
+        <!-- 2. QUẢN LÝ TÀI SẢN -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Nhà &amp; Phòng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.properties.index') }}">🏠 Quản lý nhà</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.rooms.index') }}">🚪 Quản lý phòng</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 3. KHÁCH THUÊ -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Khách &amp; Hợp đồng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
+            <li>
+              <a class="dropdown-item active" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.contracts.index') }}">📝 Hợp đồng</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 4. TÀI CHÍNH -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Tài chính
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.utilities.index') }}">⚡ Điện nước</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.invoices.index') }}">🧾 Hóa đơn</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route( 'owner.payments.index') }}">💰 Giao dịch</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 5. VẬN HÀNH & TƯƠNG TÁC -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Vận hành
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.rental-posts.index') }}">📢 Tin đăng</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.appointments.index') }}">📅 Lịch xem</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url('/owner/maintenance') }}">🛠️ Sửa chữa</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.reviews.index') }}">⭐ Đánh giá</a>
+            </li>
+          </ul>
+        </li>
+
+      </ul>
+       <div class="navbar-actions ms-lg-3">
+        <button class="notif-btn" type="button" aria-label="Thông báo">
+          🔔<span class="notif-dot"></span>
         </button>
-
-        <div class="collapse navbar-collapse" id="ownerNavbar">
-
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-
-                <li class="nav-item">
-                    <a class="app-nav-link" href="{{ url('/owner/dashboard') }}">
-                        Tổng quan
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="app-nav-link" href="{{ url('/owner/tenants') }}">
-                        Người thuê
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="app-nav-link active" href="{{ url('/owner/contracts') }}">
-                        Hợp đồng
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="app-nav-link" href="{{ url('/owner/rooms') }}">
-                        Phòng
-                    </a>
-                </li>
-
-            </ul>
-
-        </div>
+        <a href="#" class="user-chip">
+          <div class="user-avatar">A</div>
+          <div class="user-meta">
+            <div class="user-name">Chủ trọ</div>
+            <div class="user-role">Owner</div>
+          </div>
+          <span class="caret">▼</span>
+        </a>
+      </div>
     </div>
+  </div>
 </nav>
-
 
 <div class="page-wrap">
 
