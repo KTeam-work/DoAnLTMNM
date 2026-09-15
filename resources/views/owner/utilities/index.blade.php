@@ -12,6 +12,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+<!-- Custom CSS -->
+<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+
 <style>
   :root {
     --green: #20584f;
@@ -175,6 +178,9 @@
     border-radius: 11px;
     padding: 11px 18px;
     white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
     transition: 0.2s;
   }
   .btn-brand:hover { background: #ffd968; color: var(--green-dark); }
@@ -263,7 +269,7 @@
     vertical-align: middle;
   }
   .data-table tbody tr:last-child td { border-bottom: 0; }
-  .data-table tbody tr:hover td { background-color: rgba(248, 245, 235, 0.4); } /* Cream hover */
+  .data-table tbody tr:hover td { background-color: rgba(248, 245, 235, 0.4); }
 
   .cell-title { font-weight: 800; color: var(--green-dark); font-size: 14px; margin-bottom: 3px; }
   .cell-sub { color: var(--muted); font-size: 11.5px; }
@@ -284,11 +290,11 @@
     font-size: 10.5px;
     font-weight: 800;
   }
-  .badge-status.occupied { background: var(--green-soft); color: var(--green); } /* Xanh lá */
-  .badge-status.vacant { background: #f0eadc; color: var(--muted); } /* Xám nhạt */
-  .badge-status.pending { background: var(--yellow-light); color: #9b6a00; } /* Vàng */
+  .badge-status.occupied { background: var(--green-soft); color: var(--green); }
+  .badge-status.vacant { background: #f0eadc; color: var(--muted); }
+  .badge-status.pending { background: var(--yellow-light); color: #9b6a00; }
 
-  /* BỘ LỌC (FILTERS) */
+  /* FILTERS */
   .filter-label {
     display: block; font-size: 11px; font-weight: 800; color: var(--muted);
     text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;
@@ -337,41 +343,112 @@
 </head>
 <body>
 
-<!-- NAVBAR NGANG — OWNER -->
+<!-- NAVBAR ĐÃ ĐỒNG BỘ -->
+<!-- NAVBAR ĐÃ SỬA LỖI -->
 <nav class="navbar navbar-expand-lg app-navbar">
   <div class="container-fluid">
-    <a class="logo" href="owner.html">Trọ <span>Ơi</span></a>
+    <a class="logo" href="{{ route('landlord.home') }}">Trọ <span>Ơi</span></a>
 
-    <button class="navbar-toggler shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu">
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link" href="#">Tổng quan</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Nhà &amp; Phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Tin đăng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Người thuê</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Dịch vụ</a></li>
-        <!-- ACTIVE Ở ĐÂY -->
-        <li class="nav-item"><a class="app-nav-link active" href="#">Điện nước</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Giao dịch</a></li>
+        
+        <!-- 1. TỔNG QUAN -->
+        <li class="nav-item">
+          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+        </li>
+
+        <!-- 2. QUẢN LÝ TÀI SẢN -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Nhà &amp; Phòng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.properties.index') }}">🏠 Quản lý nhà</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.rooms.index') }}">🚪 Quản lý phòng</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 3. KHÁCH THUÊ -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Khách &amp; Hợp đồng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
+            <li> 
+              <a class="dropdown-item active" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.contracts.index') }}">📝 Hợp đồng</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 4. TÀI CHÍNH -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Tài chính
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.utilities.index') }}">⚡ Điện nước</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.invoices.index') }}">🧾 Hóa đơn</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route( 'owner.payments.index') }}">💰 Giao dịch</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 5. VẬN HÀNH & TƯƠNG TÁC -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Vận hành
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.rental-posts.index') }}">📢 Tin đăng</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.appointments.index') }}">📅 Lịch xem</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url('/owner/maintenance') }}">🛠️ Sửa chữa</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.reviews.index') }}">⭐ Đánh giá</a>
+            </li>
+          </ul>
+        </li>
+
       </ul>
 
-      <div class="navbar-actions mt-3 mt-lg-0">
-        <button class="notif-btn">🔔<span class="notif-dot"></span></button>
+       <div class="navbar-actions ms-lg-3">
+        <button class="notif-btn" type="button" aria-label="Thông báo">
+          🔔<span class="notif-dot"></span>
+        </button>
         <a href="#" class="user-chip">
-          <span class="user-avatar">MT</span>
-          <span class="user-meta d-none d-md-block">
-            <span class="user-name d-block">Minh Tuấn</span>
-            <span class="user-role">Chủ trọ</span>
-          </span>
-          <span class="caret d-none d-md-block">▾</span>
+          <div class="user-avatar">A</div>
+          <div class="user-meta">
+            <div class="user-name">Chủ trọ</div>
+            <div class="user-role">Owner</div>
+          </div>
+          <span class="caret">▼</span>
         </a>
       </div>
+
     </div>
   </div>
 </nav>
@@ -385,7 +462,7 @@
     </div>
     <div class="d-flex gap-2">
       <button class="btn-outline-brand">📥 Xuất Excel</button>
-      <a class="btn-brand" href="{{ route("owner.utilities.create") }}" >Them ghi chú mới</a>
+      <a class="btn-brand" href="{{ route('owner.utilities.create') }}" >+ Thêm ghi chú mới</a>
     </div>
   </div>
 
@@ -463,7 +540,7 @@
         </select>
       </div>
       <div class="col-md-3 d-flex align-items-end">
-        <button class="btn-brand w-100" style="height: 44px;">Lọc dữ liệu</button>
+        <button class="btn-brand w-100" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>
       </div>
     </div>
 
@@ -569,7 +646,7 @@
 </div>
 
 <!-- =====================================================
-     MODAL GHI CHỈ SỐ (Được style theo theme)
+     MODAL GHI CHỈ SỐ
 ===================================================== -->
 <div class="modal fade" id="readingModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -643,6 +720,7 @@
   </div>
 </div>
 
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   const readingModal = new bootstrap.Modal(document.getElementById('readingModal'));

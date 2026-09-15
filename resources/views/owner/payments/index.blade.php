@@ -68,6 +68,7 @@
     border-radius: 10px;
     transition: .2s;
     white-space: nowrap;
+    text-decoration: none;
   }
   .app-nav-link:hover, .app-nav-link.active{
     color: var(--forest) !important;
@@ -164,7 +165,7 @@
     font-weight: 700; 
     letter-spacing: -0.02em; 
     margin-top: 0.35rem; 
-    color: #a8e6cf;  /* Màu xanh mint nhạt */
+    color: #a8e6cf;
     }
   .stat-primary .stat-label{ font-size: 0.85rem; color: #cfe3dd; margin-top: 0.15rem; }
 
@@ -254,37 +255,108 @@
 </head>
 <body class="skeleton-mode">
 
-<!-- NAVBAR NGANG -->
+<!-- NAVBAR ĐÃ ĐỒNG BỘ -->
+<!-- NAVBAR ĐÃ SỬA LỖI -->
 <nav class="navbar navbar-expand-lg app-navbar">
   <div class="container-fluid">
-    <a class="logo" href="{{ url('/') }}">Trọ <span>Ơi</span></a>
+    <a class="logo" href="{{ route('landlord.home') }}">Trọ <span>Ơi</span></a>
 
-    <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu">
-      <span class="navbar-toggler-icon"></span>
+    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link" href="#">Tổng quan</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Nhà &amp; Phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Tin đăng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Người thuê</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('owner.invoices.index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link  active" href="{{ route('owner.payments.index') }}">Giao dịch</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ url('/owner/maintenance') }}">Sửa chữa</a></li>
-      </ul>
+        
+        <!-- 1. TỔNG QUAN -->
+        <li class="nav-item">
+          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+        </li>
 
-      <div class="navbar-actions">
-        <a href="#" class="notif-btn"><i class="bi bi-bell-fill"></i><span class="notif-dot"></span></a>
+        <!-- 2. QUẢN LÝ TÀI SẢN -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Nhà &amp; Phòng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.properties.index') }}">🏠 Quản lý nhà</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.rooms.index') }}">🚪 Quản lý phòng</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 3. KHÁCH THUÊ -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Khách &amp; Hợp đồng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.contracts.index') }}">📝 Hợp đồng</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 4. TÀI CHÍNH -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Tài chính
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.utilities.index') }}">⚡ Điện nước</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.invoices.index') }}">🧾 Hóa đơn</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route( 'owner.payments.index') }}">💰 Giao dịch</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- 5. VẬN HÀNH & TƯƠNG TÁC -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Vận hành
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.rental-posts.index') }}">📢 Tin đăng</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.appointments.index') }}">📅 Lịch xem</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url('/owner/maintenance') }}">🛠️ Sửa chữa</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.reviews.index') }}">⭐ Đánh giá</a>
+            </li>
+          </ul>
+        </li>
+
+      </ul>
+       <div class="navbar-actions ms-lg-3">
+        <button class="notif-btn" type="button" aria-label="Thông báo">
+          🔔<span class="notif-dot"></span>
+        </button>
         <a href="#" class="user-chip">
-          <span class="user-avatar">MT</span>
-          <span class="user-meta">
-            <span class="user-name d-block">{{ Auth::user()->name ?? 'Minh Tuấn' }}</span>
-            <span class="user-role">Chủ trọ</span>
-          </span>
-          <span class="caret">▾</span>
+          <div class="user-avatar">A</div>
+          <div class="user-meta">
+            <div class="user-name">Chủ trọ</div>
+            <div class="user-role">Owner</div>
+          </div>
+          <span class="caret">▼</span>
         </a>
       </div>
     </div>
@@ -515,7 +587,7 @@
   </div>
 </div>
 
-<!-- MODAL: THÊM GHI NHẬN THANH TOÁN - ĐÁP ỨNG TRƯỜNG HỢP THỦ CÔNG -->
+<!-- MODAL: THÊM GHI NHẬN THANH TOÁN -->
 <div class="modal fade" id="addPaymentModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -526,12 +598,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <!-- Thông báo có thể ghi nhận thủ công -->
         <div class="alert alert-info border-0 py-2 px-3 mb-3" style="background: var(--forest-tint); color: var(--forest); font-size: 0.85rem;">
           <i class="bi bi-info-circle me-1"></i> Có thể chọn hóa đơn có sẵn hoặc nhập tay cho các khoản thu phát sinh (tiền cọc, đền bù,...)
         </div>
 
-        <!-- Chọn hóa đơn (có option để nhập tay) -->
         <div class="mb-3">
           <label class="form-label fw-bold small">Hóa đơn / Khách thuê</label>
           <select class="form-select" id="invoiceSelect">
@@ -543,13 +613,11 @@
           </select>
         </div>
 
-        <!-- Nhập tên khách (hiện khi chọn "Nhập tay") -->
         <div class="mb-3" id="manualTenantGroup" style="display: none;">
           <label class="form-label fw-bold small">Tên khách thuê <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="manualTenant" placeholder="Nhập tên khách thuê...">
         </div>
 
-        <!-- Nhập phòng (hiện khi chọn "Nhập tay") -->
         <div class="mb-3" id="manualRoomGroup" style="display: none;">
           <label class="form-label fw-bold small">Phòng</label>
           <input type="text" class="form-control" id="manualRoom" placeholder="Nhập tên phòng...">

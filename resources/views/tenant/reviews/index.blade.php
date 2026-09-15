@@ -46,9 +46,33 @@
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#rooms">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
+         <li class="nav-item">
+          <a
+            class="app-nav-link"
+            href="{{ route('rooms.index') }}"
+          >
+            Tìm phòng
+          </a>
+        </li>
+        
+           <li class="nav-item">
+          <a
+            class="app-nav-link"
+            href="{{ route('favorites.index') }}"
+          >
+            Yêu thích
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            class="app-nav-link"
+            href="{{ route('appointments.index') }}"
+          >
+            Lịch xem phòng
+          </a>
+        </li>
+
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
         <li class="nav-item"><a class="app-nav-link active" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>

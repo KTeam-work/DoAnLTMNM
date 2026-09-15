@@ -321,146 +321,104 @@
 <div class="owner-page">
 
     <!-- ================= NAVBAR ================= -->
-    <nav class="navbar navbar-expand-lg app-navbar">
+   <!-- NAVBAR ĐÃ SỬA LỖI -->
+<!-- ================= NAVBAR ĐÃ SỬA ================= -->
+<nav class="navbar navbar-expand-xl app-navbar">
+  <div class="container-fluid">
+    <a class="logo" href="{{ route('landlord.home') }}">Trọ <span>Ơi</span></a>
 
-        <div class="container-fluid">
+    <button class="navbar-toggler shadow-none border-0" type="button"
+            data-bs-toggle="collapse" data-bs-target="#mainMenu"
+            aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+    </button>
 
-            <a class="logo" href="{{ route('landlord') }}">
-                Trọ <span>Ơi</span>
-            </a>
+    <div class="collapse navbar-collapse" id="mainMenu">
+      <ul class="navbar-nav mx-auto align-items-lg-center">
 
-            <button
-                class="navbar-toggler bg-light"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mainMenu"
-                aria-controls="mainMenu"
-                aria-expanded="false"
-                aria-label="Mở menu">
+        <!-- 1. TỔNG QUAN -->
+        <li class="nav-item">
+          <a class="app-nav-link 
+             href="{{ url('/landlord') }}">Tổng quan</a>
+        </li>
 
-                <span class="navbar-toggler-icon"></span>
+        <!-- 2. NHÀ & PHÒNG -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle active {{ request()->routeIs('owner.properties.*') || request()->routeIs('owner.rooms.*') ? 'active' : '' }}"
+             href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Nhà &amp; Phòng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
+            <li><a class="dropdown-item" href="{{ route('owner.properties.index') }}">🏠 Quản lý nhà</a></li>
+            <li><a class="dropdown-item" href="{{ route('owner.rooms.index') }}">🚪 Quản lý phòng</a></li>
+          </ul>
+        </li>
 
-            </button>
+        <!-- 3. KHÁCH & HỢP ĐỒNG -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle {{ request()->routeIs('owner.tenants.*') || request()->routeIs('owner.contracts.*') ? 'active' : '' }}"
+             href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Khách &amp; Hợp đồng
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
+            <li><a class="dropdown-item" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a></li>
+            <li><a class="dropdown-item" href="{{ route('owner.contracts.index') }}">📝 Hợp đồng</a></li>
+          </ul>
+        </li>
 
-            <div class="collapse navbar-collapse" id="mainMenu">
+        <!-- 4. TÀI CHÍNH -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle {{ request()->routeIs('owner.services.*') || request()->routeIs('owner.utilities.*') || request()->routeIs('owner.payments.*') || request()->routeIs('owner.invoices.*') ? 'active' : '' }}"
+             href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Tài chính
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
+            <li><a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a></li>
+            <li><a class="dropdown-item" href="{{ route('owner.utilities.index') }}">⚡ Điện nước</a></li>
+            <li>
+              <a class="dropdown-item" href="{{ route('owner.invoices.index') }}">🧾 Hóa đơn</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ route( 'owner.payments.index') }}">💰 Giao dịch</a>
+            </li>
+          </ul>
+        </li>
 
-                <ul class="navbar-nav mx-auto align-items-lg-center">
+        <!-- 5. VẬN HÀNH -->
+        <li class="nav-item dropdown">
+          <a class="app-nav-link dropdown-toggle {{ request()->routeIs('owner.rental-posts.*') || request()->routeIs('owner.appointments.*') || request()->routeIs('owner.reviews.*') || request()->is('owner/maintenance*') ? 'active' : '' }}"
+             href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Vận hành
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">
+            <li><a class="dropdown-item" href="{{ route('owner.rental-posts.index') }}">📢 Tin đăng</a></li>
+            <li><a class="dropdown-item" href="{{ route('owner.appointments.index') }}">📅 Lịch xem</a></li>
+            <li><a class="dropdown-item" href="{{ url('/owner/maintenance') }}">🛠️ Sửa chữa</a></li>
+            <li><a class="dropdown-item" href="{{ route('owner.reviews.index') }}">⭐ Đánh giá</a></li>
+          </ul>
+        </li>
 
-                    <li class="nav-item">
-                        <a
-                            class="app-nav-link"
-                            href="{{ route('landlord') }}">
-                            Tổng quan
-                        </a>
-                    </li>
+      </ul>
 
-                    <li class="nav-item dropdown">
+      <!-- ===== KHỐI BÊN PHẢI: CHUÔNG + USER ===== -->
+      <div class="navbar-actions ms-lg-3">
+        <button class="notif-btn" type="button" aria-label="Thông báo">
+          🔔<span class="notif-dot"></span>
+        </button>
 
-                        <a
-                            class="app-nav-link dropdown-toggle active"
-                            href="#"
-                            role="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Nhà &amp; Phòng
-                        </a>
+        <a href="#" class="user-chip">
+          <div class="user-avatar">A</div>
+          <div class="user-meta">
+            <div class="user-name">Chủ trọ</div>
+            <div class="user-role">Owner</div>
+          </div>
+          <span class="caret">▼</span>
+        </a>
+      </div>
 
-                        <ul class="dropdown-menu">
-
-                            <li>
-                                <a
-                                    class="dropdown-item"
-                                    href="{{ route('owner.properties.index') }}">
-                                    🏠 Quản lý nhà
-                                </a>
-                            </li>
-
-                            <li>
-                                <a
-                                    class="dropdown-item"
-                                    href="{{ route('owner.rooms.index') }}">
-                                    🚪 Quản lý phòng
-                                </a>
-                            </li>
-
-                        </ul>
-
-                    </li>
-
-                    <li class="nav-item">
-                        <a
-                            class="app-nav-link"
-                            href="{{ route('owner.rental-posts.index') }}">
-                            Tin đăng
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a
-                            class="app-nav-link"
-                            href="{{ route('owner.appointments.index') }}">
-                            Lịch xem
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link" href="#">
-                            Người thuê
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link" href="#">
-                            Hợp đồng
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link" href="#">
-                            Hóa đơn
-                        </a>
-                    </li>
-
-                </ul>
-
-                <div class="navbar-actions">
-
-                    <button class="notif-btn" type="button">
-                        🔔
-                        <span class="notif-dot"></span>
-                    </button>
-
-                    <a href="#" class="user-chip">
-
-                        <span class="user-avatar">
-                            AT
-                        </span>
-
-                        <span class="user-meta">
-
-                            <span class="user-name d-block">
-                                Anh Tuấn
-                            </span>
-
-                            <span class="user-role">
-                                Chủ trọ
-                            </span>
-
-                        </span>
-
-                        <span class="caret">
-                            ▾
-                        </span>
-
-                    </a>
-
-                </div>
-
-            </div>
-        </div>
-
-    </nav>
-
+    </div>
+  </div>
+</nav>
 
     <!-- ================= MAIN ================= -->
 
