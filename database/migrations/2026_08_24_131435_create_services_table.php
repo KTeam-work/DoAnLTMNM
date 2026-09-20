@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('owner_id')->nullable();
             $table->string('name', 100);
             $table->text('description')->nullable();
             $table->string('unit', 50);
-            $table->decimal('price', 15, 2);
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->enum('status', ['active', 'inactive']);
             $table->timestamps();
+
+            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

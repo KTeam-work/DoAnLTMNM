@@ -1144,7 +1144,13 @@
 
         <div class="wall"></div>
 
+
         <div class="warm-light"></div>
+
+            <a href="{{ route('home') }}" class="auth-logo">
+                Trọ <span>Ơi</span>
+                <small>QUẢN LÝ & CHO THUÊ PHÒNG TRỌ</small>
+            </a>
 
         <div class="window">
             <div class="window-light"></div>
