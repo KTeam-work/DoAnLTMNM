@@ -1,6 +1,15 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+
+
+/*
+|--------------------------------------------------------------------------
+| TRANG CHỦ
+|--------------------------------------------------------------------------
+*/
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ReviewController;
@@ -27,6 +36,14 @@ use App\Http\Controllers\Owner\OwnerReivewController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
+
+
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+
+    $role = Auth::user()->role;
+=======
     return view('layout.landlord');
 })->name('home');
 
@@ -43,16 +60,154 @@ Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
 
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
+
+    if ($role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+    if ($role === 'owner') {
+        return redirect()->route('landlord.dashboard');
+    }
+
+    if ($role === 'tenant') {
+        return redirect()->route('tenant.dashboard');
+    }
+
+    Auth::logout();
+
+    return redirect()
+        ->route('login')
+        ->withErrors([
+            'email' => 'Tài khoản chưa được phân quyền hợp lệ.',
+        ]);
 });
 
-Route::get('/admin/users', function () {
-    return view('admin.users');
+
+/*
+|--------------------------------------------------------------------------
+| LOGIN / REGISTER
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest')->group(function () {
+
+    Route::get('/login', [AuthController::class, 'showLogin'])
+        ->name('login');
+
+    Route::post('/login', [AuthController::class, 'login'])
+        ->name('login.post');
+
+    Route::get('/register', [AuthController::class, 'showRegister'])
+        ->name('register');
+
+    Route::post('/register', [AuthController::class, 'register'])
+        ->name('register.post');
 });
 
-Route::get('/admin/rental-posts', function () {
-    return view('admin.rental-posts');
+
+
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('logout');
+
+
+/*
+|--------------------------------------------------------------------------
+| TRANG SAU KHI ĐĂNG NHẬP
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/admin/dashboard', function () {
+
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        return view('admin.dashboard');
+
+    })->name('admin.dashboard');
+
+
+    Route::get('/admin/users', function () {
+
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        return view('admin.users');
+
+    })->name('admin.users');
+
+
+    Route::get('/admin/rental-posts', function () {
+
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        return view('admin.rental-posts');
+
+    })->name('admin.rental-posts');
+
+
+    Route::get('/admin/statistics', function () {
+
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        return view('admin.statistics');
+
+    })->name('admin.statistics');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHỦ TRỌ
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/landlord/dashboard', function () {
+
+        if (Auth::user()->role !== 'owner') {
+            abort(403);
+        }
+
+        return view('Layout.landlord');
+
+    })->name('landlord.dashboard');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | NGƯỜI THUÊ
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/tenant/dashboard', function () {
+
+        if (Auth::user()->role !== 'tenant') {
+            abort(403);
+        }
+
+        return view('Layout.tenant');
+
+    })->name('tenant.dashboard');
+
 });
 
 Route::get('/admin/statistics', function () {
@@ -150,3 +305,4 @@ Route::get('/owner/home', function () {
     
     return view('Layout.landlord'); 
 })->name('landlord.home'); 
+

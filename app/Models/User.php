@@ -2,48 +2,100 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Mass Assignment
+    |--------------------------------------------------------------------------
+    */
+
     protected $fillable = [
+        'user_code',
         'name',
         'email',
         'password',
+        'phone',
+        'avatar',
+        'role',
+        'status',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hidden
+    |--------------------------------------------------------------------------
+    */
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Casts
+    |--------------------------------------------------------------------------
+    */
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quan hệ - Chủ trọ
+    |--------------------------------------------------------------------------
+    */
+
+    public function properties()
+    {
+        return $this->hasMany(Property::class, 'owner_id');
+    }
+
+
+    public function ownedContracts()
+    {
+        return $this->hasMany(Contract::class, 'owner_id');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quan hệ - Người thuê
+    |--------------------------------------------------------------------------
+    */
+
+    public function viewingAppointments()
+    {
+        return $this->hasMany(
+            ViewingAppointment::class,
+            'tenant_id'
+        );
+    }
+
+
+    public function rentedContracts()
+    {
+        return $this->hasMany(
+            Contract::class,
+            'tenant_id'
+        );
     }
 }
