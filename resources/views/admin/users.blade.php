@@ -21,7 +21,7 @@
 
 <body>
 
-<!-- ================= NAVBAR ================= -->
+{{-- ================= NAVBAR ================= --}}
 
 <nav class="app-navbar">
 
@@ -29,42 +29,56 @@
 
         <div class="d-flex align-items-center justify-content-between h-100">
 
-            <!-- LOGO -->
+            {{-- LOGO --}}
 
-            <a href="{{ url('/admin/dashboard') }}" class="logo text-decoration-none">
+            <a href="{{ route('admin.dashboard') }}"
+               class="logo text-decoration-none">
+
                 Trọ <span>Ơi</span>
                 <small>ADMIN</small>
+
             </a>
 
 
-            <!-- MENU -->
+            {{-- MENU --}}
 
             <div class="d-flex align-items-center gap-1">
 
-                <a href="{{ url('/admin/dashboard') }}"
+                <a href="{{ route('admin.dashboard') }}"
                    class="app-nav-link text-decoration-none">
+
                     Dashboard
+
                 </a>
 
-                <a href="{{ url('/admin/users') }}"
+
+                <a href="{{ route('admin.users') }}"
                    class="app-nav-link active text-decoration-none">
+
                     Tài khoản
+
                 </a>
 
-                <a href="{{ url('/admin/rental-posts') }}"
+
+                <a href="{{ route('admin.rental-posts') }}"
                    class="app-nav-link text-decoration-none">
+
                     Kiểm duyệt tin
+
                 </a>
 
-                <a href="{{ url('/admin/statistics') }}"
+
+                <a href="{{ route('admin.statistics') }}"
                    class="app-nav-link text-decoration-none">
+
                     Thống kê
+
                 </a>
 
             </div>
 
 
-            <!-- ADMIN -->
+            {{-- ADMIN --}}
 
             <div class="navbar-actions">
 
@@ -97,11 +111,11 @@
 </nav>
 
 
-<!-- ================= CONTENT ================= -->
+{{-- ================= CONTENT ================= --}}
 
 <div class="page-wrap">
 
-    <!-- HEADER -->
+    {{-- HEADER --}}
 
     <div class="page-header">
 
@@ -120,7 +134,7 @@
     </div>
 
 
-    <!-- ================= FILTER ================= -->
+    {{-- ================= FILTER ================= --}}
 
     <div class="panel mb-4">
 
@@ -133,11 +147,12 @@
         </div>
 
 
-        <form method="GET" action="{{ url('/admin/users') }}">
+        <form method="GET"
+              action="{{ route('admin.users') }}">
 
             <div class="row g-3">
 
-                <!-- Tìm kiếm -->
+                {{-- TÌM KIẾM --}}
 
                 <div class="col-12 col-lg-6">
 
@@ -156,7 +171,7 @@
                 </div>
 
 
-                <!-- Vai trò -->
+                {{-- VAI TRÒ --}}
 
                 <div class="col-12 col-md-6 col-lg-3">
 
@@ -190,7 +205,7 @@
                 </div>
 
 
-                <!-- Trạng thái -->
+                {{-- TRẠNG THÁI --}}
 
                 <div class="col-12 col-md-6 col-lg-3">
 
@@ -219,17 +234,23 @@
                 </div>
 
 
-                <!-- BUTTON -->
+                {{-- BUTTON --}}
 
                 <div class="col-12">
 
-                    <button type="submit" class="btn-brand">
+                    <button type="submit"
+                            class="btn-brand">
+
                         Tìm kiếm
+
                     </button>
 
-                    <a href="{{ url('/admin/users') }}"
+
+                    <a href="{{ route('admin.users') }}"
                        class="btn-outline-brand text-decoration-none">
+
                         Đặt lại
+
                     </a>
 
                 </div>
@@ -241,7 +262,7 @@
     </div>
 
 
-    <!-- ================= USER TABLE ================= -->
+    {{-- ================= USER TABLE ================= --}}
 
     <div class="panel">
 
@@ -302,7 +323,7 @@
                 <tbody>
 
 
-                <!-- USER 1 -->
+                {{-- USER 1 --}}
 
                 <tr>
 
@@ -330,16 +351,13 @@
 
                     </td>
 
-
                     <td>
                         0901234567
                     </td>
 
-
                     <td>
                         Owner
                     </td>
-
 
                     <td>
 
@@ -349,11 +367,9 @@
 
                     </td>
 
-
                     <td>
                         05/09/2026
                     </td>
-
 
                     <td>
 
@@ -366,7 +382,7 @@
                 </tr>
 
 
-                <!-- USER 2 -->
+                {{-- USER 2 --}}
 
                 <tr>
 
@@ -394,16 +410,13 @@
 
                     </td>
 
-
                     <td>
                         0912345678
                     </td>
 
-
                     <td>
                         Tenant
                     </td>
-
 
                     <td>
 
@@ -413,11 +426,9 @@
 
                     </td>
 
-
                     <td>
                         04/09/2026
                     </td>
-
 
                     <td>
 
@@ -430,7 +441,7 @@
                 </tr>
 
 
-                <!-- USER 3 -->
+                {{-- USER 3 --}}
 
                 <tr>
 
@@ -458,16 +469,13 @@
 
                     </td>
 
-
                     <td>
                         0987654321
                     </td>
 
-
                     <td>
                         Owner
                     </td>
-
 
                     <td>
 
@@ -477,11 +485,9 @@
 
                     </td>
 
-
                     <td>
                         02/09/2026
                     </td>
-
 
                     <td>
 
@@ -494,7 +500,7 @@
                 </tr>
 
 
-                <!-- USER 4 -->
+                {{-- USER 4 --}}
 
                 <tr>
 
@@ -522,16 +528,13 @@
 
                     </td>
 
-
                     <td>
                         0934567890
                     </td>
 
-
                     <td>
                         Tenant
                     </td>
-
 
                     <td>
 
@@ -541,11 +544,9 @@
 
                     </td>
 
-
                     <td>
                         01/09/2026
                     </td>
-
 
                     <td>
 
@@ -558,7 +559,7 @@
                 </tr>
 
 
-                <!-- USER 5 -->
+                {{-- USER 5 --}}
 
                 <tr>
 
@@ -586,16 +587,13 @@
 
                     </td>
 
-
                     <td>
                         0978123456
                     </td>
 
-
                     <td>
                         Owner
                     </td>
-
 
                     <td>
 
@@ -605,11 +603,9 @@
 
                     </td>
 
-
                     <td>
                         30/08/2026
                     </td>
-
 
                     <td>
 
@@ -629,7 +625,7 @@
         </div>
 
 
-        <!-- ================= PAGINATION ================= -->
+        {{-- ================= PAGINATION ================= --}}
 
         <div class="d-flex justify-content-between align-items-center mt-4">
 
@@ -668,6 +664,8 @@
 
 </div>
 
+
+{{-- BOOTSTRAP JS --}}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
