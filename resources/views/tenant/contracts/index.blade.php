@@ -210,13 +210,13 @@
                         <a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ url('/#rooms') }}">Tìm phòng</a>
+                        <a class="app-nav-link" href="{{ route('rooms.index') }}">Tìm phòng</a>
                     </li>
                     <li class="nav-item">
-                        <a class="app-nav-link" href="#">Yêu thích</a>
+                        <a class="app-nav-link" href="{{ route('favorites.index') }}">Yêu thích</a>
                     </li>
                     <li class="nav-item">
-                        <a class="app-nav-link" href="#">Lịch xem phòng</a>
+                        <a class="app-nav-link" href="{{ route('appointments.index') }}">Lịch xem phòng</a>
                     </li>
                     <!-- HỢP ĐỒNG -->
                     <li class="nav-item">
@@ -268,14 +268,19 @@
                     Quản lý và theo dõi danh sách hợp đồng thuê phòng của bạn.
                 </div>
             </div>
-            <button class="btn btn-primary rounded-pill px-4 py-2 fw-medium shadow-sm">
+            <a href="{{ route('tenant.maintenance.create') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-medium shadow-sm text-decoration-none">
                 + Tạo yêu cầu mới
-            </button>
+            </a>
         </div>
 
         <!-- =================================================
              STAT CARDS
         ================================================= -->
+        @php
+            $totalContracts = $contracts->count();
+            $activeContracts = $contracts->where('status', 'active')->count();
+            $expiringContracts = $contracts->filter(fn($c) => $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60 && $c->status === 'active')->count();
+        @endphp
         <div class="row g-4 mb-5">
             <!-- CARD 1 -->
             <div class="col-6 col-lg-4">
@@ -283,9 +288,9 @@
                     <div class="icon-box bg-blue-soft">📋</div>
                     <div>
                         <div class="text-muted small fw-medium mb-1">
-                            Tổng hợp đồng <span class="badge bg-primary ms-1">+1 mới</span>
+                            Tổng hợp đồng
                         </div>
-                        <div class="fs-3 fw-bold text-dark">01</div>
+                        <div class="fs-3 fw-bold text-dark">{{ str_pad($totalContracts, 2, '0', STR_PAD_LEFT) }}</div>
                     </div>
                 </div>
             </div>
@@ -298,7 +303,7 @@
                         <div class="text-muted small fw-medium mb-1">
                             Đang hiệu lực
                         </div>
-                        <div class="fs-3 fw-bold text-dark">01</div>
+                        <div class="fs-3 fw-bold text-dark">{{ str_pad($activeContracts, 2, '0', STR_PAD_LEFT) }}</div>
                     </div>
                 </div>
             </div>
@@ -311,7 +316,7 @@
                         <div class="text-muted small fw-medium mb-1">
                             Sắp hết hạn <span class="text-danger small fw-bold ms-1">Chú ý</span>
                         </div>
-                        <div class="fs-3 fw-bold text-dark">00</div>
+                        <div class="fs-3 fw-bold text-dark">{{ str_pad($expiringContracts, 2, '0', STR_PAD_LEFT) }}</div>
                     </div>
                 </div>
             </div>
@@ -347,44 +352,50 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @forelse($contracts as $contract)
                         <tr>
                             <!-- MÃ HỢP ĐỒNG -->
                             <td>
-                                <div class="fw-bold text-primary">#HD-2026-01</div>
+                                <div class="fw-bold text-primary">#{{ $contract->contract_code }}</div>
                             </td>
 
                             <!-- PHÒNG -->
                             <td>
-                                <div class="fw-semibold text-dark mb-1">Phòng trọ máy lạnh Q.7</div>
+                                <div class="fw-semibold text-dark mb-1">{{ $contract->room->name ?? '—' }}</div>
                                 <div class="small text-muted">
-                                    📐 22 m² · 📍 Nguyễn Hữu Thọ, Q.7
+                                    📍 {{ $contract->room->property->address ?? '' }}
                                 </div>
                             </td>
 
                             <!-- THỜI HẠN -->
                             <td>
-                                <div class="text-dark fw-medium">01/02/2026</div>
-                                <div class="small text-muted">Đến 01/02/2027</div>
+                                <div class="text-dark fw-medium">{{ \Carbon\Carbon::parse($contract->start_date)->format('d/m/Y') }}</div>
+                                <div class="small text-muted">Đến {{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}</div>
                             </td>
 
                             <!-- GIÁ -->
                             <td>
-                                <div class="fw-bold text-dark fs-6">2.800.000 đ</div>
-                                <div class="small text-muted">/ tháng</div>
+                                <div class="fw-bold text-dark fs-6">{{ number_format((float)$contract->rent) }} đ</div>
+                                <div class="small text-muted">/ {{ $contract->payment_cycle === 'quarterly' ? 'quý' : 'tháng' }}</div>
                             </td>
 
                             <!-- TRẠNG THÁI -->
                             <td>
-                                <span class="badge-soft-success">● Đang hiệu lực</span>
+                                <span class="badge-soft-success">● {{ ['draft' => 'Nháp', 'active' => 'Đang hiệu lực', 'expired' => 'Hết hạn', 'terminated' => 'Đã thanh lý'][$contract->status] ?? $contract->status }}</span>
                             </td>
 
                             <!-- THAO TÁC -->
                             <td class="text-end">
-                                <a href="{{ route('tenant.contracts.show', 1) }}" class="btn btn-action btn-sm px-3 py-2">
+                                <a href="{{ route('tenant.contracts.show', $contract->id) }}" class="btn btn-action btn-sm px-3 py-2">
                                     Xem chi tiết →
                                 </a>
                             </td>
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">Bạn chưa có hợp đồng nào.</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

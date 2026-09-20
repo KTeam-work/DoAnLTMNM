@@ -92,7 +92,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link" href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -195,7 +195,7 @@
                 <h1 class="page-title">Quản lý dịch vụ</h1>
                 <div class="page-desc">Quản lý các dịch vụ và đơn giá áp dụng cho nhà trọ</div>
             </div>
-            <a href="{{ url('/owner/services/create') }}" class="btn-brand">
+            <a href="{{ route('owner.services.create') }}" class="btn-brand">
                 <span>＋</span> Thêm dịch vụ
             </a>
         </div>
@@ -219,6 +219,11 @@
         </div>
 
         {{-- STATS --}}
+        @php
+            $totalServices = $services->count();
+            $activeServices = $services->where('status', 'active')->count();
+            $inactiveServices = $services->where('status', 'inactive')->count();
+        @endphp
         <div class="row g-3">
             <div class="col-lg-4 col-md-6">
                 <div class="service-stat-card">
@@ -226,7 +231,7 @@
                         <div class="service-stat-icon">☷</div>
                         <div>
                             <div class="service-stat-title">Tổng dịch vụ</div>
-                            <div class="service-stat-number">7</div>
+                            <div class="service-stat-number">{{ $totalServices }}</div>
                         </div>
                     </div>
                 </div>
@@ -237,7 +242,7 @@
                         <div class="service-stat-icon">✓</div>
                         <div>
                             <div class="service-stat-title">Đang hoạt động</div>
-                            <div class="service-stat-number">6</div>
+                            <div class="service-stat-number">{{ $activeServices }}</div>
                         </div>
                     </div>
                 </div>
@@ -248,7 +253,7 @@
                         <div class="service-stat-icon" style="background:var(--red-soft); color:var(--red);">◷</div>
                         <div>
                             <div class="service-stat-title">Tạm ngưng</div>
-                            <div class="service-stat-number">1</div>
+                            <div class="service-stat-number">{{ $inactiveServices }}</div>
                         </div>
                     </div>
                 </div>
@@ -259,11 +264,15 @@
         <div class="panel service-panel">
             <div class="service-panel-header">
                 <div>
-                    <h2 class="service-panel-title">Dịch vụ - Nhà trọ Q.7</h2>
-                    <div class="service-panel-description">Các dịch vụ được áp dụng cho nhà trọ này</div>
+                    <h2 class="service-panel-title">Dịch vụ đang áp dụng</h2>
+                    <div class="service-panel-description">Các dịch vụ được áp dụng cho nhà trọ này (dữ liệu thật từ DB)</div>
                 </div>
-                <span class="service-count">7 dịch vụ</span>
+                <span class="service-count">{{ $totalServices }} dịch vụ</span>
             </div>
+
+            @if(session('success'))
+                <div class="alert alert-success m-3">{{ session('success') }}</div>
+            @endif
 
             <div class="table-responsive">
                 <table class="service-table">
@@ -279,152 +288,36 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- SERVICE 1 --}}
+                        @forelse($services as $service)
                         <tr>
-                            <td><span class="service-id">#1</span></td>
+                            <td><span class="service-id">#{{ $service->id }}</span></td>
                             <td>
                                 <div class="service-wrapper">
-                                    <div class="service-icon">⚡</div>
-                                    <div class="service-name">Điện</div>
+                                    <div class="service-icon">✨</div>
+                                    <div class="service-name">{{ $service->name }}</div>
                                 </div>
                             </td>
-                            <td><div class="service-description">Tiền điện sử dụng hàng tháng</div></td>
-                            <td><span class="unit">kWh</span></td>
-                            <td><span class="price">3.500 ₫</span></td>
-                            <td><span class="status-badge status-active">● Đang hoạt động</span></td>
+                            <td><div class="service-description">{{ $service->description ?? '—' }}</div></td>
+                            <td><span class="unit">{{ $service->unit }}</span></td>
+                            <td><span class="price">{{ number_format((float)$service->price) }} ₫</span></td>
+                            <td>
+                                @if($service->status === 'active')
+                                <span class="status-badge status-active">● Đang hoạt động</span>
+                                @else
+                                <span class="status-badge status-inactive">● Tạm ngưng</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="action-group">
-                                    <a href="{{ url('/owner/services/1/edit') }}" class="btn-action btn-edit">✎ Sửa</a>
-                                    <button type="button" class="btn-action btn-disable">Tạm ngưng</button>
+                                    <a href="{{ route('owner.services.edit', ['id' => $service->id]) }}" class="btn-action btn-edit">✎ Sửa</a>
                                 </div>
                             </td>
                         </tr>
-
-                        {{-- SERVICE 2 --}}
+                        @empty
                         <tr>
-                            <td><span class="service-id">#2</span></td>
-                            <td>
-                                <div class="service-wrapper">
-                                    <div class="service-icon">💧</div>
-                                    <div class="service-name">Nước</div>
-                                </div>
-                            </td>
-                            <td><div class="service-description">Tiền nước sử dụng hàng tháng</div></td>
-                            <td><span class="unit">m³</span></td>
-                            <td><span class="price">20.000 ₫</span></td>
-                            <td><span class="status-badge status-active">● Đang hoạt động</span></td>
-                            <td>
-                                <div class="action-group">
-                                    <a href="{{ url('/owner/services/2/edit') }}" class="btn-action btn-edit">✎ Sửa</a>
-                                    <button type="button" class="btn-action btn-disable">Tạm ngưng</button>
-                                </div>
-                            </td>
+                            <td colspan="7" class="text-center text-muted py-5">Chưa có dịch vụ nào. Hãy thêm dịch vụ mới.</td>
                         </tr>
-
-                        {{-- SERVICE 3 --}}
-                        <tr>
-                            <td><span class="service-id">#3</span></td>
-                            <td>
-                                <div class="service-wrapper">
-                                    <div class="service-icon">📶</div>
-                                    <div class="service-name">Internet</div>
-                                </div>
-                            </td>
-                            <td><div class="service-description">Internet và Wifi dùng chung</div></td>
-                            <td><span class="unit">tháng</span></td>
-                            <td><span class="price">100.000 ₫</span></td>
-                            <td><span class="status-badge status-active">● Đang hoạt động</span></td>
-                            <td>
-                                <div class="action-group">
-                                    <a href="{{ url('/owner/services/3/edit') }}" class="btn-action btn-edit">✎ Sửa</a>
-                                    <button type="button" class="btn-action btn-disable">Tạm ngưng</button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        {{-- SERVICE 4 --}}
-                        <tr>
-                            <td><span class="service-id">#4</span></td>
-                            <td>
-                                <div class="service-wrapper">
-                                    <div class="service-icon">🅿️</div>
-                                    <div class="service-name">Giữ xe</div>
-                                </div>
-                            </td>
-                            <td><div class="service-description">Phí gửi xe hàng tháng</div></td>
-                            <td><span class="unit">chiếc</span></td>
-                            <td><span class="price">100.000 ₫</span></td>
-                            <td><span class="status-badge status-active">● Đang hoạt động</span></td>
-                            <td>
-                                <div class="action-group">
-                                    <a href="{{ url('/owner/services/4/edit') }}" class="btn-action btn-edit">✎ Sửa</a>
-                                    <button type="button" class="btn-action btn-disable">Tạm ngưng</button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        {{-- SERVICE 5 --}}
-                        <tr>
-                            <td><span class="service-id">#5</span></td>
-                            <td>
-                                <div class="service-wrapper">
-                                    <div class="service-icon">🧹</div>
-                                    <div class="service-name">Vệ sinh</div>
-                                </div>
-                            </td>
-                            <td><div class="service-description">Phí vệ sinh khu vực chung</div></td>
-                            <td><span class="unit">tháng</span></td>
-                            <td><span class="price">50.000 ₫</span></td>
-                            <td><span class="status-badge status-active">● Đang hoạt động</span></td>
-                            <td>
-                                <div class="action-group">
-                                    <a href="{{ url('/owner/services/5/edit') }}" class="btn-action btn-edit">✎ Sửa</a>
-                                    <button type="button" class="btn-action btn-disable">Tạm ngưng</button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        {{-- SERVICE 6 --}}
-                        <tr>
-                            <td><span class="service-id">#6</span></td>
-                            <td>
-                                <div class="service-wrapper">
-                                    <div class="service-icon">🗑️</div>
-                                    <div class="service-name">Rác</div>
-                                </div>
-                            </td>
-                            <td><div class="service-description">Phí thu gom rác sinh hoạt</div></td>
-                            <td><span class="unit">tháng</span></td>
-                            <td><span class="price">30.000 ₫</span></td>
-                            <td><span class="status-badge status-active">● Đang hoạt động</span></td>
-                            <td>
-                                <div class="action-group">
-                                    <a href="{{ url('/owner/services/6/edit') }}" class="btn-action btn-edit">✎ Sửa</a>
-                                    <button type="button" class="btn-action btn-disable">Tạm ngưng</button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        {{-- SERVICE 7 --}}
-                        <tr>
-                            <td><span class="service-id">#7</span></td>
-                            <td>
-                                <div class="service-wrapper">
-                                    <div class="service-icon">❄️</div>
-                                    <div class="service-name">Máy lạnh</div>
-                                </div>
-                            </td>
-                            <td><div class="service-description">Phí sử dụng và bảo trì máy lạnh</div></td>
-                            <td><span class="unit">tháng</span></td>
-                            <td><span class="price">150.000 ₫</span></td>
-                            <td><span class="status-badge status-inactive">● Tạm ngưng</span></td>
-                            <td>
-                                <div class="action-group">
-                                    <a href="{{ route('owner.services.edit', ['id' => 7]) }}" class="btn-action btn-edit">✎ Sửa</a>
-                                    <button type="button" class="btn-action btn-disable">Kích hoạt</button>
-                                </div>
-                            </td>
-                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

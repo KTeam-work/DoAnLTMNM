@@ -358,7 +358,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link" href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -462,19 +462,28 @@
     </div>
     <div class="d-flex gap-2">
       <button class="btn-outline-brand">📥 Xuất Excel</button>
-      <a class="btn-brand" href="{{ route('owner.utilities.create') }}" >+ Thêm ghi chú mới</a>
+      <a class="btn-brand" href="{{ route('owner.utilities.create') }}" >+ Ghi chỉ số mới</a>
     </div>
   </div>
 
   <!-- STAT CARDS -->
+  @php
+      $totalRooms = $rooms->count();
+      $currentMonth = \Carbon\Carbon::parse($month)->startOfMonth();
+      $readingsThisMonth = $readings->filter(fn($r) => \Carbon\Carbon::parse($r->month)->isSameMonth($currentMonth));
+      $doneCount = $readingsThisMonth->count();
+      $totalKwh = $readingsThisMonth->sum(fn($r) => (float)$r->electricity_new - (float)$r->electricity_old);
+      $totalM3 = $readingsThisMonth->sum(fn($r) => (float)$r->water_new - (float)$r->water_old);
+      $totalMoney = $readingsThisMonth->sum(fn($r) => ((float)$r->electricity_new - (float)$r->electricity_old) * (float)$r->electricity_price + ((float)$r->water_new - (float)$r->water_old) * (float)$r->water_price);
+  @endphp
   <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon">🏠</div>
-          <span class="stat-trend muted">Tháng 09/2026</span>
+          <span class="stat-trend muted">{{ $currentMonth->format('m/Y') }}</span>
         </div>
-        <div class="stat-value">42</div>
+        <div class="stat-value">{{ $totalRooms }}</div>
         <div class="stat-label">Tổng số phòng quản lý</div>
       </div>
     </div>
@@ -483,9 +492,9 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon green">⚡</div>
-          <span class="stat-trend">Còn 7 phòng</span>
+          <span class="stat-trend">Còn {{ max(0, $totalRooms - $doneCount) }} phòng</span>
         </div>
-        <div class="stat-value">35 <small>/ 42</small></div>
+        <div class="stat-value">{{ $doneCount }} <small>/ {{ $totalRooms }}</small></div>
         <div class="stat-label">Đã chốt chỉ số</div>
       </div>
     </div>
@@ -494,9 +503,9 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon blue">💧</div>
-          <span class="stat-trend">+5% so với T8</span>
+          <span class="stat-trend">Tháng hiện tại</span>
         </div>
-        <div class="stat-value">4.280</div>
+        <div class="stat-value">{{ number_format($totalKwh + $totalM3) }}</div>
         <div class="stat-label">Tổng tiêu thụ (kWh + m³)</div>
       </div>
     </div>
@@ -507,7 +516,7 @@
           <div class="stat-icon red">💰</div>
           <span class="stat-trend">Tạm tính</span>
         </div>
-        <div class="stat-value">16,5tr</div>
+        <div class="stat-value">{{ number_format($totalMoney) }}đ</div>
         <div class="stat-label">Tổng tiền dự kiến</div>
       </div>
     </div>
@@ -515,34 +524,31 @@
 
   <!-- BẢNG DỮ LIỆU -->
   <div class="panel">
+
+    @if(session('success'))
+      <div class="alert alert-success mb-3">{{ session('success') }}</div>
+    @endif
     
     <!-- FILTERS -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <label class="filter-label">Khu vực / Tòa nhà</label>
-        <select class="custom-input">
-          <option>Tất cả nhà trọ</option>
-          <option>Nhà trọ A - Q.7</option>
-          <option>Nhà trọ B - Bình Thạnh</option>
+    <form method="GET" action="{{ route('owner.utilities.index') }}" class="row g-3 mb-4">
+      <div class="col-md-4">
+        <label class="filter-label">Phòng</label>
+        <select name="room_id" class="custom-input">
+          <option value="">Tất cả phòng</option>
+          @foreach($rooms as $room)
+            <option value="{{ $room->id }}" @selected((string) $selectedRoomId === (string) $room->id)>{{ $room->name }} · {{ $room->property->name ?? '' }}</option>
+          @endforeach
         </select>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-4">
         <label class="filter-label">Kỳ ghi chỉ số</label>
-        <input type="month" class="custom-input" value="2026-09">
+        <input type="month" name="month" class="custom-input" value="{{ $month }}">
       </div>
-      <div class="col-md-3">
-        <label class="filter-label">Trạng thái</label>
-        <select class="custom-input">
-          <option>Tất cả trạng thái</option>
-          <option>Đã ghi</option>
-          <option>Chưa ghi</option>
-          <option>Phòng trống</option>
-        </select>
+      <div class="col-md-4 d-flex align-items-end gap-2">
+        <button type="submit" class="btn-brand flex-grow-1" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>
+        <a href="{{ route('owner.utilities.index') }}" class="btn-outline-brand text-decoration-none" style="height: 44px; display: inline-flex; align-items: center;">Xóa lọc</a>
       </div>
-      <div class="col-md-3 d-flex align-items-end">
-        <button class="btn-brand w-100" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>
-      </div>
-    </div>
+    </form>
 
     <!-- TABLE -->
     <div class="table-responsive">
@@ -550,6 +556,7 @@
         <thead>
           <tr>
             <th>Phòng</th>
+            <th>Tháng</th>
             <th>Chỉ số Điện (Cũ - Mới)</th>
             <th>Chỉ số Nước (Cũ - Mới)</th>
             <th>Tiêu thụ</th>
@@ -559,179 +566,58 @@
           </tr>
         </thead>
         <tbody>
-          <!-- HÀNG 1: Đã ghi -->
+          @forelse($readings as $reading)
+            @php
+                $eUse = (float)$reading->electricity_new - (float)$reading->electricity_old;
+                $wUse = (float)$reading->water_new - (float)$reading->water_old;
+                $eMoney = $eUse * (float)$reading->electricity_price;
+                $wMoney = $wUse * (float)$reading->water_price;
+            @endphp
           <tr>
             <td>
               <div class="d-flex align-items-center gap-3">
-                <div class="avatar-sm">101</div>
+                <div class="avatar-sm">{{ substr($reading->room->name ?? '?', -3) }}</div>
                 <div>
-                  <div class="cell-title">Phòng 101 · Nhà A</div>
-                  <div class="cell-sub">👤 Ngọc Anh</div>
+                  <div class="cell-title">{{ $reading->room->name ?? '—' }} · {{ $reading->room->room_code ?? '' }}</div>
+                  <div class="cell-sub">{{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</div>
                 </div>
               </div>
             </td>
+            <td>{{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</td>
             <td>
-              <div>Cũ: <strong>1,250</strong></div>
-              <div class="mt-1">Mới: <strong>1,380</strong></div>
+              <div>Cũ: <strong>{{ number_format((float)$reading->electricity_old) }}</strong></div>
+              <div class="mt-1">Mới: <strong>{{ number_format((float)$reading->electricity_new) }}</strong></div>
             </td>
             <td>
-              <div>Cũ: <strong>80</strong></div>
-              <div class="mt-1">Mới: <strong>85</strong></div>
+              <div>Cũ: <strong>{{ number_format((float)$reading->water_old) }}</strong></div>
+              <div class="mt-1">Mới: <strong>{{ number_format((float)$reading->water_new) }}</strong></div>
             </td>
             <td>
-              <div style="font-weight: 700; color: var(--green-dark);">⚡ 130 kWh</div>
-              <div class="mt-1" style="font-weight: 700; color: var(--green-dark);">💧 5 m³</div>
+              <div style="font-weight: 700; color: var(--green-dark);">⚡ {{ number_format($eUse) }} kWh</div>
+              <div class="mt-1" style="font-weight: 700; color: var(--green-dark);">💧 {{ number_format($wUse) }} m³</div>
             </td>
             <td>
-              <div>⚡ 455.000đ</div>
-              <div class="mt-1 border-bottom pb-1" style="border-color: #f0eadc!important;">💧 100.000đ</div>
-              <div class="text-highlight mt-1">Σ 555.000đ</div>
+              <div>⚡ {{ number_format($eMoney) }}đ</div>
+              <div class="mt-1 border-bottom pb-1" style="border-color: #f0eadc!important;">💧 {{ number_format($wMoney) }}đ</div>
+              <div class="text-highlight mt-1">Σ {{ number_format($eMoney + $wMoney) }}đ</div>
             </td>
             <td><span class="badge-status occupied">Đã ghi</span></td>
             <td class="text-end">
-              <button class="btn-icon" onclick="openModal('Phòng 101 · Nhà A', 'Ngọc Anh', 1250, 80)">✏️</button>
+              <a class="btn-brand" style="padding: 6px 12px;" href="{{ route('owner.utilities.create', ['id' => $reading->id]) }}">✏️ Sửa</a>
             </td>
           </tr>
-
-          <!-- HÀNG 2: Trống -->
+          @empty
           <tr>
-            <td>
-              <div class="d-flex align-items-center gap-3">
-                <div class="avatar-sm" style="background: #f0eadc; color: var(--muted);">102</div>
-                <div>
-                  <div class="cell-title" style="color: var(--muted);">Phòng 102 · Nhà A</div>
-                  <div class="cell-sub">—</div>
-                </div>
-              </div>
-            </td>
-            <td colspan="4" class="text-center" style="background: var(--cream); border-radius: 12px; color: var(--muted); font-weight: 600;">
-              Chưa có khách thuê
-            </td>
-            <td><span class="badge-status vacant">Phòng trống</span></td>
-            <td class="text-end">
-              <button class="btn-icon" style="opacity: 0.5; cursor: not-allowed;">✏️</button>
-            </td>
+            <td colspan="8" class="text-center text-muted py-5">Chưa có chỉ số điện nước nào.</td>
           </tr>
-
-          <!-- HÀNG 3: Chưa ghi -->
-          <tr>
-            <td>
-              <div class="d-flex align-items-center gap-3">
-                <div class="avatar-sm orange">201</div>
-                <div>
-                  <div class="cell-title">Phòng 201 · Nhà B</div>
-                  <div class="cell-sub">👤 Văn Hùng</div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div>Cũ: <strong>2,100</strong></div>
-              <div class="mt-1 text-muted">Mới: —</div>
-            </td>
-            <td>
-              <div>Cũ: <strong>120</strong></div>
-              <div class="mt-1 text-muted">Mới: —</div>
-            </td>
-            <td class="text-muted">—</td>
-            <td class="text-muted">—</td>
-            <td><span class="badge-status pending">Chưa chốt</span></td>
-            <td class="text-end">
-              <button class="btn-brand" style="padding: 6px 12px;" onclick="openModal('Phòng 201 · Nhà B', 'Văn Hùng', 2100, 120)">+ Ghi</button>
-            </td>
-          </tr>
+          @endforelse
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- =====================================================
-     MODAL GHI CHỈ SỐ
-===================================================== -->
-<div class="modal fade" id="readingModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      
-      <div class="modal-header">
-        <h5 class="modal-title">Cập nhật chỉ số điện nước</h5>
-        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
-      </div>
-
-      <form>
-        <div class="modal-body">
-          
-          <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded" style="background: var(--green-soft); border: 1px solid var(--border);">
-            <div class="avatar-sm">🏠</div>
-            <div>
-              <div class="cell-title fs-5" id="modalRoom" style="margin-bottom: 0;">Phòng 101</div>
-              <div class="cell-sub" id="modalTenant" style="font-size: 13px;">Ngọc Anh</div>
-            </div>
-          </div>
-
-          <!-- ĐIỆN -->
-          <div class="reading-box">
-            <h6 class="d-flex align-items-center gap-2 mb-3">
-              <span style="font-size: 18px;">⚡</span> Chỉ số điện
-            </h6>
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="filter-label">Chỉ số cũ</label>
-                <input type="number" id="dienCu" class="custom-input" style="background: #f0eadc; border: none;" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="filter-label">Chỉ số mới</label>
-                <input type="number" class="custom-input border-success" placeholder="Nhập số mới..." required autofocus>
-              </div>
-              <div class="col-md-4">
-                <label class="filter-label">Đơn giá (đ/kWh)</label>
-                <input type="number" class="custom-input" value="3500" required>
-              </div>
-            </div>
-          </div>
-
-          <!-- NƯỚC -->
-          <div class="reading-box mb-0">
-            <h6 class="d-flex align-items-center gap-2 mb-3">
-              <span style="font-size: 18px;">💧</span> Chỉ số nước
-            </h6>
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="filter-label">Chỉ số cũ</label>
-                <input type="number" id="nuocCu" class="custom-input" style="background: #f0eadc; border: none;" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="filter-label">Chỉ số mới</label>
-                <input type="number" class="custom-input border-success" placeholder="Nhập số mới..." required>
-              </div>
-              <div class="col-md-4">
-                <label class="filter-label">Đơn giá (đ/m³)</label>
-                <input type="number" class="custom-input" value="20000" required>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="modal-footer d-flex gap-2">
-          <button type="button" class="btn-outline-brand" data-bs-dismiss="modal">Hủy bỏ</button>
-          <button type="submit" class="btn-brand">💾 Lưu chỉ số</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  const readingModal = new bootstrap.Modal(document.getElementById('readingModal'));
-
-  function openModal(room, tenant, dienCu, nuocCu) {
-    document.getElementById('modalRoom').innerText = room;
-    document.getElementById('modalTenant').innerText = '👤 ' + tenant;
-    document.getElementById('dienCu').value = dienCu;
-    document.getElementById('nuocCu').value = nuocCu;
-    readingModal.show();
-  }
-</script>
 </body>
 </html>

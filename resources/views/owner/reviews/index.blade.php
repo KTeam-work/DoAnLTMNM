@@ -194,7 +194,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link" href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -294,185 +294,109 @@
     </div>
   </div>
 
+  @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+  @endif
+  @if($errors->any())
+    <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+  @endif
+
   <!-- TỔNG QUAN — bấm vào một mức sao để lọc nhanh -->
   <div class="overview-panel">
     <div class="overview-score">
-      <div class="num">4.8<small>/ 5</small></div>
-      <div class="stars">★ ★ ★ ★ ★</div>
-      <div class="total">128 lượt đánh giá · 4 cần chú ý</div>
+      <div class="num">{{ $stats['average'] }}<small>/ 5</small></div>
+      <div class="stars">{{ str_repeat('★', (int) round($stats['average'])) }}{{ str_repeat('☆', 5 - (int) round($stats['average'])) }}</div>
+      <div class="total">{{ $stats['total'] }} lượt đánh giá</div>
     </div>
     <div class="overview-divider"></div>
-    <div class="rating-bars" id="ratingBars">
-      <button type="button" class="rating-bar-row" data-star="5">
-        <span class="label">5 sao</span>
-        <span class="rating-bar-track"><span class="rating-bar-fill" style="width: 82%"></span></span>
-        <span class="count">105</span>
-      </button>
-      <button type="button" class="rating-bar-row" data-star="4">
-        <span class="label">4 sao</span>
-        <span class="rating-bar-track"><span class="rating-bar-fill" style="width: 12%"></span></span>
-        <span class="count">15</span>
-      </button>
-      <button type="button" class="rating-bar-row attn" data-star="3">
-        <span class="label">3 sao</span>
-        <span class="rating-bar-track"><span class="rating-bar-fill" style="width: 3%"></span></span>
-        <span class="count">4</span>
-      </button>
-      <button type="button" class="rating-bar-row attn" data-star="2">
-        <span class="label">2 sao</span>
-        <span class="rating-bar-track"><span class="rating-bar-fill" style="width: 1%"></span></span>
-        <span class="count">2</span>
-      </button>
-      <button type="button" class="rating-bar-row attn" data-star="1">
-        <span class="label">1 sao</span>
-        <span class="rating-bar-track"><span class="rating-bar-fill" style="width: 1%"></span></span>
-        <span class="count">2</span>
-      </button>
+    <div class="rating-bars">
+      @foreach([5, 4, 3, 2, 1] as $star)
+        @php $pct = $stats['total'] > 0 ? round($stats['distribution'][$star] / $stats['total'] * 100) : 0; @endphp
+        <a href="{{ route('owner.reviews.index', ['rating' => $star]) }}" class="rating-bar-row {{ $star <= 2 ? 'attn' : '' }} {{ (string) ($filters['rating'] ?? '') === (string) $star ? 'is-active' : '' }}" style="text-decoration: none;">
+          <span class="label">{{ $star }} sao</span>
+          <span class="rating-bar-track"><span class="rating-bar-fill" style="width: {{ $pct }}%"></span></span>
+          <span class="count">{{ $stats['distribution'][$star] }}</span>
+        </a>
+      @endforeach
     </div>
   </div>
 
-  <!-- BỘ LỌC + SẮP XẾP -->
-  <div class="filter-row d-flex flex-wrap justify-content-between align-items-center gap-3">
+  <!-- BỘ LỌC -->
+  <form method="GET" action="{{ route('owner.reviews.index') }}" class="filter-row d-flex flex-wrap justify-content-between align-items-center gap-3">
     <div class="d-flex align-items-center gap-2 flex-wrap">
       <span class="fw-bold" style="font-size:.95rem;">Danh sách phản hồi</span>
-      <span class="filter-count" id="filterCount">— hiển thị <strong>3</strong>/3</span>
-      <span id="activeFilterChip"></span>
+      <span class="filter-count">— hiển thị <strong>{{ $reviews->count() }}</strong>/{{ $reviews->total() }}</span>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-      <select class="form-select form-select-sm shadow-none" id="starFilter" style="width: 150px;" aria-label="Lọc theo số sao">
+      <select name="room_id" class="form-select form-select-sm shadow-none" style="width: 170px;" onchange="this.form.submit()">
+        <option value="">Tất cả phòng</option>
+        @foreach($rooms as $room)
+          <option value="{{ $room->id }}" @selected((string) ($filters['room_id'] ?? '') === (string) $room->id)>{{ $room->name }}</option>
+        @endforeach
+      </select>
+      <select name="rating" class="form-select form-select-sm shadow-none" style="width: 150px;" onchange="this.form.submit()">
         <option value="">Tất cả số sao</option>
-        <option value="5">5 sao</option>
-        <option value="4">4 sao</option>
-        <option value="3">3 sao</option>
-        <option value="2">2 sao</option>
-        <option value="1">1 sao</option>
+        @foreach([5, 4, 3, 2, 1] as $star)
+          <option value="{{ $star }}" @selected((string) ($filters['rating'] ?? '') === (string) $star)>{{ $star }} sao</option>
+        @endforeach
       </select>
-      <select class="form-select form-select-sm shadow-none" id="sortOrder" style="width: 165px;" aria-label="Sắp xếp">
-        <option value="newest">Mới nhất</option>
-        <option value="high">Sao cao đến thấp</option>
-        <option value="low">Sao thấp đến cao</option>
+      <select name="status" class="form-select form-select-sm shadow-none" style="width: 150px;" onchange="this.form.submit()">
+        <option value="">Mọi trạng thái</option>
+        <option value="visible" @selected(($filters['status'] ?? '') === 'visible')>Đang hiển thị</option>
+        <option value="hidden" @selected(($filters['status'] ?? '') === 'hidden')>Đang ẩn</option>
       </select>
-      <div class="input-group input-group-sm" style="width: 230px;">
-        <span class="input-group-text bg-white border-end-0 text-muted">🔎</span>
-        <input type="text" class="form-control border-start-0 shadow-none" id="searchInput" placeholder="Tìm theo tên phòng, người thuê...">
-      </div>
+      @if(!empty($filters['room_id']) || !empty($filters['rating']) || !empty($filters['status']))
+        <a href="{{ route('owner.reviews.index') }}" class="btn btn-sm btn-light border">Xóa lọc</a>
+      @endif
     </div>
-  </div>
+  </form>
 
   <!-- DANH SÁCH PHẢN HỒI -->
-  <div class="review-feed" id="reviewFeed">
+  <div class="review-feed">
 
-    <div class="review-row" data-rating="5" data-date="2026-09-12" data-name="Thanh Huyền" data-room="Phòng 12A Nhà trọ Q.7">
+    @forelse($reviews as $review)
+    <div class="review-row {{ $review->rating <= 2 ? 'attn' : '' }} {{ $review->status === 'hidden' ? 'hidden-row' : '' }}">
       <div class="review-who">
-        <div class="review-avatar">TH</div>
+        <div class="review-avatar">{{ strtoupper(substr($review->tenant->name ?? '?', 0, 2)) }}</div>
         <div>
-          <div class="review-name">Thanh Huyền</div>
-          <div class="review-date">12/09/2026</div>
-          <div class="review-room">Phòng 12A · Nhà trọ Q.7</div>
+          <div class="review-name">{{ $review->tenant->name ?? '' }}</div>
+          <div class="review-date">{{ $review->created_at->format('d/m/Y') }}</div>
+          <div class="review-room">{{ $review->room->name ?? '' }}</div>
         </div>
       </div>
       <div class="review-body">
-        <div class="stars-line">★ ★ ★ ★ ★</div>
-        <div class="review-quote">
-          <span class="quote-text">Phòng ốc rất sạch sẽ và thoáng mát. Chủ nhà thân thiện, hỗ trợ sửa vòi nước bị rỉ rất nhanh chóng. Mình rất hài lòng khi ở đây.</span>
-        </div>
-        <div class="reply-form" data-role="reply-form">
-          <textarea placeholder="Viết phản hồi tới Thanh Huyền..."></textarea>
-          <div class="reply-form-actions">
-            <button type="button" class="btn-row-action primary-action" data-action="submit-reply">Gửi phản hồi</button>
-            <button type="button" class="btn-row-action" data-action="cancel-reply">Hủy</button>
-          </div>
+        <div class="stars-line">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
+        <div class="review-quote {{ $review->status === 'hidden' ? 'muted-quote' : '' }}">
+          <span class="quote-text">{{ $review->comment ?: '(Không có nhận xét)' }}</span>
         </div>
       </div>
       <div class="review-side">
-        <span class="status-pill showing" data-role="status-pill">Đang hiển thị</span>
+        @if($review->status === 'visible')
+          <span class="status-pill showing">Đang hiển thị</span>
+        @else
+          <span class="status-pill hidden-pill">Đã ẩn</span>
+        @endif
         <div class="row-actions">
-          <button type="button" class="btn-row-action" data-action="toggle-reply">Trả lời</button>
-          <button type="button" class="btn-row-action" data-action="toggle-visibility">Ẩn</button>
+          <form action="{{ route('owner.reviews.visibility', $review->id) }}" method="POST" class="m-0">
+            @csrf
+            @method('PUT')
+            <button type="submit" class="btn-row-action">{{ $review->status === 'visible' ? 'Ẩn' : 'Hiển thị lại' }}</button>
+          </form>
         </div>
       </div>
     </div>
+    @empty
+    <div class="text-center text-muted py-5">Chưa có đánh giá nào.</div>
+    @endforelse
 
-    <div class="review-row attn" data-rating="3" data-date="2026-09-05" data-name="Hoàng Minh" data-room="Phòng 105 Chung cư mini Thủ Đức">
-      <div class="review-who">
-        <div class="review-avatar">HM</div>
-        <div>
-          <div class="review-name">Hoàng Minh</div>
-          <div class="review-date">05/09/2026</div>
-          <div class="review-room">Phòng 105 · Chung cư mini Thủ Đức</div>
-        </div>
-      </div>
-      <div class="review-body">
-        <div class="stars-line">★ ★ ★</div>
-        <div class="review-quote">
-          <span class="quote-text">Khu vực để xe hơi chật vào buổi tối, mạng wifi thỉnh thoảng hay bị rớt. Ngoài ra phòng khá rộng, ánh sáng tự nhiên tốt, giá thuê hợp lý so với khu vực. Phòng thì ổn nhưng cần cải thiện wifi và chỗ để xe ạ.</span>
-        </div>
-        <div class="reply-form" data-role="reply-form">
-          <textarea placeholder="Viết phản hồi tới Hoàng Minh..."></textarea>
-          <div class="reply-form-actions">
-            <button type="button" class="btn-row-action primary-action" data-action="submit-reply">Gửi phản hồi</button>
-            <button type="button" class="btn-row-action" data-action="cancel-reply">Hủy</button>
-          </div>
-        </div>
-      </div>
-      <div class="review-side">
-        <span class="status-pill attn-pill" data-role="status-pill">Cần chú ý</span>
-        <div class="row-actions">
-          <button type="button" class="btn-row-action" data-action="toggle-reply">Trả lời</button>
-          <button type="button" class="btn-row-action" data-action="toggle-visibility">Ẩn</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="review-row hidden-row" data-rating="1" data-date="2026-08-28" data-name="Quốc Anh" data-room="Phòng 202 Nhà trọ Bình Thạnh" data-hidden="true">
-      <div class="review-who">
-        <div class="review-avatar">QA</div>
-        <div>
-          <div class="review-name">Quốc Anh</div>
-          <div class="review-date">28/08/2026</div>
-          <div class="review-room">Phòng 202 · Nhà trọ Bình Thạnh</div>
-        </div>
-      </div>
-      <div class="review-body">
-        <div class="stars-line">★</div>
-        <div class="review-quote muted-quote">
-          <span class="quote-text">(Đánh giá vi phạm chuẩn mực cộng đồng hoặc chứa từ ngữ không phù hợp)</span>
-        </div>
-      </div>
-      <div class="review-side">
-        <span class="status-pill hidden-pill" data-role="status-pill">Đã ẩn</span>
-        <div class="row-actions">
-          <button type="button" class="btn-row-action" data-action="toggle-visibility" data-hidden-label="Hiển thị lại" data-shown-label="Ẩn">Hiển thị lại</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- TRẠNG THÁI RỖNG -->
-  <div class="empty-state" id="emptyState">
-    <div class="empty-icon">🔎</div>
-    <div class="empty-title">Không tìm thấy đánh giá phù hợp</div>
-    <div>Thử đổi từ khóa tìm kiếm hoặc bỏ bớt bộ lọc số sao.</div>
-    <button type="button" class="btn-row-action" id="clearFiltersBtn">Xóa bộ lọc</button>
   </div>
 
   <div class="review-pagination">
-    <div class="small">Hiển thị 1 đến 3 của 128 đánh giá</div>
-    <ul class="pagination pagination-sm mb-0">
-      <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
-      <li class="page-item active"><a class="page-link" href="#">1</a></li>
-      <li class="page-item"><a class="page-link" href="#">2</a></li>
-      <li class="page-item"><a class="page-link" href="#">3</a></li>
-      <li class="page-item"><a class="page-link" href="#">Sau</a></li>
-    </ul>
+    <div class="small">Tổng {{ $reviews->total() }} đánh giá</div>
+    <div>{{ $reviews->links() }}</div>
   </div>
 </div>
 
-<div class="toast-stack" id="toastStack" aria-live="polite"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-</script>
 </body>
 </html>

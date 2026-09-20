@@ -26,7 +26,7 @@
           
           <!-- 1. TỔNG QUAN -->
           <li class="nav-item">
-              <a class="app-nav-link active" href="{{ url('/landlord') }}">Tổng quan</a>
+              <a class="app-nav-link active" href="{{ route('landlord.home') }}">Tổng quan</a>
           </li>
 
           <!-- 2. QUẢN LÝ TÀI SẢN -->

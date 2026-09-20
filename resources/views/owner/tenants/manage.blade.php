@@ -437,7 +437,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link" href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -561,15 +561,12 @@
 
 
             <!--
-                KHÔNG TẠO TENANT MỚI Ở ĐÂY.
-                Người thuê chính được tạo/liên kết
-                thông qua hợp đồng.
-
-                Nút này dùng cho người ở cùng.
+                Thêm người ở cùng tại trang riêng:
+                chọn hợp đồng rồi nhập thông tin.
             -->
 
             <a
-                href="{{ route('owner.contracts.create') }}"
+                href="{{ route('owner.tenants.create') }}"
                 class="btn-add-member text-decoration-none"
             >
                 + Thêm người ở cùng
@@ -583,6 +580,10 @@
              STAT CARDS
         ===================================================== -->
 
+        @php
+            $totalTenants = $tenants->count() + $tenants->sum(fn($t) => $t->tenantContracts->flatMap->members->count());
+            $staying = $tenants->count();
+        @endphp
         <div class="row g-3 mb-4">
 
 
@@ -606,7 +607,7 @@
                         </div>
 
                         <div class="fs-4 fw-bold text-dark">
-                            42
+                            {{ $totalTenants }}
                         </div>
 
                     </div>
@@ -636,7 +637,7 @@
                         </div>
 
                         <div class="fs-4 fw-bold text-dark">
-                            38
+                            {{ $staying }}
                         </div>
 
                     </div>
@@ -666,7 +667,7 @@
                         </div>
 
                         <div class="fs-4 fw-bold text-dark">
-                            03
+                            {{ $tenants->filter(fn($t) => ($c = $t->tenantContracts->first()) && $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count() }}
                         </div>
 
                     </div>
@@ -692,11 +693,11 @@
                     <div>
 
                         <div class="text-muted small fw-medium mb-1">
-                            Mới chuyển đến
+                            Hợp đồng hiệu lực
                         </div>
 
                         <div class="fs-4 fw-bold text-dark">
-                            04
+                            {{ $tenants->flatMap->tenantContracts->where('status', 'active')->count() }}
                         </div>
 
                     </div>
@@ -826,329 +827,71 @@
 
 
                     <tbody>
-
-
-                        <!-- =================================================
-                             NGƯỜI THUÊ CHÍNH
-                        ================================================= -->
-
-                        <tr>
-
-                            <td>
-
-                                <div
-                                    class="d-flex align-items-center gap-3"
-                                >
-
-                                    <div
-                                        class="avatar-circle bg-blue-soft"
-                                    >
-                                        TH
-                                    </div>
-
-
-                                    <div>
-
-                                        <div class="fw-bold text-dark">
-                                            Nguyễn Thanh Huyền
+                        @forelse($tenants as $tenant)
+                            @php($contract = $tenant->tenantContracts->first())
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-circle bg-blue-soft">
+                                            {{ strtoupper(substr($tenant->name, 0, 2)) }}
                                         </div>
-
-                                        <div class="small text-muted">
-                                            Nữ · 1998
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ $tenant->name }}</div>
+                                            <div class="small text-muted">{{ $tenant->email }}</div>
                                         </div>
-
                                     </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="fw-bold text-dark mb-1">
-                                    Phòng 12A
-                                </div>
-
-                                <div class="small text-muted">
-                                    Nhà trọ Q.7
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="badge-soft-primary">
-                                    Người đứng tên HĐ
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="text-dark fw-medium">
-                                    0901 234 567
-                                </div>
-
-                                <div class="small text-muted">
-                                    huyen.nt@email.com
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="text-dark fw-medium">
-                                    01/02/2026
-                                </div>
-
-                                <div class="small text-muted">
-                                    HĐ: #HD-2026-01
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="badge-soft-success">
-                                    ● Đang ở
-                                </span>
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                            <a
-                                      href="{{ route('owner.tenants.show', 1) }}"
-                                      class="btn btn-action text-decoration-none"
-                                  >
-                                      Hồ sơ
-                                  </a>
-                            </td>
-
-                        </tr>
-
-
-
-                        <!-- =================================================
-                             NGƯỜI Ở CÙNG
-                        ================================================= -->
-
-                        <tr>
-
-                            <td>
-
-                                <div
-                                    class="d-flex align-items-center gap-3"
-                                >
-
-                                    <div
-                                        class="avatar-circle bg-purple-soft"
-                                    >
-                                        TB
-                                    </div>
-
-
-                                    <div>
-
-                                        <div class="fw-bold text-dark">
-                                            Trần Minh Bình
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark mb-1">{{ $contract?->room?->name ?? '—' }}</div>
+                                    <div class="small text-muted">{{ $contract?->contract_code ?? '' }}</div>
+                                </td>
+                                <td><span class="badge-soft-primary">Người đứng tên HĐ</span></td>
+                                <td>
+                                    <div class="text-dark fw-medium">{{ $tenant->phone ?? '—' }}</div>
+                                    <div class="small text-muted">{{ $tenant->email }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-dark fw-medium">{{ $contract ? \Carbon\Carbon::parse($contract->start_date)->format('d/m/Y') : '—' }}</div>
+                                    <div class="small text-muted">HĐ: {{ $contract?->contract_code ?? '—' }}</div>
+                                </td>
+                                <td><span class="badge-soft-success">● Đang ở</span></td>
+                                <td class="text-end">
+                                    <a href="{{ route('owner.tenants.show', $tenant->id) }}" class="btn btn-action text-decoration-none">Hồ sơ</a>
+                                </td>
+                            </tr>
+                            @foreach($contract?->members ?? [] as $member)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-circle bg-purple-soft">
+                                            {{ strtoupper(substr($member->name, 0, 2)) }}
                                         </div>
-
-                                        <div class="small text-muted">
-                                            Nam · 2000
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ $member->name }}</div>
+                                            <div class="small text-muted">{{ $member->relationship ?? 'Người ở cùng' }}</div>
                                         </div>
-
                                     </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="fw-bold text-dark mb-1">
-                                    Phòng 12A
-                                </div>
-
-                                <div class="small text-muted">
-                                    Nhà trọ Q.7
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="badge-soft-secondary">
-                                    Người ở cùng
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="text-dark fw-medium">
-                                    0912 345 678
-                                </div>
-
-                                <div class="small text-muted">
-                                    CCCD: ********1234
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="text-dark fw-medium">
-                                    05/02/2026
-                                </div>
-
-                                <div class="small text-muted">
-                                    HĐ: #HD-2026-01
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="badge-soft-success">
-                                    ● Đang ở
-                                </span>
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                <a
-                                    href="#"
-                                    class="btn btn-action text-decoration-none"
-                                >
-                                    Hồ sơ
-                                </a>
-
-                            </td>
-
-                        </tr>
-
-
-
-                        <!-- =================================================
-                             NGƯỜI THUÊ CHÍNH THỨ 2
-                        ================================================= -->
-
-                        <tr>
-
-                            <td>
-
-                                <div
-                                    class="d-flex align-items-center gap-3"
-                                >
-
-                                    <div
-                                        class="avatar-circle bg-orange-soft"
-                                    >
-                                        HM
-                                    </div>
-
-
-                                    <div>
-
-                                        <div class="fw-bold text-dark">
-                                            Trần Hoàng Minh
-                                        </div>
-
-                                        <div class="small text-muted">
-                                            Nam · 2001
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="fw-bold text-dark mb-1">
-                                    Phòng 105
-                                </div>
-
-                                <div class="small text-muted">
-                                    Chung cư mini Thủ Đức
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="badge-soft-primary">
-                                    Người đứng tên HĐ
-                                </span>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="text-dark fw-medium">
-                                    0988 765 432
-                                </div>
-
-                                <div class="small text-muted">
-                                    minh.tran@email.com
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <div class="text-dark fw-medium">
-                                    15/08/2025
-                                </div>
-
-                                <div class="small text-muted">
-                                    HĐ: #HD-2025-42
-                                </div>
-
-                            </td>
-
-
-                            <td>
-
-                                <span class="badge-soft-warning">
-                                    ● Sắp chuyển đi
-                                </span>
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                <a
-                                    href="#"
-                                    class="btn btn-action text-decoration-none"
-                                >
-                                    Hồ sơ
-                                </a>
-
-                            </td>
-
-                        </tr>
-
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark mb-1">{{ $contract?->room?->name ?? '—' }}</div>
+                                    <div class="small text-muted">{{ $contract?->contract_code ?? '' }}</div>
+                                </td>
+                                <td><span class="badge-soft-secondary">Người ở cùng</span></td>
+                                <td>
+                                    <div class="text-dark fw-medium">{{ $member->phone ?? '—' }}</div>
+                                    <div class="small text-muted">CCCD: {{ $member->identity_card }}</div>
+                                </td>
+                                <td>
+                                    <div class="text-dark fw-medium">{{ $member->created_at?->format('d/m/Y') ?? '—' }}</div>
+                                    <div class="small text-muted">HĐ: {{ $contract?->contract_code ?? '—' }}</div>
+                                </td>
+                                <td><span class="badge-soft-success">● Đang ở</span></td>
+                                <td class="text-end"><span class="text-muted small">—</span></td>
+                            </tr>
+                            @endforeach
+                        @empty
+                            <tr><td colspan="7" class="text-center text-muted py-5">Chưa có người thuê nào.</td></tr>
+                        @endforelse
                     </tbody>
 
                 </table>

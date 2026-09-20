@@ -54,9 +54,9 @@
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#rooms">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Hợp đồng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('appointments.index') }}">Lịch xem</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp đồng</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
@@ -101,19 +101,17 @@
   @endif
 
   <div class="filter-tabs animate-up delay-2 skeleton-box rounded-pill border-0 p-0 mb-4">
-    <a href="#" class="filter-tab active hide-on-skeleton">Tất cả</a>
-    <a href="#" class="filter-tab hide-on-skeleton">Chưa đọc (2)</a>
-    <a href="#" class="filter-tab hide-on-skeleton">💰 Hóa đơn</a>
-    <a href="#" class="filter-tab hide-on-skeleton">🔧 Sửa chữa</a>
+    <a href="{{ route('tenant.notifications.index') }}" class="filter-tab hide-on-skeleton {{ $filter === 'all' ? 'active' : '' }}">Tất cả</a>
+    <a href="{{ route('tenant.notifications.index', ['filter' => 'unread']) }}" class="filter-tab hide-on-skeleton {{ $filter === 'unread' ? 'active' : '' }}">Chưa đọc ({{ $unreadCount }})</a>
+    <a href="{{ route('tenant.notifications.index', ['filter' => 'read']) }}" class="filter-tab hide-on-skeleton {{ $filter === 'read' ? 'active' : '' }}">Đã đọc</a>
   </div>
 
   <div class="notify-panel animate-up delay-3 skeleton-box">
     <div class="hide-on-skeleton">
-      
+
       <div class="notify-header">
         <h5 class="fw-bold mb-0 text-dark" style="font-size: 16px;">Mới nhất</h5>
-        
-        <!-- Đã sửa thành Form POST trỏ đúng về Route mark_read -->
+
         <form action="{{ route('tenant.notifications.mark_read') }}" method="POST" class="m-0">
           @csrf
           <button type="submit" class="mark-read-btn" style="background: transparent; border: none; padding: 0;">
@@ -122,54 +120,45 @@
         </form>
       </div>
 
-      <!-- Item 1: Invoice (Unread) -->
-      <a href="{{ route('tenant.invoices.show', 1) }}" class="notify-item unread">
-        <div class="notify-icon icon-invoice">💰</div>
-        <div class="flex-grow-1">
-          <div class="fw-bold text-dark" style="font-size: 15px;">Hóa đơn tháng 09/2026 đã được phát hành</div>
-          <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">Hóa đơn tiền phòng và dịch vụ tháng 9 của Phòng 12A là <strong>3.450.000đ</strong>. Hạn thanh toán: 10/09/2026.</div>
-          <div class="notify-time">10 phút trước</div>
+      @php
+        $typeIcons = ['invoice' => ['icon-invoice', '💰'], 'maintenance' => ['icon-maintenance', '🔧'], 'contract' => ['icon-contract', '📜'], 'payment' => ['icon-invoice', '💳'], 'review' => ['icon-contract', '⭐']];
+      @endphp
+      @forelse($notifications as $notification)
+        @php
+          [$iconClass, $icon] = $typeIcons[$notification->type] ?? ['icon-contract', '🔔'];
+          $target = $notification->targetUrl();
+        @endphp
+        <div class="notify-item {{ $notification->read_at ? '' : 'unread' }}">
+          <div class="notify-icon {{ $iconClass }}">{{ $icon }}</div>
+          <div class="flex-grow-1">
+            @if($target)
+              <a href="{{ $target }}" class="fw-bold text-dark text-decoration-none" style="font-size: 15px;">{{ $notification->title }}</a>
+            @else
+              <div class="fw-bold text-dark" style="font-size: 15px;">{{ $notification->title }}</div>
+            @endif
+            <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">{{ $notification->message }}</div>
+            <div class="notify-time">{{ $notification->created_at->diffForHumans() }} · {{ $notification->created_at->format('d/m/Y H:i') }}</div>
+          </div>
+          @if($notification->read_at)
+            <span class="text-muted" style="font-size: 12px;">Đã đọc</span>
+          @else
+            <div class="d-flex flex-column align-items-end gap-2">
+              <div class="notify-dot"></div>
+              <form action="{{ route('tenant.notifications.read', $notification->id) }}" method="POST" class="m-0">
+                @csrf
+                @method('PUT')
+                <button type="submit" class="mark-read-btn" style="background: transparent; border: none; padding: 0;">Đánh dấu đã đọc</button>
+              </form>
+            </div>
+          @endif
         </div>
-        <div class="notify-dot"></div>
-      </a>
-
-      <!-- Item 2: Maintenance (Unread) -->
-      <a href="{{ route('tenant.maintenance.show', 1) }}" class="notify-item unread">
-        <div class="notify-icon icon-maintenance">🔧</div>
-        <div class="flex-grow-1">
-          <div class="fw-bold text-dark" style="font-size: 15px;">Cập nhật tiến độ sửa chữa</div>
-          <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">BQL đã phản hồi ticket #TCK-0985 (Máy lạnh kêu to): "Thợ sẽ qua kiểm tra vào 17h chiều nay nhé".</div>
-          <div class="notify-time">2 giờ trước</div>
-        </div>
-        <div class="notify-dot"></div>
-      </a>
-
-      <div class="notify-header mt-2" style="background: #fafafa; border-top: 1px solid #f0f0f0;">
-        <h5 class="fw-bold mb-0 text-muted" style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Trước đó</h5>
-      </div>
-
-      <!-- Item 3: Contract (Read) -->
-      <a href="#" class="notify-item">
-        <div class="notify-icon icon-contract">📜</div>
-        <div class="flex-grow-1">
-          <div class="fw-bold text-dark" style="font-size: 15px;">Hợp đồng thuê phòng sắp hết hạn</div>
-          <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">Hợp đồng #HD-092026 của bạn sẽ hết hạn sau 30 ngày nữa. Vui lòng liên hệ BQL nếu bạn muốn gia hạn.</div>
-          <div class="notify-time">01/09/2026</div>
-        </div>
-      </a>
-
-      <!-- Item 4: Viewing Appointment (Read) -->
-      <a href="#" class="notify-item">
-        <div class="notify-icon icon-appointment">📅</div>
-        <div class="flex-grow-1">
-          <div class="fw-bold text-dark" style="font-size: 15px;">Lịch xem phòng đã được xác nhận</div>
-          <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">Chủ nhà đã xác nhận lịch đến xem Phòng 12A - Tòa nhà Hoa Mai vào lúc 09:00 ngày 28/08/2026.</div>
-          <div class="notify-time">26/08/2026</div>
-        </div>
-      </a>
+      @empty
+        <div class="text-center text-muted py-5">Bạn chưa có thông báo nào.</div>
+      @endforelse
 
     </div>
   </div>
+  <div class="mt-3">{{ $notifications->links() }}</div>
 
 </div>
 

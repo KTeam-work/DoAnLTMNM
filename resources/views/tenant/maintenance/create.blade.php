@@ -36,9 +36,9 @@
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#rooms">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Yêu thích</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('favorites.index') }}">Yêu thích</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('appointments.index') }}">Lịch xem phòng</a></li>
          <li class="nav-item">
           <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
         </li>
@@ -77,27 +77,57 @@
   </div>
 
   <div class="form-panel">
-    <form action="{{ route('tenant.maintenance.store') }}" method="POST">
+    @if($errors->any())
+      <div class="alert alert-danger mb-4">
+        <ul class="mb-0">
+          @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+          @endforeach
+        </ul>
+      </div>
+    @endif
+    @if($contracts->isEmpty())
+      <div class="alert alert-warning">Bạn chưa có hợp đồng nào để tạo yêu cầu. Vui lòng liên hệ chủ trọ.</div>
+    @else
+    <form action="{{ route('tenant.maintenance.store') }}" method="POST" enctype="multipart/form-data">
       @csrf
-      
+
       <div class="row g-4">
+        <!-- Hợp đồng liên quan -->
+        <div class="col-12">
+          <label class="form-label">Hợp đồng liên quan <span class="text-danger">*</span></label>
+          <select name="contract_id" id="contractSelect" class="form-select fw-bold text-dark" required>
+            @foreach($contracts as $contract)
+              <option value="{{ $contract->id }}" data-room="{{ $contract->room->name ?? '' }}"
+                @selected((string) old('contract_id', $prefillContractId) === (string) $contract->id)>
+                {{ $contract->contract_code }} — {{ $contract->room->name ?? '' }}
+              </option>
+            @endforeach
+          </select>
+        </div>
+
         <!-- Section 1: Thông tin cơ bản -->
         <div class="col-md-6">
           <label class="form-label">Phòng tiếp nhận sự cố</label>
           <div class="form-control fw-bold text-dark d-flex align-items-center" style="background: #f0f0f0; opacity: 0.8;">
-            <span style="margin-right: 10px;">🏠</span> Phòng 12A - Tòa A
+            <span style="margin-right: 10px;">🏠</span> <span id="roomName">—</span>
           </div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label">Phân loại sự cố <span class="text-danger">*</span></label>
-          <select class="form-select fw-bold text-dark" required>
-            <option value="" selected disabled>-- Vui lòng chọn hệ thống --</option>
-            <option value="dien_nuoc">💧 Hệ thống Điện / Nước</option>
-            <option value="dien_lanh">❄️ Thiết bị Điện lạnh (Điều hòa, Tủ lạnh)</option>
-            <option value="noi_that">🚪 Nội thất (Giường, Tủ, Cửa, Khóa)</option>
-            <option value="khac">🔧 Vấn đề khác</option>
+          <select name="category" class="form-select fw-bold text-dark" required>
+            <option value="" disabled @selected(!old('category'))>-- Vui lòng chọn hệ thống --</option>
+            <option value="dien_nuoc" @selected(old('category') === 'dien_nuoc')>💧 Hệ thống Điện / Nước</option>
+            <option value="dien_lanh" @selected(old('category') === 'dien_lanh')>❄️ Thiết bị Điện lạnh (Điều hòa, Tủ lạnh)</option>
+            <option value="noi_that" @selected(old('category') === 'noi_that')>🚪 Nội thất (Giường, Tủ, Cửa, Khóa)</option>
+            <option value="khac" @selected(old('category') === 'khac')>🔧 Vấn đề khác</option>
           </select>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control fw-bold" value="{{ old('title') }}" placeholder="VD: Điều hòa không mát" required maxlength="200">
         </div>
 
         <!-- Section 2: Enterprise Priority Cards -->
@@ -106,25 +136,49 @@
           <div class="row g-3 mt-1">
             <div class="col-md-6">
               <label class="w-100 h-100 m-0">
-                <input type="radio" name="priority" value="normal" class="radio-card-input" checked>
+                <input type="radio" name="priority" value="low" class="radio-card-input" @checked(old('priority') === 'low')>
                 <div class="radio-card normal">
                   <div class="d-flex align-items-center gap-3 mb-2">
-                    <span style="font-size: 20px;">🛡️</span>
-                    <h6 class="fw-bold mb-0 text-dark">Bình thường</h6>
+                    <span style="font-size: 20px;">🐢</span>
+                    <h6 class="fw-bold mb-0 text-dark">Thấp</h6>
                   </div>
-                  <p class="text-muted mb-0" style="font-size: 13px;">Sự cố nhỏ, không ảnh hưởng trực tiếp đến sinh hoạt (Thay bóng đèn, sửa bản lề...). Xử lý trong 24-48h.</p>
+                  <p class="text-muted mb-0" style="font-size: 13px;">Việc nhỏ, lúc nào rảnh làm cũng được.</p>
                 </div>
               </label>
             </div>
             <div class="col-md-6">
               <label class="w-100 h-100 m-0">
-                <input type="radio" name="priority" value="urgent" class="radio-card-input">
+                <input type="radio" name="priority" value="medium" class="radio-card-input" @checked(old('priority', 'medium') === 'medium')>
+                <div class="radio-card normal">
+                  <div class="d-flex align-items-center gap-3 mb-2">
+                    <span style="font-size: 20px;">🛡️</span>
+                    <h6 class="fw-bold mb-0 text-dark">Bình thường</h6>
+                  </div>
+                  <p class="text-muted mb-0" style="font-size: 13px;">Sự cố nhỏ, không ảnh hưởng trực tiếp đến sinh hoạt. Xử lý trong 24-48h.</p>
+                </div>
+              </label>
+            </div>
+            <div class="col-md-6">
+              <label class="w-100 h-100 m-0">
+                <input type="radio" name="priority" value="high" class="radio-card-input" @checked(old('priority') === 'high')>
+                <div class="radio-card urgent">
+                  <div class="d-flex align-items-center gap-3 mb-2">
+                    <span style="font-size: 20px;">⚠️</span>
+                    <h6 class="fw-bold mb-0 text-danger">Cao</h6>
+                  </div>
+                  <p class="text-muted mb-0" style="font-size: 13px;">Ảnh hưởng sinh hoạt, cần xử lý sớm trong ngày.</p>
+                </div>
+              </label>
+            </div>
+            <div class="col-md-6">
+              <label class="w-100 h-100 m-0">
+                <input type="radio" name="priority" value="urgent" class="radio-card-input" @checked(old('priority') === 'urgent')>
                 <div class="radio-card urgent">
                   <div class="d-flex align-items-center gap-3 mb-2">
                     <span style="font-size: 20px;">🚨</span>
                     <h6 class="fw-bold mb-0 text-danger">Khẩn cấp</h6>
                   </div>
-                  <p class="text-muted mb-0" style="font-size: 13px;">Sự cố nghiêm trọng, không thể sinh hoạt (Mất điện toàn phòng, vỡ ống nước chính...). Xử lý ngay lập tức.</p>
+                  <p class="text-muted mb-0" style="font-size: 13px;">Không thể sinh hoạt (mất điện, vỡ ống nước...). Xử lý ngay lập tức.</p>
                 </div>
               </label>
             </div>
@@ -134,17 +188,18 @@
         <!-- Section 3: Chi tiết & Đính kèm -->
         <div class="col-12 mt-5">
           <label class="form-label">Mô tả hiện trạng <span class="text-danger">*</span></label>
-          <textarea class="form-control" rows="5" placeholder="Ví dụ: Điều hòa bật vẫn lên nguồn nhưng không phả ra hơi lạnh, cục nóng bên ngoài kêu rất to..." required style="resize: none;"></textarea>
+          <textarea name="description" class="form-control" rows="5" placeholder="Ví dụ: Điều hòa bật vẫn lên nguồn nhưng không phả ra hơi lạnh, cục nóng bên ngoài kêu rất to..." required style="resize: none;">{{ old('description') }}</textarea>
         </div>
 
         <div class="col-12">
           <label class="form-label">Tài liệu đính kèm / Hình ảnh hiện trường (Tùy chọn)</label>
-          <div class="upload-zone">
+          <div class="upload-zone" id="uploadZone">
             <div class="upload-icon">📁</div>
             <div>
               <div class="fw-bold text-dark" style="font-size: 15px;">Kéo thả file hoặc nhấn để tải lên</div>
-              <div class="text-muted mt-1" style="font-size: 13px;">Hỗ trợ định dạng: JPG, PNG, MP4 (Tối đa 3 file, 10MB/file)</div>
+              <div class="text-muted mt-1" style="font-size: 13px;" id="uploadHint">Hỗ trợ định dạng: JPG, PNG (Tối đa 10MB)</div>
             </div>
+            <input type="file" name="image" id="imageInput" accept="image/*" class="d-none">
           </div>
         </div>
       </div>
@@ -164,8 +219,31 @@
         </div>
       </div>
     </form>
+    @endif
   </div>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+  var contractSelect = document.getElementById('contractSelect');
+  var roomName = document.getElementById('roomName');
+  function syncRoom() {
+    if (!contractSelect) return;
+    var opt = contractSelect.options[contractSelect.selectedIndex];
+    roomName.textContent = opt ? (opt.getAttribute('data-room') || '—') : '—';
+  }
+  if (contractSelect) { contractSelect.addEventListener('change', syncRoom); syncRoom(); }
+  var zone = document.getElementById('uploadZone');
+  var input = document.getElementById('imageInput');
+  var hint = document.getElementById('uploadHint');
+  if (zone && input) {
+    zone.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () {
+      if (input.files.length) hint.textContent = 'Đã chọn: ' + input.files[0].name;
+    });
+  }
+})();
+</script>
 </body>
 </html>

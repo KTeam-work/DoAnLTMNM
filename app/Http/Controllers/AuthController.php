@@ -16,6 +16,10 @@ class AuthController extends Controller{
         
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
+
+            if ($request->user()->role === 'owner') {
+                return redirect()->route('landlord.home')->with('success', 'Đăng nhập thành công!');
+            }
             
            
             return redirect('/tenant')->with('success', 'Đăng nhập thành công!');

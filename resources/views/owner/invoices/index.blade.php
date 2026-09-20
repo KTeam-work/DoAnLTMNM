@@ -194,7 +194,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link " href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link " href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -293,15 +293,21 @@
   <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
     <div>
       <h2 class="page-title">Quản lý Hóa đơn</h2>
-      <div class="page-desc">Kỳ thanh toán hiện tại: <strong>Tháng 09/2026</strong></div>
+      <div class="page-desc">Kỳ thanh toán hiện tại: <strong>Tháng {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</strong></div>
     </div>
     <div class="d-flex gap-2">
-      <button class="btn-outline-brand"><i class="bi bi-download me-1"></i>Xuất Excel</button>
       <button class="btn-brand" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
-        <i class="bi bi-magic me-1"></i> Chốt điện nước &amp; Tạo HĐ
+        <i class="bi bi-magic me-1"></i> Tạo hóa đơn tháng
       </button>
     </div>
   </div>
+
+  @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+  @endif
+  @if($errors->any())
+    <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+  @endif
 
   <!-- STAT CARDS -->
   <div class="row g-3 mb-4">
@@ -309,9 +315,9 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon"><i class="bi bi-receipt"></i></div>
-          <span class="text-muted small fw-bold">Dự kiến T09</span>
+          <span class="text-muted small fw-bold">Dự kiến {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</span>
         </div>
-        <div class="stat-value">28,5tr ₫</div>
+        <div class="stat-value">{{ number_format((float) $stats['expected']) }} ₫</div>
         <div class="stat-label">Tổng doanh thu chờ thu</div>
       </div>
     </div>
@@ -320,11 +326,10 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
-          <span class="fw-bold text-success">Đạt 68%</span>
+          <span class="fw-bold text-success">Đã thu</span>
         </div>
-        <div class="stat-value" style="color: var(--green);">19,4tr ₫</div>
-        <div class="stat-label">Đã thu</div>
-        <div class="progress progress-thin"><div class="progress-bar" style="width: 68%;"></div></div>
+        <div class="stat-value" style="color: var(--green);">{{ number_format((float) $stats['collected']) }} ₫</div>
+        <div class="stat-label">Đã thu trong kỳ</div>
       </div>
     </div>
 
@@ -332,9 +337,9 @@
       <div class="stat-card" style="border-color: var(--red-soft);">
         <div class="stat-top">
           <div class="stat-icon red"><i class="bi bi-exclamation-triangle-fill"></i></div>
-          <span class="text-danger fw-bold small">3 hóa đơn cần xử lý</span>
+          <span class="text-danger fw-bold small">{{ $stats['outstanding_count'] }} hóa đơn cần xử lý</span>
         </div>
-        <div class="stat-value" style="color: var(--red);">9,1tr ₫</div>
+        <div class="stat-value" style="color: var(--red);">{{ number_format((float) $stats['outstanding']) }} ₫</div>
         <div class="stat-label">Còn nợ &amp; Quá hạn</div>
       </div>
     </div>
@@ -344,30 +349,24 @@
   <div class="panel">
     <div class="panel-head">
       <h3 class="fw-bold fs-5 mb-0">Danh sách Hóa đơn</h3>
-      <div class="d-flex flex-wrap gap-2">
-        <div class="input-group input-group-sm" style="width: 220px;">
-          <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
-          <input type="text" class="form-control bg-light border-0 shadow-none ps-0" placeholder="Tìm mã phòng, khách...">
-        </div>
-        <select class="form-select form-select-sm w-auto shadow-none bg-light border-0">
-          <option>Tất cả khu trọ</option>
-          <option>Khu trọ Hoa Mai</option>
-          <option>Chung cư mini Trần Khát Chân</option>
+      <form method="GET" action="{{ route('owner.invoices.index') }}" class="d-flex flex-wrap gap-2">
+        <input type="month" name="month" class="form-control form-control-sm w-auto shadow-none" value="{{ $filters['month'] ?? '' }}" onchange="this.form.submit()">
+        <select name="status" class="form-select form-select-sm w-auto shadow-none" onchange="this.form.submit()">
+          <option value="">Tất cả trạng thái</option>
+          @foreach(['unpaid' => 'Chưa thanh toán', 'pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'overdue' => 'Quá hạn', 'cancelled' => 'Đã hủy'] as $value => $label)
+            <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+          @endforeach
         </select>
-        <select class="form-select form-select-sm w-auto shadow-none bg-light border-0">
-          <option>Tất cả trạng thái</option>
-          <option>Chưa thanh toán</option>
-          <option>Đã thanh toán</option>
-          <option>Quá hạn</option>
-        </select>
-      </div>
+        @if(!empty($filters['month']) || !empty($filters['status']))
+          <a href="{{ route('owner.invoices.index') }}" class="btn btn-sm btn-light border">Xóa lọc</a>
+        @endif
+      </form>
     </div>
 
     <div class="table-responsive">
       <table class="data-table">
         <thead>
           <tr>
-            <th style="width: 40px;"><input class="form-check-input" type="checkbox"></th>
             <th>MÃ HĐ / NGÀY LẬP</th>
             <th>PHÒNG &amp; KHÁCH</th>
             <th>TỔNG TIỀN</th>
@@ -376,224 +375,73 @@
           </tr>
         </thead>
         <tbody>
+          @php
+            $statusLabels = ['unpaid' => 'Chưa thanh toán', 'pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'overdue' => 'Quá hạn', 'cancelled' => 'Đã hủy'];
+          @endphp
+          @forelse($invoices as $invoice)
+            @php
+              $isOverdue = in_array($invoice->status, ['unpaid', 'pending']) && $invoice->due_date < now()->toDateString();
+              $displayStatus = $isOverdue ? 'overdue' : $invoice->status;
+            @endphp
           <tr>
-            <td><input class="form-check-input" type="checkbox"></td>
             <td>
-              <div class="cell-title" style="color: var(--green);">#INV-09-2026-12A</div>
-              <div class="cell-sub">Hạn: 05/09/2026</div>
+              <div class="cell-title" style="color: var(--green);">#{{ $invoice->invoice_code }}</div>
+              <div class="cell-sub">Hạn: {{ $invoice->due_date->format('d/m/Y') }}</div>
             </td>
             <td>
-              <div class="cell-title">Phòng 12A</div>
-              <div class="cell-sub">Thanh Huyền (0987xxx)</div>
+              <div class="cell-title">{{ $invoice->contract->room->name ?? '' }}</div>
+              <div class="cell-sub">{{ $invoice->contract->tenant->name ?? '' }}</div>
             </td>
-            <td><strong>3,7tr ₫</strong></td>
-            <td><span class="badge-status pending">Chưa thanh toán</span></td>
+            <td><strong>{{ number_format((float) $invoice->total) }} ₫</strong></td>
+            <td><span class="badge-status {{ $displayStatus }}">{{ $statusLabels[$displayStatus] ?? $displayStatus }}</span></td>
             <td class="text-end">
-              <button class="btn btn-sm btn-outline-danger me-1"><i class="bi bi-bell-fill"></i></button>
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i></button>
+              <a href="{{ route('owner.invoices.show', $invoice->id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i> Xem</a>
             </td>
           </tr>
+          @empty
           <tr>
-            <td><input class="form-check-input" type="checkbox" disabled></td>
-            <td>
-              <div class="cell-title" style="color: var(--green);">#INV-09-2026-14B</div>
-              <div class="cell-sub">Đã thu: 02/09/2026</div>
-            </td>
-            <td>
-              <div class="cell-title">Phòng 14B</div>
-              <div class="cell-sub">Hoàng Nam (0912xxx)</div>
-            </td>
-            <td><strong>4,2tr ₫</strong></td>
-            <td><span class="badge-status paid"><i class="bi bi-check2-circle me-1"></i>Đã thanh toán</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer-fill"></i></button>
-            </td>
+            <td colspan="5" class="text-center text-muted py-5">Chưa có hóa đơn nào.</td>
           </tr>
-          <tr>
-            <td><input class="form-check-input" type="checkbox"></td>
-            <td>
-              <div class="cell-title" style="color: var(--green);">#INV-08-2026-03C</div>
-              <div class="cell-sub"><span class="text-danger">Trễ 29 ngày</span></div>
-            </td>
-            <td>
-              <div class="cell-title">Phòng 03C</div>
-              <div class="cell-sub">Văn Hùng (0934xxx)</div>
-            </td>
-            <td><strong>2,9tr ₫</strong></td>
-            <td><span class="badge-status overdue">Quá hạn (29 ngày)</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-danger me-1"><i class="bi bi-cone-striped"></i></button>
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i></button>
-            </td>
-          </tr>
-          <tr>
-            <td><input class="form-check-input" type="checkbox"></td>
-            <td>
-              <div class="cell-title" style="color: var(--green);">#INV-09-2026-05A</div>
-              <div class="cell-sub">Hạn: 10/09/2026</div>
-            </td>
-            <td>
-              <div class="cell-title">Phòng 05A</div>
-              <div class="cell-sub">Mai Lan (0977xxx)</div>
-            </td>
-            <td><strong>3,4tr ₫</strong></td>
-            <td><span class="badge-status pending">Chưa thanh toán</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-danger me-1"><i class="bi bi-bell-fill"></i></button>
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i></button>
-            </td>
-          </tr>
-          <tr>
-            <td><input class="form-check-input" type="checkbox" disabled></td>
-            <td>
-              <div class="cell-title" style="color: var(--green);">#INV-09-2026-08D</div>
-              <div class="cell-sub">Đã thu: 03/09/2026</div>
-            </td>
-            <td>
-              <div class="cell-title">Phòng 08D</div>
-              <div class="cell-sub">Đức Anh (0966xxx)</div>
-            </td>
-            <td><strong>3,8tr ₫</strong></td>
-            <td><span class="badge-status paid"><i class="bi bi-check2-circle me-1"></i>Đã thanh toán</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer-fill"></i></button>
-            </td>
-          </tr>
-          <tr>
-            <td><input class="form-check-input" type="checkbox"></td>
-            <td>
-              <div class="cell-title" style="color: var(--green);">#INV-09-2026-02B</div>
-              <div class="cell-sub">Hạn: 10/09/2026</div>
-            </td>
-            <td>
-              <div class="cell-title">Phòng 02B</div>
-              <div class="cell-sub">Thu Trang (0988xxx)</div>
-            </td>
-            <td><strong>3,5tr ₫</strong></td>
-            <td><span class="badge-status pending">Chưa thanh toán</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-danger me-1"><i class="bi bi-bell-fill"></i></button>
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i></button>
-            </td>
-          </tr>
-          <tr>
-            <td><input class="form-check-input" type="checkbox"></td>
-            <td>
-              <div class="cell-title" style="color: var(--green);">#INV-08-2026-07C</div>
-              <div class="cell-sub"><span class="text-danger">Trễ 19 ngày</span></div>
-            </td>
-            <td>
-              <div class="cell-title">Phòng 07C</div>
-              <div class="cell-sub">Quốc Bảo (0911xxx)</div>
-            </td>
-            <td><strong>3,6tr ₫</strong></td>
-            <td><span class="badge-status overdue">Quá hạn (19 ngày)</span></td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-danger me-1"><i class="bi bi-cone-striped"></i></button>
-              <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i></button>
-            </td>
-          </tr>
+          @endforelse
         </tbody>
       </table>
     </div>
 
     <div class="d-flex justify-content-between align-items-center pt-3">
-      <span class="text-muted small">Hiển thị 1–7 trên 9 hóa đơn</span>
-      <div class="d-flex gap-1">
-        <button class="btn btn-sm btn-outline-secondary" disabled>‹</button>
-        <button class="btn btn-sm btn-success">1</button>
-        <button class="btn btn-sm btn-outline-secondary">2</button>
-        <button class="btn btn-sm btn-outline-secondary">›</button>
-      </div>
+      <span class="text-muted small">Tổng {{ $invoices->total() }} hóa đơn</span>
+      <div>{{ $invoices->links() }}</div>
     </div>
   </div>
 </div>
 
-<!-- MODAL: CHỐT ĐIỆN NƯỚC -->
+<!-- MODAL: TẠO HÓA ĐƠN THÁNG -->
 <div class="modal fade" id="bulkCreateModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{{ route('owner.invoices.store') }}" class="modal-content">
+      @csrf
       <div class="modal-header bg-light">
         <div>
-          <h5 class="modal-title fw-bold" style="color: var(--green);"><i class="bi bi-magic me-2"></i>Chốt điện/nước <span>tháng 10/2026</span></h5>
-          <div class="text-muted" style="font-size: 13px;">Nhập số điện/nước mới — hệ thống tự tính tiền và tạo hóa đơn.</div>
+          <h5 class="modal-title fw-bold" style="color: var(--green);"><i class="bi bi-magic me-2"></i>Tạo hóa đơn tháng</h5>
+          <div class="text-muted" style="font-size: 13px;">Tự động tính tiền phòng, điện nước và dịch vụ cho các hợp đồng hiệu lực.</div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body p-0">
-        <div class="d-flex flex-wrap gap-3 align-items-end px-4 pt-3 pb-2">
-          <div>
-            <label class="form-label small fw-bold mb-1">Khu trọ</label>
-            <select class="form-select form-select-sm" style="width:220px;">
-              <option>Khu trọ Hoa Mai</option>
-              <option>Chung cư mini Trần Khát Chân</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label small fw-bold mb-1">Kỳ thanh toán</label>
-            <input type="month" class="form-control form-control-sm" value="2026-10" style="width:150px;">
-          </div>
-          <div>
-            <label class="form-label small fw-bold mb-1">Giá điện / kWh</label>
-            <input type="number" class="form-control form-control-sm" value="3500" style="width:110px;">
-          </div>
-          <div>
-            <label class="form-label small fw-bold mb-1">Giá nước / m³</label>
-            <input type="number" class="form-control form-control-sm" value="20000" style="width:110px;">
-          </div>
-          <div>
-            <label class="form-label small fw-bold mb-1">Phí dịch vụ</label>
-            <input type="number" class="form-control form-control-sm" value="150000" style="width:120px;">
-          </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Kỳ thanh toán</label>
+          <input type="month" name="month" class="form-control" value="{{ $currentMonth }}" required>
         </div>
-        <table class="table mb-0 align-middle">
-          <thead class="table-light text-muted" style="font-size: 12px;">
-            <tr>
-              <th class="ps-4"><input class="form-check-input" type="checkbox" checked></th>
-              <th>PHÒNG</th>
-              <th class="text-end">SỐ ĐIỆN CŨ</th>
-              <th class="text-end">SỐ ĐIỆN MỚI</th>
-              <th class="text-end">SỐ NƯỚC CŨ</th>
-              <th class="text-end pe-4">SỐ NƯỚC MỚI</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="ps-4"><input class="form-check-input" type="checkbox" checked></td>
-              <td class="fw-bold">Phòng 12A</td>
-              <td class="text-end text-muted">1450</td>
-              <td class="text-end"><input type="number" class="form-control form-control-sm d-inline-block" style="width:100px;" value="1500"></td>
-              <td class="text-end text-muted">120</td>
-              <td class="text-end pe-4"><input type="number" class="form-control form-control-sm d-inline-block" style="width:100px;" value="124"></td>
-            </tr>
-            <tr>
-              <td class="ps-4"><input class="form-check-input" type="checkbox" checked></td>
-              <td class="fw-bold">Phòng 14B</td>
-              <td class="text-end text-muted">2100</td>
-              <td class="text-end"><input type="number" class="form-control form-control-sm d-inline-block" style="width:100px;" value="2185"></td>
-              <td class="text-end text-muted">340</td>
-              <td class="text-end pe-4"><input type="number" class="form-control form-control-sm d-inline-block" style="width:100px;" value="348"></td>
-            </tr>
-            <tr>
-              <td class="ps-4"><input class="form-check-input" type="checkbox" checked></td>
-              <td class="fw-bold">Phòng 05A</td>
-              <td class="text-end text-muted">980</td>
-              <td class="text-end"><input type="number" class="form-control form-control-sm d-inline-block" style="width:100px;" value="1015"></td>
-              <td class="text-end text-muted">90</td>
-              <td class="text-end pe-4"><input type="number" class="form-control form-control-sm d-inline-block" style="width:100px;" value="93"></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="d-flex justify-content-between align-items-center bg-light rounded-3 mx-4 mb-3 p-3">
-          <span class="fw-bold">Tổng dự kiến (<span>3</span> phòng)</span>
-          <span class="fw-bold fs-5" style="color: var(--green);">11,8tr ₫</span>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Giảm giá chung (đ, tùy chọn)</label>
+          <input type="number" name="discount" class="form-control" min="0" step="0.01" value="0">
         </div>
+        <div class="alert alert-info mb-0" style="font-size: 13px;">Chọn kỳ đã có chỉ số điện nước (VD: 2026-10). Phòng thiếu chỉ số của kỳ sẽ bị bỏ qua và liệt kê sau khi tạo. Không tạo trùng kỳ/hợp đồng.</div>
       </div>
       <div class="modal-footer bg-light border-0">
         <button type="button" class="btn btn-light border fw-bold px-4" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-brand fw-bold px-4"><i class="bi bi-send-check me-1"></i> Phát hành Hóa đơn</button>
+        <button type="submit" class="btn btn-brand fw-bold px-4"><i class="bi bi-send-check me-1"></i> Phát hành Hóa đơn</button>
       </div>
-    </div>
+    </form>
   </div>
 </div>
 

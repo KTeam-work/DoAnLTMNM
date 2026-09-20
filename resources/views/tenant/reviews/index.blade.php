@@ -122,12 +122,22 @@
           
           <div class="mb-4">
             <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Phòng đang thuê</label>
-            <div class="form-control fw-bold text-dark" style="background: #eaf3ef; border-color: var(--green-soft);">
-              🏠 Phòng 12A - Khu trọ Hoa Mai
-            </div>
-            <!-- Input ẩn chứa room_id để submit -->
-            <input type="hidden" name="room_id" value="1"> 
+            @if($rooms->isEmpty())
+              <div class="alert alert-warning mb-0">Bạn chưa có phòng nào để đánh giá.</div>
+            @else
+              <select name="room_id" class="form-select fw-bold text-dark" required>
+                @foreach($rooms as $room)
+                  <option value="{{ $room->id }}" @selected((string) old('room_id') === (string) $room->id)>🏠 {{ $room->name }} — {{ $room->property->name ?? '' }}</option>
+                @endforeach
+              </select>
+            @endif
           </div>
+
+          @if($errors->any())
+            <div class="alert alert-danger">
+              <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+            </div>
+          @endif
 
           <div class="mb-4">
             <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Chất lượng phòng (1-5 Sao) <span class="text-danger">*</span></label>
@@ -151,8 +161,8 @@
           </div>
 
           <div class="mb-4">
-            <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Nhận xét chi tiết <span class="text-danger">*</span></label>
-            <textarea name="comment" class="form-control" rows="4" placeholder="Phòng có ồn không? Ban quản lý có nhiệt tình không?..." required style="resize: none;"></textarea>
+            <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Nhận xét chi tiết</label>
+            <textarea name="comment" class="form-control" rows="4" placeholder="Phòng có ồn không? Ban quản lý có nhiệt tình không?... (tối đa 1000 ký tự)" maxlength="1000" style="resize: none;">{{ old('comment') }}</textarea>
           </div>
 
           <button type="submit" class="btn btn-brand w-100 py-3 mt-2" style="font-size: 14px; box-shadow: 0 4px 15px rgba(245,200,75,0.4);">
@@ -169,56 +179,34 @@
           
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold mb-0" style="color: var(--green-dark); font-size: 18px;">🕒 Lịch sử đánh giá của bạn</h4>
-            <span class="text-muted" style="font-size: 13px; font-weight: 600;">Tổng: 2 lượt</span>
+            <span class="text-muted" style="font-size: 13px; font-weight: 600;">Tổng: {{ $reviews->count() }} lượt</span>
           </div>
 
-          <!-- Thanh Tìm kiếm & Lọc -->
-          <div class="d-flex gap-2 mb-4 border-bottom pb-4">
-            <div class="position-relative flex-grow-1">
-              <span class="position-absolute" style="top: 12px; left: 14px; font-size: 14px; color: #aaa;">🔍</span>
-              <input type="text" class="form-control" placeholder="Tìm theo tên phòng, khu trọ..." style="padding-left: 38px; border-radius: 10px;">
-            </div>
-            <select class="form-select w-auto fw-bold text-dark" style="border-radius: 10px; background-color: #fafafa;">
-              <option value="newest">Lọc: Mới nhất</option>
-              <option value="oldest">Lọc: Cũ nhất</option>
-              <option value="5star">⭐ Đánh giá 5 Sao</option>
-              <option value="hidden">🚫 Bị ẩn</option>
-            </select>
-          </div>
-
-          <!-- Lịch sử 1 (Visible) -->
+          @forelse($reviews as $review)
           <div class="review-card">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
-                <div class="static-stars">★★★★★</div>
-                <div class="fw-bold mt-1 text-dark" style="font-size: 15px;">Phòng 12A - Khu trọ Hoa Mai</div>
+                <div class="static-stars" @if($review->rating < 4) style="color: #ccc;" @endif>{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
+                <div class="fw-bold mt-1 text-dark" style="font-size: 15px;">{{ $review->room->name ?? '' }}</div>
               </div>
               <div class="text-end">
-                <span class="badge-visible mb-1 d-inline-block">✓ Đang hiển thị</span>
-                <div class="text-muted" style="font-size: 11px;">05/09/2026</div>
+                @if($review->status === 'visible')
+                  <span class="badge-visible mb-1 d-inline-block">✓ Đang hiển thị</span>
+                @else
+                  <span class="badge-hidden mb-1 d-inline-block">✖ Đang ẩn</span>
+                @endif
+                <div class="text-muted" style="font-size: 11px;">{{ $review->created_at->format('d/m/Y') }}</div>
               </div>
             </div>
+            @if($review->comment)
             <p class="text-muted mb-0 mt-2" style="font-size: 13.5px; line-height: 1.6;">
-              "Phòng rất mới, sạch sẽ, BQL hỗ trợ nhiệt tình mỗi khi hỏng hóc đồ đạc. Tuy nhiên bãi để xe hơi chật vào buổi tối."
+              "{{ $review->comment }}"
             </p>
+            @endif
           </div>
-
-          <!-- Lịch sử 2 (Hidden by Admin) -->
-          <div class="review-card">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <div>
-                <div class="static-stars" style="color: #ccc;">★★☆☆☆</div>
-                <div class="fw-bold mt-1 text-dark" style="font-size: 15px;">Phòng 3B - Chung cư mini Trần Khát Chân</div>
-              </div>
-              <div class="text-end">
-                <span class="badge-hidden mb-1 d-inline-block">✖ Bị ẩn do vi phạm</span>
-                <div class="text-muted" style="font-size: 11px;">12/03/2025</div>
-              </div>
-            </div>
-            <p class="text-muted mb-0 mt-2" style="font-size: 13.5px; line-height: 1.6;">
-              "Chủ nhà quá khắt khe giờ giấc, tiền điện tính sai lệch tháng vừa rồi..."
-            </p>
-          </div>
+          @empty
+          <div class="text-center text-muted py-4">Bạn chưa có đánh giá nào. Hãy chia sẻ trải nghiệm ở form bên cạnh.</div>
+          @endforelse
 
         </div>
       </div>

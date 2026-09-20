@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Demo Guest Mode
+    |--------------------------------------------------------------------------
+    |
+    | Khi bật (local test), trình duyệt chưa đăng nhập vẫn thao tác được
+    | với dữ liệu của owner/tenant đầu tiên. Luồng production (flag tắt)
+    | bắt buộc đăng nhập và phân quyền đầy đủ. JSON API luôn cần login.
+    |
+    */
+
+    'demo_guest' => env('DEMO_GUEST_WRITE', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
