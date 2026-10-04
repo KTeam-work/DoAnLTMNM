@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Trọ Ơi | Sửa dịch vụ</title>
+    <title>Trọ Ơi | {{ ($mode ?? 'edit') === 'create' ? 'Thêm dịch vụ' : 'Sửa dịch vụ' }}</title>
 
     {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -130,7 +130,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link" href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -236,8 +236,8 @@
 
             {{-- HEADER --}}
             <div class="service-header">
-                <h1 class="service-title">Sửa dịch vụ</h1>
-                <div class="service-description">Cập nhật thông tin dịch vụ đang áp dụng cho nhà trọ.</div>
+                <h1 class="service-title">{{ ($mode ?? 'edit') === 'create' ? 'Thêm dịch vụ' : 'Sửa dịch vụ' }}</h1>
+                <div class="service-description">{{ ($mode ?? 'edit') === 'create' ? 'Tạo dịch vụ mới áp dụng cho nhà trọ.' : 'Cập nhật thông tin dịch vụ đang áp dụng cho nhà trọ.' }}</div>
             </div>
 
             {{-- PROPERTY --}}
@@ -260,24 +260,36 @@
                 </div>
 
                 {{-- FORM --}}
-                <form action="#" method="POST">
+                <form action="{{ ($mode ?? 'edit') === 'create' ? route('owner.services.store') : route('owner.services.update', $service->exists ? $service : $service->id ?? 0) }}" method="POST">
                     @csrf
-                    @method('PUT')
+                    @if(($mode ?? 'edit') !== 'create')
+                        @method('PUT')
+                    @endif
 
                     {{-- CARD BODY --}}
                     <div class="service-card-body">
 
+                        @if($errors->any())
+                            <div class="alert alert-danger mb-3">
+                                <ul class="mb-0">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         {{-- TÊN DỊCH VỤ --}}
                         <div class="service-form-group">
                             <label class="service-label">Tên dịch vụ <span class="service-required">*</span></label>
-                            <input type="text" name="name" class="service-input" value="Internet" placeholder="Nhập tên dịch vụ">
+                            <input type="text" name="name" class="service-input" value="{{ old('name', $service->name) }}" placeholder="Nhập tên dịch vụ">
                             <div class="service-help">Ví dụ: Internet, Giữ xe, Vệ sinh, Rác...</div>
                         </div>
 
                         {{-- MÔ TẢ --}}
                         <div class="service-form-group">
                             <label class="service-label">Mô tả</label>
-                            <textarea name="description" class="service-input" placeholder="Nhập mô tả dịch vụ">Internet và Wifi dùng chung cho cư dân trong nhà trọ</textarea>
+                            <textarea name="description" class="service-input" placeholder="Nhập mô tả dịch vụ">{{ old('description', $service->description) }}</textarea>
                             <div class="service-help">Mô tả ngắn gọn về dịch vụ.</div>
                         </div>
 
@@ -288,11 +300,9 @@
                                 <div class="service-form-group">
                                     <label class="service-label">Đơn vị tính <span class="service-required">*</span></label>
                                     <select name="unit" class="service-select">
-                                        <option value="tháng" selected>tháng</option>
-                                        <option value="người">người</option>
-                                        <option value="chiếc">chiếc</option>
-                                        <option value="kWh">kWh</option>
-                                        <option value="m³">m³</option>
+                                        @foreach(['tháng', 'người', 'chiếc', 'kWh', 'm³'] as $unit)
+                                            <option value="{{ $unit }}" {{ old('unit', $service->unit) === $unit ? 'selected' : '' }}>{{ $unit }}</option>
+                                        @endforeach
                                     </select>
                                     <div class="service-help">Đơn vị dùng để tính phí dịch vụ.</div>
                                 </div>
@@ -303,7 +313,7 @@
                                 <div class="service-form-group">
                                     <label class="service-label">Đơn giá áp dụng <span class="service-required">*</span></label>
                                     <div class="service-price-wrapper">
-                                        <input type="number" name="price" class="service-input" value="100000" min="0" placeholder="Nhập đơn giá">
+                                        <input type="number" name="price" class="service-input" value="{{ old('price', $service->price ?? '') }}" min="0" placeholder="Nhập đơn giá">
                                         <span class="service-price-unit">₫</span>
                                     </div>
                                     <div class="service-help">Đơn giá hiện đang áp dụng cho nhà trọ này.</div>
@@ -319,13 +329,12 @@
                                     <div class="service-status-dot"></div>
                                     <div>
                                         <div class="service-status-title">Đang hoạt động</div>
-                                        <div class="service-status-description">Dịch vụ hiện đang được áp dụng cho nhà trọ.</div>
+                                        <div class="service-status-description">Bỏ tick để tạm ngưng dịch vụ này.</div>
                                     </div>
                                 </div>
 
-                               
                                 <label class="service-switch">
-                                    <input type="checkbox" name="status" value="active" checked>
+                                    <input type="checkbox" name="status" value="active" {{ old('status', $service->status) === 'active' ? 'checked' : '' }}>
                                     <span class="service-slider"></span>
                                 </label>
                             </div>
@@ -341,7 +350,7 @@
                   
                     <div class="service-card-footer">
                         <a href="{{ route('owner.services.index') }}" class="service-btn-cancel">Hủy</a>
-                        <button type="submit" class="service-btn-save">✓ &nbsp; Lưu thay đổi</button>
+                        <button type="submit" class="service-btn-save">{{ ($mode ?? 'edit') === 'create' ? '+ &nbsp; Thêm dịch vụ' : '✓ &nbsp; Lưu thay đổi' }}</button>
                     </div>
                 </form>
             </div>

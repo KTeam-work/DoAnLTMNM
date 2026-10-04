@@ -44,9 +44,9 @@
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#rooms">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Yêu thích</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('favorites.index') }}">Yêu thích</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('appointments.index') }}">Lịch xem phòng</a></li>
          <li class="nav-item">
           <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
         </li>
@@ -89,7 +89,7 @@
   <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4 animate-up delay-1">
     <div>
       <h2 class="page-title skeleton-box"><span class="hide-on-skeleton">Trung tâm Hỗ trợ & Sửa chữa</span></h2>
-      <div class="text-muted mt-2 skeleton-box"><span class="hide-on-skeleton">Quản lý và theo dõi tiến độ khắc phục sự cố tại Phòng 12A.</span></div>
+      <div class="text-muted mt-2 skeleton-box"><span class="hide-on-skeleton">Quản lý và theo dõi tiến độ khắc phục sự cố tại phòng của bạn.</span></div>
     </div>
     <div class="skeleton-box rounded">
       <a href="{{ route('tenant.maintenance.create') }}" class="btn btn-brand px-4 py-2 hide-on-skeleton shadow-sm">
@@ -99,13 +99,20 @@
   </div>
 
   <!-- Metrics Dashboard -->
+  @php
+    $urgentCount = $requests->whereIn('priority', ['high', 'urgent'])->whereIn('status', ['pending', 'processing'])->count();
+    $processingCount = $requests->where('status', 'processing')->count();
+    $doneCount = $requests->where('status', 'completed')->count();
+    $categoryLabels = ['dien_nuoc' => 'Điện / Nước', 'dien_lanh' => 'Thiết bị điện lạnh', 'noi_that' => 'Nội thất', 'khac' => 'Vấn đề khác'];
+    $statusLabels = ['pending' => '⏳ Đang chờ xác nhận', 'processing' => '🔧 Đang xử lý', 'completed' => '✅ Hoàn thành', 'rejected' => '✖ Đã từ chối'];
+  @endphp
   <div class="row g-3 mb-4 animate-up delay-2">
     <div class="col-md-4">
       <div class="metric-card skeleton-box">
         <div class="metric-icon hide-on-skeleton" style="background: var(--red-soft); color: var(--red);">🚨</div>
         <div class="hide-on-skeleton">
           <div class="text-muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase;">Cần xử lý gấp</div>
-          <div style="font-size: 22px; font-weight: 800; color: var(--green-dark);">1 <span style="font-size: 13px; color: var(--muted); font-weight: 500;">yêu cầu</span></div>
+          <div style="font-size: 22px; font-weight: 800; color: var(--green-dark);">{{ $urgentCount }} <span style="font-size: 13px; color: var(--muted); font-weight: 500;">yêu cầu</span></div>
         </div>
       </div>
     </div>
@@ -113,8 +120,8 @@
       <div class="metric-card skeleton-box">
         <div class="metric-icon hide-on-skeleton" style="background: var(--blue-soft); color: var(--blue);">🔧</div>
         <div class="hide-on-skeleton">
-          <div class="text-muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase;">Đang phân công thợ</div>
-          <div style="font-size: 22px; font-weight: 800; color: var(--green-dark);">1 <span style="font-size: 13px; color: var(--muted); font-weight: 500;">yêu cầu</span></div>
+          <div class="text-muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase;">Đang xử lý</div>
+          <div style="font-size: 22px; font-weight: 800; color: var(--green-dark);">{{ $processingCount }} <span style="font-size: 13px; color: var(--muted); font-weight: 500;">yêu cầu</span></div>
         </div>
       </div>
     </div>
@@ -122,8 +129,8 @@
       <div class="metric-card skeleton-box">
         <div class="metric-icon hide-on-skeleton" style="background: var(--green-soft); color: var(--green);">✓</div>
         <div class="hide-on-skeleton">
-          <div class="text-muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase;">Đã hoàn thành (Tháng 9)</div>
-          <div style="font-size: 22px; font-weight: 800; color: var(--green-dark);">3 <span style="font-size: 13px; color: var(--muted); font-weight: 500;">yêu cầu</span></div>
+          <div class="text-muted" style="font-size: 12px; font-weight: 700; text-transform: uppercase;">Đã hoàn thành</div>
+          <div style="font-size: 22px; font-weight: 800; color: var(--green-dark);">{{ $doneCount }} <span style="font-size: 13px; color: var(--muted); font-weight: 500;">yêu cầu</span></div>
         </div>
       </div>
     </div>
@@ -131,52 +138,40 @@
 
   <!-- Filter Tabs -->
   <div class="filter-tabs animate-up delay-3 skeleton-box rounded-pill border-0 p-0 mb-4">
-    <a href="#" class="filter-tab active hide-on-skeleton">Tất cả Ticket</a>
-    <a href="#" class="filter-tab hide-on-skeleton">Mới tạo (1)</a>
-    <a href="#" class="filter-tab hide-on-skeleton">Đang sửa (1)</a>
-    <a href="#" class="filter-tab hide-on-skeleton">Lịch sử</a>
+    <a href="{{ route('tenant.maintenance.index') }}" class="filter-tab hide-on-skeleton {{ $statusFilter === 'all' ? 'active' : '' }}">Tất cả ({{ $requests->count() }})</a>
+    <a href="{{ route('tenant.maintenance.index', ['status' => 'pending']) }}" class="filter-tab hide-on-skeleton {{ $statusFilter === 'pending' ? 'active' : '' }}">Chờ xử lý</a>
+    <a href="{{ route('tenant.maintenance.index', ['status' => 'processing']) }}" class="filter-tab hide-on-skeleton {{ $statusFilter === 'processing' ? 'active' : '' }}">Đang xử lý</a>
+    <a href="{{ route('tenant.maintenance.index', ['status' => 'completed']) }}" class="filter-tab hide-on-skeleton {{ $statusFilter === 'completed' ? 'active' : '' }}">Hoàn thành</a>
   </div>
 
   <!-- Ticket List -->
   <div class="animate-up delay-3">
-    
-    <!-- Ticket 1: Urgent -->
-    <div class="ticket-card priority-urgent skeleton-box">
-      <div class="ticket-icon dien-nuoc hide-on-skeleton">💧</div>
-      <div class="flex-grow-1 hide-on-skeleton d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-          <div class="d-flex align-items-center gap-2 mb-1">
-            <span class="badge bg-danger text-white rounded-1" style="font-size: 10px; letter-spacing: 0.5px;">KHẨN CẤP</span>
-            <span class="text-muted" style="font-size: 12px; font-weight: 600;">#TCK-1002 • Gửi lúc 08:30, 06/09</span>
-          </div>
-          <h5 class="fw-bold text-dark mb-1" style="font-size: 16px;">Ống nước nhà vệ sinh bị bục, chảy lênh láng</h5>
-          <p class="text-muted mb-0" style="font-size: 13px;">Khu vực: Điện / Nước • Người báo: Thanh Huyền</p>
-        </div>
-        <div class="text-end d-flex flex-column align-items-end">
-          <span class="badge-status pending px-3 py-2 rounded-pill mb-2" style="font-size: 11.5px; font-weight: 700;">⏳ Đang chờ BQL xác nhận</span>
-          <a href="{{ route('tenant.maintenance.show', 1) }}" class="text-decoration-none fw-bold" style="font-size: 13px; color: var(--green);">Xem chi tiết →</a>
-        </div>
-      </div>
-    </div>
 
-    <!-- Ticket 2: Normal/Processing -->
-    <div class="ticket-card priority-normal skeleton-box">
-      <div class="ticket-icon dien-lanh hide-on-skeleton">❄️</div>
+    @forelse($requests as $ticket)
+    <div class="ticket-card {{ in_array($ticket->priority, ['high', 'urgent']) ? 'priority-urgent' : 'priority-normal' }} skeleton-box">
+      <div class="ticket-icon {{ $ticket->category === 'dien_lanh' ? 'dien-lanh' : ($ticket->category === 'noi_that' ? 'noi-that' : 'dien-nuoc') }} hide-on-skeleton">{{ $ticket->category === 'dien_lanh' ? '❄️' : ($ticket->category === 'noi_that' ? '🚪' : '💧') }}</div>
       <div class="flex-grow-1 hide-on-skeleton d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
           <div class="d-flex align-items-center gap-2 mb-1">
-            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-1" style="font-size: 10px; letter-spacing: 0.5px;">BÌNH THƯỜNG</span>
-            <span class="text-muted" style="font-size: 12px; font-weight: 600;">#TCK-0985 • Gửi lúc 14:15, 01/09</span>
+            <span class="badge {{ in_array($ticket->priority, ['high', 'urgent']) ? 'bg-danger text-white' : 'bg-secondary bg-opacity-10 text-secondary' }} rounded-1" style="font-size: 10px; letter-spacing: 0.5px;">{{ strtoupper($ticket->priority) }}</span>
+            <span class="text-muted" style="font-size: 12px; font-weight: 600;">#TCK-{{ $ticket->id }} • {{ $ticket->created_at->format('H:i, d/m') }}</span>
           </div>
-          <h5 class="fw-bold text-dark mb-1" style="font-size: 16px;">Máy lạnh kêu to và không mát</h5>
-          <p class="text-muted mb-0" style="font-size: 13px;">Khu vực: Thiết bị điện lạnh • Người báo: Thanh Huyền</p>
+          <h5 class="fw-bold text-dark mb-1" style="font-size: 16px;">{{ $ticket->title }}</h5>
+          <p class="text-muted mb-0" style="font-size: 13px;">Khu vực: {{ $categoryLabels[$ticket->category] ?? 'Khác' }} • Phòng {{ $ticket->room->name ?? '' }}{{ $ticket->contract ? ' • HĐ ' . $ticket->contract->contract_code : '' }}</p>
         </div>
         <div class="text-end d-flex flex-column align-items-end">
-          <span class="badge-status processing px-3 py-2 rounded-pill mb-2" style="font-size: 11.5px; font-weight: 700;">🔧 Thợ đang trên đường tới</span>
-         <a href="{{ route('tenant.maintenance.show', 1) }}" class="text-decoration-none fw-bold" style="font-size: 13px; color: var(--green);">Xem chi tiết →</a>
+          <span class="badge-status {{ $ticket->status }} px-3 py-2 rounded-pill mb-2" style="font-size: 11.5px; font-weight: 700;">{{ $statusLabels[$ticket->status] ?? $ticket->status }}</span>
+          <a href="{{ route('tenant.maintenance.show', $ticket->id) }}" class="text-decoration-none fw-bold" style="font-size: 13px; color: var(--green);">Xem chi tiết →</a>
         </div>
       </div>
     </div>
+    @empty
+    <div class="text-center text-muted py-5">
+      <div style="font-size: 40px;">🔧</div>
+      <div class="fw-bold mt-2">Chưa có yêu cầu nào</div>
+      <a href="{{ route('tenant.maintenance.create') }}" class="btn btn-brand px-4 py-2 mt-3">+ Tạo yêu cầu mới</a>
+    </div>
+    @endforelse
 
   </div>
 </div>

@@ -53,7 +53,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link " href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link " href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -157,13 +157,19 @@
     </div>
 
     <!-- THỐNG KÊ -->
+    @php
+        $total = $contracts->count();
+        $active = $contracts->where('status', 'active')->count();
+        $expiring = $contracts->filter(fn($c) => $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count();
+        $terminated = $contracts->where('status', 'terminated')->count();
+    @endphp
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
             <div class="stat-card-modern d-flex align-items-center gap-3">
                 <div class="icon-box bg-blue-soft">📋</div>
                 <div>
                     <div class="text-muted small fw-medium mb-1">Tổng hợp đồng</div>
-                    <div class="fs-4 fw-bold text-dark">28</div>
+                    <div class="fs-4 fw-bold text-dark">{{ $total }}</div>
                 </div>
             </div>
         </div>
@@ -172,7 +178,7 @@
                 <div class="icon-box bg-green-soft">✅</div>
                 <div>
                     <div class="text-muted small fw-medium mb-1">Đang hiệu lực</div>
-                    <div class="fs-4 fw-bold text-dark">25</div>
+                    <div class="fs-4 fw-bold text-dark">{{ $active }}</div>
                 </div>
             </div>
         </div>
@@ -181,7 +187,7 @@
                 <div class="icon-box bg-orange-soft">⏳</div>
                 <div>
                     <div class="text-muted small fw-medium mb-1">Sắp hết hạn</div>
-                    <div class="fs-4 fw-bold text-dark">02</div>
+                    <div class="fs-4 fw-bold text-dark">{{ $expiring }}</div>
                 </div>
             </div>
         </div>
@@ -190,7 +196,7 @@
                 <div class="icon-box bg-red-soft">🔒</div>
                 <div>
                     <div class="text-muted small fw-medium mb-1">Đã thanh lý</div>
-                    <div class="fs-4 fw-bold text-dark">01</div>
+                    <div class="fs-4 fw-bold text-dark">{{ $terminated }}</div>
                 </div>
             </div>
         </div>
@@ -199,9 +205,11 @@
     <!-- BẢNG DANH SÁCH HỢP ĐỒNG -->
     <div class="panel-modern">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold text-dark m-0 fs-5">Danh sách hợp đồng</h4>
-            <input type="text" class="form-control form-control-sm w-25" placeholder="Tìm mã HĐ, tên khách...">
+            <h4 class="fw-bold text-dark m-0 fs-5">Danh sách hợp đồng ({{ $total }})</h4>
         </div>
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
         <div class="table-responsive">
             <table class="table-modern">
                 <thead>
@@ -215,44 +223,39 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @forelse($contracts as $contract)
                     <tr>
-                        <td><strong class="text-primary">#HD-2026-01</strong></td>
+                        <td><strong class="text-primary">#{{ $contract->contract_code }}</strong></td>
                         <td>
-                            <div class="fw-bold text-dark">Phòng 12A</div>
-                            <div class="small text-muted">Nhà trọ Q.7</div>
+                            <div class="fw-bold text-dark">{{ $contract->room->name ?? '—' }}</div>
+                            <div class="small text-muted">{{ $contract->room->property->name ?? '' }}</div>
                         </td>
                         <td>
-                            <div class="fw-bold text-dark">Thanh Huyền</div>
-                            <div class="small text-muted">0901 234 567</div>
+                            <div class="fw-bold text-dark">{{ $contract->tenant->name ?? '—' }}</div>
+                            <div class="small text-muted">{{ $contract->tenant->phone ?? '' }}</div>
                         </td>
                         <td>
-                            <div class="text-dark">01/02/2026</div>
-                            <div class="small text-muted">Đến 01/02/2027</div>
+                            <div class="text-dark">{{ \Carbon\Carbon::parse($contract->start_date)->format('d/m/Y') }}</div>
+                            <div class="small text-muted">Đến {{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}</div>
                         </td>
-                        <td><span class="badge-soft-success">Đang hiệu lực</span></td>
+                        <td>
+                            @if($contract->status === 'active')
+                            <span class="badge-soft-success">Đang hiệu lực</span>
+                            @elseif($contract->status === 'terminated')
+                            <span class="badge-soft-warning">Đã thanh lý</span>
+                            @else
+                            <span class="badge-soft-warning">{{ $contract->status }}</span>
+                            @endif
+                        </td>
                         <td class="text-end">
-                            <a href="{{ url('/owner/contracts/1') }}" class="btn-action">Xem</a>
+                            <a href="{{ route('owner.contracts.show', $contract) }}" class="btn-action">Xem</a>
                         </td>
                     </tr>
+                    @empty
                     <tr>
-                        <td><strong class="text-primary">#HD-2025-42</strong></td>
-                        <td>
-                            <div class="fw-bold text-dark">Phòng 105</div>
-                            <div class="small text-muted">Chung cư mini Thủ Đức</div>
-                        </td>
-                        <td>
-                            <div class="fw-bold text-dark">Hoàng Minh</div>
-                            <div class="small text-muted">0988 765 432</div>
-                        </td>
-                        <td>
-                            <div class="text-dark">15/08/2025</div>
-                            <div class="small text-muted">Đến 15/08/2026</div>
-                        </td>
-                        <td><span class="badge-soft-warning">Sắp hết hạn</span></td>
-                        <td class="text-end">
-                            <a href="{{ url('/owner/contracts/2') }}" class="btn-action">Xem</a>
-                        </td>
+                        <td colspan="6" class="text-center text-muted py-5">Chưa có hợp đồng nào.</td>
                     </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

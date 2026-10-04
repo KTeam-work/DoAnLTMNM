@@ -339,7 +339,7 @@
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
           <a class="app-nav-link 
-             href="{{ url('/landlord') }}">Tổng quan</a>
+             href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. NHÀ & PHÒNG -->

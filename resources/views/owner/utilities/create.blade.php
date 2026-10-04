@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm phòng mới - Trọ Ơi</title>
+    <title>Ghi chỉ số điện nước - Trọ Ơi</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -416,7 +416,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link" href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link" href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -514,167 +514,133 @@
     <!-- HEADER -->
     <div class="page-header">
         <div>
-            <h2 class="page-title">Thêm phòng trọ mới</h2>
-            <div class="page-desc">Chủ nhà <span> / Quản lý phòng / Thêm mới</span></div>
+            <h2 class="page-title">{{ $reading ? 'Cập nhật chỉ số điện nước' : 'Ghi chỉ số điện nước' }}</h2>
+            <div class="page-desc">Chủ nhà <span> / Điện nước / {{ $reading ? 'Cập nhật' : 'Ghi mới' }}</span></div>
         </div>
 
-        <div class="header-actions">
-            <a href="#" class="btn-outline-brand" onclick="history.back()">
+        <div class="header-actions d-flex gap-2">
+            <a href="{{ route('owner.utilities.index') }}" class="btn-outline-brand">
                 ← Quay lại
             </a>
-            <button type="submit" form="addRoomForm" class="btn-brand">
-                💾 Lưu phòng trọ
+            <button type="submit" form="readingForm" class="btn-brand">
+                💾 {{ $reading ? 'Cập nhật' : 'Lưu chỉ số' }}
             </button>
         </div>
     </div>
 
     <!-- FORM START -->
-    <form id="addRoomForm">
+    @if($errors->any())
+        <div class="alert alert-danger mb-3">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    @if($rooms->isEmpty())
+        <div class="alert alert-warning">Chưa có phòng nào thuộc khu trọ của bạn. Hãy tạo phòng trước.</div>
+    @endif
+    <form id="readingForm" method="POST" action="{{ $reading ? route('owner.utilities.update', $reading) : route('owner.utilities.store') }}">
+        @csrf
+        @if($reading)
+            @method('PUT')
+        @endif
         <div class="form-grid">
 
-            <!-- CỘT TRÁI: THÔNG TIN CĂN PHÒNG & TIỆN ÍCH -->
+            <!-- COT TRAI -->
             <div class="col-left">
 
-                <!-- THÔNG TIN CƠ BẢN -->
+                <!-- PHONG + THANG -->
                 <div class="card">
                     <div class="card-header">
-                        <span>📌</span> Thông tin chi tiết phòng
-                    </div>
-
-                    <div class="form-group">
-                        <label>Thuộc tòa nhà / Dãy trọ <span>*</span></label>
-                        <select class="custom-input" required>
-                            <option value="">-- Chọn bất động sản quản lý --</option>
-                            <option value="1">Nhà trọ Nguyễn Văn Cừ (Quận 5)</option>
-                            <option value="2">Nhà trọ Quận 7</option>
-                            <option value="3">Nhà trọ Bình Thạnh</option>
-                        </select>
-                    </div>
-
-                    <div class="row-3">
-                        <div class="form-group">
-                            <label>Tên / Số phòng <span>*</span></label>
-                            <input type="text" class="custom-input" placeholder="Vd: Phòng 201" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Tầng lầu</label>
-                            <input type="number" class="custom-input" value="1" min="1">
-                        </div>
-                        <div class="form-group">
-                            <label>Loại phòng</label>
-                            <select class="custom-input">
-                                <option>Tiêu chuẩn</option>
-                                <option>Có gác lửng</option>
-                                <option>Studio khép kín</option>
-                                <option>Duplex</option>
-                            </select>
-                        </div>
+                        <span>🏠</span> Phòng &amp; kỳ ghi
                     </div>
 
                     <div class="row-2">
                         <div class="form-group">
-                            <label>Diện tích (m²) <span>*</span></label>
-                            <input type="number" class="custom-input" step="0.1" placeholder="Vd: 25" required>
+                            <label>Phòng <span>*</span></label>
+                            @if($reading)
+                                <input type="text" class="custom-input" value="{{ $reading->room->name ?? '' }} ({{ $reading->room->room_code ?? '' }})" disabled>
+                            @else
+                                <select name="room_id" class="custom-input" required>
+                                    <option value="">-- Chọn phòng --</option>
+                                    @foreach($rooms as $room)
+                                        <option value="{{ $room->id }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>{{ $room->name }} · {{ $room->property->name ?? '' }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
                         <div class="form-group">
-                            <label>Sức chứa tối đa (người)</label>
-                            <input type="number" class="custom-input" value="2" min="1">
+                            <label>Kỳ ghi chỉ số <span>*</span></label>
+                            <input type="month" name="month" class="custom-input" value="{{ old('month', $prefillMonth) }}" required>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Mô tả bổ sung</label>
-                        <textarea class="custom-input" placeholder="Cửa sổ thoáng mát, giờ giấc tự do, có chỗ nấu ăn..."></textarea>
+                    <div class="form-group mb-0">
+                        <label class="text-muted" style="font-weight:500">Chỉ số cũ sẽ tự lấy từ tháng trước (hoặc chốt đầu hợp đồng) nếu bạn bỏ trống.</label>
                     </div>
                 </div>
 
-                <!-- TIỆN ÍCH CĂN PHÒNG -->
+                <!-- DIEN -->
                 <div class="card">
                     <div class="card-header">
-                        <span>✨</span> Tiện ích phòng trọ
+                        <span>⚡</span> Chỉ số điện
                     </div>
 
-                    <div class="amenities-container">
-                        <label class="amenity-item">
-                            <input type="checkbox"> ❄️ Máy lạnh
-                        </label>
-                        <label class="amenity-item">
-                            <input type="checkbox"> 🧊 Tủ lạnh
-                        </label>
-                        <label class="amenity-item">
-                            <input type="checkbox"> 🚿 Bình nước nóng
-                        </label>
-                        <label class="amenity-item">
-                            <input type="checkbox"> 📶 Wifi riêng
-                        </label>
-                        <label class="amenity-item">
-                            <input type="checkbox"> 🛏️ Giường nệm
-                        </label>
-                        <label class="amenity-item">
-                            <input type="checkbox"> 🚪 Tủ quần áo
-                        </label>
-                        <label class="amenity-item">
-                            <input type="checkbox"> 🧺 Máy giặt
-                        </label>
-                        <label class="amenity-item">
-                            <input type="checkbox"> 🌿 Ban công riêng
-                        </label>
+                    <div class="row-3">
+                        <div class="form-group">
+                            <label>Chỉ số cũ</label>
+                            <input type="number" step="0.01" min="0" name="electricity_old" class="custom-input" value="{{ old('electricity_old', $reading?->electricity_old) }}" placeholder="Tự động">
+                        </div>
+                        <div class="form-group">
+                            <label>Chỉ số mới <span>*</span></label>
+                            <input type="number" step="0.01" min="0" name="electricity_new" class="custom-input" value="{{ old('electricity_new', $reading?->electricity_new) }}" placeholder="Nhập số mới..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Đơn giá (đ/kWh) <span>*</span></label>
+                            <input type="number" step="0.01" min="0" name="electricity_price" class="custom-input" value="{{ old('electricity_price', $reading?->electricity_price ?? 3500) }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NUOC -->
+                <div class="card">
+                    <div class="card-header">
+                        <span>💧</span> Chỉ số nước
+                    </div>
+
+                    <div class="row-3">
+                        <div class="form-group">
+                            <label>Chỉ số cũ</label>
+                            <input type="number" step="0.01" min="0" name="water_old" class="custom-input" value="{{ old('water_old', $reading?->water_old) }}" placeholder="Tự động">
+                        </div>
+                        <div class="form-group">
+                            <label>Chỉ số mới <span>*</span></label>
+                            <input type="number" step="0.01" min="0" name="water_new" class="custom-input" value="{{ old('water_new', $reading?->water_new) }}" placeholder="Nhập số mới..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Đơn giá (đ/m³) <span>*</span></label>
+                            <input type="number" step="0.01" min="0" name="water_price" class="custom-input" value="{{ old('water_price', $reading?->water_price ?? 20000) }}" required>
+                        </div>
                     </div>
                 </div>
 
             </div>
 
-            <!-- CỘT PHẢI: GIÁ & HÌNH ẢNH -->
+            <!-- COT PHAI: HUONG DAN -->
             <div class="col-right">
-
-                <!-- THIẾT LẬP GIÁ -->
                 <div class="card">
                     <div class="card-header">
-                        <span>💰</span> Chi phí & Trạng thái
+                        <span>📌</span> Lưu ý
                     </div>
-
                     <div class="form-group">
-                        <label>Giá thuê tháng (VNĐ) <span>*</span></label>
-                        <input type="number" class="custom-input" placeholder="Vd: 3500000" step="10000" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tiền đặt cọc (VNĐ)</label>
-                        <input type="number" class="custom-input" placeholder="Vd: 3500000" step="10000">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Trạng thái ban đầu</label>
-                        <select class="custom-input">
-                            <option value="available">🟢 Phòng trống (Sẵn sàng)</option>
-                            <option value="maintenance">🟡 Đang sửa chữa / Bảo trì</option>
-                            <option value="rented">🔴 Đã có người thuê</option>
-                        </select>
+                        <label class="text-muted" style="font-weight:500; line-height:1.7">
+                            • Mỗi phòng mỗi tháng chỉ ghi 1 lần (hệ thống chặn trùng).<br>
+                            • Chỉ số mới không được thấp hơn chỉ số cũ.<br>
+                            • Muốn sửa bản ghi cũ, mở trang này với nút Sửa ở danh sách.
+                        </label>
                     </div>
                 </div>
-
-                <!-- HÌNH ẢNH PHÒNG -->
-                <div class="card">
-                    <div class="card-header">
-                        <span>📸</span> Hình ảnh phòng
-                    </div>
-
-                    <div class="upload-dropzone" onclick="document.getElementById('fileInput').click()">
-                        <div class="upload-icon">📷</div>
-                        <div class="upload-text">
-                            <strong>Nhấp tải ảnh</strong> hoặc kéo thả vào đây<br>
-                            Hỗ trợ PNG, JPG, JPEG
-                        </div>
-                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
-                    </div>
-
-                    <div class="preview-list">
-                        <div class="preview-item">Ảnh 1</div>
-                        <div class="preview-item">Ảnh 2</div>
-                        <div class="preview-item">Ảnh 3</div>
-                    </div>
-                </div>
-
             </div>
 
         </div>

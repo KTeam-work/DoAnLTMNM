@@ -94,9 +94,9 @@
     <div class="collapse navbar-collapse" id="mainMenu">
     <ul class="navbar-nav mx-auto align-items-lg-center">
         <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#rooms">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Yêu thích</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Lịch xem phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('favorites.index') }}">Yêu thích</a></li>
+        <li class="nav-item"><a class="app-nav-link" href="{{ route('appointments.index') }}">Lịch xem phòng</a></li>
         <li class="nav-item">
           <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
         </li>
@@ -153,7 +153,7 @@
         </div>
         <div class="skeleton-box mt-2">
           <div class="stat-label hide-on-skeleton">Tổng nợ quá hạn</div>
-          <div class="stat-value hide-on-skeleton" style="color: var(--red);">3.200.000 đ</div>
+          <div class="stat-value hide-on-skeleton" style="color: var(--red);">{{ number_format((float) $stats['overdue']) }} đ</div>
         </div>
       </div>
     </div>
@@ -162,11 +162,11 @@
       <div class="stat-card p-3 rounded-4">
         <div class="stat-top mb-3 skeleton-box">
           <div class="stat-icon hide-on-skeleton" style="background: var(--yellow-light); color: #9b6a00;">⏳</div>
-          <div class="stat-trend hide-on-skeleton" style="color: #9b6a00;">Hạn: 05/09</div>
+          <div class="stat-trend hide-on-skeleton" style="color: #9b6a00;">Chưa thanh toán</div>
         </div>
         <div class="skeleton-box mt-2">
-          <div class="stat-label hide-on-skeleton">Chưa thanh toán (Kỳ này)</div>
-          <div class="stat-value hide-on-skeleton">3.450.000 đ</div>
+          <div class="stat-label hide-on-skeleton">Chưa thanh toán</div>
+          <div class="stat-value hide-on-skeleton">{{ number_format((float) $stats['unpaid']) }} đ</div>
         </div>
       </div>
     </div>
@@ -179,7 +179,7 @@
         </div>
         <div class="skeleton-box mt-2">
           <div class="stat-label hide-on-skeleton">Đã thanh toán (Năm nay)</div>
-          <div class="stat-value hide-on-skeleton" style="color: var(--green);">24.150.000 đ</div>
+          <div class="stat-value hide-on-skeleton" style="color: var(--green);">{{ number_format((float) $stats['paid_year']) }} đ</div>
         </div>
       </div>
     </div>
@@ -187,17 +187,30 @@
 
   <!-- Bảng Dữ Liệu -->
   <div class="animate-up delay-3">
+    @php
+      $statusLabels = ['unpaid' => 'Chưa thanh toán', 'pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'overdue' => 'Quá hạn', 'cancelled' => 'Đã hủy'];
+    @endphp
     <!-- Thanh Filter -->
-    <div class="enterprise-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 border-0 bg-white rounded-4 p-3 skeleton-box" style="box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+    <form method="GET" action="{{ route('tenant.invoices.index') }}" class="enterprise-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 border-0 bg-white rounded-4 p-3 skeleton-box" style="box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
       <div class="d-flex flex-wrap gap-2 hide-on-skeleton">
-        <select class="form-select form-select-sm border-0 bg-light shadow-none fw-bold" style="border-radius: 8px;"><option>Tất cả trạng thái</option></select>
-        <select class="form-select form-select-sm border-0 bg-light shadow-none fw-bold" style="border-radius: 8px;"><option>Năm 2026</option></select>
+        <select name="status" class="form-select form-select-sm border-0 bg-light shadow-none fw-bold" style="border-radius: 8px;" onchange="this.form.submit()">
+          <option value="">Tất cả trạng thái</option>
+          @foreach($statusLabels as $value => $label)
+            <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+          @endforeach
+        </select>
+        <input type="month" name="month" class="form-control form-control-sm border-0 bg-light shadow-none fw-bold" style="border-radius: 8px;" value="{{ $filters['month'] ?? '' }}" onchange="this.form.submit()">
       </div>
-      <div class="input-group input-group-sm hide-on-skeleton" style="max-width: 250px;">
-        <span class="input-group-text bg-light border-0" style="border-radius: 8px 0 0 8px;">🔍</span>
-        <input type="text" class="form-control bg-light border-0 shadow-none ps-0" placeholder="Tìm mã HĐ..." style="border-radius: 0 8px 8px 0;">
+      <div class="hide-on-skeleton">
+        @if(!empty($filters['status']) || !empty($filters['month']))
+          <a href="{{ route('tenant.invoices.index') }}" class="btn btn-sm btn-light fw-bold">Xóa lọc</a>
+        @endif
       </div>
-    </div>
+    </form>
+
+    @if(session('success'))
+      <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
     <div class="table-responsive" style="min-height: 300px;">
       <table class="data-table align-middle w-100">
@@ -212,153 +225,62 @@
           </tr>
         </thead>
         <tbody>
-          <!-- Dòng 1: Chờ thanh toán -->
+          @forelse($invoices as $invoice)
+            @php
+              $isOverdue = in_array($invoice->status, ['unpaid', 'pending']) && $invoice->due_date < now()->toDateString();
+              $displayStatus = $isOverdue ? 'overdue' : $invoice->status;
+            @endphp
           <tr>
             <td style="padding-left: 20px;">
-              <div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">#INV-092026</div></div>
-              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Kỳ: Tháng 09/2026</div></div>
+              <div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">#{{ $invoice->invoice_code }}</div></div>
+              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Kỳ: Tháng {{ $invoice->billing_month->format('m/Y') }}</div></div>
             </td>
             <td>
-              <div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">Phòng 12A</div></div>
-              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Phòng + Dịch vụ</div></div>
+              <div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">{{ $invoice->contract->room->name ?? '' }}</div></div>
+              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton">{{ $invoice->contract->contract_code ?? '' }}</div></div>
             </td>
             <td>
-              <div class="skeleton-box mb-1"><div class="hide-on-skeleton" style="font-weight: 600;">05/09/2026</div></div>
-              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton" style="color: #9b6a00;">Còn 3 ngày</div></div>
+              <div class="skeleton-box mb-1"><div class="hide-on-skeleton" style="font-weight: 600;{{ $isOverdue ? ' color: var(--red);' : '' }}">{{ $invoice->due_date->format('d/m/Y') }}</div></div>
+              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton" style="{{ $isOverdue ? 'color: var(--red);' : '' }}">{{ $isOverdue ? 'Đã quá hạn' : ($invoice->status === 'paid' ? 'Đã thanh toán' : 'Còn ' . now()->diffInDays($invoice->due_date) . ' ngày') }}</div></div>
             </td>
-            <td><div class="skeleton-box"><strong class="hide-on-skeleton" style="color: var(--green-dark); font-size: 15px;">3.450.000 đ</strong></div></td>
-            <td><div class="skeleton-box rounded-pill"><span class="badge-status pending hide-on-skeleton">Chưa thanh toán</span></div></td>
+            <td><div class="skeleton-box"><strong class="hide-on-skeleton" style="color: var(--green-dark); font-size: 15px;">{{ number_format((float) $invoice->total) }} đ</strong></div></td>
+            <td><div class="skeleton-box rounded-pill"><span class="badge-status {{ $displayStatus }} hide-on-skeleton">{{ $statusLabels[$displayStatus] ?? $displayStatus }}</span></div></td>
             <td class="text-end" style="padding-right: 20px;">
               <div class="d-flex justify-content-end align-items-center gap-2 skeleton-box rounded">
-                <!-- Nút Thanh toán (Mở bảng trượt bên phải) -->
-                <button class="btn-brand hide-on-skeleton" style="padding: 6px 16px; font-size: 12px;" data-bs-toggle="offcanvas" data-bs-target="#paymentOffcanvas">Thanh toán</button>
-                
-                <!-- Dropdown Thao tác -->
+                @if(in_array($invoice->status, ['unpaid', 'pending', 'overdue']))
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}#pay" class="btn-brand hide-on-skeleton text-decoration-none" style="padding: 6px 16px; font-size: 12px;{{ $isOverdue ? ' background: var(--red); color: white;' : '' }}">Thanh toán</a>
+                @else
+                  <span class="hide-on-skeleton" style="font-size: 12px; color: var(--muted); padding-right: 8px; font-weight: 600;">✓ Hoàn tất</span>
+                @endif
                 <div class="dropdown action-dropdown hide-on-skeleton">
                   <button class="btn dropdown-toggle border-0 shadow-none text-muted" type="button" data-bs-toggle="dropdown">⋮</button>
                   <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
-                    <!-- Nút Xem chi tiết trỏ tới trang show.blade.php bằng đường dẫn an toàn url() -->
-                    <li><a class="dropdown-item py-2" href="{{ url('/tenant/invoices/1') }}">👁️ Xem chi tiết</a></li>
-                    <li><a class="dropdown-item py-2" href="#">📥 Tải PDF</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('tenant.invoices.show', $invoice->id) }}">👁️ Xem chi tiết</a></li>
                   </ul>
                 </div>
               </div>
             </td>
           </tr>
-
-          <!-- Dòng 2: Quá hạn -->
+          @empty
           <tr>
-            <td style="padding-left: 20px;"><div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">#INV-072026</div></div><div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Kỳ: Tháng 07/2026</div></div></td>
-            <td><div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">Phòng 12A</div></div><div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Phòng + Dịch vụ</div></div></td>
-            <td><div class="skeleton-box mb-1"><div class="hide-on-skeleton" style="font-weight: 600; color: var(--red);">05/07/2026</div></div><div class="skeleton-box"><div class="cell-sub hide-on-skeleton" style="color: var(--red);">Trễ 60 ngày</div></div></td>
-            <td><div class="skeleton-box"><strong class="hide-on-skeleton" style="color: var(--green-dark); font-size: 15px;">3.200.000 đ</strong></div></td>
-            <td><div class="skeleton-box rounded-pill"><span class="badge-status overdue hide-on-skeleton">Quá hạn</span></div></td>
-            <td class="text-end" style="padding-right: 20px;">
-              <div class="d-flex justify-content-end align-items-center gap-2 skeleton-box rounded">
-                <button class="btn-brand hide-on-skeleton" style="padding: 6px 16px; font-size: 12px; background: var(--red); color: white;" data-bs-toggle="offcanvas" data-bs-target="#paymentOffcanvas">Thanh toán</button>
-                <div class="dropdown action-dropdown hide-on-skeleton">
-                  <button class="btn dropdown-toggle border-0 shadow-none text-muted" type="button" data-bs-toggle="dropdown">⋮</button>
-                  <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
-                    <li><a class="dropdown-item py-2" href="{{ url('/tenant/invoices/1') }}">👁️ Xem chi tiết</a></li>
-                    <li><a class="dropdown-item py-2" href="#">📥 Tải PDF</a></li>
-                  </ul>
-                </div>
-              </div>
-            </td>
+            <td colspan="6" class="text-center text-muted py-5">Bạn chưa có hóa đơn nào.</td>
           </tr>
-
-          <!-- Dòng 3: Đã thanh toán -->
-          <tr>
-            <td style="padding-left: 20px;"><div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">#INV-082026</div></div><div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Kỳ: Tháng 08/2026</div></div></td>
-            <td><div class="skeleton-box mb-1"><div class="cell-title hide-on-skeleton">Phòng 12A</div></div><div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Phòng + Dịch vụ</div></div></td>
-            <td><div class="skeleton-box mb-1"><div class="hide-on-skeleton" style="font-weight: 600;">05/08/2026</div></div><div class="skeleton-box"><div class="cell-sub hide-on-skeleton">Đã CK ngày 02/08</div></div></td>
-            <td><div class="skeleton-box"><strong class="hide-on-skeleton" style="color: var(--green-dark); font-size: 15px;">3.450.000 đ</strong></div></td>
-            <td><div class="skeleton-box rounded-pill"><span class="badge-status occupied hide-on-skeleton">Đã thanh toán</span></div></td>
-            <td class="text-end" style="padding-right: 20px;">
-              <div class="d-flex justify-content-end align-items-center gap-2 skeleton-box rounded">
-                <span class="hide-on-skeleton" style="font-size: 12px; color: var(--muted); padding-right: 8px; font-weight: 600;">✓ Hoàn tất</span>
-                <div class="dropdown action-dropdown hide-on-skeleton">
-                  <button class="btn dropdown-toggle border-0 shadow-none text-muted" type="button" data-bs-toggle="dropdown">⋮</button>
-                  <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
-                    <li><a class="dropdown-item py-2" href="{{ url('/tenant/invoices/1') }}">👁️ Xem chi tiết</a></li>
-                    <li><a class="dropdown-item py-2" href="#">📥 Tải Biên lai PDF</a></li>
-                  </ul>
-                </div>
-              </div>
-            </td>
-          </tr>
+          @endforelse
         </tbody>
       </table>
     </div>
-  </div>
-</div>
-
-<!-- ========================================== -->
-<!-- OFFCANVAS: BẢNG THANH TOÁN QR -->
-<!-- ========================================== -->
-<div class="offcanvas offcanvas-end offcanvas-glass" tabindex="-1" id="paymentOffcanvas" style="width: 440px;">
-  <div class="offcanvas-header border-bottom border-light">
-    <h5 class="offcanvas-title fw-bold" style="color: var(--green-dark);">Thanh toán Hóa đơn</h5>
-    <button type="button" class="btn-close shadow-none bg-white rounded-circle p-2" data-bs-dismiss="offcanvas"></button>
-  </div>
-  
-  <div class="offcanvas-body">
-    <div class="receipt-ticket">
-      <div class="text-center mb-4">
-        <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Kỳ thanh toán</div>
-        <h4 class="fw-bold mt-1 mb-2" style="color: var(--green-dark);">Tháng 09/2026</h4>
-        <span class="badge-status pending">#INV-092026</span>
-      </div>
-      <div class="receipt-item"><span>Phòng thuê:</span><span class="fw-bold">Phòng 12A</span></div>
-      <div class="receipt-item"><span>Hạn thanh toán:</span><span class="fw-bold text-danger">05/09/2026</span></div>
-      <div class="receipt-divider"></div>
-      <div class="receipt-item total align-items-center mt-3">
-        <span style="color: var(--green-dark); font-size: 14px; font-weight: 800;">TỔNG CỘNG:</span>
-        <span style="font-size: 22px; color: var(--green-dark); font-weight: 800;">3.450.000 đ</span>
-      </div>
-    </div>
-
-    <!-- QR Code & Copy -->
-    <div class="mt-4">
-      <div class="bg-white p-4 rounded-4 text-center" style="box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;">
-        <h6 class="fw-bold mb-3" style="color: var(--muted); font-size: 12px;">QUÉT MÃ ĐỂ THANH TOÁN</h6>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QR" style="width: 130px; height: 130px; margin-bottom: 16px; opacity: 0.9;">
-        <div class="fw-bold mb-1" style="color: var(--green-dark); font-size: 14px;">Ngân hàng Vietcombank</div>
-        <div class="text-muted mb-3" style="font-size: 12px;">Chủ TK: NGUYEN VAN TUAN<br>STK: 0123456789</div>
-        <button onclick="showCopyToast()" class="btn btn-light btn-sm w-100 shadow-none border fw-bold text-muted py-2" style="border-radius: 10px;">📋 Sao chép STK & Số tiền</button>
-      </div>
-    </div>
-    
-    <div class="mt-4 text-center">
-      <button class="btn-brand w-100 py-3 mb-3" style="font-size: 14px; border-radius: 12px;">Xác nhận đã chuyển khoản</button>
-    </div>
-  </div>
-</div>
-
-<!-- ========================================== -->
-<!-- TOAST NOTIFICATION CONTAINER -->
-<!-- ========================================== -->
-<div class="toast-container-custom">
-  <div id="copyToast" class="toast-custom">
-    <span style="color: var(--yellow);">✔</span> Đã sao chép thông tin thanh toán!
+    <div class="mt-3">{{ $invoices->links() }}</div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // 1. Tắt Skeleton sau khi trang tải xong (Ví dụ: sau 0.8s)
+  // Tắt Skeleton sau khi trang tải xong
   document.addEventListener("DOMContentLoaded", function() {
     setTimeout(() => {
       document.body.classList.remove('skeleton-mode');
-    }, 800); 
+    }, 800);
   });
-
-  // 2. Hiển thị Toast khi copy QR
-  function showCopyToast() {
-    const toast = document.getElementById('copyToast');
-    toast.classList.add('show');
-    setTimeout(() => { toast.classList.remove('show'); }, 3000);
-  }
 </script>
 </body>
 </html>

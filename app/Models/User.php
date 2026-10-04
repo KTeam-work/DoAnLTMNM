@@ -1,3 +1,4 @@
+```php
 <?php
 
 namespace App\Models;
@@ -30,7 +31,6 @@ class User extends Authenticatable
         'status',
     ];
 
-
     /*
     |--------------------------------------------------------------------------
     | Hidden
@@ -41,7 +41,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
 
     /*
     |--------------------------------------------------------------------------
@@ -57,7 +56,6 @@ class User extends Authenticatable
         ];
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Quan hệ - Chủ trọ
@@ -69,12 +67,15 @@ class User extends Authenticatable
         return $this->hasMany(Property::class, 'owner_id');
     }
 
-
     public function ownedContracts()
     {
         return $this->hasMany(Contract::class, 'owner_id');
     }
 
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'owner_id');
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -90,7 +91,6 @@ class User extends Authenticatable
         );
     }
 
-
     public function rentedContracts()
     {
         return $this->hasMany(
@@ -99,3 +99,4 @@ class User extends Authenticatable
         );
     }
 }
+```

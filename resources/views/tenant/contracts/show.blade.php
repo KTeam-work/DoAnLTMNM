@@ -315,6 +315,9 @@
         </a>
 
         <div class="action-buttons">
+            <a href="{{ route('tenant.maintenance.create', ['contract_id' => $contract->id]) }}" class="btn-custom text-decoration-none" style="border: 1px solid #16834b; color: #16834b;">
+                ＋ Tạo yêu cầu mới
+            </a>
             <button class="btn-custom btn-pdf">
                 📥 Tải file PDF
             </button>
@@ -330,7 +333,7 @@
         <div>
             <h2 class="page-title">
                 Chi tiết hợp đồng
-                <span class="text-brand">#HD-2026-01</span>
+                <span class="text-brand">#{{ $contract->contract_code }}</span>
             </h2>
             <div class="page-desc">
                 Thông tin chi tiết về phòng thuê, chi phí cố định và các dịch vụ đi kèm.
@@ -338,7 +341,7 @@
         </div>
 
         <span class="badge-status resolved">
-            Đang hiệu lực
+            {{ ['draft' => 'Nháp', 'active' => 'Đang hiệu lực', 'expired' => 'Hết hạn', 'terminated' => 'Đã thanh lý'][$contract->status] ?? $contract->status }}
         </span>
     </div>
 
@@ -361,44 +364,62 @@
                     <div>
                         <div class="cell-sub">Phòng thuê</div>
                         <div class="info-value">
-                            Phòng trọ máy lạnh Q.7
+                            {{ $contract->room->name ?? '—' }}
                         </div>
+                        <div class="cell-sub mt-1">{{ $contract->room->property->name ?? '' }}</div>
                     </div>
 
                     <div>
                         <div class="cell-sub">Tiền thuê hàng tháng</div>
                         <div class="info-value price">
-                            2.800.000 đ/tháng
+                            {{ number_format((float)$contract->rent) }} đ/tháng
                         </div>
                     </div>
 
                     <div>
                         <div class="cell-sub">Tiền cọc</div>
                         <div class="info-value">
-                            2.800.000 đ
+                            {{ number_format((float)$contract->deposit) }} đ
                         </div>
                     </div>
 
                     <div>
                         <div class="cell-sub">Ngày bắt đầu</div>
                         <div class="info-value">
-                            01/02/2026
+                            {{ \Carbon\Carbon::parse($contract->start_date)->format('d/m/Y') }}
                         </div>
                     </div>
 
                     <div>
                         <div class="cell-sub">Ngày kết thúc</div>
                         <div class="info-value">
-                            01/02/2027
+                            {{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}
                         </div>
                     </div>
 
                     <div>
                         <div class="cell-sub">Kỳ thanh toán</div>
                         <div class="info-value">
-                            Hàng tháng (Ngày 05)
+                            {{ $contract->payment_cycle === 'quarterly' ? 'Hàng quý' : 'Hàng tháng' }}
                         </div>
                     </div>
+
+                    <div>
+                        <div class="cell-sub">Chốt điện ban đầu</div>
+                        <div class="info-value">{{ number_format((float)$contract->initial_electricity_reading) }}</div>
+                    </div>
+
+                    <div>
+                        <div class="cell-sub">Chốt nước ban đầu</div>
+                        <div class="info-value">{{ number_format((float)$contract->initial_water_reading) }}</div>
+                    </div>
+
+                    @if($contract->termination)
+                    <div>
+                        <div class="cell-sub">Quyết toán cọc</div>
+                        <div class="info-value">Hoàn {{ number_format((float)$contract->termination->refund_amount) }} đ</div>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -469,19 +490,19 @@
                 <div class="owner-box">
                     <div class="person">
                         <div class="avatar-sm">
-                            MT
+                            {{ strtoupper(substr($contract->owner->name ?? '?', 0, 2)) }}
                         </div>
                         <div>
                             <div class="person-name">
-                                Minh Tuấn
+                                {{ $contract->owner->name ?? '—' }}
                             </div>
                             <div class="cell-sub">
-                                SĐT: 0901 234 567
+                                SĐT: {{ $contract->owner->phone ?? '—' }}
                             </div>
                         </div>
                     </div>
 
-                    <a href="tel:0901234567" class="call-button">
+                    <a href="tel:{{ $contract->owner->phone ?? '' }}" class="call-button">
                         📞 Gọi cho chủ trọ
                     </a>
                 </div>
@@ -495,25 +516,42 @@
                             Thành viên phòng
                         </h3>
                         <span class="cell-sub mb-0">
-                            1/2 Người
+                            {{ 1 + $contract->members->count() }} người
                         </span>
                     </div>
                 </div>
 
                 <div class="member-box">
-                    <div class="person mb-0">
+                    <div class="person mb-3">
                         <div class="avatar-sm">
-                            TH
+                            {{ strtoupper(substr($contract->tenant->name ?? '?', 0, 2)) }}
                         </div>
                         <div>
                             <div class="person-name">
-                                Nguyễn Tấn Hiệu
+                                {{ $contract->tenant->name ?? '—' }}
                             </div>
                             <div class="cell-sub">
                                 Người đại diện hợp đồng
                             </div>
                         </div>
                     </div>
+                    @forelse($contract->members as $member)
+                    <div class="person {{ $loop->last ? 'mb-0' : 'mb-3' }}">
+                        <div class="avatar-sm">
+                            {{ strtoupper(substr($member->name, 0, 2)) }}
+                        </div>
+                        <div>
+                            <div class="person-name">
+                                {{ $member->name }}
+                            </div>
+                            <div class="cell-sub">
+                                {{ $member->relationship ?? 'Người ở cùng' }}{{ $member->phone ? ' · ' . $member->phone : '' }}
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="cell-sub mb-0">Chưa có người ở cùng.</div>
+                    @endforelse
                 </div>
             </div>
 

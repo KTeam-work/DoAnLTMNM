@@ -229,7 +229,7 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link " href="{{ url('/landlord') }}">Tổng quan</a>
+          <a class="app-nav-link " href="{{ route('landlord.home') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
@@ -327,8 +327,8 @@
     <!-- Quay lại -->
     <div class="page-header">
 
-        <a href="{{ url('/owner/contracts') }}" class="back-link">
-            ← Quay lại danh sách hợp đồng
+        <a href="{{ route('owner.tenants.manage') }}" class="back-link">
+            ← Quay lại quản lý người thuê
         </a>
 
         <h1 class="page-title">
@@ -336,28 +336,58 @@
         </h1>
 
         <div class="page-desc">
-            Thêm thông tin người cùng sinh sống trong hợp đồng thuê.
+            Chọn hợp đồng rồi nhập thông tin người cùng sinh sống trong phòng.
         </div>
 
     </div>
 
 
-    <!-- Thông tin hợp đồng -->
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if($contracts->isEmpty())
+        <div class="alert alert-warning">Chưa có hợp đồng nào đang hiệu lực để thêm người ở cùng.</div>
+    @else
+    <!-- Chọn hợp đồng -->
     <div class="info-card">
 
         <div class="info-title">
-            Thông tin hợp đồng
+            Chọn hợp đồng
         </div>
 
-        <div class="contract-info">
+        <select id="contractSelect" class="form-select form-select-lg">
+            @foreach($contracts as $contract)
+                <option value="{{ $contract->id }}"
+                    data-code="{{ $contract->contract_code }}"
+                    data-tenant="{{ $contract->tenant->name ?? '' }}"
+                    data-room="{{ $contract->room->name ?? '' }} · {{ $contract->room->property->name ?? '' }}"
+                    data-count="{{ $contract->members->count() }}"
+                    data-max="{{ $contract->room->max_people ?? '' }}"
+                    @selected((string) old('contract_id', request('contract_id')) === (string) $contract->id)>
+                    {{ $contract->contract_code }} — {{ $contract->room->name ?? '' }} ({{ $contract->tenant->name ?? '' }})
+                </option>
+            @endforeach
+        </select>
+
+        <div class="contract-info mt-3" id="contractInfoBox">
 
             <div class="info-item">
                 <div class="info-label">
                     Mã hợp đồng
                 </div>
 
-                <div class="info-value">
-                    #HD-2026-01
+                <div class="info-value" id="infoCode">
+                    —
                 </div>
             </div>
 
@@ -367,8 +397,8 @@
                     Người thuê chính
                 </div>
 
-                <div class="info-value">
-                    Nguyễn Thanh Huyền
+                <div class="info-value" id="infoTenant">
+                    —
                 </div>
             </div>
 
@@ -378,8 +408,18 @@
                     Phòng
                 </div>
 
-                <div class="info-value">
-                    Phòng 12A
+                <div class="info-value" id="infoRoom">
+                    —
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">
+                    Đã ở / Tối đa
+                </div>
+
+                <div class="info-value" id="infoCount">
+                    —
                 </div>
             </div>
 
@@ -400,9 +440,11 @@
         </div>
 
 
-        <form action="#" method="POST">
+        <form id="memberForm" action="#" method="POST">
 
             @csrf
+            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="contract_id" id="contractIdHidden" value="{{ old('contract_id', request('contract_id')) }}">
 
             <div class="row g-4">
 
@@ -416,9 +458,11 @@
                     <input
                         type="text"
                         name="name"
+                        value="{{ old('name') }}"
                         class="form-control"
                         placeholder="Nhập họ và tên"
                         required
+                        maxlength="100"
                     >
 
                 </div>
@@ -428,14 +472,17 @@
                 <div class="col-md-6">
 
                     <label class="form-label">
-                        Số CCCD
+                        Số CCCD <span class="required">*</span>
                     </label>
 
                     <input
                         type="text"
                         name="identity_card"
+                        value="{{ old('identity_card') }}"
                         class="form-control"
                         placeholder="Nhập số CCCD"
+                        required
+                        maxlength="20"
                     >
 
                 </div>
@@ -451,8 +498,10 @@
                     <input
                         type="tel"
                         name="phone"
+                        value="{{ old('phone') }}"
                         class="form-control"
                         placeholder="Nhập số điện thoại"
+                        maxlength="20"
                     >
 
                 </div>
@@ -474,25 +523,11 @@
                             -- Chọn quan hệ --
                         </option>
 
-                        <option value="Bạn">
-                            Bạn
-                        </option>
-
-                        <option value="Vợ/Chồng">
-                            Vợ/Chồng
-                        </option>
-
-                        <option value="Anh/Chị/Em">
-                            Anh/Chị/Em
-                        </option>
-
-                        <option value="Người thân">
-                            Người thân
-                        </option>
-
-                        <option value="Khác">
-                            Khác
-                        </option>
+                        @foreach(['Bạn', 'Vợ/Chồng', 'Anh/Chị/Em', 'Người thân', 'Khác'] as $rel)
+                            <option value="{{ $rel }}" @selected(old('relationship') === $rel)>
+                                {{ $rel }}
+                            </option>
+                        @endforeach
 
                     </select>
 
@@ -512,7 +547,7 @@
             <div class="form-actions">
 
                 <a
-                    href="{{ url('/owner/contracts') }}"
+                    href="{{ route('owner.tenants.manage') }}"
                     class="btn-cancel"
                 >
                     Hủy
@@ -529,12 +564,33 @@
 
         </form>
 
+        @endif
+
     </div>
 
 </div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    var select = document.getElementById('contractSelect');
+    var form = document.getElementById('memberForm');
+    if (!select || !form) return;
+    function sync() {
+        var opt = select.options[select.selectedIndex];
+        form.action = "{{ url('/owner/contracts') }}/" + opt.value + "/members";
+        document.getElementById('contractIdHidden').value = opt.value;
+        document.getElementById('infoCode').textContent = '#' + (opt.getAttribute('data-code') || '');
+        document.getElementById('infoTenant').textContent = opt.getAttribute('data-tenant') || '—';
+        document.getElementById('infoRoom').textContent = opt.getAttribute('data-room') || '—';
+        document.getElementById('infoCount').textContent =
+            (1 + parseInt(opt.getAttribute('data-count') || '0', 10)) + ' / ' + (opt.getAttribute('data-max') || '?') + ' người';
+    }
+    select.addEventListener('change', sync);
+    sync();
+})();
+</script>
 
 </body>
 </html>
