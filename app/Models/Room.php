@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Room extends Model
 {
@@ -29,4 +30,14 @@ class Room extends Model
     {
         return $this->hasMany(UtilityReading::class);
     }
+    public function rentalPosts(): HasMany
+{
+    return $this->hasMany(RentalPost::class);
+}
+
+public function amenities(): BelongsToMany
+{
+    return $this->belongsToMany(Amenity::class, 'room_amenities')
+        ->withTimestamps();
+}
 }

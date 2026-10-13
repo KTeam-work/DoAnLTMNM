@@ -1,928 +1,516 @@
-@php
-    /*
-    |--------------------------------------------------------------------------
-    | DỮ LIỆU MOCK PHÒNG
-    | Sau này khi nối Database chỉ cần thay phần này bằng Room Model.
-    |--------------------------------------------------------------------------
-    */
-
-    $rooms = [
-        1 => [
-            'title' => 'Phòng trọ máy lạnh gần Q.7',
-            'address' => 'Đường Nguyễn Thị Thập, Quận 7, TP.HCM',
-            'price' => '2,8 triệu',
-            'area' => '22 m²',
-            'people' => '2 người',
-            'bathroom' => 'WC riêng',
-            'type' => 'Phòng trọ',
-            'images' => [
-                'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80',
-            ],
-            'landlord' => 'Anh Tuấn',
-            'phone' => '09xx xxx 123',
-        ],
-
-        2 => [
-            'title' => 'Căn hộ mini full nội thất Quận 4',
-            'address' => 'Đường Hoàng Diệu, Quận 4, TP.HCM',
-            'price' => '4,2 triệu',
-            'area' => '35 m²',
-            'people' => '2 người',
-            'bathroom' => 'WC riêng',
-            'type' => 'Căn hộ mini',
-            'images' => [
-                'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1000&q=80',
-            ],
-            'landlord' => 'Chị Lan',
-            'phone' => '09xx xxx 456',
-        ],
-
-        3 => [
-            'title' => 'Studio hiện đại gần trung tâm',
-            'address' => 'Đường Nguyễn Hữu Cảnh, Bình Thạnh, TP.HCM',
-            'price' => '5,5 triệu',
-            'area' => '40 m²',
-            'people' => '2 người',
-            'bathroom' => 'WC riêng',
-            'type' => 'Studio',
-            'images' => [
-                'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80',
-            ],
-            'landlord' => 'Anh Minh',
-            'phone' => '09xx xxx 789',
-        ],
-
-        4 => [
-            'title' => 'Phòng rộng có ban công',
-            'address' => 'Đường Lê Văn Lương, Quận 7, TP.HCM',
-            'price' => '3,6 triệu',
-            'area' => '28 m²',
-            'people' => '2 người',
-            'bathroom' => 'WC riêng',
-            'type' => 'Phòng trọ',
-            'images' => [
-                'https://images.unsplash.com/photo-1560185008-b033106af5c3?auto=format&fit=crop&w=1000&q=80',
-            ],
-            'landlord' => 'Chị Hương',
-            'phone' => '09xx xxx 321',
-        ],
-
-        5 => [
-            'title' => 'Phòng trọ giá tốt gần trường',
-            'address' => 'Đường D2, Bình Thạnh, TP.HCM',
-            'price' => '2,5 triệu',
-            'area' => '20 m²',
-            'people' => '2 người',
-            'bathroom' => 'WC riêng',
-            'type' => 'Phòng trọ',
-            'images' => [
-                'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1000&q=80',
-            ],
-            'landlord' => 'Anh Phúc',
-            'phone' => '09xx xxx 654',
-        ],
-
-        6 => [
-            'title' => 'Căn hộ cao cấp đầy đủ tiện nghi',
-            'address' => 'Đường Nguyễn Tất Thành, Quận 4, TP.HCM',
-            'price' => '6,8 triệu',
-            'area' => '50 m²',
-            'people' => '3 người',
-            'bathroom' => 'WC riêng',
-            'type' => 'Căn hộ',
-            'images' => [
-                'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=80',
-            ],
-            'landlord' => 'Chị Mai',
-            'phone' => '09xx xxx 987',
-        ],
-    ];
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | LẤY ID PHÒNG TỪ URL
-    | Ví dụ:
-    | /appointments/create?id=2
-    |--------------------------------------------------------------------------
-    */
-
-    $roomId = (int) request('id', 1);
-
-    $room = $rooms[$roomId] ?? null;
-@endphp
-
 
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trọ Ơi | Đặt lịch xem phòng</title>
-
-
-    <!-- Bootstrap -->
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
-
-    <!-- Font -->
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
-
-    <!-- CSS chính -->
-
-    <link
-        rel="stylesheet"
-        href="{{ asset('css/styles.css') }}"
-    >
-
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
-
 
 <body>
 
+    {{-- NAVBAR --}}
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container-fluid">
 
-<!-- =========================================================
-     NAVBAR
-========================================================= -->
+            <a class="logo" href="{{ route('tenant') }}">
+                Trọ <span>Ơi</span>
+            </a>
 
-<nav class="navbar navbar-expand-lg app-navbar">
+            <button
+                class="navbar-toggler bg-light"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainMenu"
+                aria-controls="mainMenu"
+                aria-expanded="false"
+                aria-label="Mở menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-    <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="mainMenu">
+                <ul class="navbar-nav mx-auto align-items-lg-center">
 
-        <a
-            class="logo"
-            href="{{ route('tenant') }}"
-        >
-            Trọ <span>Ơi</span>
-        </a>
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ route('tenant') }}">
+                            Trang chủ
+                        </a>
+                    </li>
 
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ route('rooms.index') }}">
+                            Tìm phòng
+                        </a>
+                    </li>
 
-        <button
-            class="navbar-toggler bg-light"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#mainMenu"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ route('favorites.index') }}">
+                            Yêu thích
+                        </a>
+                    </li>
 
+                    <li class="nav-item">
+                        <a class="app-nav-link active" href="{{ route('appointments.index') }}">
+                            Lịch xem phòng
+                        </a>
+                    </li>
 
-        <div
-            class="collapse navbar-collapse"
-            id="mainMenu"
-        >
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ route('appointments.index') }}">
+                            Hợp đồng
+                        </a>
+                    </li>
 
-            <ul class="navbar-nav mx-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">
+                            Hóa đơn
+                        </a>
+                    </li>
 
-                <li class="nav-item">
+                </ul>
+
+                <div class="navbar-actions">
                     <a
-                        class="app-nav-link"
-                        href="{{ route('tenant') }}"
-                    >
-                        Trang chủ
-                    </a>
-                </li>
-
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="{{ route('rooms.index') }}"
-                    >
-                        Tìm phòng
-                    </a>
-                </li>
-
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="{{ route('favorites.index') }}"
-                    >
-                        Yêu thích
-                    </a>
-                </li>
-
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link active"
+                        class="notif-btn text-decoration-none"
                         href="{{ route('appointments.index') }}"
-                    >
-                        Lịch xem phòng
+                        aria-label="Thông báo">
+                        🔔
                     </a>
-                </li>
 
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Hợp đồng
-                    </a>
-                </li>
-
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Hóa đơn
-                    </a>
-                </li>
-
-            </ul>
-
-
-            <div class="navbar-actions">
-
-                <button
-                    class="notif-btn"
-                    type="button"
-                >
-                    🔔
-                    <span class="notif-dot"></span>
-                </button>
-
-
-                <a
-                    href="#"
-                    class="user-chip"
-                >
-
-                    <span class="user-avatar">
-                        TH
-                    </span>
-
-
-                    <span class="user-meta">
-
-                        <span class="user-name d-block">
-                            Thanh Huyền
+                    <a href="{{ route('appointments.index') }}" class="user-chip text-decoration-none">
+                        <span class="user-avatar">
+                            {{ strtoupper(substr(auth()->user()->name ?? 'NT', 0, 1)) }}
                         </span>
 
-                        <span class="user-role">
-                            Người thuê
+                        <span class="user-meta">
+                            <span class="user-name d-block">
+                                {{ auth()->user()->name ?? 'Người thuê' }}
+                            </span>
+                            <span class="user-role">Người thuê</span>
                         </span>
 
-                    </span>
-
-
-                    <span class="caret">
-                        ▾
-                    </span>
-
-                </a>
-
+                        <span class="caret">▾</span>
+                    </a>
+                </div>
             </div>
+        </div>
+    </nav>
 
+    <main class="page-wrap">
+
+        {{-- THÔNG BÁO --}}
+        @if (session('success'))
+            <div class="alert alert-success mt-3">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger mt-3">
+                <div class="fw-bold mb-1">Vui lòng kiểm tra lại thông tin:</div>
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- QUAY LẠI --}}
+        <div class="mb-4">
+            @if ($selectedRoom)
+                <a
+                    href="{{ route('rooms.show', ['id' => $selectedRoom->id]) }}"
+                    class="section-link text-decoration-none">
+                    ← Quay lại phòng
+                </a>
+            @else
+                <a
+                    href="{{ route('rooms.index') }}"
+                    class="section-link text-decoration-none">
+                    ← Quay lại danh sách phòng
+                </a>
+            @endif
         </div>
 
-    </div>
+        {{-- TIÊU ĐỀ --}}
+        <div class="page-header">
+            <div>
+                <div class="badge-status pending mb-2">
+                    📅 ĐẶT LỊCH XEM PHÒNG
+                </div>
 
-</nav>
+                <h1 class="page-title">
+                    Chọn thời gian bạn muốn xem phòng
+                </h1>
 
+                <div class="page-desc">
+                    Gửi lịch hẹn để chủ nhà xác nhận thời gian phù hợp.
+                </div>
+            </div>
+        </div>
 
+        @if ($rooms->isEmpty())
 
-<!-- =========================================================
-     MAIN
-========================================================= -->
+            <div class="panel text-center py-5">
+                <div class="stat-icon mx-auto mb-3">🏠</div>
 
-<div class="page-wrap">
+                <h2 class="panel-title mb-2">
+                    Hiện chưa có phòng phù hợp
+                </h2>
 
+                <p class="page-desc mb-4">
+                    Chưa có phòng đang được đăng cho thuê hoặc phòng chưa đáp ứng điều kiện đặt lịch.
+                </p>
 
-    <!-- BACK -->
-
-    <div class="mb-4">
-
-        @if($room)
-
-            <a
-                href="{{ route('rooms.show', $roomId) }}"
-                class="section-link"
-            >
-                ← Quay lại phòng
-            </a>
+                <a
+                    href="{{ route('rooms.index') }}"
+                    class="btn-brand text-decoration-none d-inline-block">
+                    ← Tìm phòng khác
+                </a>
+            </div>
 
         @else
 
-            <a
-                href="{{ route('rooms.index') }}"
-                class="section-link"
-            >
-                ← Quay lại danh sách phòng
-            </a>
+            <div class="row g-4">
 
-        @endif
+                {{-- CỘT TRÁI: THÔNG TIN PHÒNG --}}
+                <div class="col-lg-5">
+                    <div class="panel">
 
-    </div>
-
-
-
-    <!-- HEADER -->
-
-    <div class="page-header">
-
-        <div>
-
-            <div class="badge-status pending mb-2">
-                📅 ĐẶT LỊCH XEM PHÒNG
-            </div>
-
-
-            <h1 class="page-title">
-                Chọn thời gian bạn muốn xem phòng
-            </h1>
-
-
-            <div class="page-desc">
-                Gửi lịch hẹn để chủ nhà xác nhận thời gian phù hợp.
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         CHECK ROOM
-    ====================================================== -->
-
-    @if($room)
-
-        <div class="row g-4">
-
-
-            <!-- =================================================
-                 LEFT
-            ================================================== -->
-
-            <div class="col-lg-5">
-
-
-                <!-- ROOM -->
-
-                <div class="panel">
-
-                    <div class="panel-head">
-
-                        <h2 class="panel-title">
-                            Phòng bạn muốn xem
-                        </h2>
-
-                        <span class="badge-status vacant">
-                            Còn phòng
-                        </span>
-
-                    </div>
-
-
-                    <!-- IMAGE -->
-
-                    <img
-                        src="{{ $room['images'][0] }}"
-                        alt="{{ $room['title'] }}"
-                        class="room-img"
-                        style="height:230px;border-radius:14px;"
-                    >
-
-
-                    <div class="mt-3">
-
-
-                        <div class="room-badges">
-
-                            <span class="badge-room hot">
-                                🔥 HOT
-                            </span>
-
-                            <span class="badge-room">
-                                ✓ Đã xác thực
-                            </span>
-
+                        <div class="panel-head">
+                            <h2 class="panel-title">Phòng bạn muốn xem</h2>
+                            <span class="badge-status vacant">Còn phòng</span>
                         </div>
 
+                        @if ($selectedRoom)
 
-                        <div class="room-title">
+                            @php
+                                $roomName = $selectedRoom->name ?? 'Phòng #' . $selectedRoom->id;
+                                $roomAddress = $selectedRoom->property?->address ?? 'Chưa cập nhật địa chỉ';
+                                $roomArea = $selectedRoom->area ?? null;
+                                $roomPrice = $selectedRoom->price ?? null;
+                            @endphp
 
-                            {{ $room['title'] }}
+                            <div class="mt-3">
+                                <div class="room-title">
+                                    {{ $roomName }}
+                                </div>
 
-                        </div>
+                                <div class="room-address">
+                                    📍 {{ $roomAddress }}
+                                </div>
 
+                                <div class="room-stats mt-3">
+                                    @if ($roomArea !== null)
+                                        <span>📐 {{ $roomArea }} m²</span>
+                                    @endif
+                                </div>
 
-                        <div class="room-address">
+                                <div class="room-bottom mt-3">
+                                    <div class="room-price">
+                                        @if (is_numeric($roomPrice))
+                                            {{ number_format((float) $roomPrice, 0, ',', '.') }} đ
+                                        @else
+                                            Liên hệ chủ nhà
+                                        @endif
+                                        <small>/ tháng</small>
+                                    </div>
 
-                            📍 {{ $room['address'] }}
-
-                        </div>
-
-
-                        <div class="room-stats">
-
-                            <span>
-                                📐 {{ $room['area'] }}
-                            </span>
-
-                            <span>
-                                👥 {{ $room['people'] }}
-                            </span>
-
-                            <span>
-                                🚿 {{ $room['bathroom'] }}
-                            </span>
-
-                        </div>
-
-
-                        <div class="room-bottom">
-
-                            <div class="room-price">
-
-                                {{ $room['price'] }}
-
-                                <small>
-                                    / tháng
-                                </small>
-
+                                    <a
+                                        href="{{ route('rooms.show', ['id' => $selectedRoom->id]) }}"
+                                        class="detail-btn text-decoration-none">
+                                        Xem phòng
+                                    </a>
+                                </div>
                             </div>
 
+                        @else
 
-                            <a
-                                href="{{ route('rooms.show', $roomId) }}"
-                                class="detail-btn text-decoration-none"
-                            >
-                                Xem phòng
-                            </a>
+                            <p class="cell-sub mt-3 mb-0">
+                                Em hãy chọn phòng trong danh sách bên cạnh để xem thông tin phòng tại đây.
+                            </p>
 
-                        </div>
-
+                        @endif
                     </div>
 
+                    <div class="panel mt-4">
+                        <div class="panel-head">
+                            <h3 class="panel-title">Lưu ý</h3>
+                        </div>
+
+                        <div class="cell-sub">
+                            Sau khi gửi lịch hẹn, lịch sẽ ở trạng thái
+                            <strong>Chờ xác nhận</strong>. Chủ nhà sẽ xem và phản hồi lịch hẹn.
+                        </div>
+                    </div>
                 </div>
 
+                {{-- CỘT PHẢI: FORM --}}
+                <div class="col-lg-7">
+                    <div class="panel">
 
-
-                <!-- OWNER -->
-
-                <div class="panel mt-4">
-
-                    <div class="panel-head">
-
-                        <h3 class="panel-title">
-                            Thông tin chủ nhà
-                        </h3>
-
-                    </div>
-
-
-                    <div class="d-flex align-items-center gap-3">
-
-                        <div class="avatar-sm">
-                            {{ collect(explode(' ', $room['landlord']))->map(fn($word) => strtoupper(substr($word, 0, 1)))->join('') }}
-                        </div>
-
-
-                        <div>
-
-                            <div class="cell-title">
-                                {{ $room['landlord'] }}
+                        <div class="panel-head">
+                            <div>
+                                <h2 class="panel-title">Thông tin lịch hẹn</h2>
+                                <div class="page-desc">
+                                    Vui lòng điền đầy đủ thông tin.
+                                </div>
                             </div>
-
-                            <div class="cell-sub">
-                                Chủ nhà
-                            </div>
-
                         </div>
 
-                    </div>
+                        <form
+                            action="{{ route('appointments.store') }}"
+                            method="POST">
+                            @csrf
 
-
-                    <div class="mt-3">
-
-                        <div class="d-flex gap-2 mb-2">
-
-                            <span>
-                                📞
-                            </span>
-
-                            <span class="cell-sub">
-                                {{ $room['phone'] }}
-                            </span>
-
-                        </div>
-
-
-                        <div class="d-flex gap-2">
-
-                            <span>
-                                📍
-                            </span>
-
-                            <span class="cell-sub">
-                                {{ $room['address'] }}
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 RIGHT
-            ================================================== -->
-
-            <div class="col-lg-7">
-
-
-                <!-- FORM -->
-
-                <div class="panel">
-
-                    <div class="panel-head">
-
-                        <div>
-
-                            <h2 class="panel-title">
-                                Thông tin lịch hẹn
-                            </h2>
-
-                            <div class="page-desc">
-                                Vui lòng điền đầy đủ thông tin.
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <form>
-
-
-                        <!-- ROOM ID -->
-
-                        <input
-                            type="hidden"
-                            name="room_id"
-                            value="{{ $roomId }}"
-                        >
-
-
-                        <!-- DATE + TIME -->
-
-                        <div class="row g-3">
-
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="appointment_date"
-                                    class="form-label fw-bold small"
-                                >
-                                    Ngày xem phòng
+                            {{-- CHỌN PHÒNG --}}
+                            <div class="mb-3">
+                                <label for="room_id" class="form-label fw-bold small">
+                                    Phòng muốn xem
                                 </label>
 
+                                <select
+                                    name="room_id"
+                                    id="room_id"
+                                    class="form-select @error('room_id') is-invalid @enderror"
+                                    required>
+
+                                    <option value="">-- Chọn phòng --</option>
+
+                                    @foreach ($rooms as $item)
+                                        <option
+                                            value="{{ $item->id }}"
+                                            @selected(
+                                                (string) old('room_id', $selectedRoom?->id)
+                                                === (string) $item->id
+                                            )>
+                                            {{ $item->name ?? 'Phòng #' . $item->id }}
+                                            @if ($item->property?->address)
+                                                - {{ $item->property->address }}
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                @error('room_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            {{-- NGÀY VÀ GIỜ --}}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label
+                                        for="appointment_date"
+                                        class="form-label fw-bold small">
+                                        Ngày xem phòng
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        id="appointment_date"
+                                        name="appointment_date"
+                                        class="form-control @error('appointment_date') is-invalid @enderror"
+                                        min="{{ now()->format('Y-m-d') }}"
+                                        value="{{ old('appointment_date') }}"
+                                        required>
+
+                                    @error('appointment_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+
+                                    <div class="form-text">
+                                        Không chọn ngày trong quá khứ.
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label
+                                        for="appointment_time"
+                                        class="form-label fw-bold small">
+                                        Giờ xem phòng
+                                    </label>
+
+                                    <input
+                                        type="time"
+                                        id="appointment_time"
+                                        name="appointment_time"
+                                        class="form-control @error('appointment_time') is-invalid @enderror"
+                                        value="{{ old('appointment_time') }}"
+                                        required>
+
+                                    @error('appointment_time')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            {{-- SỐ ĐIỆN THOẠI --}}
+                            <div class="mt-3">
+                                <label
+                                    for="phone"
+                                    class="form-label fw-bold small">
+                                    Số điện thoại liên hệ
+                                </label>
 
                                 <input
-                                    type="date"
-                                    id="appointment_date"
-                                    name="appointment_date"
-                                    class="form-control"
-                                >
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    class="form-control @error('phone') is-invalid @enderror"
+                                    value="{{ old('phone', auth()->user()->phone ?? '') }}"
+                                    maxlength="20"
+                                    required>
 
+                                @error('phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
 
                                 <div class="form-text">
-                                    Không chọn ngày trong quá khứ.
+                                    Chủ nhà sẽ sử dụng số này để liên hệ xác nhận lịch.
                                 </div>
-
                             </div>
 
-
-
-                            <div class="col-md-6">
-
+                            {{-- LỜI NHẮN --}}
+                            <div class="mt-3">
                                 <label
-                                    for="appointment_time"
-                                    class="form-label fw-bold small"
-                                >
-                                    Giờ xem phòng
+                                    for="message"
+                                    class="form-label fw-bold small">
+                                    Lời nhắn cho chủ nhà
                                 </label>
 
+                                <textarea
+                                    id="message"
+                                    name="message"
+                                    rows="5"
+                                    maxlength="1000"
+                                    class="form-control @error('message') is-invalid @enderror"
+                                    placeholder="Nhập câu hỏi hoặc yêu cầu của bạn...">{{ old('message') }}</textarea>
 
-                                <input
-                                    type="time"
-                                    id="appointment_time"
-                                    name="appointment_time"
-                                    class="form-control"
-                                >
+                                @error('message')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
 
-                            </div>
-
-                        </div>
-
-
-
-                        <!-- PHONE -->
-
-                        <div class="mt-3">
-
-                            <label
-                                for="phone"
-                                class="form-label fw-bold small"
-                            >
-                                Số điện thoại liên hệ
-                            </label>
-
-
-                            <input
-                                type="tel"
-                                id="phone"
-                                name="phone"
-                                class="form-control"
-                                placeholder="Nhập số điện thoại của bạn"
-                            >
-
-
-                            <div class="form-text">
-                                Chủ nhà sẽ sử dụng số này để liên hệ xác nhận lịch.
-                            </div>
-
-                        </div>
-
-
-
-                        <!-- MESSAGE -->
-
-                        <div class="mt-3">
-
-                            <label
-                                for="message"
-                                class="form-label fw-bold small"
-                            >
-                                Lời nhắn cho chủ nhà
-                            </label>
-
-
-                            <textarea
-                                id="message"
-                                name="message"
-                                rows="5"
-                                class="form-control"
-                                placeholder="Ví dụ: Em muốn xem phòng vào buổi chiều. Cho em hỏi phòng có chỗ để xe không ạ?"
-                            ></textarea>
-
-
-                            <div class="form-text">
-                                Bạn có thể để lại câu hỏi hoặc yêu cầu đặc biệt.
-                            </div>
-
-                        </div>
-
-
-
-                        <!-- NOTE -->
-
-                        <div class="panel mt-4">
-
-                            <div class="d-flex gap-3">
-
-                                <div class="stat-icon">
-                                    💡
+                                <div class="form-text">
+                                    Không bắt buộc.
                                 </div>
-
-
-                                <div>
-
-                                    <div class="cell-title">
-                                        Lưu ý trước khi gửi lịch
-                                    </div>
-
-
-                                    <div class="cell-sub mt-1">
-
-                                        Sau khi gửi, lịch hẹn sẽ ở trạng thái
-                                        <strong>Chờ xác nhận</strong>.
-                                        Chủ nhà có thể xác nhận, từ chối hoặc đề xuất
-                                        một thời gian khác.
-
-                                    </div>
-
-                                </div>
-
                             </div>
 
-                        </div>
+                            {{-- GHI CHÚ --}}
+                            <div class="panel mt-4">
+                                <div class="d-flex gap-3">
+                                    <div class="stat-icon">💡</div>
 
+                                    <div>
+                                        <div class="cell-title">
+                                            Lưu ý trước khi gửi lịch
+                                        </div>
 
+                                        <div class="cell-sub mt-1">
+                                            Lịch hẹn sẽ ở trạng thái
+                                            <strong>Chờ xác nhận</strong> sau khi gửi.
+                                            Chủ nhà sẽ xác nhận hoặc phản hồi lịch hẹn.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <!-- ACTION -->
+                            {{-- NÚT --}}
+                            <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
 
-                        <div class="d-flex justify-content-end gap-2 mt-4 flex-wrap">
+                                <a
+                                    href="{{ $selectedRoom
+                                        ? route('rooms.show', ['id' => $selectedRoom->id])
+                                        : route('appointments.index') }}"
+                                    class="btn-outline-brand text-decoration-none">
+                                    Hủy
+                                </a>
 
+                                <button type="submit" class="btn-brand">
+                                    📅 Gửi lịch hẹn
+                                </button>
 
-                            <a
-                                href="{{ route('rooms.show', $roomId) }}"
-                                class="btn-outline-brand text-decoration-none"
-                            >
-                                Hủy
-                            </a>
-
-
-                            <button
-                                type="submit"
-                                class="btn-brand"
-                            >
-                                📅 Gửi lịch hẹn
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
-
-
-                <!-- PROCESS -->
-
-                <div class="panel mt-4">
-
-                    <div class="panel-head">
-
-                        <h3 class="panel-title">
-                            Quy trình đặt lịch
-                        </h3>
-
+                            </div>
+                        </form>
                     </div>
 
-
-                    <div class="row g-3">
-
-
-                        <div class="col-md-4">
-
-                            <div class="d-flex gap-2">
-
-                                <div class="avatar-sm">
-                                    1
-                                </div>
-
-                                <div>
-
-                                    <div class="cell-title">
-                                        Gửi lịch
-                                    </div>
-
-                                    <div class="cell-sub">
-                                        Chọn ngày và giờ bạn muốn xem.
-                                    </div>
-
-                                </div>
-
-                            </div>
-
+                    {{-- QUY TRÌNH --}}
+                    <div class="panel mt-4">
+                        <div class="panel-head">
+                            <h3 class="panel-title">Quy trình đặt lịch</h3>
                         </div>
 
-
-
-                        <div class="col-md-4">
-
-                            <div class="d-flex gap-2">
-
-                                <div class="avatar-sm">
-                                    2
-                                </div>
-
-                                <div>
-
-                                    <div class="cell-title">
-                                        Chủ nhà xử lý
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-flex gap-2">
+                                    <div class="avatar-sm">1</div>
+                                    <div>
+                                        <div class="cell-title">Gửi lịch</div>
+                                        <div class="cell-sub">
+                                            Chọn phòng, ngày và giờ muốn xem.
+                                        </div>
                                     </div>
-
-                                    <div class="cell-sub">
-                                        Xác nhận hoặc đề xuất giờ khác.
-                                    </div>
-
                                 </div>
-
                             </div>
 
-                        </div>
-
-
-
-                        <div class="col-md-4">
-
-                            <div class="d-flex gap-2">
-
-                                <div class="avatar-sm">
-                                    3
-                                </div>
-
-                                <div>
-
-                                    <div class="cell-title">
-                                        Đến xem phòng
+                            <div class="col-md-4">
+                                <div class="d-flex gap-2">
+                                    <div class="avatar-sm">2</div>
+                                    <div>
+                                        <div class="cell-title">Chủ nhà xử lý</div>
+                                        <div class="cell-sub">
+                                            Chủ nhà xem và phản hồi lịch hẹn.
+                                        </div>
                                     </div>
-
-                                    <div class="cell-sub">
-                                        Lịch hoàn thành sau khi xem phòng.
-                                    </div>
-
                                 </div>
-
                             </div>
 
+                            <div class="col-md-4">
+                                <div class="d-flex gap-2">
+                                    <div class="avatar-sm">3</div>
+                                    <div>
+                                        <div class="cell-title">Đến xem phòng</div>
+                                        <div class="cell-sub">
+                                            Đến xem theo thời gian đã thống nhất.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
+        @endif
+    </main>
 
-        </div>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
 
-
-    @else
-
-
-        <!-- =================================================
-             ROOM NOT FOUND
-        ================================================== -->
-
-        <div class="panel text-center py-5">
-
-            <div class="stat-icon mx-auto mb-3">
-                🏠
-            </div>
-
-
-            <h2 class="panel-title mb-2">
-                Không tìm thấy phòng
-            </h2>
-
-
-            <div class="page-desc mb-4">
-                Phòng bạn đang chọn không tồn tại hoặc đã được thay đổi.
-            </div>
-
-
-            <a
-                href="{{ route('rooms.index') }}"
-                class="btn-brand text-decoration-none d-inline-block"
-            >
-                ← Chọn phòng khác
-            </a>
-
-        </div>
-
-    @endif
-
-</div>
-
-
-
-<!-- Bootstrap JS -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-></script>
-
+    <script>
+        // Khi đổi phòng, giữ trang đặt lịch và truyền ID phòng qua URL.
+        document.getElementById('room_id')?.addEventListener('change', function () {
+            if (this.value) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('id', this.value);
+                window.location.href = url.toString();
+            }
+        });
+    </script>
 
 </body>
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -239,7 +240,7 @@
             position: absolute;
             left: 13px;
             top: 13px;
-            background: rgba(255,255,255,.94);
+            background: rgba(255, 255, 255, .94);
             color: #20584f;
             border-radius: 8px;
             padding: 6px 9px;
@@ -520,12 +521,14 @@
             color: #20584f;
         }
 
-        .btn-save, .btn-add-save {
+        .btn-save,
+        .btn-add-save {
             background: #20584f;
             color: white;
         }
 
-        .btn-save:hover, .btn-add-save:hover {
+        .btn-save:hover,
+        .btn-add-save:hover {
             background: #17463e;
         }
 
@@ -592,9 +595,20 @@
             font-weight: 800;
         }
 
-        .detail-status.available { background: #eaf3ef; color: #20584f; }
-        .detail-status.rented { background: #fff7d7; color: #8b6810; }
-        .detail-status.maintenance { background: #fae8e5; color: #a33f35; }
+        .detail-status.available {
+            background: #eaf3ef;
+            color: #20584f;
+        }
+
+        .detail-status.rented {
+            background: #fff7d7;
+            color: #8b6810;
+        }
+
+        .detail-status.maintenance {
+            background: #fae8e5;
+            color: #a33f35;
+        }
 
         .detail-amenities {
             display: flex;
@@ -648,721 +662,886 @@
             margin-bottom: 10px;
         }
 
-        .required { color: #c65b4a; }
+        .required {
+            color: #c65b4a;
+        }
 
         /* RESPONSIVE */
         @media (max-width: 1100px) {
-            .room-grid { grid-template-columns: repeat(2, 1fr); }
-            .stats { grid-template-columns: repeat(2, 1fr); }
+            .room-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 700px) {
-            .owner-main { padding: 25px 15px 45px; }
-            .heading { align-items: flex-start; flex-direction: column; }
-            .toolbar { flex-direction: column; }
-            .filter-select { width: 100%; }
-            .room-grid { grid-template-columns: 1fr; }
-            .form-grid, .detail-grid { grid-template-columns: 1fr; }
-            .form-group.full, .detail-item.full { grid-column: auto; }
-            .amenity-checks { grid-template-columns: 1fr 1fr; }
-            .detail-image-wrap { height: 210px; }
+            .owner-main {
+                padding: 25px 15px 45px;
+            }
+
+            .heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+
+            .room-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid,
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full,
+            .detail-item.full {
+                grid-column: auto;
+            }
+
+            .amenity-checks {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .detail-image-wrap {
+                height: 210px;
+            }
         }
 
         @media (max-width: 450px) {
-            .stats { grid-template-columns: 1fr; }
-            .room-container { padding: 14px; }
-            .amenity-checks { grid-template-columns: 1fr; }
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .room-container {
+                padding: 14px;
+            }
+
+            .amenity-checks {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg app-navbar">
-  <div class="container-fluid">
-    <a class="logo" href="{{ route('landlord.home') }}">Trọ <span>Ơi</span></a>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container-fluid">
+            <a class="logo" href="{{ route('landlord.dashboard') }}">
+                Trọ <span>Ơi</span>
+            </a>
 
-    <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
-    </button>
+            <button
+                class="navbar-toggler shadow-none border-0"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainMenu"
+                aria-controls="mainMenu"
+                aria-expanded="false"
+                aria-label="Mở menu điều hướng">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+            </button>
 
-    <div class="collapse navbar-collapse" id="mainMenu">
-      <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item">
-          <a class="app-nav-link " href="{{  route('landlord.home')  }}">Tổng quan</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle active" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Nhà &amp; Phòng
-          </a>
-          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
-            <li><a class="dropdown-item" href="{{ route('owner.properties.index') }}">🏠 Quản lý nhà</a></li>
-            <li><a class="dropdown-item" href="{{ route('owner.rooms.index') }}">🚪 Quản lý phòng</a></li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Khách &amp; Hợp đồng
-          </a>
-          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
-            <li><a class="dropdown-item" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a></li>
-            <li><a class="dropdown-item" href="{{ route('owner.contracts.index') }}">📝 Hợp đồng</a></li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Tài chính
-          </a>
-          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
-            <li><a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a></li>
-            <li><a class="dropdown-item" href="{{ route('owner.utilities.index') }}">⚡ Điện nước</a></li>
-             <li>
-              <a class="dropdown-item" href="{{ route('owner.invoices.index') }}">🧾 Hóa đơn</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="{{ route( 'owner.payments.index') }}">💰 Giao dịch</a>
-            </li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Vận hành
-          </a>
-          <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">
-            <li><a class="dropdown-item" href="{{ route('owner.rental-posts.index') }}">📢 Tin đăng</a></li>
-            <li><a class="dropdown-item" href="{{ route('owner.appointments.index') }}">📅 Lịch xem</a></li>
-            <li><a class="dropdown-item" href="{{ url('/owner/maintenance') }}">🛠️ Sửa chữa</a></li>
-            <li><a class="dropdown-item" href="{{ route('owner.reviews.index') }}">⭐ Đánh giá</a></li>
-          </ul>
-        </li>
-      </ul>
-       <div class="navbar-actions ms-lg-3">
-        <button class="notif-btn" type="button" aria-label="Thông báo">
-          🔔<span class="notif-dot"></span>
-        </button>
-        <a href="#" class="user-chip">
-          <div class="user-avatar">A</div>
-          <div class="user-meta">
-            <div class="user-name">Chủ trọ</div>
-            <div class="user-role">Owner</div>
-          </div>
-          <span class="caret">▼</span>
-        </a>
-      </div>
-    </div>
-  </div>
-</nav>
+            <div class="collapse navbar-collapse" id="mainMenu">
+                <ul class="navbar-nav mx-auto align-items-lg-center">
 
-<!-- MAIN CONTENT -->
-<main class="owner-main">
+                    <!-- TỔNG QUAN -->
+                    <li class="nav-item">
+                        <a class="app-nav-link"
+                            href="{{ route('landlord.home') }}">
+                            Tổng quan
+                        </a>
+                    </li>
 
-    <div class="heading">
-        <div>
-            <h1>Danh sách phòng</h1>
-            <p>Quản lý trạng thái và thông tin các phòng đang cho thuê.</p>
+                    <!-- NHÀ VÀ PHÒNG -->
+                    <li class="nav-item dropdown">
+                        <a
+                            class="app-nav-link dropdown-toggle active"
+                            href="#"
+                            id="navbarDrop1"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Nhà &amp; Phòng
+                        </a>
+
+                        <ul class="dropdown-menu border-0 shadow-sm"
+                            aria-labelledby="navbarDrop1">
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.properties.index') }}">
+                                    🏠 Quản lý nhà
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item active"
+                                    href="{{ route('owner.rooms.index') }}"
+                                    aria-current="page">
+                                    🚪 Quản lý phòng
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- KHÁCH VÀ HỢP ĐỒNG -->
+                    <li class="nav-item dropdown">
+                        <a
+                            class="app-nav-link dropdown-toggle"
+                            href="#"
+                            id="navbarDrop2"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Khách &amp; Hợp đồng
+                        </a>
+
+                        <ul class="dropdown-menu border-0 shadow-sm"
+                            aria-labelledby="navbarDrop2">
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.tenants.manage') }}">
+                                    👤 Người thuê
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.contracts.index') }}">
+                                    📝 Hợp đồng
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- TÀI CHÍNH -->
+                    <li class="nav-item dropdown">
+                        <a
+                            class="app-nav-link dropdown-toggle"
+                            href="#"
+                            id="navbarDrop3"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Tài chính
+                        </a>
+
+                        <ul class="dropdown-menu border-0 shadow-sm"
+                            aria-labelledby="navbarDrop3">
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.services.index') }}">
+                                    ✨ Dịch vụ
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.utilities.index') }}">
+                                    ⚡ Điện nước
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.invoices.index') }}">
+                                    🧾 Hóa đơn
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.payments.index') }}">
+                                    💰 Giao dịch
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- VẬN HÀNH -->
+                    <li class="nav-item dropdown">
+                        <a
+                            class="app-nav-link dropdown-toggle"
+                            href="#"
+                            id="navbarDrop4"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Vận hành
+                        </a>
+
+                        <ul class="dropdown-menu border-0 shadow-sm"
+                            aria-labelledby="navbarDrop4">
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.rental-posts.index') }}">
+                                    📢 Tin đăng
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('owner.rental-posts.index') }}">
+                                    Tin đăng
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ url('/owner/maintenance') }}">
+                                    🛠️ Sửa chữa
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ route('owner.reviews.index') }}">
+                                    ⭐ Đánh giá
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- KHU VỰC TÀI KHOẢN -->
+                <div class="navbar-actions ms-lg-3">
+                    <button
+                        class="notif-btn"
+                        type="button"
+                        aria-label="Thông báo">
+                        🔔
+                        <span class="notif-dot"></span>
+                    </button>
+
+                    <a href="#" class="user-chip">
+                        <div class="user-avatar">AT</div>
+
+                        <div class="user-meta">
+                            <div class="user-name">Chủ trọ</div>
+                            <div class="user-role">Owner</div>
+                        </div>
+
+                        <span class="caret">▾</span>
+                    </a>
+                </div>
+            </div>
         </div>
-        <button class="btn-owner" onclick="openAddModal()">＋ Thêm phòng</button>
-    </div>
+    </nav>
 
-    <!-- STATS CARDS -->
-    <div class="stats">
-        <div class="stat">
-            <div class="stat-icon">🏠</div>
+    <!-- MAIN CONTENT -->
+    <main class="owner-main">
+
+        <div class="heading">
             <div>
-                <div class="stat-label">Tổng số phòng</div>
-                <div class="stat-number" id="totalRooms">00</div>
+                <h1>Danh sách phòng</h1>
+                <p>Quản lý trạng thái và thông tin các phòng đang cho thuê.</p>
+            </div>
+            <button class="btn-owner" onclick="openAddModal()">＋ Thêm phòng</button>
+        </div>
+
+        <!-- STATS CARDS -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-icon">🏠</div>
+                <div>
+                    <div class="stat-label">Tổng số phòng</div>
+                    <div class="stat-number" id="totalRooms">00</div>
+                </div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">✓</div>
+                <div>
+                    <div class="stat-label">Còn trống</div>
+                    <div class="stat-number" id="availableRooms">00</div>
+                </div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">👤</div>
+                <div>
+                    <div class="stat-label">Đang thuê</div>
+                    <div class="stat-number" id="rentedRooms">00</div>
+                </div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">🔧</div>
+                <div>
+                    <div class="stat-label">Bảo trì</div>
+                    <div class="stat-number" id="maintenanceRooms">00</div>
+                </div>
             </div>
         </div>
-        <div class="stat">
-            <div class="stat-icon">✓</div>
-            <div>
-                <div class="stat-label">Còn trống</div>
-                <div class="stat-number" id="availableRooms">00</div>
-            </div>
-        </div>
-        <div class="stat">
-            <div class="stat-icon">👤</div>
-            <div>
-                <div class="stat-label">Đang thuê</div>
-                <div class="stat-number" id="rentedRooms">00</div>
-            </div>
-        </div>
-        <div class="stat">
-            <div class="stat-icon">🔧</div>
-            <div>
-                <div class="stat-label">Bảo trì</div>
-                <div class="stat-number" id="maintenanceRooms">00</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- ROOM CONTAINER -->
-    <section class="room-container">
+        <!-- ROOM CONTAINER -->
+        <section class="room-container">
 
-        <!-- TOOLBAR -->
-        <div class="toolbar">
-            <div class="search-box">
-                <span>⌕</span>
-                <input type="text" id="roomSearch" placeholder="Tìm theo tên phòng, mã phòng, khu vực...">
+            <!-- TOOLBAR -->
+            <div class="toolbar">
+                <div class="search-box">
+                    <span>⌕</span>
+                    <input type="text" id="roomSearch" placeholder="Tìm theo tên phòng, mã phòng, khu vực...">
+                </div>
+
+                <select id="propertyFilter" class="filter-select">
+                    <option value="">Tất cả nhà trọ</option>
+                    <option value="Nguyễn Thị Thập">Nguyễn Thị Thập</option>
+                    <option value="An Phú">An Phú</option>
+                    <option value="Tân Phú">Tân Phú</option>
+                </select>
+
+                <select id="statusFilter" class="filter-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="available">Còn trống</option>
+                    <option value="rented">Đang thuê</option>
+                    <option value="maintenance">Bảo trì</option>
+                </select>
             </div>
 
-            <select id="propertyFilter" class="filter-select">
-                <option value="">Tất cả nhà trọ</option>
-                <option value="Nguyễn Thị Thập">Nguyễn Thị Thập</option>
-                <option value="An Phú">An Phú</option>
-                <option value="Tân Phú">Tân Phú</option>
-            </select>
 
-            <select id="statusFilter" class="filter-select">
-                <option value="">Tất cả trạng thái</option>
-                <option value="available">Còn trống</option>
-                <option value="rented">Đang thuê</option>
-                <option value="maintenance">Bảo trì</option>
-            </select>
-        </div>
+            <div class="room-grid" id="roomGrid">
+                @forelse ($rooms as $room)
+                @php
+                $statusLabels = [
+                'available' => 'CÒN TRỐNG',
+                'rented' => 'ĐANG THUÊ',
+                'maintenance' => 'BẢO TRÌ',
+                'pending' => 'CHỜ XỬ LÝ',
+                'hidden' => 'ĐANG ẨN',
+                ];
 
-        <!-- ROOM GRID -->
-        <div class="room-grid" id="roomGrid">
+                $propertyName = $room->property?->name ?? 'Chưa có nhà trọ';
 
-            <!-- ROOM 101 -->
-            <article class="room-card" data-room-id="101" data-property="Nguyễn Thị Thập" data-status="rented" data-search="phòng 101 p.101 nguyễn thị thập">
-                <div class="room-img">
-                    <img src="https://images.unsplash.com/photo-1560185008-b033106af5c3?auto=format&fit=crop&w=900&q=80" alt="Phòng 101">
-                    <span class="room-code">P.101</span>
-                    <span class="room-status rented">ĐANG THUÊ</span>
+                $roomSearch = mb_strtolower(
+                $room->name . ' ' .
+                $room->room_code . ' ' .
+                $propertyName
+                );
+                @endphp
+
+                <article class="room-card"
+                    data-room-id="{{ $room->id }}"
+                    data-property="{{ $propertyName }}"
+                    data-status="{{ $room->status }}"
+                    data-search="{{ $roomSearch }}"
+                    data-area="{{ $room->area }}"
+                    data-capacity="{{ $room->max_people }}"
+                    data-deposit="{{ $room->deposit }}"
+                    data-floor="{{ $room->floor }}"
+                    data-description="{{ $room->description }}">
+
+                    <div class="room-img">
+                        <img
+                            src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80"
+                            alt="{{ $room->name }}">
+
+                        <span class="room-code">
+                            {{ $room->room_code }}
+                        </span>
+
+                        <span class="room-status {{ $room->status }}">
+                            {{ $statusLabels[$room->status] ?? $room->status }}
+                        </span>
+                    </div>
+
+                    <div class="room-body">
+                        <h3>{{ $room->name }}</h3>
+
+                        <div class="room-property">
+                            {{ $propertyName }}
+                        </div>
+
+                        <div class="room-price">
+                            {{ number_format($room->price, 0, ',', '.') }}đ / tháng
+                        </div>
+
+                        <div class="room-info">
+                            <span>{{ $room->area }} m²</span>
+                            <span>{{ $room->max_people }} người</span>
+                            <span>Tầng {{ $room->floor ?? '—' }}</span>
+                        </div>
+
+                        <div class="amenities">
+                            <span class="amenity">
+                                Cọc: {{ number_format($room->deposit, 0, ',', '.') }}đ
+                            </span>
+                        </div>
+
+                        <div class="room-actions">
+                            <button type="button" class="btn-edit"
+                                onclick="openEditModal(this)">
+                                Chỉnh sửa
+                            </button>
+
+                            <button type="button" class="btn-more"
+                                onclick="openDetailModal(this)">
+                                Chi tiết
+                            </button>
+                        </div>
+                    </div>
+                </article>
+                @empty
+                <div class="empty-room-message">
+                    <div class="empty-room-icon">🏠</div>
+                    Chưa có phòng nào. Hãy nhấn “Thêm phòng” để bắt đầu.
                 </div>
-                <div class="room-body">
-                    <h3>Phòng 101</h3>
-                    <div class="room-property">Nhà trọ Nguyễn Thị Thập</div>
-                    <div class="room-price">2.800.000đ / tháng</div>
-                    <div class="room-info">
-                        <span>22 m²</span>
-                        <span>2 người</span>
-                        <span>1 WC</span>
-                    </div>
-                    <div class="amenities">
-                        <span class="amenity">❄ Máy lạnh</span>
-                        <span class="amenity">📶 Wifi</span>
-                        <span class="amenity">🛏 Nội thất</span>
-                    </div>
-                    <div class="room-actions">
-                        <button class="btn-edit" onclick="openEditModal(this)">Chỉnh sửa</button>
-                        <button class="btn-more" onclick="openDetailModal(this)">Chi tiết</button>
-                    </div>
-                </div>
-            </article>
+                @endforelse
+            </div>
 
-            <!-- ROOM 102 -->
-            <article class="room-card" data-room-id="102" data-property="Nguyễn Thị Thập" data-status="available" data-search="phòng 102 p.102 nguyễn thị thập">
-                <div class="room-img">
-                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80" alt="Phòng 102">
-                    <span class="room-code">P.102</span>
-                    <span class="room-status available">CÒN TRỐNG</span>
-                </div>
-                <div class="room-body">
-                    <h3>Phòng 102</h3>
-                    <div class="room-property">Nhà trọ Nguyễn Thị Thập</div>
-                    <div class="room-price">3.200.000đ / tháng</div>
-                    <div class="room-info">
-                        <span>25 m²</span>
-                        <span>3 người</span>
-                        <span>1 WC</span>
-                    </div>
-                    <div class="amenities">
-                        <span class="amenity">❄ Máy lạnh</span>
-                        <span class="amenity">📶 Wifi</span>
-                        <span class="amenity">🌅 Ban công</span>
-                    </div>
-                    <div class="room-actions">
-                        <button class="btn-edit" onclick="openEditModal(this)">Chỉnh sửa</button>
-                        <button class="btn-more" onclick="openDetailModal(this)">Chi tiết</button>
-                    </div>
-                </div>
-            </article>
+        </section>
 
-            <!-- ROOM 201 -->
-            <article class="room-card" data-room-id="201" data-property="An Phú" data-status="maintenance" data-search="phòng 201 p.201 an phú">
-                <div class="room-img">
-                    <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80" alt="Phòng 201">
-                    <span class="room-code">P.201</span>
-                    <span class="room-status maintenance">BẢO TRÌ</span>
-                </div>
-                <div class="room-body">
-                    <h3>Phòng 201</h3>
-                    <div class="room-property">Căn hộ An Phú</div>
-                    <div class="room-price">4.500.000đ / tháng</div>
-                    <div class="room-info">
-                        <span>35 m²</span>
-                        <span>4 người</span>
-                        <span>1 WC</span>
-                    </div>
-                    <div class="amenities">
-                        <span class="amenity">❄ Máy lạnh</span>
-                        <span class="amenity">🧺 Máy giặt</span>
-                        <span class="amenity">🅿️ Chỗ để xe</span>
-                    </div>
-                    <div class="room-actions">
-                        <button class="btn-edit" onclick="openEditModal(this)">Chỉnh sửa</button>
-                        <button class="btn-more" onclick="openDetailModal(this)">Chi tiết</button>
-                    </div>
-                </div>
-            </article>
+    </main>
 
-        </div>
-    </section>
-
-</main>
-
-<!-- =========================
+    <!-- =========================
      MODAL CHI TIẾT PHÒNG
 ========================= -->
-<div class="custom-modal" id="detailModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="modal-title-area">
-                <div class="modal-title-icon">🚪</div>
-                <div>
-                    <h2 class="modal-title" id="detailTitle">Thông tin phòng</h2>
-                    <p class="modal-subtitle" id="detailSubtitle">Mã phòng: ---</p>
+    <div class="custom-modal" id="detailModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <div class="modal-title-icon">🚪</div>
+                    <div>
+                        <h2 class="modal-title" id="detailTitle">Thông tin phòng</h2>
+                        <p class="modal-subtitle" id="detailSubtitle">Mã phòng: ---</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-image-wrap">
+                    <img id="detailImg" src="" class="detail-image" alt="Ảnh phòng">
+                </div>
+                <div class="detail-grid">
+                    <div>
+                        <div class="detail-label">Thuộc nhà trọ</div>
+                        <div class="detail-value" id="detailProperty">---</div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Trạng thái</div>
+                        <div><span class="detail-status" id="detailStatus">---</span></div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Giá thuê theo tháng</div>
+                        <div class="detail-value price" id="detailPrice">---</div>
+                    </div>
+                    <div>
+                        <div class="detail-label">Diện tích & Sức chứa</div>
+                        <div class="detail-value" id="detailSpecs">---</div>
+                    </div>
+                    <div class="detail-item full">
+                        <div class="detail-label">Tiện ích đi kèm</div>
+                        <div class="detail-amenities" id="detailAmenities"></div>
+                    </div>
+                    <div class="detail-item full">
+                        <div class="detail-label">Mô tả thêm</div>
+                        <div class="detail-value" id="detailDescription" style="font-weight: 400; line-height: 1.5;">Chưa có thông tin mô tả chi tiết cho phòng này.</div>
+                    </div>
                 </div>
             </div>
-            <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="detail-image-wrap">
-                <img id="detailImg" src="" class="detail-image" alt="Ảnh phòng">
+            <div class="modal-footer">
+                <button class="btn-back" onclick="closeModal('detailModal')">Đóng</button>
             </div>
-            <div class="detail-grid">
-                <div>
-                    <div class="detail-label">Thuộc nhà trọ</div>
-                    <div class="detail-value" id="detailProperty">---</div>
-                </div>
-                <div>
-                    <div class="detail-label">Trạng thái</div>
-                    <div><span class="detail-status" id="detailStatus">---</span></div>
-                </div>
-                <div>
-                    <div class="detail-label">Giá thuê theo tháng</div>
-                    <div class="detail-value price" id="detailPrice">---</div>
-                </div>
-                <div>
-                    <div class="detail-label">Diện tích & Sức chứa</div>
-                    <div class="detail-value" id="detailSpecs">---</div>
-                </div>
-                <div class="detail-item full">
-                    <div class="detail-label">Tiện ích đi kèm</div>
-                    <div class="detail-amenities" id="detailAmenities"></div>
-                </div>
-                <div class="detail-item full">
-                    <div class="detail-label">Mô tả thêm</div>
-                    <div class="detail-value" id="detailDescription" style="font-weight: 400; line-height: 1.5;">Chưa có thông tin mô tả chi tiết cho phòng này.</div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-back" onclick="closeModal('detailModal')">Đóng</button>
         </div>
     </div>
-</div>
 
-<!-- =========================
+    <!-- =========================
      MODAL CHỈNH SỬA PHÒNG
 ========================= -->
-<div class="custom-modal" id="editModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="modal-title-area">
-                <div class="modal-title-icon">✏️</div>
-                <div>
-                    <h2 class="modal-title">Chỉnh sửa thông tin phòng</h2>
-                    <p class="modal-subtitle">Cập nhật thông tin chi tiết phòng trọ</p>
+    <div class="custom-modal" id="editModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <div class="modal-title-icon">✏️</div>
+                    <div>
+                        <h2 class="modal-title">Chỉnh sửa thông tin phòng</h2>
+                        <p class="modal-subtitle">Cập nhật thông tin chi tiết phòng trọ</p>
+                    </div>
                 </div>
+                <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
             </div>
-            <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
-        </div>
-        <form id="editRoomForm" onsubmit="saveEditRoom(event)">
-            <div class="modal-body">
-                <input type="hidden" id="editCardId">
-                <div class="form-grid">
-                    <div>
-                        <label class="form-label">Tên phòng <span class="required">*</span></label>
-                        <input type="text" class="edit-input" id="editRoomName" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Mã phòng <span class="required">*</span></label>
-                        <input type="text" class="edit-input" id="editRoomCode" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Thuộc nhà trọ</label>
-                        <select class="edit-select" id="editProperty">
-                            <option value="Nguyễn Thị Thập">Nguyễn Thị Thập</option>
-                            <option value="An Phú">An Phú</option>
-                            <option value="Tân Phú">Tân Phú</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Trạng thái</label>
-                        <select class="edit-select" id="editStatus">
-                            <option value="available">Còn trống</option>
-                            <option value="rented">Đang thuê</option>
-                            <option value="maintenance">Bảo trì</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Giá thuê (VNĐ/tháng) <span class="required">*</span></label>
-                        <input type="number" class="edit-input" id="editPrice" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Diện tích (m²)</label>
-                        <input type="number" class="edit-input" id="editArea" value="20">
-                    </div>
-                    <div>
-                        <label class="form-label">Sức chứa (người)</label>
-                        <input type="number" class="edit-input" id="editCapacity" value="2">
-                    </div>
-                    <div>
-                        <label class="form-label">Số WC</label>
-                        <input type="number" class="edit-input" id="editWc" value="1">
-                    </div>
-                    <div class="form-group full">
-                        <label class="form-label">Tiện ích</label>
-                        <div class="amenity-checks">
-                            <label class="amenity-check"><input type="checkbox" name="editAmenities" value="❄ Máy lạnh"> ❄ Máy lạnh</label>
-                            <label class="amenity-check"><input type="checkbox" name="editAmenities" value="📶 Wifi"> 📶 Wifi</label>
-                            <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🛏 Nội thất"> 🛏 Nội thất</label>
-                            <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🌅 Ban công"> 🌅 Ban công</label>
-                            <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🧺 Máy giặt"> 🧺 Máy giặt</label>
-                            <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🅿️ Chỗ để xe"> 🅿️ Chỗ để xe</label>
+            <form id="editRoomForm" onsubmit="saveEditRoom(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="editCardId">
+                    <div class="form-grid">
+                        <div>
+                            <label class="form-label">Tên phòng <span class="required">*</span></label>
+                            <input type="text" class="edit-input" id="editRoomName" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Mã phòng <span class="required">*</span></label>
+                            <input type="text" class="edit-input" id="editRoomCode" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Thuộc nhà trọ</label>
+                            <select class="edit-select" id="editProperty">
+                                <option value="Nguyễn Thị Thập">Nguyễn Thị Thập</option>
+                                <option value="An Phú">An Phú</option>
+                                <option value="Tân Phú">Tân Phú</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Trạng thái</label>
+                            <select class="edit-select" id="editStatus">
+                                <option value="available">Còn trống</option>
+                                <option value="rented">Đang thuê</option>
+                                <option value="maintenance">Bảo trì</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Giá thuê (VNĐ/tháng) <span class="required">*</span></label>
+                            <input type="number" class="edit-input" id="editPrice" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Diện tích (m²)</label>
+                            <input type="number" class="edit-input" id="editArea" value="20">
+                        </div>
+                        <div>
+                            <label class="form-label">Sức chứa (người)</label>
+                            <input type="number" class="edit-input" id="editCapacity" value="2">
+                        </div>
+                        <div>
+                            <label class="form-label">Số WC</label>
+                            <input type="number" class="edit-input" id="editWc" value="1">
+                        </div>
+                        <div class="form-group full">
+                            <label class="form-label">Tiện ích</label>
+                            <div class="amenity-checks">
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="❄ Máy lạnh"> ❄ Máy lạnh</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="📶 Wifi"> 📶 Wifi</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🛏 Nội thất"> 🛏 Nội thất</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🌅 Ban công"> 🌅 Ban công</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🧺 Máy giặt"> 🧺 Máy giặt</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🅿️ Chỗ để xe"> 🅿️ Chỗ để xe</label>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Hủy bỏ</button>
-                <button type="submit" class="btn-save">Lưu thay đổi</button>
-            </div>
-        </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Hủy bỏ</button>
+                    <button type="submit" class="btn-save">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<!-- =========================
+    <!-- =========================
      MODAL THÊM PHÒNG MỚI
 ========================= -->
-<div class="custom-modal" id="addModal">
-    <div class="modal-box add-modal-box">
-        <div class="modal-header">
-            <div class="modal-title-area">
-                <div class="modal-title-icon">➕</div>
-                <div>
-                    <h2 class="modal-title">Thêm phòng mới</h2>
-                    <p class="modal-subtitle">Tạo phòng trọ mới vào danh sách quản lý</p>
+    <div class="custom-modal" id="addModal">
+        <div class="modal-box add-modal-box">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <div class="modal-title-icon">➕</div>
+                    <div>
+                        <h2 class="modal-title">Thêm phòng mới</h2>
+                        <p class="modal-subtitle">Tạo phòng trọ mới vào danh sách quản lý</p>
+                    </div>
                 </div>
+                <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
             </div>
-            <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
-        </div>
-        <form id="addRoomForm" onsubmit="saveAddRoom(event)">
-            <div class="modal-body">
-                <div class="form-grid">
-                    <div>
-                        <label class="form-label">Tên phòng <span class="required">*</span></label>
-                        <input type="text" class="edit-input" id="addRoomName" placeholder="VD: Phòng 103" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Mã phòng <span class="required">*</span></label>
-                        <input type="text" class="edit-input" id="addRoomCode" placeholder="VD: P.103" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Thuộc nhà trọ</label>
-                        <select class="edit-select" id="addProperty">
-                            <option value="Nguyễn Thị Thập">Nguyễn Thị Thập</option>
-                            <option value="An Phú">An Phú</option>
-                            <option value="Tân Phú">Tân Phú</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Trạng thái ban đầu</label>
-                        <select class="edit-select" id="addStatus">
-                            <option value="available">Còn trống</option>
-                            <option value="rented">Đang thuê</option>
-                            <option value="maintenance">Bảo trì</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Giá thuê (VNĐ/tháng) <span class="required">*</span></label>
-                        <input type="number" class="edit-input" id="addPrice" placeholder="VD: 3000000" required>
-                    </div>
-                    <div>
-                        <label class="form-label">Diện tích (m²)</label>
-                        <input type="number" class="edit-input" id="addArea" value="20">
-                    </div>
-                    <div>
-                        <label class="form-label">Sức chứa (người)</label>
-                        <input type="number" class="edit-input" id="addCapacity" value="2">
-                    </div>
-                    <div>
-                        <label class="form-label">Số WC</label>
-                        <input type="number" class="edit-input" id="addWc" value="1">
-                    </div>
-                    <div class="form-group full">
-                        <label class="form-label">Tiện ích chọn sẵn</label>
-                        <div class="amenity-checks">
-                            <label class="amenity-check"><input type="checkbox" name="addAmenities" value="❄ Máy lạnh" checked> ❄ Máy lạnh</label>
-                            <label class="amenity-check"><input type="checkbox" name="addAmenities" value="📶 Wifi" checked> 📶 Wifi</label>
-                            <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🛏 Nội thất"> 🛏 Nội thất</label>
-                            <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🌅 Ban công"> 🌅 Ban công</label>
-                            <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🧺 Máy giặt"> 🧺 Máy giặt</label>
-                            <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🅿️ Chỗ để xe"> 🅿️ Chỗ để xe</label>
+            <form id="addRoomForm" onsubmit="saveAddRoom(event)">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div>
+                            <label class="form-label">Tên phòng <span class="required">*</span></label>
+                            <input type="text" class="edit-input" id="addRoomName" placeholder="VD: Phòng 103" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Mã phòng <span class="required">*</span></label>
+                            <input type="text" class="edit-input" id="addRoomCode" placeholder="VD: P.103" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Thuộc nhà trọ</label>
+                            <select class="edit-select" id="addProperty">
+                                <option value="Nguyễn Thị Thập">Nguyễn Thị Thập</option>
+                                <option value="An Phú">An Phú</option>
+                                <option value="Tân Phú">Tân Phú</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Trạng thái ban đầu</label>
+                            <select class="edit-select" id="addStatus">
+                                <option value="available">Còn trống</option>
+                                <option value="rented">Đang thuê</option>
+                                <option value="maintenance">Bảo trì</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Giá thuê (VNĐ/tháng) <span class="required">*</span></label>
+                            <input type="number" class="edit-input" id="addPrice" placeholder="VD: 3000000" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Diện tích (m²)</label>
+                            <input type="number" class="edit-input" id="addArea" value="20">
+                        </div>
+                        <div>
+                            <label class="form-label">Sức chứa (người)</label>
+                            <input type="number" class="edit-input" id="addCapacity" value="2">
+                        </div>
+                        <div>
+                            <label class="form-label">Số WC</label>
+                            <input type="number" class="edit-input" id="addWc" value="1">
+                        </div>
+                        <div class="form-group full">
+                            <label class="form-label">Tiện ích chọn sẵn</label>
+                            <div class="amenity-checks">
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="❄ Máy lạnh" checked> ❄ Máy lạnh</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="📶 Wifi" checked> 📶 Wifi</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🛏 Nội thất"> 🛏 Nội thất</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🌅 Ban công"> 🌅 Ban công</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🧺 Máy giặt"> 🧺 Máy giặt</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🅿️ Chỗ để xe"> 🅿️ Chỗ để xe</label>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Hủy bỏ</button>
-                <button type="submit" class="btn-add-save">Tạo phòng</button>
-            </div>
-        </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Hủy bỏ</button>
+                    <button type="submit" class="btn-add-save">Tạo phòng</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<!-- TOAST MESSAGE -->
-<div class="toast-message" id="toastMessage">Thông báo từ hệ thống</div>
+    <!-- TOAST MESSAGE -->
+    <div class="toast-message" id="toastMessage">Thông báo từ hệ thống</div>
 
-<!-- BOOTSTRAP 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- BOOTSTRAP 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- APPLICATION JAVASCRIPT LOGIC -->
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        updateStatistics();
-        initFilters();
-    });
-
-    // 1. CẬP NHẬT THỐNG KÊ (STATS)
-    function updateStatistics() {
-        const cards = document.querySelectorAll('.room-card');
-        let total = cards.length;
-        let available = 0;
-        let rented = 0;
-        let maintenance = 0;
-
-        cards.forEach(card => {
-            const status = card.dataset.status;
-            if (status === 'available') available++;
-            else if (status === 'rented') rented++;
-            else if (status === 'maintenance') maintenance++;
+    <!-- APPLICATION JAVASCRIPT LOGIC -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            updateStatistics();
+            initFilters();
         });
 
-        document.getElementById('totalRooms').innerText = total < 10 ? '0' + total : total;
-        document.getElementById('availableRooms').innerText = available < 10 ? '0' + available : available;
-        document.getElementById('rentedRooms').innerText = rented < 10 ? '0' + rented : rented;
-        document.getElementById('maintenanceRooms').innerText = maintenance < 10 ? '0' + maintenance : maintenance;
-    }
-
-    // 2. LOGIC TÌM KIẾM VÀ LỌC
-    function initFilters() {
-        const searchInput = document.getElementById('roomSearch');
-        const propertySelect = document.getElementById('propertyFilter');
-        const statusSelect = document.getElementById('statusFilter');
-
-        function filterRooms() {
-            const searchVal = searchInput.value.toLowerCase().trim();
-            const propertyVal = propertySelect.value;
-            const statusVal = statusSelect.value;
+        // 1. CẬP NHẬT THỐNG KÊ (STATS)
+        function updateStatistics() {
             const cards = document.querySelectorAll('.room-card');
-            let visibleCount = 0;
+            let total = cards.length;
+            let available = 0;
+            let rented = 0;
+            let maintenance = 0;
 
             cards.forEach(card => {
-                const searchData = (card.dataset.search || '').toLowerCase();
-                const propertyData = card.dataset.property;
-                const statusData = card.dataset.status;
-
-                const matchSearch = !searchVal || searchData.includes(searchVal);
-                const matchProperty = !propertyVal || propertyData === propertyVal;
-                const matchStatus = !statusVal || statusData === statusVal;
-
-                if (matchSearch && matchProperty && matchStatus) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
+                const status = card.dataset.status;
+                if (status === 'available') available++;
+                else if (status === 'rented') rented++;
+                else if (status === 'maintenance') maintenance++;
             });
 
-            // Xử lý thông báo khi tìm kiếm không ra kết quả
-            let emptyMsg = document.getElementById('emptyRoomMsg');
-            if (visibleCount === 0) {
-                if (!emptyMsg) {
-                    emptyMsg = document.createElement('div');
-                    emptyMsg.id = 'emptyRoomMsg';
-                    emptyMsg.className = 'empty-room-message';
-                    emptyMsg.innerHTML = '<div class="empty-room-icon">🔍</div>Không tìm thấy phòng nào phù hợp với bộ lọc.';
-                    document.getElementById('roomGrid').appendChild(emptyMsg);
-                }
-            } else if (emptyMsg) {
-                emptyMsg.remove();
-            }
+            document.getElementById('totalRooms').innerText = total < 10 ? '0' + total : total;
+            document.getElementById('availableRooms').innerText = available < 10 ? '0' + available : available;
+            document.getElementById('rentedRooms').innerText = rented < 10 ? '0' + rented : rented;
+            document.getElementById('maintenanceRooms').innerText = maintenance < 10 ? '0' + maintenance : maintenance;
         }
 
-        searchInput.addEventListener('input', filterRooms);
-        propertySelect.addEventListener('change', filterRooms);
-        statusSelect.addEventListener('change', filterRooms);
-    }
+        // 2. LOGIC TÌM KIẾM VÀ LỌC
+        function initFilters() {
+            const searchInput = document.getElementById('roomSearch');
+            const propertySelect = document.getElementById('propertyFilter');
+            const statusSelect = document.getElementById('statusFilter');
 
-    // 3. XỬ LÝ TOAST
-    function showToast(text) {
-        const toast = document.getElementById('toastMessage');
-        toast.innerText = text;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    }
+            function filterRooms() {
+                const searchVal = searchInput.value.toLowerCase().trim();
+                const propertyVal = propertySelect.value;
+                const statusVal = statusSelect.value;
+                const cards = document.querySelectorAll('.room-card');
+                let visibleCount = 0;
 
-    // 4. BẬT/TẮT MODAL
-    function openModal(id) {
-        document.getElementById(id).classList.add('show');
-    }
+                cards.forEach(card => {
+                    const searchData = (card.dataset.search || '').toLowerCase();
+                    const propertyData = card.dataset.property;
+                    const statusData = card.dataset.status;
 
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('show');
-    }
+                    const matchSearch = !searchVal || searchData.includes(searchVal);
+                    const matchProperty = !propertyVal || propertyData === propertyVal;
+                    const matchStatus = !statusVal || statusData === statusVal;
 
-    // 5. MỞ MODAL CHI TIẾT PHÒNG
-    function openDetailModal(btn) {
-        const card = btn.closest('.room-card');
-        const code = card.querySelector('.room-code').innerText;
-        const name = card.querySelector('h3').innerText;
-        const prop = card.querySelector('.room-property').innerText;
-        const price = card.querySelector('.room-price').innerText;
-        const img = card.querySelector('.room-img img').src;
-        const statusText = card.querySelector('.room-status').innerText;
-        const statusClass = card.dataset.status;
+                    if (matchSearch && matchProperty && matchStatus) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
 
-        // Điền dữ liệu
-        document.getElementById('detailTitle').innerText = name;
-        document.getElementById('detailSubtitle').innerText = "Mã phòng: " + code;
-        document.getElementById('detailProperty').innerText = prop;
-        document.getElementById('detailPrice').innerText = price;
-        document.getElementById('detailImg').src = img;
+                // Xử lý thông báo khi tìm kiếm không ra kết quả
+                let emptyMsg = document.getElementById('emptyRoomMsg');
+                if (visibleCount === 0) {
+                    if (!emptyMsg) {
+                        emptyMsg = document.createElement('div');
+                        emptyMsg.id = 'emptyRoomMsg';
+                        emptyMsg.className = 'empty-room-message';
+                        emptyMsg.innerHTML = '<div class="empty-room-icon">🔍</div>Không tìm thấy phòng nào phù hợp với bộ lọc.';
+                        document.getElementById('roomGrid').appendChild(emptyMsg);
+                    }
+                } else if (emptyMsg) {
+                    emptyMsg.remove();
+                }
+            }
 
-        const infoSpans = card.querySelectorAll('.room-info span');
-        let specs = [];
-        infoSpans.forEach(s => specs.push(s.innerText));
-        document.getElementById('detailSpecs').innerText = specs.join(' • ');
+            searchInput.addEventListener('input', filterRooms);
+            propertySelect.addEventListener('change', filterRooms);
+            statusSelect.addEventListener('change', filterRooms);
+        }
 
-        const statusEl = document.getElementById('detailStatus');
-        statusEl.innerText = statusText;
-        statusEl.className = 'detail-status ' + statusClass;
+        // 3. XỬ LÝ TOAST
+        function showToast(text) {
+            const toast = document.getElementById('toastMessage');
+            toast.innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
 
-        const amenities = card.querySelectorAll('.amenity');
-        const amenitiesContainer = document.getElementById('detailAmenities');
-        amenitiesContainer.innerHTML = '';
-        amenities.forEach(a => {
-            const span = document.createElement('span');
-            span.className = 'detail-amenity';
-            span.innerText = a.innerText;
-            amenitiesContainer.appendChild(span);
-        });
+        // 4. BẬT/TẮT MODAL
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
 
-        openModal('detailModal');
-    }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
 
-    // 6. MỞ & LƯU EDIT MODAL
-    function openEditModal(btn) {
-        const card = btn.closest('.room-card');
-        document.getElementById('editCardId').value = card.dataset.roomId;
+        // 5. MỞ MODAL CHI TIẾT PHÒNG
+        function openDetailModal(btn) {
+            const card = btn.closest('.room-card');
+            const code = card.querySelector('.room-code').innerText;
+            const name = card.querySelector('h3').innerText;
+            const prop = card.querySelector('.room-property').innerText;
+            const price = card.querySelector('.room-price').innerText;
+            const img = card.querySelector('.room-img img').src;
+            const statusText = card.querySelector('.room-status').innerText;
+            const statusClass = card.dataset.status;
 
-        const name = card.querySelector('h3').innerText;
-        const code = card.querySelector('.room-code').innerText;
-        const priceText = card.querySelector('.room-price').innerText.replace(/\D/g, '');
+            // Điền dữ liệu
+            document.getElementById('detailTitle').innerText = name;
+            document.getElementById('detailSubtitle').innerText = "Mã phòng: " + code;
+            document.getElementById('detailProperty').innerText = prop;
+            document.getElementById('detailPrice').innerText = price;
+            document.getElementById('detailImg').src = img;
 
-        document.getElementById('editRoomName').value = name;
-        document.getElementById('editRoomCode').value = code;
-        document.getElementById('editProperty').value = card.dataset.property;
-        document.getElementById('editStatus').value = card.dataset.status;
-        document.getElementById('editPrice').value = priceText;
+            const infoSpans = card.querySelectorAll('.room-info span');
+            let specs = [];
+            infoSpans.forEach(s => specs.push(s.innerText));
+            document.getElementById('detailSpecs').innerText = specs.join(' • ');
 
-        // Checkbox tiện ích
-        const currentAmenities = Array.from(card.querySelectorAll('.amenity')).map(a => a.innerText.trim());
-        const checkboxes = document.querySelectorAll('input[name="editAmenities"]');
-        checkboxes.forEach(cb => {
-            cb.checked = currentAmenities.includes(cb.value);
-        });
+            const statusEl = document.getElementById('detailStatus');
+            statusEl.innerText = statusText;
+            statusEl.className = 'detail-status ' + statusClass;
 
-        openModal('editModal');
-    }
-
-    function saveEditRoom(e) {
-        e.preventDefault();
-        const roomId = document.getElementById('editCardId').value;
-        const card = document.querySelector(`.room-card[data-room-id="${roomId}"]`);
-
-        if (card) {
-            const name = document.getElementById('editRoomName').value;
-            const code = document.getElementById('editRoomCode').value;
-            const property = document.getElementById('editProperty').value;
-            const status = document.getElementById('editStatus').value;
-            const price = parseInt(document.getElementById('editPrice').value).toLocaleString('vi-VN') + 'đ / tháng';
-
-            // Cập nhật DOM
-            card.dataset.property = property;
-            card.dataset.status = status;
-            card.dataset.search = `${name} ${code} ${property}`.toLowerCase();
-
-            card.querySelector('h3').innerText = name;
-            card.querySelector('.room-code').innerText = code;
-            card.querySelector('.room-property').innerText = "Nhà trọ " + property;
-            card.querySelector('.room-price').innerText = price;
-
-            const statusTag = card.querySelector('.room-status');
-            statusTag.className = 'room-status ' + status;
-            statusTag.innerText = status === 'available' ? 'CÒN TRỐNG' : status === 'rented' ? 'ĐANG THUÊ' : 'BẢO TRÌ';
-
-            // Tiện ích
-            const amenitiesContainer = card.querySelector('.amenities');
+            const amenities = card.querySelectorAll('.amenity');
+            const amenitiesContainer = document.getElementById('detailAmenities');
             amenitiesContainer.innerHTML = '';
-            const checkedBoxes = document.querySelectorAll('input[name="editAmenities"]:checked');
-            checkedBoxes.forEach(cb => {
+            amenities.forEach(a => {
                 const span = document.createElement('span');
-                span.className = 'amenity';
-                span.innerText = cb.value;
+                span.className = 'detail-amenity';
+                span.innerText = a.innerText;
                 amenitiesContainer.appendChild(span);
             });
 
-            updateStatistics();
-            closeModal('editModal');
-            showToast('Đã lưu thông tin phòng thành công!');
+            openModal('detailModal');
         }
-    }
 
-    // 7. MỞ & LƯU ADD MODAL
-    function openAddModal() {
-        document.getElementById('addRoomForm').reset();
-        openModal('addModal');
-    }
+        // 6. MỞ & LƯU EDIT MODAL
+        function openEditModal(btn) {
+            const card = btn.closest('.room-card');
+            document.getElementById('editCardId').value = card.dataset.roomId;
 
-    function saveAddRoom(e) {
-        e.preventDefault();
-        const name = document.getElementById('addRoomName').value;
-        const code = document.getElementById('addRoomCode').value;
-        const property = document.getElementById('addProperty').value;
-        const status = document.getElementById('addStatus').value;
-        const priceNum = parseInt(document.getElementById('addPrice').value) || 0;
-        const price = priceNum.toLocaleString('vi-VN') + 'đ / tháng';
-        const area = document.getElementById('addArea').value || '20';
-        const capacity = document.getElementById('addCapacity').value || '2';
-        const wc = document.getElementById('addWc').value || '1';
+            const name = card.querySelector('h3').innerText;
+            const code = card.querySelector('.room-code').innerText;
+            const priceText = card.querySelector('.room-price').innerText.replace(/\D/g, '');
 
-        const roomId = Date.now().toString(); // Tạo ID tạm thời
-        const statusText = status === 'available' ? 'CÒN TRỐNG' : status === 'rented' ? 'ĐANG THUÊ' : 'BẢO TRÌ';
+            document.getElementById('editRoomName').value = name;
+            document.getElementById('editRoomCode').value = code;
+            document.getElementById('editProperty').value = card.dataset.property;
+            document.getElementById('editStatus').value = card.dataset.status;
+            document.getElementById('editPrice').value = priceText;
 
-        // Lấy danh sách tiện ích được chọn
-        const checkedBoxes = document.querySelectorAll('input[name="addAmenities"]:checked');
-        let amenitiesHTML = '';
-        checkedBoxes.forEach(cb => {
-            amenitiesHTML += `<span class="amenity">${cb.value}</span>`;
-        });
+            // Checkbox tiện ích
+            const currentAmenities = Array.from(card.querySelectorAll('.amenity')).map(a => a.innerText.trim());
+            const checkboxes = document.querySelectorAll('input[name="editAmenities"]');
+            checkboxes.forEach(cb => {
+                cb.checked = currentAmenities.includes(cb.value);
+            });
 
-        const newCardHTML = `
+            openModal('editModal');
+        }
+
+        function saveEditRoom(e) {
+            e.preventDefault();
+            const roomId = document.getElementById('editCardId').value;
+            const card = document.querySelector(`.room-card[data-room-id="${roomId}"]`);
+
+            if (card) {
+                const name = document.getElementById('editRoomName').value;
+                const code = document.getElementById('editRoomCode').value;
+                const property = document.getElementById('editProperty').value;
+                const status = document.getElementById('editStatus').value;
+                const price = parseInt(document.getElementById('editPrice').value).toLocaleString('vi-VN') + 'đ / tháng';
+
+                // Cập nhật DOM
+                card.dataset.property = property;
+                card.dataset.status = status;
+                card.dataset.search = `${name} ${code} ${property}`.toLowerCase();
+
+                card.querySelector('h3').innerText = name;
+                card.querySelector('.room-code').innerText = code;
+                card.querySelector('.room-property').innerText = "Nhà trọ " + property;
+                card.querySelector('.room-price').innerText = price;
+
+                const statusTag = card.querySelector('.room-status');
+                statusTag.className = 'room-status ' + status;
+                statusTag.innerText = status === 'available' ? 'CÒN TRỐNG' : status === 'rented' ? 'ĐANG THUÊ' : 'BẢO TRÌ';
+
+                // Tiện ích
+                const amenitiesContainer = card.querySelector('.amenities');
+                amenitiesContainer.innerHTML = '';
+                const checkedBoxes = document.querySelectorAll('input[name="editAmenities"]:checked');
+                checkedBoxes.forEach(cb => {
+                    const span = document.createElement('span');
+                    span.className = 'amenity';
+                    span.innerText = cb.value;
+                    amenitiesContainer.appendChild(span);
+                });
+
+                updateStatistics();
+                closeModal('editModal');
+                showToast('Đã lưu thông tin phòng thành công!');
+            }
+        }
+
+        // 7. MỞ & LƯU ADD MODAL
+        function openAddModal() {
+            document.getElementById('addRoomForm').reset();
+            openModal('addModal');
+        }
+
+        function saveAddRoom(e) {
+            e.preventDefault();
+            const name = document.getElementById('addRoomName').value;
+            const code = document.getElementById('addRoomCode').value;
+            const property = document.getElementById('addProperty').value;
+            const status = document.getElementById('addStatus').value;
+            const priceNum = parseInt(document.getElementById('addPrice').value) || 0;
+            const price = priceNum.toLocaleString('vi-VN') + 'đ / tháng';
+            const area = document.getElementById('addArea').value || '20';
+            const capacity = document.getElementById('addCapacity').value || '2';
+            const wc = document.getElementById('addWc').value || '1';
+
+            const roomId = Date.now().toString(); // Tạo ID tạm thời
+            const statusText = status === 'available' ? 'CÒN TRỐNG' : status === 'rented' ? 'ĐANG THUÊ' : 'BẢO TRÌ';
+
+            // Lấy danh sách tiện ích được chọn
+            const checkedBoxes = document.querySelectorAll('input[name="addAmenities"]:checked');
+            let amenitiesHTML = '';
+            checkedBoxes.forEach(cb => {
+                amenitiesHTML += `<span class="amenity">${cb.value}</span>`;
+            });
+
+            const newCardHTML = `
             <article class="room-card" data-room-id="${roomId}" data-property="${property}" data-status="${status}" data-search="${name.toLowerCase()} ${code.toLowerCase()} ${property.toLowerCase()}">
                 <div class="room-img">
                     <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80" alt="${name}">
@@ -1389,11 +1568,12 @@
             </article>
         `;
 
-        document.getElementById('roomGrid').insertAdjacentHTML('afterbegin', newCardHTML);
-        updateStatistics();
-        closeModal('addModal');
-        showToast('Đã thêm phòng mới thành công!');
-    }
-</script>
+            document.getElementById('roomGrid').insertAdjacentHTML('afterbegin', newCardHTML);
+            updateStatistics();
+            closeModal('addModal');
+            showToast('Đã thêm phòng mới thành công!');
+        }
+    </script>
 </body>
+
 </html>
