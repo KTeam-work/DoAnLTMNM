@@ -1,4 +1,3 @@
-```php
 <?php
 
 namespace App\Models;
@@ -98,5 +97,8 @@ class User extends Authenticatable
             'tenant_id'
         );
     }
+    public function favorites()
+{
+    return $this->hasMany(Favorite::class);
 }
-```
+}

@@ -1,4 +1,4 @@
-```php
+
 <?php
 
 use Illuminate\Support\Facades\Auth;
@@ -19,10 +19,17 @@ use App\Http\Controllers\Owner\OwnerTenantsController;
 use App\Http\Controllers\Owner\OwnerContractController;
 use App\Http\Controllers\Owner\OwnerServiceController;
 use App\Http\Controllers\Owner\OwnerUtilitiesController;
-use App\Http\Controllers\Owner\OwnerRoomController as OwnerRoomRoomController;
+
 use App\Http\Controllers\Owner\OwnerRentailController;
 use App\Http\Controllers\Owner\OwnerApptionmentController;
 use App\Http\Controllers\Owner\OwnerpropertiesController;
+use App\Http\Controllers\Tenant\RoomController;
+use App\Http\Controllers\Tenant\FavoriteController;
+use App\Http\Controllers\Tenant\AppointmentController;
+use App\Http\Controllers\Tenant\TenantDashboardController;
+use App\Http\Controllers\Owner\OwnerDashboardController;
+use App\Http\Controllers\Owner\OwnerRoomController;
+use App\Http\Controllers\Owner\OwnerRentalPostController;
 
 
 /*
@@ -115,7 +122,6 @@ Route::middleware('auth')->group(function () {
         }
 
         return view('admin.dashboard');
-
     })->name('admin.dashboard');
 
 
@@ -126,7 +132,6 @@ Route::middleware('auth')->group(function () {
         }
 
         return view('admin.users');
-
     })->name('admin.users');
 
 
@@ -137,7 +142,6 @@ Route::middleware('auth')->group(function () {
         }
 
         return view('admin.rental-posts');
-
     })->name('admin.rental-posts');
 
 
@@ -148,7 +152,6 @@ Route::middleware('auth')->group(function () {
         }
 
         return view('admin.statistics');
-
     })->name('admin.statistics');
 
 
@@ -157,16 +160,12 @@ Route::middleware('auth')->group(function () {
     | CHỦ TRỌ
     |--------------------------------------------------------------------------
     */
-
-    Route::get('/landlord/dashboard', function () {
-
-        if (Auth::user()->role !== 'owner') {
-            abort(403);
-        }
-
-        return view('Layout.landlord');
-
-    })->name('landlord.dashboard');
+    Route::get('/landlord/dashboard', [
+        OwnerDashboardController::class,
+        'index'
+    ])
+        ->middleware('auth')
+        ->name('landlord.dashboard');
 
 
     /*
@@ -175,16 +174,10 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/tenant/dashboard', function () {
-
-        if (Auth::user()->role !== 'tenant') {
-            abort(403);
-        }
-
-        return view('Layout.tenant');
-
-    })->name('tenant.dashboard');
-
+    Route::get('/tenant/dashboard', [
+        TenantDashboardController::class,
+        'index'
+    ])->name('tenant.dashboard');
 });
 
 
@@ -195,31 +188,39 @@ Route::middleware('auth')->group(function () {
 */
 
 Route::get('/tenant/home', function () {
-    return view('Layout.tenant');
-})->name('tenant.home');
+    return redirect()->route('tenant.dashboard');
+})->middleware('auth')->name('tenant.home');
 
 Route::redirect('/tenant', '/tenant/home')
     ->name('tenant');
 
-Route::get('/rooms', function () {
-    return view('rooms.index');
-})->name('rooms.index');
+Route::get('/rooms', [RoomController::class, 'index'])
+    ->name('rooms.index');
 
-Route::get('/rooms/{id}', function ($id) {
-    return view('rooms.show', compact('id'));
-})->name('rooms.show');
+Route::get('/rooms/{id}', [RoomController::class, 'show'])
+    ->name('rooms.show');
 
-Route::get('/favorites', function () {
-    return view('favorites.index');
-})->name('favorites.index');
 
-Route::get('/appointments', function () {
-    return view('appointments.index');
-})->name('appointments.index');
+Route::get('/favorites', [FavoriteController::class, 'index'])
+    ->name('favorites.index');
 
-Route::get('/appointments/create', function () {
-    return view('appointments.create');
-})->name('appointments.create');
+Route::post('/favorites', [FavoriteController::class, 'store'])
+    ->name('favorites.store');
+
+Route::delete('/favorites/{id}', [FavoriteController::class, 'destroy'])
+    ->name('favorites.destroy');
+
+Route::get('/appointments', [AppointmentController::class, 'index'])
+    ->name('appointments.index');
+
+Route::get('/appointments/create', [AppointmentController::class, 'create'])
+    ->name('appointments.create');
+
+Route::post('/appointments', [AppointmentController::class, 'store'])
+    ->name('appointments.store');
+
+Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])
+    ->name('appointments.destroy');
 
 
 /*
@@ -482,9 +483,79 @@ Route::delete(
 | OWNER - HÓA ĐƠN / THANH TOÁN
 |--------------------------------------------------------------------------
 */
-
 Route::get(
     '/owner/invoices',
     [OwnerInvoiceController::class, 'index']
-)->name('owner.
-```
+)->name('owner.invoices.index');
+
+Route::get(
+    '/owner/invoices/{invoice}',
+    [OwnerInvoiceController::class, 'show']
+)->name('owner.invoices.show');
+
+
+/*
+|--------------------------------------------------------------------------
+| OWNER - THANH TOÁN
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/owner/payments',
+    [OwnerPaymentController::class, 'index']
+)->name('owner.payments.index');
+
+
+/*
+|--------------------------------------------------------------------------
+| OWNER - BẢO TRÌ
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/owner/maintenance',
+    [OwnerMaintenanceController::class, 'index']
+)->name('owner.maintenance.index');
+
+
+/*
+|--------------------------------------------------------------------------
+| OWNER - ĐÁNH GIÁ
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/owner/reviews',
+    [OwnerReviewController::class, 'index']
+)->name('owner.reviews.index');
+
+
+/*
+|--------------------------------------------------------------------------
+| OWNER - PHÒNG TRỌ
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'owner/rooms',
+    OwnerRoomController::class
+)->names('owner.rooms');
+
+
+
+Route::resource(
+    'owner/appointments',
+    OwnerApptionmentController::class
+)->names('owner.appointments');
+
+
+
+Route::resource(
+    'owner/properties',
+    OwnerpropertiesController::class
+)->names('owner.properties');
+
+Route::resource(
+    'owner/rental-posts',
+    OwnerRentalPostController::class
+)->names('owner.rental-posts');

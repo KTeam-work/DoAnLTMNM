@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,684 +21,410 @@
 
 <body>
 
-<!-- =========================================================
+    <!-- =========================================================
      NAVBAR
 ========================================================= -->
-<nav class="navbar navbar-expand-lg app-navbar">
+    <nav class="navbar navbar-expand-lg app-navbar">
 
-    <div class="container-fluid">
+        <div class="container-fluid">
 
-        <a class="logo" href="{{ url('/tenant') }}">
-            Trọ <span>Ơi</span>
-        </a>
+            <a class="logo" href="{{ url('/tenant') }}">
+                Trọ <span>Ơi</span>
+            </a>
 
-        <button
-            class="navbar-toggler bg-light"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#mainMenu"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <button
+                class="navbar-toggler bg-light"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <div class="collapse navbar-collapse" id="mainMenu">
+            <div class="collapse navbar-collapse" id="mainMenu">
 
-            <ul class="navbar-nav mx-auto align-items-lg-center">
+                <ul class="navbar-nav mx-auto align-items-lg-center">
 
-            <li class="nav-item">
-    <a class="app-nav-link" href="{{ route('tenant.home') }}">
-        Trang chủ
-    </a>
-</li>
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ route('tenant.home') }}">
+                            Trang chủ
+                        </a>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="app-nav-link active"
-                       href="{{ route('rooms.index') }}">
-                        Tìm phòng
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a class="app-nav-link active"
+                            href="{{ route('rooms.index') }}">
+                            Tìm phòng
+                        </a>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="app-nav-link" href="{{ route('favorites.index') }}">
-                        Yêu thích
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ route('favorites.index') }}">
+                            Yêu thích
+                        </a>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="app-nav-link" href="{{ route('appointments.index') }}">
-                        Lịch xem phòng
-                    </a>
-                </li>
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="{{ route('appointments.index') }}">
+                            Lịch xem phòng
+                        </a>
+                    </li>
 
-                <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-               <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
+                    <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
+                    <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
 
-              <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-              <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
+                    <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+                    <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
 
-            </ul>
+                </ul>
 
 
-            <div class="navbar-actions">
+                <div class="navbar-actions">
 
-                <button class="notif-btn">
-                    🔔
-                    <span class="notif-dot"></span>
-                </button>
-
-                <a href="#" class="user-chip">
-
-                    <span class="user-avatar">
-                        TH
-                    </span>
-
-                    <span class="user-meta">
-
-                        <span class="user-name d-block">
-                            Thanh Huyền
-                        </span>
-
-                        <span class="user-role">
-                            Người thuê
-                        </span>
-
-                    </span>
-
-                    <span class="caret">
-                        ▾
-                    </span>
-
-                </a>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</nav>
-
-
-<!-- =========================================================
-     HEADER
-========================================================= -->
-<section class="hero">
-
-    <div class="hero-inner">
-
-        <div class="hero-kicker">
-            🔎 TÌM KIẾM PHÒNG TRỌ
-        </div>
-
-        <h1>
-            Tìm phòng phù hợp,
-            <br>
-            <span class="highlight">
-                ở đúng nơi bạn muốn.
-            </span>
-        </h1>
-
-        <p class="hero-desc">
-            Khám phá phòng trọ, căn hộ và nhà cho thuê phù hợp
-            với nhu cầu của bạn.
-        </p>
-
-
-        <!-- SEARCH -->
-        <div class="search-panel">
-
-            <div class="row g-0 align-items-center">
-
-                <div class="col-lg-3">
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Khu vực
-                        </span>
-
-                        <div class="field-value">
-                            📍 TP. Hồ Chí Minh
-                        </div>
-
-                    </div>
-                </div>
-
-
-                <div class="col-lg-2">
-
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Khoảng giá
-                        </span>
-
-                        <div class="field-value field-muted">
-                            Tất cả mức giá
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-lg-2">
-
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Diện tích
-                        </span>
-
-                        <div class="field-value field-muted">
-                            Tất cả
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-lg-2">
-
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Tiện ích
-                        </span>
-
-                        <div class="field-value field-muted">
-                            Tất cả
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-lg-3 p-2">
-
-                    <button class="search-btn">
-                        🔎 Tìm kiếm phòng
+                    <button class="notif-btn">
+                        🔔
+                        <span class="notif-dot"></span>
                     </button>
 
+                    <a href="#" class="user-chip">
+
+                        <span class="user-avatar">
+                            TH
+                        </span>
+
+                        <span class="user-meta">
+
+                            <span class="user-name d-block">
+                                Thanh Huyền
+                            </span>
+
+                            <span class="user-role">
+                                Người thuê
+                            </span>
+
+                        </span>
+
+                        <span class="caret">
+                            ▾
+                        </span>
+
+                    </a>
+
                 </div>
 
             </div>
 
         </div>
 
+    </nav>
 
-        <!-- QUICK FILTER -->
-        <div class="quick-filters">
 
-            <span class="quick-filter">
-                ≤ 2 triệu
-            </span>
+    <!-- =========================================================
+     HEADER
+========================================================= -->
+    <section class="hero">
 
-            <span class="quick-filter">
-                2 - 3 triệu
-            </span>
+        <div class="hero-inner">
 
-            <span class="quick-filter">
-                3 - 5 triệu
-            </span>
+            <div class="hero-kicker">
+                🔎 TÌM KIẾM PHÒNG TRỌ
+            </div>
 
-            <span class="quick-filter">
-                Có máy lạnh
-            </span>
+            <h1>
+                Tìm phòng phù hợp,
+                <br>
+                <span class="highlight">
+                    ở đúng nơi bạn muốn.
+                </span>
+            </h1>
 
-            <span class="quick-filter">
-                Có gác
-            </span>
+            <p class="hero-desc">
+                Khám phá phòng trọ, căn hộ và nhà cho thuê phù hợp
+                với nhu cầu của bạn.
+            </p>
 
-            <span class="quick-filter">
-                Có ban công
-            </span>
 
-            <span class="quick-filter">
-                Nuôi thú cưng
-            </span>
+            <!-- SEARCH -->
+            <div class="search-panel">
+
+                <div class="row g-0 align-items-center">
+
+                    <div class="col-lg-3">
+                        <div class="search-field">
+
+                            <span class="field-label">
+                                Khu vực
+                            </span>
+
+                            <div class="field-value">
+                                📍 TP. Hồ Chí Minh
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-2">
+
+                        <div class="search-field">
+
+                            <span class="field-label">
+                                Khoảng giá
+                            </span>
+
+                            <div class="field-value field-muted">
+                                Tất cả mức giá
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-lg-2">
+
+                        <div class="search-field">
+
+                            <span class="field-label">
+                                Diện tích
+                            </span>
+
+                            <div class="field-value field-muted">
+                                Tất cả
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-lg-2">
+
+                        <div class="search-field">
+
+                            <span class="field-label">
+                                Tiện ích
+                            </span>
+
+                            <div class="field-value field-muted">
+                                Tất cả
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-lg-3 p-2">
+
+                        <button class="search-btn">
+                            🔎 Tìm kiếm phòng
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUICK FILTER -->
+            <div class="quick-filters">
+
+                <span class="quick-filter">
+                    ≤ 2 triệu
+                </span>
+
+                <span class="quick-filter">
+                    2 - 3 triệu
+                </span>
+
+                <span class="quick-filter">
+                    3 - 5 triệu
+                </span>
+
+                <span class="quick-filter">
+                    Có máy lạnh
+                </span>
+
+                <span class="quick-filter">
+                    Có gác
+                </span>
+
+                <span class="quick-filter">
+                    Có ban công
+                </span>
+
+                <span class="quick-filter">
+                    Nuôi thú cưng
+                </span>
+
+            </div>
 
         </div>
 
-    </div>
-
-</section>
+    </section>
 
 
-<!-- =========================================================
+    <!-- =========================================================
      ROOM LIST
 ========================================================= -->
-<div class="page-wrap">
+    <div class="page-wrap">
 
-    <div class="page-header">
+        <div class="page-header">
 
-        <div>
+            <div>
 
-            <h2 class="page-title">
-                Danh sách phòng
-            </h2>
+                <h2 class="page-title">
+                    Danh sách phòng
+                </h2>
 
-            <div class="page-desc">
-                Tìm thấy 6 phòng phù hợp với nhu cầu của bạn.
+                <div class="page-desc">
+                    Tìm thấy {{ $rooms->total() }} phòng phù hợp với nhu cầu của bạn.
+                </div>
+
             </div>
+
+            <a
+                href="{{ url('/tenant') }}"
+                class="section-link">
+                ← Về trang chủ
+            </a>
 
         </div>
 
-        <a
-            href="{{ url('/tenant') }}"
-            class="section-link"
-        >
-            ← Về trang chủ
-        </a>
 
-    </div>
-
-
-    <!-- =====================================================
+        <!-- =====================================================
          ROOM CARDS
     ====================================================== -->
-    <div class="row g-4">
 
+        <div class="row g-4">
 
-        <!-- ROOM 1 -->
-        <div class="col-md-6 col-lg-4">
+            @forelse ($rooms as $room)
 
-            <div class="room-card">
+            @php
+            $favoriteId = $favoriteIdsByRoom[$room->id] ?? null;
+            $isFavorite = $favoriteId !== null;
+            @endphp
 
-                <button class="fav-btn">
-                    ♥
-                </button>
+            <div class="col-md-6 col-lg-4">
+                <div class="room-card">
 
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
-                    alt="Phòng trọ máy lạnh gần Quận 7"
-                >
+                    {{-- Nút thêm hoặc bỏ yêu thích --}}
+                    <form
+                        action="{{ $isFavorite
+                        ? route('favorites.destroy', $favoriteId)
+                        : route('favorites.store') }}"
+                        method="POST"
+                        class="favorite-form">
+                        @csrf
 
-                <div class="room-body">
+                        @if ($isFavorite)
+                        @method('DELETE')
+                        @else
+                        <input
+                            type="hidden"
+                            name="room_id"
+                            value="{{ $room->id }}">
+                        @endif
 
-                    <div class="room-badges">
+                        <button
+                            type="submit"
+                            class="fav-btn"
+                            title="{{ $isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích' }}"
+                            aria-label="{{ $isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích' }}"
+                            @if ($isFavorite)
+                            style="color: #e53935;"
+                            @endif>
+                            {{ $isFavorite ? '♥' : '♡' }}
+                        </button>
+                    </form>
 
-                        <span class="badge-room hot">
-                            🔥 HOT
-                        </span>
+                    {{-- Ảnh minh họa --}}
+                    <img
+                        class="room-img"
+                        src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
+                        alt="{{ $room->name ?? 'Phòng trọ' }}"
+                        loading="lazy">
 
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
+                    <div class="room-body">
 
-                    </div>
-
-                    <div class="room-title">
-                        Phòng trọ máy lạnh gần Q.7
-                    </div>
-
-                    <div class="room-address">
-                        Đường Nguyễn Thị Thập, Quận 7, TP.HCM
-                    </div>
-
-                    <div class="room-stats">
-
-                        <span>📐 22 m²</span>
-                        <span>❄️ Máy lạnh</span>
-                        <span>🚗 Bãi xe</span>
-
-                    </div>
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            2,8 triệu
-                            <small>/ tháng</small>
+                        <div class="room-badges">
+                            <span class="badge-room">
+                                Mã phòng: {{ $room->room_code ?? $room->id }}
+                            </span>
                         </div>
 
-                        <a
-                            href="{{ route('rooms.show', 1) }}"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </a>
+                        <div class="room-title">
+                            {{ $room->name ?? 'Phòng trọ' }}
+                        </div>
+
+                        <div class="room-address">
+                            {{ $room->property?->address ?? 'Chưa cập nhật địa chỉ' }}
+
+                            @if ($room->property?->ward)
+                            , {{ $room->property->ward }}
+                            @endif
+
+                            @if ($room->property?->district)
+                            , {{ $room->property->district }}
+                            @endif
+                        </div>
+
+                        <div class="room-stats">
+                            <span>
+                                📐 {{ number_format((float) $room->area, 0, ',', '.') }} m²
+                            </span>
+
+                            @forelse ($room->amenities->take(2) as $amenity)
+                            <span>{{ $amenity->name }}</span>
+                            @empty
+                            <span>Chưa cập nhật tiện ích</span>
+                            @endforelse
+                        </div>
+
+                        <div class="room-bottom">
+                            <div class="room-price">
+                                {{ number_format((float) $room->price, 0, ',', '.') }} đ
+                                <small>/ tháng</small>
+                            </div>
+
+                            <a
+                                href="{{ route('rooms.show', $room->id) }}"
+                                class="detail-btn">
+                                Xem phòng
+                            </a>
+                        </div>
 
                     </div>
-
                 </div>
-
             </div>
+
+            @empty
+
+            <div class="col-12">
+                <div class="alert alert-light text-center py-5">
+                    <h5>Chưa tìm thấy phòng phù hợp</h5>
+                    <p class="mb-0">
+                        Hiện chưa có phòng nào đáp ứng điều kiện tìm kiếm.
+                    </p>
+                </div>
+            </div>
+
+            @endforelse
 
         </div>
 
-
-        <!-- ROOM 2 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button class="fav-btn">
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1000&q=80"
-                    alt="Căn hộ mini đầy đủ nội thất"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
-
-                    </div>
-
-                    <div class="room-title">
-                        Căn hộ mini đầy đủ nội thất
-                    </div>
-
-                    <div class="room-address">
-                        Phường An Phú, TP. Thủ Đức, TP.HCM
-                    </div>
-
-                    <div class="room-stats">
-
-                        <span>📐 35 m²</span>
-                        <span>🛋️ Full nội thất</span>
-                        <span>🚗 Bãi xe</span>
-
-                    </div>
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            6,8 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <a
-                            href="{{ route('rooms.show', 2) }}"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+        <div class="d-flex justify-content-center mt-4">
+            {{ $rooms->links() }}
         </div>
 
-
-        <!-- ROOM 3 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button class="fav-btn">
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1000&q=80"
-                    alt="Phòng cửa sổ lớn"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room hot">
-                            🔥 HOT
-                        </span>
-
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
-
-                    </div>
-
-                    <div class="room-title">
-                        Phòng cửa sổ lớn, giờ giấc tự do
-                    </div>
-
-                    <div class="room-address">
-                        Phường Tân Thành, Tân Phú, TP.HCM
-                    </div>
-
-                    <div class="room-stats">
-
-                        <span>📐 24 m²</span>
-                        <span>🪟 Cửa sổ</span>
-                        <span>🕐 Tự do</span>
-
-                    </div>
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            3,2 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <a
-                            href="{{ route('rooms.show', 3) }}"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ROOM 4 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button class="fav-btn">
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1000&q=80"
-                    alt="Phòng có gác"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
-
-                    </div>
-
-                    <div class="room-title">
-                        Phòng có gác rộng, thoáng mát
-                    </div>
-
-                    <div class="room-address">
-                        Đường Lê Văn Việt, TP. Thủ Đức, TP.HCM
-                    </div>
-
-                    <div class="room-stats">
-
-                        <span>📐 28 m²</span>
-                        <span>🛏️ Có gác</span>
-                        <span>🚗 Bãi xe</span>
-
-                    </div>
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            3,5 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <a
-                            href="{{ route('rooms.show', 4) }}"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ROOM 5 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button class="fav-btn">
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1000&q=80"
-                    alt="Phòng có ban công"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room hot">
-                            🔥 HOT
-                        </span>
-
-                    </div>
-
-                    <div class="room-title">
-                        Phòng ban công riêng, nhiều ánh sáng
-                    </div>
-
-                    <div class="room-address">
-                        Nguyễn Gia Trí, Bình Thạnh, TP.HCM
-                    </div>
-
-                    <div class="room-stats">
-
-                        <span>📐 30 m²</span>
-                        <span>🌤️ Ban công</span>
-                        <span>❄️ Máy lạnh</span>
-
-                    </div>
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            4,2 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <a
-                            href="{{ route('rooms.show', 5) }}"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ROOM 6 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button class="fav-btn">
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1000&q=80"
-                    alt="Căn hộ đầy đủ tiện nghi"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
-
-                    </div>
-
-                    <div class="room-title">
-                        Căn hộ nhỏ đầy đủ tiện nghi
-                    </div>
-
-                    <div class="room-address">
-                        Phường 4, Quận 3, TP.HCM
-                    </div>
-
-                    <div class="room-stats">
-
-                        <span>📐 32 m²</span>
-                        <span>🛋️ Nội thất</span>
-                        <span>🧺 Máy giặt</span>
-
-                    </div>
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            5,5 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <a
-                            href="{{ route('rooms.show', 6) }}"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
 
     </div>
 
-</div>
 
-
-<!-- BOOTSTRAP JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- BOOTSTRAP JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
+
 </html>

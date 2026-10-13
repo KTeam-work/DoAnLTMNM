@@ -14,8 +14,7 @@
 
     <link
         href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 
@@ -27,6 +26,9 @@
         * {
             box-sizing: border-box;
         }
+
+
+
 
         body {
             margin: 0;
@@ -108,9 +110,9 @@
             position: relative;
             width: 42px;
             height: 42px;
-            border: 1px solid rgba(255,255,255,.18);
+            border: 1px solid rgba(255, 255, 255, .18);
             border-radius: 12px;
-            background: rgba(255,255,255,.08);
+            background: rgba(255, 255, 255, .08);
             color: #fff;
             font-size: 18px;
             cursor: pointer;
@@ -118,7 +120,7 @@
         }
 
         .notif-btn:hover {
-            background: rgba(255,255,255,.15);
+            background: rgba(255, 255, 255, .15);
         }
 
         .notif-dot {
@@ -147,8 +149,8 @@
             min-width: 185px;
             padding: 7px 10px;
             border-radius: 14px;
-            border: 1px solid rgba(255,255,255,.14);
-            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(255, 255, 255, .07);
             color: #fff;
             cursor: pointer;
             transition: .2s ease;
@@ -156,7 +158,7 @@
 
         .user-chip:hover,
         .user-chip.show {
-            background: rgba(255,255,255,.14);
+            background: rgba(255, 255, 255, .14);
             color: #fff;
         }
 
@@ -191,14 +193,14 @@
         .user-role {
             display: block;
             margin-top: 3px;
-            color: rgba(255,255,255,.65);
+            color: rgba(255, 255, 255, .65);
             font-size: 11px;
             font-weight: 500;
         }
 
         .caret {
             margin-left: auto;
-            color: rgba(255,255,255,.7);
+            color: rgba(255, 255, 255, .7);
             font-size: 13px;
             transition: transform .2s ease;
         }
@@ -214,7 +216,7 @@
             border: 1px solid #e8e1d4;
             border-radius: 16px;
             background: #ffffff;
-            box-shadow: 0 18px 45px rgba(23,70,62,.16);
+            box-shadow: 0 18px 45px rgba(23, 70, 62, .16);
         }
 
         .dropdown-user-info {
@@ -294,7 +296,7 @@
             overflow: hidden;
             padding: 64px 24px 52px;
             background:
-                radial-gradient(circle at 85% 10%, rgba(242,223,181,.35), transparent 28%),
+                radial-gradient(circle at 85% 10%, rgba(242, 223, 181, .35), transparent 28%),
                 linear-gradient(135deg, #20584f 0%, #17463e 100%);
         }
 
@@ -306,7 +308,7 @@
             right: -150px;
             bottom: -230px;
             border-radius: 50%;
-            background: rgba(242,223,181,.08);
+            background: rgba(242, 223, 181, .08);
         }
 
         .hero-inner {
@@ -340,7 +342,7 @@
         .hero-desc {
             max-width: 700px;
             margin: 18px 0 30px;
-            color: rgba(255,255,255,.75);
+            color: rgba(255, 255, 255, .75);
             font-size: 14px;
             line-height: 1.8;
         }
@@ -353,7 +355,7 @@
             overflow: hidden;
             border-radius: 18px;
             background: #ffffff;
-            box-shadow: 0 18px 45px rgba(0,0,0,.15);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, .15);
         }
 
         .search-field {
@@ -409,10 +411,10 @@
 
         .quick-filter {
             padding: 7px 12px;
-            border: 1px solid rgba(255,255,255,.18);
+            border: 1px solid rgba(255, 255, 255, .18);
             border-radius: 99px;
-            background: rgba(255,255,255,.08);
-            color: rgba(255,255,255,.8);
+            background: rgba(255, 255, 255, .08);
+            color: rgba(255, 255, 255, .8);
             font-size: 11px;
             font-weight: 600;
         }
@@ -472,13 +474,13 @@
             border: 1px solid #e9e3d8;
             border-radius: 18px;
             background: #ffffff;
-            box-shadow: 0 8px 25px rgba(23,70,62,.05);
+            box-shadow: 0 8px 25px rgba(23, 70, 62, .05);
             transition: .25s ease;
         }
 
         .room-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 15px 35px rgba(23,70,62,.11);
+            box-shadow: 0 15px 35px rgba(23, 70, 62, .11);
         }
 
         .fav-btn {
@@ -490,11 +492,11 @@
             height: 38px;
             border: 0;
             border-radius: 50%;
-            background: rgba(255,255,255,.92);
+            background: rgba(255, 255, 255, .92);
             color: #78908a;
             font-size: 18px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,.08);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
         }
 
         .fav-btn:hover {
@@ -608,7 +610,7 @@
             border: 1px solid #e9e3d8;
             border-radius: 18px;
             background: #ffffff;
-            box-shadow: 0 8px 25px rgba(23,70,62,.04);
+            box-shadow: 0 8px 25px rgba(23, 70, 62, .04);
         }
 
         .panel-head {
@@ -749,1745 +751,476 @@
             .panel {
                 overflow-x: auto;
             }
+
+            html {
+                scroll-behavior: smooth;
+            }
+
+            #search-panel {
+                scroll-margin-top: 25px;
+            }
         }
     </style>
 </head>
 
+
 <body>
+    @php
+        $userName = $user->name ?? 'Người dùng';
+        $nameParts = preg_split('/\s+/', trim($userName));
+        $lastName = $nameParts[count($nameParts) - 1] ?? $userName;
 
+        $userInitials = count($nameParts) >= 2
+            ? mb_substr($nameParts[0], 0, 1)
+                . mb_substr($lastName, 0, 1)
+            : mb_substr($userName, 0, 2);
 
-feature/tv1_dashboard
-@php
-    $user = auth()->user();
+        $userInitials = mb_strtoupper($userInitials);
+    @endphp
 
-    $userName = $user?->name ?? 'Người dùng';
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container-fluid">
+            <a class="logo" href="{{ route('tenant.dashboard') }}">
+                Trọ <span>Ơi</span>
+            </a>
 
-    $nameParts = preg_split('/\s+/', trim($userName));
+            <button class="navbar-toggler bg-light"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainMenu"
+                aria-controls="mainMenu"
+                aria-expanded="false"
+                aria-label="Mở menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-    if (count($nameParts) >= 2) {
-        $userInitials =
-            mb_substr($nameParts[0], 0, 1) .
-            mb_substr($nameParts[count($nameParts) - 1], 0, 1);
-    } else {
-        $userInitials = mb_substr($userName, 0, 2);
-    }
+            <div class="collapse navbar-collapse" id="mainMenu">
+                <ul class="navbar-nav mx-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="app-nav-link active"
+                           href="{{ route('tenant.dashboard') }}">
+                            Trang chủ
+                        </a>
+                    </li>
 
-    $userInitials = mb_strtoupper($userInitials);
-@endphp
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="#search-panel">
+                            Tìm phòng
+                        </a>
+                    </li>
 
+                    <li class="nav-item">
+                        <a class="app-nav-link"
+                           href="{{ route('favorites.index') }}">
+                            Yêu thích
+                        </a>
+                    </li>
 
-<!-- =========================================================
-     NAVBAR
-========================================================= -->
+                    <li class="nav-item">
+                        <a class="app-nav-link"
+                           href="{{ route('appointments.index') }}">
+                            Lịch xem phòng
+                        </a>
+                    </li>
 
-<nav class="navbar navbar-expand-lg app-navbar">
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="#contracts">
+                            Hợp đồng
+                        </a>
+                    </li>
 
-    <div class="container-fluid">
+                    <li class="nav-item">
+                        <a class="app-nav-link" href="#invoices">
+                            Hóa đơn
+                        </a>
+                    </li>
+                </ul>
 
-        <!-- LOGO -->
-        <a class="logo" href="{{ route('tenant.dashboard') }}">
-            Trọ <span>Ơi</span>
-        </a>
-
-
-        <!-- MOBILE BUTTON -->
-        <button
-            class="navbar-toggler bg-light"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#mainMenu"
-            aria-controls="mainMenu"
-            aria-expanded="false"
-            aria-label="Mở menu"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-
-        <!-- MENU -->
-        <div class="collapse navbar-collapse" id="mainMenu">
-
-            <ul class="navbar-nav mx-auto align-items-lg-center">
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link active"
-                        href="{{ route('tenant.dashboard') }}"
-                    >
-                        Trang chủ
+                <div class="navbar-actions">
+                    <a href="#notifications"
+                       class="notif-btn d-flex align-items-center justify-content-center"
+                       title="Thông báo">
+                        🔔
                     </a>
-                </li>
 
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="#rooms"
-                    >
-                        Tìm phòng
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Yêu thích
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Lịch xem phòng
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Hợp đồng
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a
-                        class="app-nav-link"
-                        href="#"
-                    >
-                        Hóa đơn
-                    </a>
-                </li>
-
-            </ul>
-
-
-            <!-- RIGHT ACTIONS -->
-            <div class="navbar-actions">
-
-                <!-- THÔNG BÁO -->
-                <button
-                    type="button"
-                    class="notif-btn"
-                    title="Thông báo"
-                >
-                    🔔
-                    <span class="notif-dot"></span>
-                </button>
-
-
-                <!-- USER DROPDOWN -->
-                <div class="dropdown user-dropdown">
-
-                    <button
-                        type="button"
-                        class="user-chip dropdown-toggle"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-
-                        <span class="user-avatar">
-                            {{ $userInitials }}
-                        </span>
-
-                        <span class="user-meta">
-
-                            <span class="user-name d-block">
-                                {{ $userName }}
+                    <div class="dropdown user-dropdown">
+                        <button class="user-chip dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <span class="user-avatar">
+                                {{ $userInitials }}
                             </span>
 
-                            <span class="user-role">
-                                Người thuê
+                            <span class="user-meta">
+                                <span class="user-name d-block">
+                                    {{ $userName }}
+                                </span>
+                                <span class="user-role">Người thuê</span>
                             </span>
+                        </button>
 
-                        </span>
-
-
-
-                    </button>
-
-
-                    <!-- DROPDOWN -->
-                    <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-
-                        <!-- USER INFO -->
-                        <div class="dropdown-user-info">
-
-                            <div class="dropdown-user-name">
-                                {{ $userName }}
+                        <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-user-name">
+                                    {{ $userName }}
+                                </div>
+                                <div class="dropdown-user-email">
+                                    {{ $user->email ?? '' }}
+                                </div>
                             </div>
 
-                            <div class="dropdown-user-email">
-                                {{ $user?->email }}
-                            </div>
+                            <div class="dropdown-divider-custom"></div>
 
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit"
+                                    class="dropdown-item-custom dropdown-logout">
+                                    <span class="logout-icon">↪</span>
+                                    Đăng xuất
+                                </button>
+                            </form>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-kicker">
+                👋 CHÀO {{ mb_strtoupper($lastName) }},
+                TÌM PHÒNG MỚI HÔM NAY?
+            </div>
 
-                        <div class="dropdown-divider-custom"></div>
+            <h1>
+                Tìm phòng phù hợp,<br>
+                <span class="highlight">ở đúng nơi bạn muốn.</span>
+            </h1>
 
+            <p class="hero-desc">
+                Khám phá phòng trọ đang được đăng cho thuê.
+                Lọc theo khu vực, giá và diện tích để tìm nơi ở phù hợp.
+            </p>
 
-                        <!-- THÔNG TIN -->
-                        <a
-                            href="#"
-                            class="dropdown-item-custom"
-                        >
-                            <span class="logout-icon">
-                                👤
-                            </span>
+            <!-- FORM TÌM KIẾM -->
+            <form method="GET"
+                action="{{ route('tenant.dashboard') }}"
+                class="search-panel"
+                id="search-panel">
 
-                            Thông tin tài khoản
+                <div class="row g-0 align-items-center">
+                    <div class="col-lg-4">
+                        <div class="search-field">
+                            <label class="field-label" for="location">
+                                Bạn muốn tìm ở đâu?
+                            </label>
+                            <input class="form-control"
+                                id="location"
+                                name="location"
+                                value="{{ request('location') }}"
+                                placeholder="Tên đường, quận, khu vực">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <div class="search-field">
+                            <label class="field-label" for="max_price">
+                                Giá tối đa mỗi tháng (VNĐ)
+                            </label>
+                            <input class="form-control"
+                                id="max_price"
+                                name="max_price"
+                                type="number"
+                                min="0"
+                                value="{{ request('max_price') }}"
+                                placeholder="Ví dụ: 3000000">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="search-field">
+                            <label class="field-label" for="min_area">
+                                Diện tích tối thiểu (m²)
+                            </label>
+                            <input class="form-control"
+                                id="min_area"
+                                name="min_area"
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                value="{{ request('min_area') }}"
+                                placeholder="Ví dụ: 20">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 p-2">
+                        <button type="submit" class="search-btn">
+                            🔎 Tìm kiếm phòng
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="quick-filters">
+                <a class="quick-filter"
+                   href="{{ route('tenant.dashboard', ['max_price' => 2000000]) }}">
+                    ≤ 2 triệu
+                </a>
+
+                <a class="quick-filter"
+                   href="{{ route('tenant.dashboard', ['max_price' => 3000000]) }}">
+                    ≤ 3 triệu
+                </a>
+
+                <a class="quick-filter"
+                   href="{{ route('tenant.dashboard', ['max_price' => 5000000]) }}">
+                    ≤ 5 triệu
+                </a>
+
+                <a class="quick-filter"
+                   href="{{ route('tenant.dashboard') }}">
+                    Xóa bộ lọc
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PHÒNG GỢI Ý -->
+    <main class="page-wrap" id="rooms">
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">Phòng gợi ý cho bạn</h2>
+                <div class="page-desc">
+                    Phòng đang trống và có bài đăng cho thuê hợp lệ.
+                </div>
+            </div>
+
+            <a href="{{ route('rooms.index') }}" class="section-link">
+                Xem tất cả →
+            </a>
+        </div>
+
+        <div class="row g-3">
+            @forelse ($rooms as $room)
+                @php
+                    $images = json_decode($room->images ?? '[]', true);
+
+                    $roomImage = is_array($images)
+                        ? ($images[0] ?? null)
+                        : null;
+
+                    $isFavorite = in_array(
+                        (int) $room->id,
+                        $favoriteRoomIds,
+                        true
+                    );
+                @endphp
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="room-card">
+                        <a href="{{ route('favorites.index') }}"
+                            class="fav-btn d-flex align-items-center justify-content-center"
+                            title="{{ $isFavorite ? 'Đã yêu thích' : 'Xem danh sách yêu thích' }}"
+                            style="{{ $isFavorite ? 'color:#b45454;' : '' }}">
+                            {{ $isFavorite ? '♥' : '♡' }}
                         </a>
 
+                        @if ($roomImage)
+                            <img class="room-img"
+                                src="{{ $roomImage }}"
+                                alt="{{ $room->name }}"
+                                onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';">
+                        @else
+                            <img class="room-img"
+                                src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
+                                alt="Hình phòng trọ">
+                        @endif
 
-                        <!-- ĐĂNG XUẤT -->
-                        <form
-                            method="POST"
-                            action="{{ route('logout') }}"
-                            class="m-0"
-                        >
-
-                            @csrf
-
-                            <button
-                                type="submit"
-                                class="dropdown-item-custom dropdown-logout"
-                            >
-
-                                <span class="logout-icon">
-                                    ↪
+                        <div class="room-body">
+                            <div class="room-badges">
+                                <span class="badge-room">
+                                    Đang cho thuê
                                 </span>
+                            </div>
 
-                                Đăng xuất
+                            <div class="room-title">
+                                {{ $room->name ?: 'Phòng ' . $room->room_code }}
+                            </div>
 
-                            </button>
+                            <div class="room-address">
+                                {{ $room->property_address ?: 'Chưa cập nhật địa chỉ' }}
+                            </div>
 
-                        </form>
+                            <div class="room-stats">
+                                <span>📐 {{ $room->area }} m²</span>
+                                <span>👥 Tối đa {{ $room->max_people }} người</span>
+                                <span>🏷️ {{ $room->room_code }}</span>
+                            </div>
 
-                    </div>
+                            <div class="room-bottom">
+                                <div class="room-price">
+                                    {{ number_format((float) $room->price, 0, ',', '.') }}
+                                    <small>đ/tháng</small>
+                                </div>
 
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</nav>
-
-
-
-<!-- =========================================================
-     HERO
-========================================================= -->
-
-<section class="hero">
-
-    <div class="hero-inner">
-
-        <div class="hero-kicker">
-            👋 CHÀO {{ mb_strtoupper($nameParts[count($nameParts) - 1]) }},
-            TÌM PHÒNG MỚI HÔM NAY?
-        </div>
-
-
-        <h1>
-            Tìm phòng phù hợp,
-            <br>
-            <span class="highlight">
-                ở đúng nơi bạn muốn.
-            </span>
-        </h1>
-
-
-        <p class="hero-desc">
-            Khám phá hàng trăm phòng trọ, căn hộ và nhà cho thuê.
-            Lọc theo khu vực, mức giá, diện tích và tiện ích để tìm đúng nơi bạn cần.
-        </p>
-
-
-        <!-- SEARCH -->
-        <div class="search-panel">
-
-            <div class="row g-0 align-items-center">
-
-                <div class="col-lg-3">
-
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Bạn muốn tìm ở đâu?
-                        </span>
-
-                        <div class="field-value">
-                            📍 TP. Hồ Chí Minh
+                                <a href="{{ route('rooms.show', $room->id) }}"
+                                    class="detail-btn">
+                                    Xem phòng
+                                </a>
+                            </div>
                         </div>
-
                     </div>
-
                 </div>
-
-
-                <div class="col-lg-2">
-
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Khoảng giá
-                        </span>
-
-                        <div class="field-value field-muted">
-                            Tất cả mức giá
-                        </div>
-
+            @empty
+                <div class="col-12">
+                    <div class="panel p-4 text-center">
+                        <div style="font-size:36px;">🏠</div>
+                        <h3 class="panel-title mt-3">
+                            Chưa tìm thấy phòng phù hợp
+                        </h3>
+                        <p class="page-desc mb-3">
+                            Hiện chưa có phòng thỏa mãn điều kiện tìm kiếm.
+                            Em có thể thử đổi khu vực, giá hoặc diện tích.
+                        </p>
+                        <a href="{{ route('tenant.dashboard') }}"
+                            class="detail-btn">
+                            Xem tất cả phòng gợi ý
+                        </a>
                     </div>
-
                 </div>
-
-
-                <div class="col-lg-2">
-
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Diện tích
-                        </span>
-
-                        <div class="field-value field-muted">
-                            Tất cả
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-lg-2">
-
-                    <div class="search-field">
-
-                        <span class="field-label">
-                            Tiện ích
-                        </span>
-
-                        <div class="field-value field-muted">
-                            Tất cả
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-lg-3 p-2">
-
-                    <button
-                        type="button"
-                        class="search-btn"
-                    >
-                        🔎 Tìm kiếm phòng
-                    </button>
-
-                </div>
-
-            </div>
-
+            @endforelse
         </div>
-
-
-        <!-- QUICK FILTERS -->
-        <div class="quick-filters">
-
-            <span class="quick-filter">
-                ≤ 2 triệu
-            </span>
-
-            <span class="quick-filter">
-                2 - 3 triệu
-            </span>
-
-            <span class="quick-filter">
-                3 - 5 triệu
-            </span>
-
-            <span class="quick-filter">
-                Có máy lạnh
-            </span>
-
-            <span class="quick-filter">
-                Có gác
-            </span>
-
-            <span class="quick-filter">
-                Có ban công
-            </span>
-
-            <span class="quick-filter">
-                Nuôi thú cưng
-            </span>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-
-<!-- =========================================================
-     CONTENT
-========================================================= -->
-
-<div class="page-wrap" id="rooms">
-
-
-    <!-- SECTION HEADER -->
-    <div class="page-header">
-
-        <div>
-
-            <h2 class="page-title">
-                Phòng gợi ý cho bạn
-            </h2>
-
-            <div class="page-desc">
-                Dựa trên khu vực và mức giá bạn đã tìm gần đây.
-            </div>
-
-        </div>
-
-        <a
-            class="section-link"
-            href="#"
-        >
-            Xem tất cả →
-        </a>
-=======
-<!-- =========================================================
-     NAVBAR NGANG — TENANT
-========================================================= -->
-<nav class="navbar navbar-expand-lg app-navbar">
-
-  <div class="container-fluid">
-
-    <!-- LOGO -->
-    <a
-      class="logo"
-      href="{{ url('/tenant') }}"
-    >
-      Trọ <span>Ơi</span>
-    </a>
-
-
-    <!-- MOBILE BUTTON -->
-    <button
-      class="navbar-toggler bg-light"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#mainMenu"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-
-    <!-- MENU -->
-    <div
-      class="collapse navbar-collapse"
-      id="mainMenu"
-    >
-
-      <ul class="navbar-nav mx-auto align-items-lg-center">
-
-
-
-
-      
-
-
-
-         <li class="nav-item">
-          <a
-            class="app-nav-link active"
-            href="{{ url('/tenant') }}"
-          >
-            Trang chủ
-          </a>
-        </li>
-
-        
-         <li class="nav-item">
-          <a
-            class="app-nav-link"
-            href="{{ route('rooms.index') }}"
-          >
-            Tìm phòng
-          </a>
-        </li>
-        
-         <li class="nav-item">
-          <a
-            class="app-nav-link"
-            href="{{ route('favorites.index') }}"
-          >
-            Yêu thích
-          </a>
-        </li>
-        
-         <li class="nav-item">
-          <a
-            class="app-nav-link"
-            href="{{ route('appointments.index') }}"
-          >
-            Lịch xem phòng
-          </a>
-        </li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
-      </ul>
-
-
-      <!-- RIGHT USER -->
-      <div class="navbar-actions">
-
-        <button class="notif-btn">
-          🔔
-          <span class="notif-dot"></span>
-        </button>
-
-
-        <a
-          href="#"
-          class="user-chip"
-        >
-
-          <span class="user-avatar">
-            TH
-          </span>
-
-
-          <span class="user-meta">
-
-            <span class="user-name d-block">
-              Thanh Huyền
-            </span>
-
-            <span class="user-role">
-              Người thuê
-            </span>
-
-          </span>
-
-
-          <span class="caret">
-            ▾
-          </span>
-
-        </a>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</nav>
-
-
-<!-- =========================================================
-     HERO + SEARCH
-========================================================= -->
-<section class="hero">
-
-  <div class="hero-inner">
-
-    <div class="hero-kicker">
-      👋 CHÀO HUYỀN, TÌM PHÒNG MỚI HÔM NAY?
-    </div>
-
-
-    <h1>
-      Tìm phòng phù hợp,
-      <br>
-      <span class="highlight">
-        ở đúng nơi bạn muốn.
-      </span>
-    </h1>
-
-
-    <p class="hero-desc">
-      Khám phá hàng trăm phòng trọ, căn hộ và nhà cho thuê.
-      Lọc theo khu vực, mức giá, diện tích và tiện ích để tìm đúng nơi bạn cần.
-    </p>
-
-
-    <!-- SEARCH PANEL -->
-    <div class="search-panel">
-
-      <div class="row g-0 align-items-center">
-
-
-        <!-- LOCATION -->
-        <div class="col-lg-3">
-
-          <div class="search-field">
-
-            <span class="field-label">
-              Bạn muốn tìm ở đâu?
-            </span>
-
-            <div class="field-value">
-              📍 TP. Hồ Chí Minh
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- PRICE -->
-        <div class="col-lg-2">
-
-          <div class="search-field">
-
-            <span class="field-label">
-              Khoảng giá
-            </span>
-
-            <div class="field-value field-muted">
-              Tất cả mức giá
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- AREA -->
-        <div class="col-lg-2">
-
-          <div class="search-field">
-
-            <span class="field-label">
-              Diện tích
-            </span>
-
-            <div class="field-value field-muted">
-              Tất cả
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- AMENITIES -->
-        <div class="col-lg-2">
-
-          <div class="search-field">
-
-            <span class="field-label">
-              Tiện ích
-            </span>
-
-            <div class="field-value field-muted">
-              Tất cả
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- SEARCH BUTTON -->
-        <div class="col-lg-3 p-2">
-
-          <a
-            href="{{ route('rooms.index') }}"
-            class="search-btn d-flex align-items-center justify-content-center text-decoration-none"
-          >
-            🔎 Tìm kiếm phòng
-          </a>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- QUICK FILTER -->
-    <div class="quick-filters">
-
-      <a
-        href="{{ route('rooms.index') }}"
-        class="quick-filter text-decoration-none"
-      >
-        ≤ 2 triệu
-      </a>
-
-      <a
-        href="{{ route('rooms.index') }}"
-        class="quick-filter text-decoration-none"
-      >
-        2 - 3 triệu
-      </a>
-
-      <a
-        href="{{ route('rooms.index') }}"
-        class="quick-filter text-decoration-none"
-      >
-        3 - 5 triệu
-      </a>
-
-      <a
-        href="{{ route('rooms.index') }}"
-        class="quick-filter text-decoration-none"
-      >
-        Có máy lạnh
-      </a>
-
-      <a
-        href="{{ route('rooms.index') }}"
-        class="quick-filter text-decoration-none"
-      >
-        Có gác
-      </a>
-
-      <a
-        href="{{ route('rooms.index') }}"
-        class="quick-filter text-decoration-none"
-      >
-        Có ban công
-      </a>
-
-      <a
-        href="{{ route('rooms.index') }}"
-        class="quick-filter text-decoration-none"
-      >
-        Nuôi thú cưng
-      </a>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- =========================================================
-     ROOM SUGGESTIONS
-========================================================= -->
-<div
-  class="page-wrap"
-  id="rooms"
->
-
-  <div class="page-header">
-
-    <div>
-
-      <h2 class="page-title">
-        Phòng gợi ý cho bạn
-      </h2>
-
-      <div class="page-desc">
-        Dựa trên khu vực và mức giá bạn đã tìm gần đây.
-      </div>
-
-    </div>
-
-
-    <!-- XEM TẤT CẢ -->
-    <a
-      class="section-link"
-      href="{{ route('rooms.index') }}"
-    >
-      Xem tất cả →
-    </a>
-
-  </div>
-
-
-  <div class="row g-3">
-
-
-    <!-- =====================================================
-         ROOM 1
-    ====================================================== -->
-    <div class="col-md-6 col-lg-4">
-
-      <div class="room-card">
-
-        <button class="fav-btn">
-          ♥
-        </button>
-
-
-        <img
-          class="room-img"
-          src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
-          alt="Phòng trọ"
-        >
-
-
-        <div class="room-body">
-
-          <div class="room-badges">
-
-            <span class="badge-room hot">
-              🔥 HOT
-            </span>
-
-            <span class="badge-room">
-              Đã xác thực
-            </span>
-
-          </div>
-
-
-          <div class="room-title">
-            Phòng trọ máy lạnh gần Q.7
-          </div>
-
-
-          <div class="room-address">
-            Đường Nguyễn Thị Thập, Quận 7, TP.HCM
-          </div>
-
-
-          <div class="room-stats">
-
-            <span>
-              📐 22 m²
-            </span>
-
-            <span>
-              ❄️ Máy lạnh
-            </span>
-
-            <span>
-              🚗 Bãi xe
-            </span>
-
-          </div>
-
-
-          <div class="room-bottom">
-
-            <div class="room-price">
-              2,8 triệu
-              <small>/ tháng</small>
-            </div>
-
-
-            <!-- SỬA NÚT XEM PHÒNG -->
-            <a
-              href="{{ route('rooms.show', 1) }}"
-              class="detail-btn"
-            >
-              Xem phòng
-            </a>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         ROOM CARDS
-    ====================================================== -->
-
-    <div class="row g-3">
-
-
-        <!-- ROOM 1 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button
-                    type="button"
-                    class="fav-btn"
-                    title="Thêm vào yêu thích"
-                >
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
-                    alt="Phòng trọ"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room hot">
-                            🔥 HOT
-                        </span>
-
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
-
-                    </div>
-
-
-                    <div class="room-title">
-                        Phòng trọ máy lạnh gần Q.7
-                    </div>
-
-
-                    <div class="room-address">
-                        Đường Nguyễn Thị Thập, Quận 7, TP.HCM
-                    </div>
-
-
-                    <div class="room-stats">
-
-                        <span>
-                            📐 22 m²
-                        </span>
-
-                        <span>
-                            ❄️ Máy lạnh
-                        </span>
-
-                        <span>
-                            🚗 Bãi xe
-                        </span>
-
-                    </div>
-
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            2,8 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ROOM 2 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button
-                    type="button"
-                    class="fav-btn"
-                    title="Thêm vào yêu thích"
-                >
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1000&q=80"
-                    alt="Căn hộ"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
-
-                    </div>
-
-
-                    <div class="room-title">
-                        Căn hộ mini đầy đủ nội thất
-                    </div>
-
-
-                    <div class="room-address">
-                        Phường An Phú, TP. Thủ Đức, TP.HCM
-                    </div>
-
-
-                    <div class="room-stats">
-
-                        <span>
-                            📐 35 m²
-                        </span>
-
-                        <span>
-                            🛋️ Full nội thất
-                        </span>
-
-                        <span>
-                            🚗 Bãi xe
-                        </span>
-
-                    </div>
-
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            6,8 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- ROOM 3 -->
-        <div class="col-md-6 col-lg-4">
-
-            <div class="room-card">
-
-                <button
-                    type="button"
-                    class="fav-btn"
-                    title="Thêm vào yêu thích"
-                >
-                    ♥
-                </button>
-
-                <img
-                    class="room-img"
-                    src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1000&q=80"
-                    alt="Phòng"
-                >
-
-                <div class="room-body">
-
-                    <div class="room-badges">
-
-                        <span class="badge-room hot">
-                            🔥 HOT
-                        </span>
-
-                        <span class="badge-room">
-                            Đã xác thực
-                        </span>
-
-                    </div>
-
-
-                    <div class="room-title">
-                        Phòng cửa sổ lớn, giờ giấc tự do
-                    </div>
-
-
-                    <div class="room-address">
-                        Phường Tân Thành, Tân Phú, TP.HCM
-                    </div>
-
-
-                    <div class="room-stats">
-
-                        <span>
-                            📐 24 m²
-                        </span>
-
-                        <span>
-                            🪟 Cửa sổ
-                        </span>
-
-                        <span>
-                            🕐 Tự do
-                        </span>
-
-                    </div>
-
-
-                    <div class="room-bottom">
-
-                        <div class="room-price">
-                            3,2 triệu
-                            <small>/ tháng</small>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="detail-btn"
-                        >
-                            Xem phòng
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-=======
-         ROOM 2
-    ====================================================== -->
-    <div class="col-md-6 col-lg-4">
-
-      <div class="room-card">
-
-        <button class="fav-btn">
-          ♥
-        </button>
-
-
-        <img
-          class="room-img"
-          src="https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1000&q=80"
-          alt="Căn hộ"
-        >
-
-
-        <div class="room-body">
-
-          <div class="room-badges">
-
-            <span class="badge-room">
-              Đã xác thực
-            </span>
-
-          </div>
-
-
-          <div class="room-title">
-            Căn hộ mini đầy đủ nội thất
-          </div>
-
-
-          <div class="room-address">
-            Phường An Phú, TP. Thủ Đức, TP.HCM
-          </div>
-
-
-          <div class="room-stats">
-
-            <span>
-              📐 35 m²
-            </span>
-
-            <span>
-              🛋️ Full nội thất
-            </span>
-
-            <span>
-              🚗 Bãi xe
-            </span>
-
-          </div>
-
-
-          <div class="room-bottom">
-
-            <div class="room-price">
-              6,8 triệu
-              <small>/ tháng</small>
-            </div>
-
-
-            <!-- SỬA NÚT XEM PHÒNG -->
-            <a
-              href="{{ route('rooms.show', 2) }}"
-              class="detail-btn"
-            >
-              Xem phòng
-            </a>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         ROOM 3
-    ====================================================== -->
-    <div class="col-md-6 col-lg-4">
-
-      <div class="room-card">
-
-        <button class="fav-btn">
-          ♥
-        </button>
-
-
-        <img
-          class="room-img"
-          src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1000&q=80"
-          alt="Phòng"
-        >
-
-
-        <div class="room-body">
-
-          <div class="room-badges">
-
-            <span class="badge-room hot">
-              🔥 HOT
-            </span>
-
-            <span class="badge-room">
-              Đã xác thực
-            </span>
-
-          </div>
-
-
-          <div class="room-title">
-            Phòng cửa sổ lớn, giờ giấc tự do
-          </div>
-
-
-          <div class="room-address">
-            Phường Tân Thành, Tân Phú, TP.HCM
-          </div>
-
-
-          <div class="room-stats">
-
-            <span>
-              📐 24 m²
-            </span>
-
-            <span>
-              🪟 Cửa sổ
-            </span>
-
-            <span>
-              🕐 Tự do
-            </span>
-
-          </div>
-
-
-          <div class="room-bottom">
-
-            <div class="room-price">
-              3,2 triệu
-              <small>/ tháng</small>
-            </div>
-
-
-            <!-- SỬA NÚT XEM PHÒNG -->
-            <a
-              href="{{ route('rooms.show', 3) }}"
-              class="detail-btn"
-            >
-              Xem phòng
-            </a>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- =========================================================
-       LỊCH XEM PHÒNG + HÓA ĐƠN
-  ========================================================== -->
-  <div class="row g-3 mt-1">
-
-
-    <!-- LỊCH XEM PHÒNG -->
-    <div class="col-lg-6">
-
-      <div class="panel">
-
-        <div class="panel-head">
-
-          <h3 class="panel-title">
-            Lịch xem phòng sắp tới
-          </h3>
-
-
-          <a
-            class="panel-link"
-            href="#"
-          >
-            Xem tất cả
-          </a>
-
-        </div>
-
-
-        <table class="data-table">
-
-          <thead>
-
-            <tr>
-              <th>Phòng</th>
-              <th>Ngày giờ</th>
-              <th>Trạng thái</th>
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            <tr>
-
-              <td>
-
-                <div class="cell-title">
-                  Phòng trọ máy lạnh Q.7
-                </div>
-
-                <div class="cell-sub">
-                  Chủ nhà: Anh Tuấn
-                </div>
-
-              </td>
-
-
-              <td>
-                28/08 · 15:00
-              </td>
-
-
-              <td>
-
-                <span class="badge-status pending">
-                  Chờ xác nhận
-                </span>
-
-              </td>
-
-            </tr>
-
-
-            <tr>
-
-              <td>
-
-                <div class="cell-title">
-                  Căn hộ mini An Phú
-                </div>
-
-                <div class="cell-sub">
-                  Chủ nhà: Chị Lan
-                </div>
-
-              </td>
-
-
-              <td>
-                30/08 · 09:30
-              </td>
-
-
-              <td>
-
-                <span class="badge-status occupied">
-                  Đã xác nhận
-                </span>
-
-              </td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-    </div>
-
-
-
-    <!-- 
-    ==============================================
-         BOTTOM PANELS
-    ====================================================== -->
-
-    <div class="row g-3 mt-1">
-
 
         <!-- LỊCH XEM PHÒNG -->
-        <div class="col-lg-6">
+        <div class="row g-3 mt-4">
+            <div class="col-lg-6" id="appointments">
+                <div class="panel">
+                    <div class="panel-head">
+                        <h3 class="panel-title">Lịch xem phòng gần đây</h3>
+                        <a href="{{ route('appointments.index') }}"
+                            class="panel-link">
+                            Xem tất cả →
+                        </a>
+                    </div>
 
-            <div class="panel">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Phòng</th>
+                                    <th>Ngày giờ</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
 
-                <div class="panel-head">
+                            <tbody>
+                                @forelse ($appointments as $appointment)
+                                    @php
+                                        $statusLabels = [
+                                            'pending' => 'Chờ xác nhận',
+                                            'confirmed' => 'Đã xác nhận',
+                                            'rescheduled' => 'Đề xuất đổi lịch',
+                                            'rejected' => 'Bị từ chối',
+                                            'cancelled' => 'Đã hủy',
+                                            'completed' => 'Đã hoàn thành',
+                                        ];
 
-                    <h3 class="panel-title">
-                        Lịch xem phòng sắp tới
-                    </h3>
+                                        $statusClasses = [
+                                            'pending' => 'pending',
+                                            'confirmed' => 'occupied',
+                                            'rescheduled' => 'pending',
+                                            'rejected' => 'overdue',
+                                            'cancelled' => 'overdue',
+                                            'completed' => 'occupied',
+                                        ];
 
-                    <a
-                        class="panel-link"
-                        href="#"
-                    >
-                        Xem tất cả
-                    </a>
+                                        $status = $appointment->status;
+                                    @endphp
 
+                                    <tr>
+                                        <td>
+                                            <div class="cell-title">
+                                                {{ $appointment->room_name ?: 'Phòng ' . $appointment->room_code }}
+                                            </div>
+                                            <div class="cell-sub">
+                                                {{ $appointment->property_address ?: 'Chưa cập nhật địa chỉ' }}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y') }}
+                                            <div class="cell-sub">
+                                                {{ substr($appointment->appointment_time, 0, 5) }}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge-status {{ $statusClasses[$status] ?? 'pending' }}">
+                                                {{ $statusLabels[$status] ?? $status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4">
+                                            Em chưa có lịch xem phòng nào.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
-
-                <div class="table-responsive">
-
-                    <table class="data-table">
-
-                        <thead>
-
-                            <tr>
-                                <th>Phòng</th>
-                                <th>Ngày giờ</th>
-                                <th>Trạng thái</th>
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            <tr>
-
-                                <td>
-
-                                    <div class="cell-title">
-                                        Phòng trọ máy lạnh Q.7
-                                    </div>
-
-                                    <div class="cell-sub">
-                                        Chủ nhà: Anh Tuấn
-                                    </div>
-
-                                </td>
-
-                                <td>
-                                    28/08 · 15:00
-                                </td>
-
-                                <td>
-
-                                    <span class="badge-status pending">
-                                        Chờ xác nhận
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-
-                            <tr>
-
-                                <td>
-
-                                    <div class="cell-title">
-                                        Căn hộ mini An Phú
-                                    </div>
-
-                                    <div class="cell-sub">
-                                        Chủ nhà: Chị Lan
-                                    </div>
-
-                                </td>
-
-                                <td>
-                                    30/08 · 09:30
-                                </td>
-
-                                <td>
-
-                                    <span class="badge-status occupied">
-                                        Đã xác nhận
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
             </div>
 
+            <!-- HÓA ĐƠN: CHƯA HIỂN THỊ DỮ LIỆU GIẢ -->
+            <div class="col-lg-6" id="invoices">
+                <div class="panel">
+                    <div class="panel-head">
+                        <h3 class="panel-title">Hóa đơn</h3>
+                    </div>
+
+                    <div class="p-4 text-center">
+                        <div style="font-size:32px;">🧾</div>
+                        <p class="page-desc mt-2 mb-0">
+                            Phần hóa đơn sẽ được kết nối với dữ liệu
+                            thực tế sau khi xác định cấu trúc bảng hóa đơn.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-
-
-        <!-- HÓA ĐƠN -->
-        <div class="col-lg-6">
-
-            <div class="panel">
-
-                <div class="panel-head">
-
-                    <h3 class="panel-title">
-                        Hóa đơn gần đây
-                    </h3>
-
-                    <a
-                        class="panel-link"
-                        href="#"
-                    >
-                        Xem tất cả
-                    </a>
-
+        <!-- HỢP ĐỒNG VÀ THÔNG BÁO -->
+        <div class="row g-3 mt-1">
+            <div class="col-lg-6" id="contracts">
+                <div class="panel p-4">
+                    <h3 class="panel-title">Hợp đồng thuê</h3>
+                    <p class="page-desc mb-0">
+                        Phần hợp đồng sẽ được kết nối với hợp đồng
+                        của người thuê sau khi bổ sung truy vấn backend.
+                    </p>
                 </div>
-
-
-                <div class="table-responsive">
-
-                    <table class="data-table">
-
-                        <thead>
-
-                            <tr>
-                                <th>Kỳ hóa đơn</th>
-                                <th>Số tiền</th>
-                                <th>Trạng thái</th>
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            <tr>
-
-                                <td>
-
-                                    <div class="cell-title">
-                                        Tháng 08/2026
-                                    </div>
-
-                                    <div class="cell-sub">
-                                        Phòng 12A, Q.7
-                                    </div>
-
-                                </td>
-
-                                <td>
-                                    3.450.000 đ
-                                </td>
-
-                                <td>
-
-                                    <span class="badge-status occupied">
-                                        Đã thanh toán
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-
-                            <tr>
-
-                                <td>
-
-                                    <div class="cell-title">
-                                        Tháng 07/2026
-                                    </div>
-
-                                    <div class="cell-sub">
-                                        Phòng 12A, Q.7
-                                    </div>
-
-                                </td>
-
-                                <td>
-                                    3.200.000 đ
-                                </td>
-
-                                <td>
-
-                                    <span class="badge-status overdue">
-                                        Quá hạn
-                                    </span>
-
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
             </div>
 
+            <div class="col-lg-6" id="notifications">
+                <div class="panel p-4">
+                    <h3 class="panel-title">Thông báo</h3>
+                    <p class="page-desc mb-0">
+                        Phần thông báo sẽ được kết nối với dữ liệu
+                        thông báo của tài khoản đang đăng nhập.
+                    </p>
+                </div>
+            </div>
         </div>
+    </main>
 
-    </div>
-
-</div>
-
-
-
-<!-- =========================================================
-     BOOTSTRAP
-========================================================= -->
-    <!-- HÓA ĐƠN -->
-    <div class="col-lg-6">
-
-      <div class="panel">
-
-        <div class="panel-head">
-
-          <h3 class="panel-title">
-            Hóa đơn gần đây
-          </h3>
-
-
-          <a
-            class="panel-link"
-            href="#"
-          >
-            Xem tất cả
-          </a>
-
-        </div>
-
-
-        <table class="data-table">
-
-          <thead>
-
-            <tr>
-              <th>Kỳ hóa đơn</th>
-              <th>Số tiền</th>
-              <th>Trạng thái</th>
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            <tr>
-
-              <td>
-
-                <div class="cell-title">
-                  Tháng 08/2026
-                </div>
-
-                <div class="cell-sub">
-                  Phòng 12A, Q.7
-                </div>
-
-              </td>
-
-
-              <td>
-                3.450.000 đ
-              </td>
-
-
-              <td>
-
-                <span class="badge-status occupied">
-                  Đã thanh toán
-                </span>
-
-              </td>
-
-            </tr>
-
-
-            <tr>
-
-              <td>
-
-                <div class="cell-title">
-                  Tháng 07/2026
-                </div>
-
-                <div class="cell-sub">
-                  Phòng 12A, Q.7
-                </div>
-
-              </td>
-
-
-              <td>
-                3.200.000 đ
-              </td>
-
-
-              <td>
-
-                <span class="badge-status overdue">
-                  Quá hạn
-                </span>
-
-              </td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- BOOTSTRAP JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+</html>
+
 </html>

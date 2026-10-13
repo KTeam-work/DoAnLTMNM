@@ -2,25 +2,38 @@
 
 
 namespace App\Http\Controllers\Owner;
+
 use App\Http\Controllers\Controller;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+
 
 class OwnerRoomController extends Controller
 {
     public function index(Request $request)
     {
         $owner = $this->actingOwner($request);
-        $rooms = Room::query()
-            ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id))
-            ->with('property:id,name')
+
+        $rooms = Room::with('property:id,name')
+            ->whereHas('property', function ($query) use ($owner) {
+                $query->where('owner_id', $owner->id);
+            })
             ->orderBy('name')
             ->get();
 
-        return view('owner.rooms.manage', compact('rooms'));
+        $properties = \App\Models\Property::where(
+            'owner_id',
+            $owner->id
+        )->orderBy('name')->get();
+
+        return view('owner.rooms.manage', compact(
+            'rooms',
+            'properties'
+        ));
     }
 
     public function create(Request $request)
@@ -51,6 +64,115 @@ class OwnerRoomController extends Controller
         Room::query()->create([...$data, 'status' => $data['status'] ?? 'available']);
 
         return redirect()->route('owner.rooms.index')->with('success', 'Tạo phòng thành công.');
+    }
+    /**
+     * Hiển thị form sửa phòng.
+     */
+    public function edit(Request $request, Room $room)
+    {
+        $owner = $this->actingOwner($request);
+
+        // Chỉ cho phép sửa phòng thuộc nhà trọ của chủ trọ hiện tại.
+        $this->authorizeRoomOwner($room, $owner);
+
+        $properties = Property::query()
+            ->where('owner_id', $owner->id)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('owner.rooms.edit', compact('room', 'properties'));
+    }
+
+    /**
+     * Cập nhật thông tin phòng.
+     */
+    public function update(Request $request, Room $room)
+    {
+        $owner = $this->actingOwner($request);
+
+        $this->authorizeRoomOwner($room, $owner);
+
+        $data = $request->validate([
+            'property_id' => ['required', 'integer', 'exists:properties,id'],
+            'name' => ['required', 'string', 'max:100'],
+            'room_code' => [
+                'nullable',
+                'string',
+                'max:20',
+                Rule::unique('rooms', 'room_code')->ignore($room->id),
+            ],
+            'area' => ['required', 'numeric', 'min:0.01'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'deposit' => ['required', 'numeric', 'min:0'],
+            'max_people' => ['required', 'integer', 'min:1'],
+            'floor' => ['nullable', 'integer', 'min:0'],
+            'description' => ['nullable', 'string'],
+            'status' => [
+                'required',
+                'in:available,pending,rented,maintenance,hidden',
+            ],
+        ]);
+
+        // Không được chuyển phòng sang nhà trọ của chủ khác.
+        abort_unless(
+            Property::query()
+                ->whereKey($data['property_id'])
+                ->where('owner_id', $owner->id)
+                ->exists(),
+            404
+        );
+
+        $room->update($data);
+
+        return redirect()
+            ->route('owner.rooms.index')
+            ->with('success', 'Cập nhật phòng thành công.');
+    }
+
+    /**
+     * Xóa phòng trọ.
+     */
+    public function destroy(Request $request, Room $room)
+    {
+        $owner = $this->actingOwner($request);
+
+        // Chỉ được xóa phòng thuộc khu trọ của chủ nhà hiện tại.
+        $this->authorizeRoomOwner($room, $owner);
+
+        // Không xóa phòng đang có hợp đồng.
+        if ($room->contracts()->exists()) {
+            return redirect()
+                ->route('owner.rooms.index')
+                ->with('error', 'Không thể xóa phòng đang có hợp đồng.');
+        }
+
+        $room->delete();
+
+        return redirect()
+            ->route('owner.rooms.index')
+            ->with('success', 'Xóa phòng thành công.');
+    }
+    public function show(Request $request, Room $room)
+    {
+        $owner = $this->actingOwner($request);
+
+        $this->authorizeRoomOwner($room, $owner);
+
+        $room->load('property');
+
+        return view('owner.rooms.show', compact('room'));
+    }
+
+
+    private function authorizeRoomOwner(Room $room, User $owner): void
+    {
+        abort_unless(
+            Property::query()
+                ->whereKey($room->property_id)
+                ->where('owner_id', $owner->id)
+                ->exists(),
+            404
+        );
     }
 
     private function owner(Request $request): User
