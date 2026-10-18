@@ -426,7 +426,8 @@
 <!-- NAVBAR ĐÃ SỬA LỖI -->
 <nav class="navbar navbar-expand-lg app-navbar">
   <div class="container-fluid">
-    <a class="logo" href="{{ route('landlord.home') }}">Trọ <span>Ơi</span></a>
+      <a class="logo" href="{{ route('landlord.dashboard') }}">Trọ <span>Ơi</span></a>
+
 
     <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
@@ -437,12 +438,12 @@
         
         <!-- 1. TỔNG QUAN -->
         <li class="nav-item">
-          <a class="app-nav-link" href="{{ route('landlord.home') }}">Tổng quan</a>
+          <a class="app-nav-link text-decoration-none" href="{{ route('landlord.dashboard') }}">Tổng quan</a>
         </li>
 
         <!-- 2. QUẢN LÝ TÀI SẢN -->
         <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Nhà &amp; Phòng
           </a>
           <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
@@ -457,7 +458,7 @@
 
         <!-- 3. KHÁCH THUÊ -->
         <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Khách &amp; Hợp đồng
           </a>
           <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
@@ -472,7 +473,7 @@
 
         <!-- 4. TÀI CHÍNH -->
         <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Tài chính
           </a>
           <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
@@ -493,7 +494,7 @@
 
         <!-- 5. VẬN HÀNH & TƯƠNG TÁC -->
         <li class="nav-item dropdown">
-          <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Vận hành
           </a>
           <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">
@@ -513,19 +514,61 @@
         </li>
 
       </ul>
-       <div class="navbar-actions ms-lg-3">
-        <button class="notif-btn" type="button" aria-label="Thông báo">
-          🔔<span class="notif-dot"></span>
-        </button>
-        <a href="#" class="user-chip">
-          <div class="user-avatar">A</div>
-          <div class="user-meta">
-            <div class="user-name">Chủ trọ</div>
-            <div class="user-role">Owner</div>
-          </div>
-          <span class="caret">▼</span>
-        </a>
-      </div>
+         <div class="navbar-actions">
+
+                    <button
+                        class="notif-btn"
+                        type="button"
+                        aria-label="Thông báo"
+                        title="Thông báo">
+                        🔔
+                    </button>
+
+                    <div class="dropdown">
+                        <button
+                            class="user-chip border-0 bg-transparent p-0"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <span class="user-avatar">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'CT', 0, 2)) }}
+                            </span>
+
+                            <span class="user-meta text-start">
+                                <span class="user-name d-block">
+                                    {{ auth()->user()->name ?? 'Chủ trọ' }}
+                                </span>
+                                <span class="user-role">Chủ trọ</span>
+                            </span>
+
+                            <span class="caret">▾</span>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <span class="dropdown-item-text">
+                                    {{ auth()->user()->email ?? '' }}
+                                </span>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form method="POST"
+                                      action="{{ route('logout') }}"
+                                      class="m-0">
+                                    @csrf
+
+                                    <button type="submit" class="dropdown-item">
+                                        ↪ Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
     </div>
   </div>
 </nav>
@@ -581,7 +624,9 @@
         ===================================================== -->
 
         @php
-            $totalTenants = $tenants->count() + $tenants->sum(fn($t) => $t->tenantContracts->flatMap->members->count());
+            $totalTenants = $tenants->count() + $tenants->reduce(function ($carry, $t) {
+                return $carry + optional($t->rentedContracts)->flatMap->members->count();
+            }, 0);
             $staying = $tenants->count();
         @endphp
         <div class="row g-3 mb-4">
@@ -667,7 +712,7 @@
                         </div>
 
                         <div class="fs-4 fw-bold text-dark">
-                            {{ $tenants->filter(fn($t) => ($c = $t->tenantContracts->first()) && $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count() }}
+                            {{ $tenants->filter(fn($t) => ($c = $t->rentedContracts->first()) && $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count() }}
                         </div>
 
                     </div>
@@ -697,7 +742,7 @@
                         </div>
 
                         <div class="fs-4 fw-bold text-dark">
-                            {{ $tenants->flatMap->tenantContracts->where('status', 'active')->count() }}
+                            {{ $tenants->flatMap->rentedContracts->where('status', 'active')->count() }}
                         </div>
 
                     </div>
@@ -828,7 +873,7 @@
 
                     <tbody>
                         @forelse($tenants as $tenant)
-                            @php($contract = $tenant->tenantContracts->first())
+                            @php($contract = $tenant->rentedContracts->first())
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-3">

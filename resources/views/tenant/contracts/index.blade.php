@@ -207,32 +207,32 @@
             <div class="collapse navbar-collapse" id="mainMenu">
                 <ul class="navbar-nav mx-auto align-items-lg-center">
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant.home') }}">Trang chủ</a>
                     </li>
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('rooms.index') }}">Tìm phòng</a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">Tìm phòng</a>
                     </li>
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('favorites.index') }}">Yêu thích</a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('favorites.index') }}">Yêu thích</a>
                     </li>
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('appointments.index') }}">Lịch xem phòng</a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">Lịch xem phòng</a>
                     </li>
                     <!-- HỢP ĐỒNG -->
                     <li class="nav-item">
-                        <a class="app-nav-link active" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a>
+                        <a class="app-nav-link active text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a>
                     </li>
                     <!-- HÓA ĐƠN -->
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a>
                     </li>
                     <!-- SỬA CHỮA -->
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a>
                     </li>
                     <!-- ĐÁNH GIÁ -->
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a>
                     </li>
                 </ul>
 
@@ -241,14 +241,31 @@
                     <button class="notif-btn">
                         🔔<span class="notif-dot"></span>
                     </button>
-                    <a href="#" class="user-chip text-decoration-none">
-                        <span class="user-avatar">TH</span>
-                        <span class="user-meta">
-                            <span class="user-name d-block">Thanh Huyền</span>
-                            <span class="user-role">Người thuê</span>
-                        </span>
-                        <span class="caret">▾</span>
-                    </a>
+                    <div class="dropdown">
+                        <button class="user-chip text-decoration-none dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <span class="user-avatar">{{ $authInitials ?? 'NT' }}</span>
+                            <span class="user-meta">
+                                <span class="user-name d-block">{{ $authUser->name ?? 'Người dùng' }}</span>
+                                <span class="user-role">Người thuê</span>
+                            </span>
+                            <span class="caret">▾</span>
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
+                            <form method="POST" action="{{ route('logout') }}"
+                                class="m-0">
+                                @csrf
+
+                                <button type="submit"
+                                    class="dropdown-item">
+                                    ↪ Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

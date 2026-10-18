@@ -1,250 +1,36 @@
-```blade
 @php
+    /*
+    |--------------------------------------------------------------------------
+    | DỮ LIỆU PHÒNG TỪ DATABASE (controller truyền $room)
+    |--------------------------------------------------------------------------
+    */
+    if (isset($room) && $room instanceof \App\Models\Room) {
+        $property = $room->property;
+        $owner = optional($property)->owner;
 
-/*
-|--------------------------------------------------------------------------
-| DỮ LIỆU PHÒNG MOCKUP
-| Sau này sẽ thay bằng dữ liệu từ bảng rooms/properties/database.
-|--------------------------------------------------------------------------
-*/
-
-$rooms = [
-
-    1 => [
-        'title' => 'Phòng trọ máy lạnh gần Q.7',
-        'address' => 'Đường Nguyễn Thị Thập, Quận 7, TP. Hồ Chí Minh',
-        'price' => '2.800.000đ',
-        'area' => '22 m²',
-        'people' => '2 người',
-        'bathroom' => 'WC riêng',
-        'type' => 'Phòng trọ',
-
-        'images' => [
-            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80',
-        ],
-
-        'description' => 'Phòng trọ sạch sẽ, thoáng mát, có máy lạnh và đầy đủ nội thất cơ bản. Vị trí thuận tiện di chuyển đến các trường học, chợ, siêu thị và khu vực trung tâm Quận 7.',
-
-        'amenities' => [
-            '🛏️ Nội thất cơ bản',
-            '❄️ Máy lạnh',
-            '🚿 WC riêng',
-            '📶 Wi-Fi',
-            '🛵 Chỗ để xe',
-            '🔐 An ninh tốt',
-            '🧺 Máy giặt',
-            '💧 Nước sạch',
-            '⚡ Điện riêng',
-        ],
-
-        'landlord' => 'Anh Tuấn',
-        'phone' => '0900000001',
-
-        'map' => 'Đường Nguyễn Thị Thập, Quận 7, TP. Hồ Chí Minh',
-    ],
-
-
-    2 => [
-        'title' => 'Căn hộ mini đầy đủ nội thất',
-        'address' => 'Phường An Phú, TP. Thủ Đức, TP. Hồ Chí Minh',
-        'price' => '6.800.000đ',
-        'area' => '35 m²',
-        'people' => '3 người',
-        'bathroom' => 'WC riêng',
-        'type' => 'Căn hộ mini',
-
-        'images' => [
-            'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
-        ],
-
-        'description' => 'Căn hộ mini rộng rãi, đầy đủ nội thất, thiết kế hiện đại. Khu vực an ninh, yên tĩnh, phù hợp cho người đi làm hoặc gia đình nhỏ. Giao thông thuận tiện.',
-
-        'amenities' => [
-            '🛋️ Full nội thất',
-            '❄️ Máy lạnh',
-            '🚿 WC riêng',
-            '📶 Wi-Fi',
-            '🛵 Chỗ để xe',
-            '🔐 Camera an ninh',
-            '🧺 Máy giặt',
-            '🍳 Bếp riêng',
-            '🌐 Internet',
-        ],
-
-        'landlord' => 'Chị Lan',
-        'phone' => '0900000002',
-
-        'map' => 'Phường An Phú, TP. Thủ Đức, TP. Hồ Chí Minh',
-    ],
-
-
-    3 => [
-        'title' => 'Phòng cửa sổ lớn, giờ giấc tự do',
-        'address' => 'Phường Tân Thành, Quận Tân Phú, TP. Hồ Chí Minh',
-        'price' => '3.200.000đ',
-        'area' => '24 m²',
-        'people' => '2 người',
-        'bathroom' => 'WC riêng',
-        'type' => 'Phòng trọ',
-
-        'images' => [
-            'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80',
-        ],
-
-        'description' => 'Phòng có cửa sổ lớn, đón nhiều ánh sáng tự nhiên, không gian thoáng mát. Giờ giấc tự do, khu dân cư yên tĩnh và an ninh tốt. Phù hợp cho sinh viên và người đi làm.',
-
-        'amenities' => [
-            '🪟 Cửa sổ lớn',
-            '🕐 Giờ giấc tự do',
-            '🚿 WC riêng',
-            '📶 Wi-Fi',
-            '🛵 Chỗ để xe',
-            '🔐 An ninh tốt',
-            '🧺 Máy giặt',
-            '💧 Nước sạch',
-            '⚡ Điện riêng',
-        ],
-
-        'landlord' => 'Anh Minh',
-        'phone' => '0900000003',
-
-        'map' => 'Phường Tân Thành, Quận Tân Phú, TP. Hồ Chí Minh',
-    ],
-
-
-    4 => [
-        'title' => 'Phòng có gác rộng, thoáng mát',
-        'address' => 'Đường Lê Văn Việt, TP. Thủ Đức, TP. Hồ Chí Minh',
-        'price' => '3.500.000đ',
-        'area' => '28 m²',
-        'people' => '3 người',
-        'bathroom' => 'WC riêng',
-        'type' => 'Phòng trọ có gác',
-
-        'images' => [
-            'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80',
-        ],
-
-        'description' => 'Phòng trọ có gác rộng, không gian thoáng mát và sạch sẽ. Gác có thể sử dụng làm khu vực ngủ hoặc để đồ. Vị trí gần các trường đại học, khu mua sắm và nhiều tiện ích.',
-
-        'amenities' => [
-            '🛏️ Có gác rộng',
-            '❄️ Máy lạnh',
-            '🚿 WC riêng',
-            '📶 Wi-Fi',
-            '🛵 Chỗ để xe',
-            '🔐 An ninh tốt',
-            '🧺 Máy giặt',
-            '💧 Nước sạch',
-            '⚡ Điện riêng',
-        ],
-
-        'landlord' => 'Chú Hùng',
-        'phone' => '0900000004',
-
-        'map' => 'Đường Lê Văn Việt, TP. Thủ Đức, TP. Hồ Chí Minh',
-    ],
-
-
-    5 => [
-        'title' => 'Phòng ban công riêng, nhiều ánh sáng',
-        'address' => 'Nguyễn Gia Trí, Bình Thạnh, TP. Hồ Chí Minh',
-        'price' => '4.200.000đ',
-        'area' => '30 m²',
-        'people' => '2 người',
-        'bathroom' => 'WC riêng',
-        'type' => 'Phòng trọ',
-
-        'images' => [
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80',
-        ],
-
-        'description' => 'Phòng có ban công riêng, nhiều ánh sáng tự nhiên và không gian thoáng. Phòng được thiết kế hiện đại, phù hợp cho sinh viên, người đi làm hoặc hai người ở cùng.',
-
-        'amenities' => [
-            '🌤️ Ban công riêng',
-            '❄️ Máy lạnh',
-            '🛏️ Nội thất cơ bản',
-            '🚿 WC riêng',
-            '📶 Wi-Fi',
-            '🛵 Chỗ để xe',
-            '🔐 Camera an ninh',
-            '🧺 Máy giặt',
-            '💧 Nước sạch',
-        ],
-
-        'landlord' => 'Chị Hương',
-        'phone' => '0900000005',
-
-        'map' => 'Nguyễn Gia Trí, Bình Thạnh, TP. Hồ Chí Minh',
-    ],
-
-
-    6 => [
-        'title' => 'Căn hộ nhỏ đầy đủ tiện nghi',
-        'address' => 'Phường 4, Quận 3, TP. Hồ Chí Minh',
-        'price' => '5.500.000đ',
-        'area' => '32 m²',
-        'people' => '2 người',
-        'bathroom' => 'WC riêng',
-        'type' => 'Căn hộ mini',
-
-        'images' => [
-            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80',
-            'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80',
-        ],
-
-        'description' => 'Căn hộ nhỏ đầy đủ tiện nghi, thiết kế gọn gàng và hiện đại. Không gian phù hợp cho một đến hai người ở. Vị trí ngay Quận 3, thuận tiện di chuyển đến trung tâm thành phố, trường học và khu vui chơi.',
-
-        'amenities' => [
-            '🛋️ Nội thất đầy đủ',
-            '❄️ Máy lạnh',
-            '🚿 WC riêng',
-            '📶 Wi-Fi',
-            '🛵 Chỗ để xe',
-            '🔐 Camera an ninh',
-            '🧺 Máy giặt',
-            '🍳 Bếp riêng',
-            '🌐 Internet',
-        ],
-
-        'landlord' => 'Anh Nam',
-        'phone' => '0900000006',
-
-        'map' => 'Phường 4, Quận 3, TP. Hồ Chí Minh',
-    ],
-
-];
-
-$roomId = (int) $id;
-
-$room = $rooms[$roomId] ?? null;
-
+        $room = [
+            'title' => $room->name,
+            'id' => $room->id,
+            'address' => optional($property)->address ?? 'Chưa cập nhật địa chỉ',
+            'price' => number_format((float) $room->price, 0, ',', '.') . 'đ',
+            'area' => number_format((float) $room->area, 0, ',', '.') . ' m²',
+            'people' => $room->max_people . ' người',
+            'bathroom' => 'WC riêng',
+            'type' => ucfirst($room->status ?? 'Phòng trọ'),
+            'images' => is_array($room->images)
+                ? $room->images
+                : (json_decode($room->images ?? '[]', true) ?: []),
+            'description' => $room->description ?? 'Không có mô tả chi tiết.',
+            'amenities' => optional($room->amenities)->pluck('name')->toArray()
+                ?? ['WC riêng', 'Wi-Fi', 'Chỗ để xe'],
+            'landlord' => optional($owner)->name ?? 'Chủ trọ',
+            'phone' => optional($owner)->phone ?? '',
+            'map' => optional($property)->address ?? 'Chưa cập nhật vị trí',
+        ];
+    } else {
+        $room = null;
+    }
 @endphp
-
 
 <!DOCTYPE html>
 
@@ -297,7 +83,6 @@ $room = $rooms[$roomId] ?? null;
         rel="stylesheet"
         href="{{ asset('css/styles.css') }}"
     >
-
 
     <style>
 
@@ -896,11 +681,12 @@ $room = $rooms[$roomId] ?? null;
 
 <!-- =========================================================
      HEADER
-========================================================= -->
+============================================================== -->
 
 <header class="room-detail-header">
 
     <div class="room-detail-header-inner">
+
 
 
         <a
@@ -909,6 +695,7 @@ $room = $rooms[$roomId] ?? null;
         >
             Trọ <span>Ơi</span>
         </a>
+
 
 
         <a
@@ -926,14 +713,16 @@ $room = $rooms[$roomId] ?? null;
 
 <!-- =========================================================
      MAIN
-========================================================= -->
+============================================================== -->
 
 <main class="room-detail-page">
 
     <div class="room-detail-container">
 
 
+
         @if(!$room)
+
 
 
             <!-- =========================
@@ -961,7 +750,9 @@ $room = $rooms[$roomId] ?? null;
             </div>
 
 
+
         @else
+
 
 
             <!-- =========================
@@ -978,6 +769,7 @@ $room = $rooms[$roomId] ?? null;
                             src="{{ $image }}"
                             alt="{{ $room['title'] }}"
                         >
+
 
 
                         @if($index === 0)
@@ -999,11 +791,13 @@ $room = $rooms[$roomId] ?? null;
             <div class="row g-4">
 
 
+
                 <!-- =================================================
                      LEFT
                 ================================================== -->
 
                 <div class="col-lg-8">
+
 
 
                     <!-- =========================
@@ -1015,11 +809,13 @@ $room = $rooms[$roomId] ?? null;
                         <div class="room-title-top">
 
 
+
                             <div>
 
                                 <h1>
                                     {{ $room['title'] }}
                                 </h1>
+
 
 
                                 <div class="room-address">
@@ -1035,6 +831,7 @@ $room = $rooms[$roomId] ?? null;
                             </div>
 
 
+
                             <div class="room-price-box">
 
                                 <div class="room-price">
@@ -1046,6 +843,7 @@ $room = $rooms[$roomId] ?? null;
                                     </span>
 
                                 </div>
+
 
 
                                 <div class="available-badge">
@@ -1061,7 +859,9 @@ $room = $rooms[$roomId] ?? null;
                         </div>
 
 
+
                         <div class="room-info-box">
+
 
 
                             <div class="room-info-item">
@@ -1077,6 +877,7 @@ $room = $rooms[$roomId] ?? null;
                             </div>
 
 
+
                             <div class="room-info-item">
 
                                 <div class="label">
@@ -1090,6 +891,7 @@ $room = $rooms[$roomId] ?? null;
                             </div>
 
 
+
                             <div class="room-info-item">
 
                                 <div class="label">
@@ -1101,6 +903,7 @@ $room = $rooms[$roomId] ?? null;
                                 </div>
 
                             </div>
+
 
 
                             <div class="room-info-item">
@@ -1154,6 +957,7 @@ $room = $rooms[$roomId] ?? null;
                         <div class="section-line"></div>
 
 
+
                         <div class="amenities">
 
                             @foreach($room['amenities'] as $amenity)
@@ -1183,6 +987,7 @@ $room = $rooms[$roomId] ?? null;
                         <div class="section-line"></div>
 
 
+
                         <div class="map-address">
 
                             📌
@@ -1190,6 +995,7 @@ $room = $rooms[$roomId] ?? null;
                             {{ $room['map'] }}
 
                         </div>
+
 
 
                         <div class="map-wrapper">
@@ -1221,10 +1027,13 @@ $room = $rooms[$roomId] ?? null;
                         <div class="section-line"></div>
 
 
+
                         <div class="landlord-box">
 
 
+
                             <div class="landlord-info">
+
 
 
                                 <div class="landlord-avatar">
@@ -1232,6 +1041,7 @@ $room = $rooms[$roomId] ?? null;
                                     {{ strtoupper(substr($room['landlord'], 0, 1)) }}
 
                                 </div>
+
 
 
                                 <div>
@@ -1243,6 +1053,7 @@ $room = $rooms[$roomId] ?? null;
                                     </div>
 
 
+
                                     <div class="landlord-status">
 
                                         ● Đang hoạt động
@@ -1252,6 +1063,7 @@ $room = $rooms[$roomId] ?? null;
                                 </div>
 
                             </div>
+
 
 
                             <div class="landlord-contact">
@@ -1275,14 +1087,19 @@ $room = $rooms[$roomId] ?? null;
                 <div class="col-lg-4">
 
 
+
                     <div class="booking-card">
+
 
 
                         <div class="booking-top">
 
+
+
                             <h2>
                                 📅 Đặt lịch xem phòng
                             </h2>
+
 
 
                             <div class="booking-note">
@@ -1291,6 +1108,7 @@ $room = $rooms[$roomId] ?? null;
                                 Chủ trọ sẽ xác nhận lịch hẹn của bạn.
 
                             </div>
+
 
 
                             <div class="booking-room-price">
@@ -1306,6 +1124,7 @@ $room = $rooms[$roomId] ?? null;
                         </div>
 
 
+
                         <!--
                         |-----------------------------------------------------------
                         | QUAN TRỌNG:
@@ -1317,11 +1136,12 @@ $room = $rooms[$roomId] ?? null;
                         -->
 
                         <a
-                            href="{{ route('appointments.create', ['id' => $roomId]) }}"
+                            href="{{ route('appointments.create', ['id' => $room['id'] ?? 0]) }}"
                             class="btn-booking text-decoration-none d-flex align-items-center justify-content-center"
                         >
                             📅 Đặt lịch xem phòng
                         </a>
+
 
 
                         <div class="booking-secure-note">
@@ -1331,9 +1151,11 @@ $room = $rooms[$roomId] ?? null;
                         </div>
 
 
+
                         <!-- LIÊN HỆ NHANH -->
 
                         <div class="contact-buttons">
+
 
 
                             <a
@@ -1342,6 +1164,7 @@ $room = $rooms[$roomId] ?? null;
                             >
                                 📞 Gọi chủ trọ
                             </a>
+
 
 
                             <a
@@ -1374,7 +1197,7 @@ $room = $rooms[$roomId] ?? null;
 ></script>
 
 
+
 </body>
 
 </html>
-```

@@ -531,12 +531,12 @@
         <div class="collapse navbar-collapse" id="mainMenu">
             <ul class="navbar-nav mx-auto align-items-xl-center">
                 <li class="nav-item">
-                    <a class="app-nav-link {{ request()->routeIs('landlord.dashboard') ? 'active' : '' }}"
+                    <a class="app-nav-link text-decoration-none {{ request()->routeIs('landlord.dashboard') ? 'active' : '' }}"
                        href="{{ route('landlord.dashboard') }}">Tổng quan</a>
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="app-nav-link dropdown-toggle {{ request()->routeIs('owner.properties.*') || request()->routeIs('owner.rooms.*') ? 'active' : '' }}"
+                    <a class="app-nav-link dropdown-toggle text-decoration-none {{ request()->routeIs('owner.properties.*') || request()->routeIs('owner.rooms.*') ? 'active' : '' }}"
                        href="#" data-bs-toggle="dropdown">Nhà &amp; Phòng</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('owner.properties.index') }}">🏠 Quản lý nhà</a></li>
@@ -545,7 +545,7 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="app-nav-link dropdown-toggle {{ request()->routeIs('owner.tenants.*') || request()->routeIs('owner.contracts.*') ? 'active' : '' }}"
+                    <a class="app-nav-link dropdown-toggle text-decoration-none {{ request()->routeIs('owner.tenants.*') || request()->routeIs('owner.contracts.*') ? 'active' : '' }}"
                        href="#" data-bs-toggle="dropdown">Khách &amp; Hợp đồng</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a></li>
@@ -554,7 +554,7 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="app-nav-link dropdown-toggle {{ request()->routeIs('owner.services.*') || request()->routeIs('owner.utilities.*') || request()->routeIs('owner.invoices.*') || request()->routeIs('owner.payments.*') ? 'active' : '' }}"
+                    <a class="app-nav-link dropdown-toggle text-decoration-none {{ request()->routeIs('owner.services.*') || request()->routeIs('owner.utilities.*') || request()->routeIs('owner.invoices.*') || request()->routeIs('owner.payments.*') ? 'active' : '' }}"
                        href="#" data-bs-toggle="dropdown">Tài chính</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a></li>
@@ -565,7 +565,7 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="app-nav-link dropdown-toggle {{ request()->routeIs('owner.rental-posts.*') || request()->routeIs('owner.appointments.*') || request()->routeIs('owner.reviews.*') || request()->is('owner/maintenance*') ? 'active' : '' }}"
+                    <a class="app-nav-link dropdown-toggle text-decoration-none {{ request()->routeIs('owner.rental-posts.*') || request()->routeIs('owner.appointments.*') || request()->routeIs('owner.reviews.*') || request()->is('owner/maintenance*') ? 'active' : '' }}"
                        href="#" data-bs-toggle="dropdown">Vận hành</a>
                     <ul class="dropdown-menu">
                         <li>
@@ -582,18 +582,61 @@
                 </li>
             </ul>
 
-            <div class="navbar-actions ms-xl-3">
-                <button class="notif-btn" type="button" aria-label="Thông báo">🔔</button>
-                <div class="user-chip">
-                    <div class="user-avatar">
-                        {{ strtoupper(substr(auth()->user()->name ?? 'C', 0, 1)) }}
+           <div class="navbar-actions">
+
+                    <button
+                        class="notif-btn"
+                        type="button"
+                        aria-label="Thông báo"
+                        title="Thông báo">
+                        🔔
+                    </button>
+
+                    <div class="dropdown">
+                        <button
+                            class="user-chip border-0 bg-transparent p-0"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <span class="user-avatar">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'CT', 0, 2)) }}
+                            </span>
+
+                            <span class="user-meta text-start">
+                                <span class="user-name d-block">
+                                    {{ auth()->user()->name ?? 'Chủ trọ' }}
+                                </span>
+                                <span class="user-role">Chủ trọ</span>
+                            </span>
+
+                            <span class="caret">▾</span>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <span class="dropdown-item-text">
+                                    {{ auth()->user()->email ?? '' }}
+                                </span>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form method="POST"
+                                      action="{{ route('logout') }}"
+                                      class="m-0">
+                                    @csrf
+
+                                    <button type="submit" class="dropdown-item">
+                                        ↪ Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
-                    <div>
-                        <div class="user-name">{{ auth()->user()->name ?? 'Chủ trọ' }}</div>
-                        <div class="user-role">Chủ trọ</div>
-                    </div>
+
                 </div>
-            </div>
         </div>
     </div>
 </nav>

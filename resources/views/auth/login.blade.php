@@ -1147,7 +1147,7 @@
 
         <div class="warm-light"></div>
 
-            <a href="{{ route('home') }}" class="auth-logo">
+            <a href="{{ url('/') }}" class="auth-logo">
                 Trọ <span>Ơi</span>
                 <small>QUẢN LÝ & CHO THUÊ PHÒNG TRỌ</small>
             </a>

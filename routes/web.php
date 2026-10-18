@@ -493,6 +493,11 @@ Route::get(
     [OwnerInvoiceController::class, 'show']
 )->name('owner.invoices.show');
 
+Route::post(
+    '/owner/invoices',
+    [OwnerInvoiceController::class, 'store']
+)->name('owner.invoices.store');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -504,6 +509,16 @@ Route::get(
     '/owner/payments',
     [OwnerPaymentController::class, 'index']
 )->name('owner.payments.index');
+
+Route::put(
+    '/owner/payments/{payment}/confirm',
+    [OwnerPaymentController::class, 'confirm']
+)->name('owner.payments.confirm');
+
+Route::put(
+    '/owner/payments/{payment}/reject',
+    [OwnerPaymentController::class, 'reject']
+)->name('owner.payments.reject');
 
 
 /*
@@ -517,6 +532,16 @@ Route::get(
     [OwnerMaintenanceController::class, 'index']
 )->name('owner.maintenance.index');
 
+Route::get(
+    '/owner/maintenance/{maintenance}',
+    [OwnerMaintenanceController::class, 'show']
+)->name('owner.maintenance.show');
+
+Route::put(
+    '/owner/maintenance/{maintenance}/status',
+    [OwnerMaintenanceController::class, 'updateStatus']
+)->name('owner.maintenance.status');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -528,6 +553,11 @@ Route::get(
     '/owner/reviews',
     [OwnerReviewController::class, 'index']
 )->name('owner.reviews.index');
+
+Route::put(
+    '/owner/reviews/{review}/visibility',
+    [OwnerReviewController::class, 'toggleVisibility']
+)->name('owner.reviews.visibility');
 
 
 /*
@@ -547,6 +577,16 @@ Route::resource(
     'owner/appointments',
     OwnerApptionmentController::class
 )->names('owner.appointments');
+
+Route::put(
+    '/owner/appointments/{appointment}/confirm',
+    [OwnerApptionmentController::class, 'confirm']
+)->name('owner.appointments.confirm');
+
+Route::put(
+    '/owner/appointments/{appointment}/reject',
+    [OwnerApptionmentController::class, 'reject']
+)->name('owner.appointments.reject');
 
 
 

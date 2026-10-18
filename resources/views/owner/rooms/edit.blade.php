@@ -352,13 +352,13 @@
         <div class="collapse navbar-collapse" id="ownerMenu">
             <ul class="navbar-nav mx-auto align-items-lg-center">
                 <li class="nav-item">
-                    <a class="app-nav-link" href="{{ route('landlord.dashboard') }}">
+                    <a class="app-nav-link text-decoration-none" href="{{ route('landlord.dashboard') }}">
                         Tổng quan
                     </a>
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="app-nav-link dropdown-toggle active"
+                    <a class="app-nav-link dropdown-toggle active text-decoration-none"
                        href="#"
                        role="button"
                        data-bs-toggle="dropdown"
@@ -383,7 +383,7 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="app-nav-link dropdown-toggle"
+                    <a class="app-nav-link dropdown-toggle text-decoration-none"
                        href="#"
                        role="button"
                        data-bs-toggle="dropdown"
@@ -414,7 +414,7 @@
                 </li>
 
                 <li class="nav-item dropdown">
-                    <a class="app-nav-link dropdown-toggle"
+                    <a class="app-nav-link dropdown-toggle text-decoration-none"
                        href="#"
                        role="button"
                        data-bs-toggle="dropdown"
@@ -445,46 +445,61 @@
                 </li>
             </ul>
 
-            <div class="navbar-actions ms-lg-3">
-                <div class="dropdown">
+            <div class="navbar-actions">
+
                     <button
-                        class="user-chip border-0 bg-transparent p-0"
+                        class="notif-btn"
                         type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false">
-
-                        <span class="user-avatar-small">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'CT', 0, 2)) }}
-                        </span>
-
-                        <span class="user-meta ms-2 text-start">
-                            <span class="user-name d-block">
-                                {{ auth()->user()->name ?? 'Chủ trọ' }}
-                            </span>
-                            <span class="user-role">Chủ trọ</span>
-                        </span>
-
-                        <span class="caret ms-2">▾</span>
+                        aria-label="Thông báo"
+                        title="Thông báo">
+                        🔔
                     </button>
 
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li>
-                            <span class="dropdown-item-text">
-                                {{ auth()->user()->email ?? '' }}
+                    <div class="dropdown">
+                        <button
+                            class="user-chip border-0 bg-transparent p-0"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <span class="user-avatar">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'CT', 0, 2)) }}
                             </span>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form action="{{ route('logout') }}" method="POST">
-                                @csrf
-                                <button type="submit" class="dropdown-item">
-                                    Đăng xuất
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
+
+                            <span class="user-meta text-start">
+                                <span class="user-name d-block">
+                                    {{ auth()->user()->name ?? 'Chủ trọ' }}
+                                </span>
+                                <span class="user-role">Chủ trọ</span>
+                            </span>
+
+                            <span class="caret">▾</span>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <span class="dropdown-item-text">
+                                    {{ auth()->user()->email ?? '' }}
+                                </span>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form method="POST"
+                                      action="{{ route('logout') }}"
+                                      class="m-0">
+                                    @csrf
+
+                                    <button type="submit" class="dropdown-item">
+                                        ↪ Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
                 </div>
-            </div>
         </div>
     </div>
 </nav>

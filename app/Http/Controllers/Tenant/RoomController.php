@@ -17,10 +17,10 @@ class RoomController extends Controller
     public function index(Request $request)
     {
         $query = Room::query()
-           ->with([
-    'property',
-    'amenities',
-    'rentalPosts' => function ($query) {
+            ->with([
+                'property.owner',
+                'amenities',
+                'rentalPosts' => function ($query) {
                     $query->where('status', 'published');
                 },
             ])
@@ -113,7 +113,7 @@ class RoomController extends Controller
     {
         $room = Room::query()
             ->with([
-                'property',
+                'property.owner',
                 'amenities',
                 'rentalPosts' => function ($query) {
                     $query->where('status', 'published')

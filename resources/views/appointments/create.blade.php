@@ -45,37 +45,37 @@
                 <ul class="navbar-nav mx-auto align-items-lg-center">
 
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('tenant') }}">
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant') }}">
                             Trang chủ
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('rooms.index') }}">
+                        <a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">
                             Tìm phòng
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('favorites.index') }}">
+                        <a class="app-nav-link text-decoration-none" href="{{ route('favorites.index') }}">
                             Yêu thích
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="app-nav-link active" href="{{ route('appointments.index') }}">
+                        <a class="app-nav-link active text-decoration-none" href="{{ route('appointments.index') }}">
                             Lịch xem phòng
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ route('appointments.index') }}">
+                        <a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">
                             Hợp đồng
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">
+                        <a class="app-nav-link text-decoration-none" href="{{ url('/tenant/invoices/index') }}">
                             Hóa đơn
                         </a>
                     </li>

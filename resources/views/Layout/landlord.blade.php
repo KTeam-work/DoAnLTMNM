@@ -24,11 +24,6 @@
     ========================== --}}
     <nav class="navbar navbar-expand-lg app-navbar">
         <div class="container-fluid">
-
-            <a class="logo" href="{{ route('landlord.dashboard') }}">
-                Trọ <span>Ơi</span>
-            </a>
-
             <button
                 class="navbar-toggler bg-light"
                 type="button"
@@ -41,12 +36,13 @@
             </button>
 
             <div class="collapse navbar-collapse" id="ownerMainMenu">
+                  <a class="logo" href="{{ route('landlord.dashboard') }}">Trọ <span>Ơi</span></a>
 
                 <ul class="navbar-nav mx-auto align-items-lg-center">
 
                     {{-- Tổng quan --}}
                     <li class="nav-item">
-                        <a class="app-nav-link active"
+                        <a class="app-nav-link active text-decoration-none"
                            href="{{ route('landlord.dashboard') }}">
                             Tổng quan
                         </a>
@@ -54,7 +50,7 @@
 
                     {{-- Nhà và phòng --}}
                     <li class="nav-item dropdown">
-                        <a class="app-nav-link dropdown-toggle"
+                        <a class="app-nav-link dropdown-toggle text-decoration-none"
                            href="#"
                            role="button"
                            data-bs-toggle="dropdown"
@@ -80,7 +76,7 @@
 
                     {{-- Khách thuê --}}
                     <li class="nav-item dropdown">
-                        <a class="app-nav-link dropdown-toggle"
+                        <a class="app-nav-link dropdown-toggle text-decoration-none"
                            href="#"
                            role="button"
                            data-bs-toggle="dropdown"
@@ -106,7 +102,7 @@
 
                     {{-- Tài chính --}}
                     <li class="nav-item dropdown">
-                        <a class="app-nav-link dropdown-toggle"
+                        <a class="app-nav-link dropdown-toggle text-decoration-none"
                            href="#"
                            role="button"
                            data-bs-toggle="dropdown"
@@ -144,7 +140,7 @@
 
                     {{-- Vận hành --}}
                     <li class="nav-item dropdown">
-                        <a class="app-nav-link dropdown-toggle"
+                        <a class="app-nav-link dropdown-toggle text-decoration-none"
                            href="#"
                            role="button"
                            data-bs-toggle="dropdown"
@@ -153,6 +149,9 @@
                         </a>
 
                         <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('owner.rental-posts.index') }}">📢 Tin đăng</a>
+                             
                             <li>
                                 <a class="dropdown-item"
                                    href="{{ route('owner.appointments.index') }}">

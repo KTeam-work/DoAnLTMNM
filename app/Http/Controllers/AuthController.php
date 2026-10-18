@@ -1,4 +1,3 @@
-```php
 <?php
 
 namespace App\Http\Controllers;
@@ -98,6 +97,7 @@ class AuthController extends Controller
             'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
             'role' => $data['role'],
+            'status' => 'active',
         ]);
 
         return redirect()
@@ -123,4 +123,4 @@ class AuthController extends Controller
             );
     }
 }
-```
+
