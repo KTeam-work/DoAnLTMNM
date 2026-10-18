@@ -76,7 +76,7 @@
                     <li class="nav-item">
 
                         <a
-                            class="app-nav-link"
+                            class="app-nav-link text-decoration-none"
                             href="{{ route('tenant.home') }}">
                             Trang chủ
                         </a>
@@ -87,7 +87,7 @@
                     <li class="nav-item">
 
                         <a
-                            class="app-nav-link"
+                            class="app-nav-link text-decoration-none"
                             href="{{ route('rooms.index') }}">
                             Tìm phòng
                         </a>
@@ -98,7 +98,7 @@
                     <li class="nav-item">
 
                         <a
-                            class="app-nav-link"
+                            class="app-nav-link text-decoration-none"
                             href="{{ route('favorites.index') }}">
                             Yêu thích
                         </a>
@@ -109,7 +109,7 @@
                     <li class="nav-item">
 
                         <a
-                            class="app-nav-link active"
+                            class="app-nav-link active text-decoration-none"
                             href="{{ route('appointments.index') }}">
                             Lịch xem phòng
                         </a>
@@ -117,11 +117,11 @@
                     </li>
 
 
-                    <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-                    <li class="nav-item"><a class="app-nav-link" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
+                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
+                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
 
-                    <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-                    <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
+                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
 
                 </ul>
 
@@ -138,33 +138,45 @@
                     </button>
 
 
-                    <a
-                        href="#"
-                        class="user-chip">
-
-                        <span class="user-avatar">
-                            TH
-                        </span>
-
-
-                        <span class="user-meta">
-
-                            <span class="user-name d-block">
-                                Thanh Huyền
+                    <div class="dropdown">
+                        <button class="user-chip dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <span class="user-avatar">
+                                {{ $authInitials ?? 'NT' }}
                             </span>
 
-                            <span class="user-role">
-                                Người thuê
+                            <span class="user-meta">
+
+                                <span class="user-name d-block">
+                                    {{ $authUser->name ?? 'Người dùng' }}
+                                </span>
+
+                                <span class="user-role">
+                                    Người thuê
+                                </span>
+
                             </span>
 
-                        </span>
 
+                            <span class="caret">
+                                ▾
+                            </span>
+                        </button>
 
-                        <span class="caret">
-                            ▾
-                        </span>
+                        <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
+                            <form method="POST" action="{{ route('logout') }}"
+                                class="m-0">
+                                @csrf
 
-                    </a>
+                                <button type="submit"
+                                    class="dropdown-item">
+                                    ↪ Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
 
                 </div>
 

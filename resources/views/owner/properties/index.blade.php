@@ -401,13 +401,13 @@
                     <ul class="navbar-nav mx-auto align-items-lg-center">
 
                         <li class="nav-item">
-                            <a class="app-nav-link" href="{{ route('landlord.dashboard') }}">
+                            <a class="app-nav-link text-decoration-none" href="{{ route('landlord.dashboard') }}">
                                 Tổng quan
                             </a>
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="app-nav-link dropdown-toggle active"
+                            <a class="app-nav-link dropdown-toggle active text-decoration-none"
                                 href="#"
                                 id="navbarDrop1"
                                 role="button"
@@ -431,7 +431,7 @@
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="app-nav-link dropdown-toggle"
+                            <a class="app-nav-link dropdown-toggle text-decoration-none"
                                 href="#"
                                 id="navbarDrop2"
                                 role="button"
@@ -441,13 +441,13 @@
                             </a>
 
                             <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
-                                <li><a class="dropdown-item" href="#">👤 Người thuê</a></li>
-                                <li><a class="dropdown-item" href="#">📝 Hợp đồng</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.contracts.index') }}">📝 Hợp đồng</a></li>
                             </ul>
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="app-nav-link dropdown-toggle"
+                            <a class="app-nav-link dropdown-toggle text-decoration-none"
                                 href="#"
                                 id="navbarDrop3"
                                 role="button"
@@ -457,15 +457,15 @@
                             </a>
 
                             <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
-                                <li><a class="dropdown-item" href="#">✨ Dịch vụ</a></li>
-                                <li><a class="dropdown-item" href="#">⚡ Điện nước</a></li>
-                                <li><a class="dropdown-item" href="#">🧾 Hóa đơn</a></li>
-                                <li><a class="dropdown-item" href="#">💰 Giao dịch</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.utilities.index') }}">⚡ Điện nước</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.invoices.index') }}">🧾 Hóa đơn</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.payments.index') }}">💰 Giao dịch</a></li>
                             </ul>
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="app-nav-link dropdown-toggle"
+                            <a class="app-nav-link dropdown-toggle text-decoration-none"
                                 href="#"
                                 id="navbarDrop4"
                                 role="button"
@@ -486,30 +486,68 @@
                                         📅 Lịch xem
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item" href="#">🛠️ Sửa chữa</a></li>
-                                <li><a class="dropdown-item" href="#">⭐ Đánh giá</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.maintenance.index') }}">🛠️ Sửa chữa</a></li>
+                                <li><a class="dropdown-item" href="{{ route('owner.reviews.index') }}">⭐ Đánh giá</a></li>
                             </ul>
                         </li>
                     </ul>
 
-                    <div class="navbar-actions ms-lg-3">
-                        <button class="notif-btn" type="button" aria-label="Thông báo">
-                            🔔
+                    <div class="navbar-actions">
+
+                    <button
+                        class="notif-btn"
+                        type="button"
+                        aria-label="Thông báo"
+                        title="Thông báo">
+                        🔔
+                    </button>
+
+                    <div class="dropdown">
+                        <button
+                            class="user-chip border-0 bg-transparent p-0"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <span class="user-avatar">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'CT', 0, 2)) }}
+                            </span>
+
+                            <span class="user-meta text-start">
+                                <span class="user-name d-block">
+                                    {{ auth()->user()->name ?? 'Chủ trọ' }}
+                                </span>
+                                <span class="user-role">Chủ trọ</span>
+                            </span>
+
+                            <span class="caret">▾</span>
                         </button>
 
-                        <a href="#" class="user-chip">
-                            <div class="user-avatar">
-                                {{ strtoupper(substr(auth()->user()->name ?? 'O', 0, 1)) }}
-                            </div>
-                            <div class="user-meta">
-                                <div class="user-name">
-                                    {{ auth()->user()->name ?? 'Chủ trọ' }}
-                                </div>
-                                <div class="user-role">Owner</div>
-                            </div>
-                            <span class="caret">▼</span>
-                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <span class="dropdown-item-text">
+                                    {{ auth()->user()->email ?? '' }}
+                                </span>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form method="POST"
+                                      action="{{ route('logout') }}"
+                                      class="m-0">
+                                    @csrf
+
+                                    <button type="submit" class="dropdown-item">
+                                        ↪ Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
+
+                </div>
+             
                 </div>
             </div>
         </nav>

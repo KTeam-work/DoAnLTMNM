@@ -53,13 +53,13 @@
     <a class="logo" href="{{ route('tenant.home') }}">Trọ <span>Ơi</span></a>
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('appointments.index') }}">Lịch xem</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.contracts.index') }}">Hợp đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.home') }}">Trang chủ</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">Lịch xem</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp đồng</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
       </ul>
       
       <!-- Cái chuông thông báo -->
@@ -71,14 +71,31 @@
           </a>
           
           <!-- Thêm text-decoration-none vào class -->
-          <a href="#" class="user-chip text-decoration-none">
-            <span class="user-avatar">TH</span>
-            <span class="user-meta">
-              <span class="user-name d-block" style="text-decoration: none;">Thanh Huyền</span>
-              <span class="user-role">Người thuê</span>
-            </span>
-            <span class="caret">▾</span>
-          </a>
+          <div class="dropdown">
+              <button class="user-chip text-decoration-none dropdown-toggle"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <span class="user-avatar">{{ $authInitials ?? 'NT' }}</span>
+                  <span class="user-meta">
+                      <span class="user-name d-block">{{ $authUser->name ?? 'Người dùng' }}</span>
+                      <span class="user-role">Người thuê</span>
+                  </span>
+                  <span class="caret">▾</span>
+              </button>
+
+              <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
+                  <form method="POST" action="{{ route('logout') }}"
+                      class="m-0">
+                      @csrf
+
+                      <button type="submit"
+                          class="dropdown-item">
+                          ↪ Đăng xuất
+                      </button>
+                  </form>
+              </div>
+          </div>
         </div>
       </div>
     </div>

@@ -82,7 +82,7 @@
 
   <nav class="navbar navbar-expand-lg app-navbar">
     <div class="container-fluid">
-      <a class="app-nav-link" href="{{ route('landlord.dashboard') }}">
+      <a class="app-nav-link text-decoration-none" href="{{ route('landlord.dashboard') }}">
         Tổng quan
       </a>
       <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,12 +91,12 @@
       <div class="collapse navbar-collapse" id="mainMenu">
         <ul class="navbar-nav mx-auto align-items-lg-center">
           <li class="nav-item">
-            <a class="app-nav-link" href="{{ route('landlord.dashboard') }}">
+            <a class="app-nav-link text-decoration-none" href="{{ route('landlord.dashboard') }}">
               Tổng quan
             </a>
           </li>
           <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Nhà &amp; Phòng
             </a>
             <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
@@ -109,7 +109,7 @@
             </ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Khách &amp; Hợp đồng
             </a>
             <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
@@ -122,7 +122,7 @@
             </ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Tài chính
             </a>
             <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
@@ -141,7 +141,7 @@
             </ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Vận hành
             </a>
             <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">

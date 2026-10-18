@@ -16,7 +16,7 @@
 <!-- NAVBAR NGANG — ADMIN -->
 <nav class="navbar navbar-expand-lg app-navbar">
   <div class="container-fluid">
-    <a class="logo" href="admin.html">Trọ <span>Ơi</span><small>ADMIN</small></a>
+    <a class="logo" href="{{ route('admin.dashboard') }}">Trọ <span>Ơi</span><small>ADMIN</small></a>
 
     <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu">
       <span class="navbar-toggler-icon"></span>
@@ -24,13 +24,13 @@
 
     <div class="collapse navbar-collapse" id="mainMenu">
       <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link active" href="admin.html">Dashboard</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Người dùng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Phòng trọ</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Tin đăng</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Báo cáo</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Đánh giá</a></li>
-        <li class="nav-item"><a class="app-nav-link" href="#">Thống kê</a></li>
+        <li class="nav-item"><a class="app-nav-link active text-decoration-none" href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('admin.users') }}">Người dùng</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('admin.rental-posts') }}">Phòng trọ</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('admin.rental-posts') }}">Tin đăng</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('admin.statistics') }}">Báo cáo</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('admin.rental-posts') }}">Đánh giá</a></li>
+        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('admin.statistics') }}">Thống kê</a></li>
       </ul>
 
       <div class="navbar-actions">

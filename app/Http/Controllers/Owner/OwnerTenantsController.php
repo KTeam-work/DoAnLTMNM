@@ -23,8 +23,8 @@ class OwnerTenantsController extends Controller{
             ? User::query()
                 ->select(['id', 'name', 'email', 'phone', 'status'])
                 ->where('role', 'tenant')
-                ->whereHas('tenantContracts', fn ($query) => $query->where('owner_id', $owner->id))
-                ->with(['tenantContracts' => fn ($query) => $query
+                ->whereHas('rentedContracts', fn ($query) => $query->where('owner_id', $owner->id))
+                ->with(['rentedContracts' => fn ($query) => $query
                     ->where('owner_id', $owner->id)
                     ->with(['room:id,name,room_code,property_id', 'members'])])
                 ->orderBy('name')

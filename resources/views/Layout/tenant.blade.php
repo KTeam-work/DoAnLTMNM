@@ -42,252 +42,6 @@
         }
 
         /* =========================================================
-           NAVBAR
-        ========================================================= */
-
-        .app-navbar {
-            background: #20584f;
-            min-height: 76px;
-            padding: 0 28px;
-            box-shadow: 0 4px 18px rgba(23, 70, 62, .12);
-        }
-
-        .app-navbar .container-fluid {
-            max-width: 1500px;
-        }
-
-        .logo {
-            color: #ffffff;
-            font-size: 25px;
-            font-weight: 800;
-            letter-spacing: -.5px;
-            white-space: nowrap;
-        }
-
-        .logo span {
-            color: #f2dfb5;
-        }
-
-        .app-nav-link {
-            color: rgba(255, 255, 255, .78);
-            font-size: 14px;
-            font-weight: 600;
-            padding: 28px 15px !important;
-            transition: .2s ease;
-        }
-
-        .app-nav-link:hover,
-        .app-nav-link.active {
-            color: #ffffff;
-        }
-
-        .app-nav-link.active {
-            position: relative;
-        }
-
-        .app-nav-link.active::after {
-            content: "";
-            position: absolute;
-            left: 15px;
-            right: 15px;
-            bottom: 16px;
-            height: 3px;
-            border-radius: 99px;
-            background: #f2dfb5;
-        }
-
-        .navbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        /* =========================================================
-           NOTIFICATION
-        ========================================================= */
-
-        .notif-btn {
-            position: relative;
-            width: 42px;
-            height: 42px;
-            border: 1px solid rgba(255, 255, 255, .18);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, .08);
-            color: #fff;
-            font-size: 18px;
-            cursor: pointer;
-            transition: .2s ease;
-        }
-
-        .notif-btn:hover {
-            background: rgba(255, 255, 255, .15);
-        }
-
-        .notif-dot {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #f2dfb5;
-            border: 2px solid #20584f;
-        }
-
-        /* =========================================================
-           USER DROPDOWN
-        ========================================================= */
-
-        .user-dropdown {
-            position: relative;
-        }
-
-        .user-chip {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 185px;
-            padding: 7px 10px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, .14);
-            background: rgba(255, 255, 255, .07);
-            color: #fff;
-            cursor: pointer;
-            transition: .2s ease;
-        }
-
-        .user-chip:hover,
-        .user-chip.show {
-            background: rgba(255, 255, 255, .14);
-            color: #fff;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            flex: 0 0 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: #f2dfb5;
-            color: #17463e;
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .user-meta {
-            min-width: 0;
-            line-height: 1.2;
-        }
-
-        .user-name {
-            max-width: 115px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .user-role {
-            display: block;
-            margin-top: 3px;
-            color: rgba(255, 255, 255, .65);
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .caret {
-            margin-left: auto;
-            color: rgba(255, 255, 255, .7);
-            font-size: 13px;
-            transition: transform .2s ease;
-        }
-
-        .user-chip.show .caret {
-            transform: rotate(180deg);
-        }
-
-        .user-dropdown-menu {
-            width: 250px;
-            margin-top: 10px !important;
-            padding: 10px;
-            border: 1px solid #e8e1d4;
-            border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 18px 45px rgba(23, 70, 62, .16);
-        }
-
-        .dropdown-user-info {
-            padding: 10px 12px 12px;
-        }
-
-        .dropdown-user-name {
-            color: #17463e;
-            font-size: 14px;
-            font-weight: 800;
-        }
-
-        .dropdown-user-email {
-            margin-top: 3px;
-            color: #7c8985;
-            font-size: 11px;
-            word-break: break-word;
-        }
-
-        .dropdown-divider-custom {
-            height: 1px;
-            margin: 4px 0 8px;
-            background: #eee8dc;
-        }
-
-        .dropdown-item-custom {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            padding: 10px 12px;
-            border: 0;
-            border-radius: 10px;
-            background: transparent;
-            color: #315b54;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: left;
-            transition: .2s ease;
-        }
-
-        .dropdown-item-custom:hover {
-            background: #f3f6f4;
-            color: #17463e;
-        }
-
-        .dropdown-logout {
-            color: #a04444;
-        }
-
-        .dropdown-logout:hover {
-            background: #fff1f1;
-            color: #9a3030;
-        }
-
-        .logout-icon {
-            width: 27px;
-            height: 27px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            background: #f4f5f3;
-            font-size: 13px;
-        }
-
-        .dropdown-logout .logout-icon {
-            background: #fff0f0;
-        }
-
-        /* =========================================================
            HERO
         ========================================================= */
 
@@ -798,51 +552,47 @@
             <div class="collapse navbar-collapse" id="mainMenu">
                 <ul class="navbar-nav mx-auto align-items-lg-center">
                     <li class="nav-item">
-                        <a class="app-nav-link active"
+                        <a class="app-nav-link active text-decoration-none"
                            href="{{ route('tenant.dashboard') }}">
                             Trang chủ
                         </a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="app-nav-link" href="#search-panel">
-                            Tìm phòng
-                        </a>
+                   <li class="nav-item">
+                        <a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">Tìm phòng</a>
                     </li>
-
                     <li class="nav-item">
-                        <a class="app-nav-link"
-                           href="{{ route('favorites.index') }}">
-                            Yêu thích
-                        </a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('favorites.index') }}">Yêu thích</a>
                     </li>
-
                     <li class="nav-item">
-                        <a class="app-nav-link"
-                           href="{{ route('appointments.index') }}">
-                            Lịch xem phòng
-                        </a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">Lịch xem phòng</a>
                     </li>
-
+                    <!-- HỢP ĐỒNG -->
                     <li class="nav-item">
-                        <a class="app-nav-link" href="#contracts">
-                            Hợp đồng
-                        </a>
+                        <a class="app-nav-link active text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a>
                     </li>
-
+                    <!-- HÓA ĐƠN -->
                     <li class="nav-item">
-                        <a class="app-nav-link" href="#invoices">
-                            Hóa đơn
-                        </a>
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a>
+                    </li>
+                    <!-- SỬA CHỮA -->
+                    <li class="nav-item">
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a>
+                    </li>
+                    <!-- ĐÁNH GIÁ -->
+                    <li class="nav-item">
+                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a>
                     </li>
                 </ul>
 
                 <div class="navbar-actions">
-                    <a href="#notifications"
-                       class="notif-btn d-flex align-items-center justify-content-center"
-                       title="Thông báo">
+                    <button
+                        class="notif-btn"
+                        type="button"
+                        title="Thông báo">
                         🔔
-                    </a>
+                        <span class="notif-dot"></span>
+                    </button>
 
                     <div class="dropdown user-dropdown">
                         <button class="user-chip dropdown-toggle"
@@ -1025,7 +775,7 @@
                         <a href="{{ route('favorites.index') }}"
                             class="fav-btn d-flex align-items-center justify-content-center"
                             title="{{ $isFavorite ? 'Đã yêu thích' : 'Xem danh sách yêu thích' }}"
-                            style="{{ $isFavorite ? 'color:#b45454;' : '' }}">
+                            style="{{ $isFavorite ? 'color:#b45454;' : 'color:#ccc;' }}">
                             {{ $isFavorite ? '♥' : '♡' }}
                         </a>
 
