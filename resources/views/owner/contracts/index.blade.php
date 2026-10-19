@@ -129,19 +129,61 @@
         </li>
 
       </ul>
-       <div class="navbar-actions ms-lg-3">
-        <button class="notif-btn" type="button" aria-label="Thông báo">
-          🔔<span class="notif-dot"></span>
-        </button>
-        <a href="#" class="user-chip">
-          <div class="user-avatar">A</div>
-          <div class="user-meta">
-            <div class="user-name">Chủ trọ</div>
-            <div class="user-role">Owner</div>
-          </div>
-          <span class="caret">▼</span>
-        </a>
-      </div>
+          <div class="navbar-actions">
+
+                    <button
+                        class="notif-btn"
+                        type="button"
+                        aria-label="Thông báo"
+                        title="Thông báo">
+                        🔔
+                    </button>
+
+                    <div class="dropdown">
+                        <button
+                            class="user-chip border-0 bg-transparent p-0"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+
+                            <span class="user-avatar">
+                                {{ strtoupper(substr(auth()->user()->name ?? 'CT', 0, 2)) }}
+                            </span>
+
+                            <span class="user-meta text-start">
+                                <span class="user-name d-block">
+                                    {{ auth()->user()->name ?? 'Chủ trọ' }}
+                                </span>
+                                <span class="user-role">Chủ trọ</span>
+                            </span>
+
+                            <span class="caret">▾</span>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li>
+                                <span class="dropdown-item-text">
+                                    {{ auth()->user()->email ?? '' }}
+                                </span>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <li>
+                                <form method="POST"
+                                      action="{{ route('logout') }}"
+                                      class="m-0">
+                                    @csrf
+
+                                    <button type="submit" class="dropdown-item">
+                                        ↪ Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
     </div>
   </div>
 </nav>
