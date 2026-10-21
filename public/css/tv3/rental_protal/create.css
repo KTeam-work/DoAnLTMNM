@@ -1,0 +1,9 @@
+
+        body { background:#f8f5eb; color:#213430; font-family:'Be Vietnam Pro',sans-serif; }
+        .page { max-width:850px; margin:45px auto; padding:0 16px; }
+        .panel { background:white; border:1px solid #e6dcc2; border-radius:20px; padding:30px; }
+        h1 { font-weight:800; font-size:27px; }
+        .form-label { font-weight:600; font-size:13px; }
+        .form-control,.form-select { border-radius:11px; padding:12px; }
+        .btn-main { background:#20584f; color:white; border:0; border-radius:11px; padding:12px 20px; font-weight:700; }
+        .btn-main:hover { background:#17463e; color:white; }

@@ -1,0 +1,67 @@
+
+      .page-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 30px 28px 70px;
+    }
+
+    .page-title {
+      color: var(--green-dark);
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.6px;
+    }
+
+    .back-link {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .back-link:hover {
+      color: var(--green);
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .02);
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 11px;
+      border-color: var(--border);
+      font-size: 13.5px;
+      padding: 10px 14px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px var(--green-soft);
+    }
+
+    .btn-brand {
+      border: 0;
+      background: var(--yellow);
+      color: var(--green-dark);
+      font-weight: 800;
+      font-size: 13px;
+      border-radius: 11px;
+      padding: 11px 18px;
+    }
+
+    .btn-brand:hover {
+      background: #ffd968;
+      color: var(--green-dark);
+    }

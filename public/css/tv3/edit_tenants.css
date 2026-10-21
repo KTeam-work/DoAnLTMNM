@@ -1,0 +1,277 @@
+
+
+        html,
+        body {
+            background-color: #f7f9f8 !important;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+
+        .page-wrap {
+            max-width: 900px;
+            margin: 30px auto 60px;
+            padding: 0 20px;
+        }
+
+
+        /* =========================
+           BACK
+        ========================= */
+
+        .back-link {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            color: #198754;
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .page-desc {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .form-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+
+            padding: 28px;
+
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+
+
+        /* =========================
+           SECTION
+        ========================= */
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1e293b;
+
+            margin-bottom: 5px;
+        }
+
+        .section-desc {
+            color: #64748b;
+            font-size: 13px;
+
+            margin-bottom: 22px;
+        }
+
+        .section-divider {
+            border: 0;
+            border-top: 1px solid #eef2f5;
+            margin: 30px 0;
+        }
+
+
+        /* =========================
+           LABEL
+        ========================= */
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+
+        /* =========================
+           INPUT
+        ========================= */
+
+        .form-control,
+        .form-select {
+            min-height: 46px;
+
+            border-radius: 9px;
+            border: 1px solid #dbe1e6;
+
+            font-size: 14px;
+
+            padding: 10px 13px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+
+            border-color: #198754;
+
+            box-shadow:
+                0 0 0 3px rgba(25, 135, 84, 0.10);
+        }
+
+        .form-control::placeholder {
+            color: #a0a8b2;
+        }
+
+
+        /* =========================
+           DISABLED
+        ========================= */
+
+        .form-control:disabled {
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        .input-note {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+
+        /* =========================
+           ALERT
+        ========================= */
+
+        .info-box {
+            background: #f0fdf4;
+
+            border: 1px solid #d1fae5;
+
+            border-radius: 10px;
+
+            padding: 13px 15px;
+
+            color: #166534;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+            margin-bottom: 25px;
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+
+            gap: 10px;
+
+            padding-top: 5px;
+        }
+
+        .btn-cancel {
+            min-height: 45px;
+
+            padding: 10px 22px;
+
+            border-radius: 9px;
+
+            border: 1px solid #dbe1e6;
+
+            background: #fff;
+
+            color: #475569;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            text-decoration: none;
+        }
+
+        .btn-cancel:hover {
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .btn-save {
+            min-height: 45px;
+
+            padding: 10px 24px;
+
+            border-radius: 9px;
+
+            border: none;
+
+            background: #198754;
+
+            color: #fff;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+        .btn-save:hover {
+            background: #157347;
+            color: #fff;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 768px) {
+
+            .page-wrap {
+                margin-top: 20px;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 22px;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+
+            .btn-cancel,
+            .btn-save {
+                width: 100%;
+                text-align: center;
+            }
+
+        }
+
+

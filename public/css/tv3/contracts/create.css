@@ -1,0 +1,7 @@
+
+    
+        
+        .panel-modern { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .form-label { font-weight: 500; color: #475569; font-size: 0.9rem; }
+        .form-control, .form-select { border-radius: 8px; border-color: #cbd5e1; padding: 0.6rem 1rem; }
+        .form-control:focus, .form-select:focus { box-shadow: none; border-color: #10b981; }

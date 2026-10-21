@@ -1,178 +1,15 @@
-<!DOCTYPE html>
-<html lang="vi">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tạo phòng | Trọ Ơi</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-  <style>
-    .page-wrap {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 30px 28px 70px;
-    }
+@extends('Layout.landlord')
 
-    .page-title {
-      color: var(--green-dark);
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -.6px;
-    }
+@section('title', 'Tạo Phòng | Trọ Ơi')
 
-    .back-link {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-    }
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/tv3/rooms/created.css') }}">
+@endpush
 
-    .back-link:hover {
-      color: var(--green);
-    }
+@section('content')
 
-    .panel {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, .02);
-    }
 
-    .form-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .form-control,
-    .form-select {
-      border-radius: 11px;
-      border-color: var(--border);
-      font-size: 13.5px;
-      padding: 10px 14px;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px var(--green-soft);
-    }
-
-    .btn-brand {
-      border: 0;
-      background: var(--yellow);
-      color: var(--green-dark);
-      font-weight: 800;
-      font-size: 13px;
-      border-radius: 11px;
-      padding: 11px 18px;
-    }
-
-    .btn-brand:hover {
-      background: #ffd968;
-      color: var(--green-dark);
-    }
-  </style>
-</head>
-
-<body>
-
-  <nav class="navbar navbar-expand-lg app-navbar">
-    <div class="container-fluid">
-      <a class="app-nav-link text-decoration-none" href="{{ route('landlord.dashboard') }}">
-        Tổng quan
-      </a>
-      <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mainMenu">
-        <ul class="navbar-nav mx-auto align-items-lg-center">
-          <li class="nav-item">
-            <a class="app-nav-link text-decoration-none" href="{{ route('landlord.dashboard') }}">
-              Tổng quan
-            </a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Nhà &amp; Phòng
-            </a>
-            <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop1">
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.properties.index') }}">🏠 Quản lý nhà</a>
-              </li>
-              <li>
-                <a class="dropdown-item active" href="{{ route('owner.rooms.index') }}">🚪 Quản lý phòng</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop2" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Khách &amp; Hợp đồng
-            </a>
-            <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop2">
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.tenants.manage') }}">👤 Người thuê</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.contracts.index') }}">📝 Hợp đồng</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop3" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Tài chính
-            </a>
-            <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop3">
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.services.index') }}">✨ Dịch vụ</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.utilities.index') }}">⚡ Điện nước</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.invoices.index') }}">🧾 Hóa đơn</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.payments.index') }}">💰 Giao dịch</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="app-nav-link dropdown-toggle text-decoration-none" href="#" id="navbarDrop4" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Vận hành
-            </a>
-            <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDrop4">
-              <li>
-                <a class="dropdown-item" href="#">📢 Tin đăng</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.appointments.index') }}">📅 Lịch xem</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ route('owner.reviews.index') }}">⭐ Đánh giá</a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-        <div class="navbar-actions ms-lg-3">
-          <button class="notif-btn" type="button" aria-label="Thông báo">
-            🔔<span class="notif-dot"></span>
-          </button>
-          <a href="#" class="user-chip">
-            <div class="user-avatar">A</div>
-            <div class="user-meta">
-              <div class="user-name">Chủ trọ</div>
-              <div class="user-role">Owner</div>
-            </div>
-            <span class="caret">▼</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </nav>
 
   <main class="page-wrap">
     <a href="{{ route('owner.rooms.index') }}" class="back-link">← Quay lại quản lý phòng</a>
@@ -210,7 +47,4 @@
     @endif
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
+@endsection
