@@ -77,7 +77,7 @@ class OwnerDashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('Layout.landlord', compact(
+       return view('owner.dashboard', compact(
             'totalRooms',
             'rentedRooms',
             'availableRooms',

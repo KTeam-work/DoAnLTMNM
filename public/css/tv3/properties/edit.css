@@ -1,0 +1,137 @@
+
+
+        body {
+            background: #f8f5eb;
+            color: #213430;
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
+
+        .edit-container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 35px 20px 50px;
+        }
+
+        .page-heading {
+            margin-bottom: 25px;
+        }
+
+        .eyebrow {
+            color: #20584f;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+
+        .page-heading h1 {
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .page-heading p {
+            color: #78837e;
+        }
+
+        .edit-card {
+            background: white;
+            border: 1px solid #e6dcc2;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 10px 32px rgba(32, 88, 79, .05);
+        }
+
+        .edit-card-header {
+            background: #20584f;
+            color: white;
+            padding: 22px 26px;
+        }
+
+        .edit-card-header h2 {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .edit-card-header p {
+            font-size: 13px;
+            margin: 0;
+            color: #e0eee8;
+        }
+
+        .edit-card-body {
+            padding: 28px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #c65b4a;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 12px;
+            padding: 11px 13px;
+            border-color: #e6dcc2;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #20584f;
+            box-shadow: 0 0 0 .2rem rgba(32, 88, 79, .10);
+        }
+
+        .btn-owner {
+            background: #20584f;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-owner:hover {
+            background: #17463e;
+            color: white;
+        }
+
+        .btn-back {
+            background: #eaf3ef;
+            color: #20584f;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background: #dcebe4;
+            color: #17463e;
+        }
+
+        .form-text {
+            color: #78837e;
+        }
+
+        @media (max-width: 576px) {
+            .edit-container {
+                padding: 25px 14px 35px;
+            }
+
+            .edit-card-body {
+                padding: 20px 16px;
+            }
+
+            .page-heading h1 {
+                font-size: 25px;
+            }
+        }

@@ -1,0 +1,90 @@
+
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Be Vietnam Pro', sans-serif; }
+
+        /* PAGE */
+        .service-edit-page { min-height: calc(100vh - 68px); padding: 32px 25px 60px; }
+        .service-edit-container { width: 100%; max-width: 1050px; margin: 0 auto; }
+
+        /* BACK */
+        .service-back { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 20px; color: #7a8580; text-decoration: none; font-size: 12px; font-weight: 500; transition: 0.2s ease; }
+        .service-back:hover { color: #16834b; }
+
+        /* HEADER */
+        .service-header { margin-bottom: 23px; }
+        .service-title { margin: 0; color: #26332d; font-size: 25px; font-weight: 800; }
+        .service-description { margin-top: 6px; color: #7b8781; font-size: 13px; }
+
+        /* PROPERTY */
+        .service-property { display: flex; align-items: center; gap: 14px; padding: 16px 18px; margin-bottom: 18px; background: #ffffff; border: 1px solid #e5ebe7; border-radius: 13px; }
+        .service-property-icon { width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #e7f5ec; border-radius: 11px; font-size: 20px; }
+        .service-property-label { margin-bottom: 3px; color: #89948e; font-size: 10px; font-weight: 500; text-transform: uppercase; }
+        .service-property-name { color: #26332d; font-size: 14px; font-weight: 700; }
+        .service-property-address { margin-top: 3px; color: #8a958f; font-size: 11px; }
+
+        /* EDIT CARD */
+        .service-card { background: #ffffff; border: 1px solid #e5ebe7; border-radius: 14px; overflow: hidden; }
+        .service-card-header { padding: 20px 23px; background: #ffffff; border-bottom: 1px solid #edf1ef; }
+        .service-card-title { margin: 0; color: #26332d; font-size: 16px; font-weight: 700; }
+        .service-card-description { margin-top: 4px; color: #8a958f; font-size: 11px; }
+        .service-card-body { padding: 24px; background: #ffffff; }
+
+        /* FORM */
+        .service-form-group { margin-bottom: 20px; }
+        .service-label { display: block; margin-bottom: 7px; color: #37443d; font-size: 12px; font-weight: 700; }
+        .service-required { color: #dc3545; }
+        .service-input, .service-select { width: 100%; height: 44px; padding: 0 12px; background: #ffffff; border: 1px solid #dce5e0; border-radius: 9px; color: #26332d; font-family: inherit; font-size: 12px; outline: none; transition: all 0.2s ease; }
+        .service-input:focus, .service-select:focus { border-color: #16834b; box-shadow: 0 0 0 3px rgba(22, 131, 75, 0.08); }
+        .service-input::placeholder { color: #a0aaa5; }
+        textarea.service-input { height: 105px; padding-top: 11px; padding-bottom: 11px; resize: vertical; }
+        .service-help { margin-top: 5px; color: #929c97; font-size: 10px; }
+
+        /* PRICE */
+        .service-price-wrapper { position: relative; }
+        .service-price-wrapper .service-input { padding-right: 40px; }
+        .service-price-unit { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: #7f8a85; font-size: 11px; font-weight: 600; pointer-events: none; }
+
+        /* STATUS */
+        .service-status { display: flex; align-items: center; justify-content: space-between; padding: 14px 15px; background: #ffffff; border: 1px solid #e2e9e5; border-radius: 10px; }
+        .service-status-content { display: flex; align-items: center; gap: 10px; }
+        .service-status-dot { width: 9px; height: 9px; flex-shrink: 0; background: #16834b; border-radius: 50%; }
+        .service-status-title { color: #37443d; font-size: 12px; font-weight: 700; }
+        .service-status-description { margin-top: 2px; color: #8a958f; font-size: 10px; }
+
+        /* SWITCH */
+        .service-switch { position: relative; display: inline-block; width: 42px; height: 23px; flex-shrink: 0; }
+        .service-switch input { opacity: 0; width: 0; height: 0; }
+        .service-slider { position: absolute; inset: 0; cursor: pointer; background: #d8e0dc; border-radius: 20px; transition: 0.2s; }
+        .service-slider::before { content: ""; position: absolute; width: 17px; height: 17px; left: 3px; top: 3px; background: #ffffff; border-radius: 50%; transition: 0.2s; }
+        .service-switch input:checked + .service-slider { background: #16834b; }
+        .service-switch input:checked + .service-slider::before { transform: translateX(19px); }
+
+        /* NOTE */
+        .service-note { margin-top: 22px; padding: 13px 15px; background: #f8fbf9; border: 1px solid #e5eee9; border-radius: 10px; color: #7e8984; font-size: 10px; line-height: 1.7; }
+        .service-note strong { color: #56635c; }
+
+        /* FOOTER */
+        .service-card-footer { display: flex; align-items: center; justify-content: space-between; padding: 17px 23px; background: #f9fbfa; border-top: 1px solid #edf1ef; }
+
+        /* BUTTONS */
+        .service-btn-cancel { display: inline-flex; align-items: center; justify-content: center; min-width: 90px; height: 40px; padding: 0 16px; background: #ffffff; border: 1px solid #dce5e0; border-radius: 8px; color: #69756f; text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s ease; }
+        .service-btn-cancel:hover { background: #f4f7f5; color: #4f5b55; }
+        .service-btn-save { min-width: 130px; height: 40px; padding: 0 18px; background: #16834b; border: none; border-radius: 8px; color: #ffffff; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s ease; }
+        .service-btn-save:hover { background: #126b3e; }
+
+        /* RESPONSIVE */
+        @media (max-width: 1100px) { .service-edit-page { padding-left: 20px; padding-right: 20px; } }
+        @media (max-width: 992px) { .service-edit-page { padding-top: 27px; } }
+        @media (max-width: 768px) {
+            .service-title { font-size: 22px; }
+            .service-card-body { padding: 20px; }
+            .service-card-footer { padding: 15px 20px; }
+            .service-property { align-items: flex-start; }
+            .service-btn-cancel, .service-btn-save { min-width: 110px; }
+        }
+        @media (max-width: 576px) {
+            .service-edit-page { padding-left: 15px; padding-right: 15px; }
+            .service-property-address { line-height: 1.5; }
+            .service-card-footer { gap: 10px; }
+            .service-btn-cancel, .service-btn-save { flex: 1; }
+        }

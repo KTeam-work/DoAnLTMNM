@@ -1,25 +1,15 @@
+@extends('Layout.landlord')
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Trọ Ơi | Chi tiết tin đăng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { background:#f8f5eb; color:#213430; font-family:'Be Vietnam Pro',sans-serif; }
-        .page { max-width:850px; margin:45px auto; padding:0 16px; }
-        .panel { background:white; border:1px solid #e6dcc2; border-radius:20px; padding:30px; }
-        h1 { font-weight:800; font-size:27px; overflow-wrap:anywhere; }
-        .label { color:#78837e; font-size:12px; margin-bottom:5px; }
-        .value { font-weight:600; margin-bottom:22px; }
-        .description { white-space:pre-line; line-height:1.8; overflow-wrap:anywhere; }
-        .btn-main { background:#20584f; color:white; border:0; border-radius:11px; padding:11px 18px; font-weight:700; }
-        .btn-main:hover { background:#17463e; color:white; }
-    </style>
-</head>
-<body>
+@section('title', 'Quản lý tin đăng | Trọ Ơi')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/tv3/rental_protal/show.css') }}">
+@endpush
+
+@section('content')
+
+
+
 <div class="page">
     <a href="{{ route('owner.rental-posts.index') }}" class="text-decoration-none">← Quay lại danh sách</a>
 
@@ -89,5 +79,5 @@
         <a href="{{ route('owner.rental-posts.index') }}" class="btn btn-light">Quay lại</a>
     </div>
 </div>
-</body>
-</html>
+
+@endsection

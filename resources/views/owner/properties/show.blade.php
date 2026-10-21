@@ -1,87 +1,13 @@
+@extends('Layout.landlord')
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết nhà trọ | Trọ Ơi</title>
+@section('title', 'Chi Tiết Nhà | Trọ Ơi')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/tv3/properties/show.css') }}">
+@endpush
 
-    <style>
-        body {
-            background: #F9F9F6;
-            color: #1F2937;
-        }
+@section('content')
 
-        .detail-card {
-            background: #FFFFFF;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-            margin-bottom: 24px;
-        }
-
-        .page-title {
-            color: #005D4B;
-            font-weight: 700;
-        }
-
-        .info-label {
-            color: #6B7280;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .info-value {
-            font-weight: 600;
-            overflow-wrap: anywhere;
-        }
-
-        .btn-owner {
-            background: #005D4B;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 18px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-owner:hover {
-            background: #004638;
-            color: white;
-        }
-
-        .btn-back {
-            background: #E6F0EB;
-            color: #005D4B;
-            border-radius: 8px;
-            padding: 10px 18px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .status-active {
-            color: #087443;
-            background: #E6F5EC;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-
-        .status-inactive {
-            color: #92400E;
-            background: #FEF3C7;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-    </style>
-</head>
-<body>
     <div class="container py-4 py-md-5">
 
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -268,5 +194,7 @@
         </div>
 
     </div>
-</body>
-</html>
+
+
+
+@endsection

@@ -1,12 +1,12 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use App\Models\Property;
 
 class User extends Authenticatable
 {
@@ -65,6 +65,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Property::class, 'owner_id');
     }
+     
+
 
     public function ownedContracts()
     {
@@ -97,8 +99,12 @@ class User extends Authenticatable
             'tenant_id'
         );
     }
+
+    
     public function favorites()
 {
     return $this->hasMany(Favorite::class);
 }
+
+
 }

@@ -1,12 +1,15 @@
-<!doctype html>
-<html lang="vi">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Chi tiết hợp đồng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+
+@extends('Layout.landlord')
+
+@section('title', 'Quản lý hợp đồng | Trọ Ơi')
+
+@push('styles')
+    
+@endpush
+
+@section('content')
+
+
     <main class="container py-5" style="max-width: 900px">
         <a href="{{ route('owner.contracts.index') }}" class="text-decoration-none">← Quay lại danh sách</a>
         
@@ -108,5 +111,4 @@
             </div>
         </div>
     </main>
-</body>
-</html>
+@endsection
