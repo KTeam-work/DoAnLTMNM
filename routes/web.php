@@ -404,9 +404,13 @@ Route::get(
 )->name('owner.tenants.create');
 
 Route::get(
-    '/owner/tenants/edit',
+    '/owner/tenants/{id}/edit',
     [OwnerTenantsController::class, 'edit']
 )->name('owner.tenants.edit');
+
+Route::put('/owner/tenants/{id}', [OwnerTenantsController::class, 'update'])
+    ->name('owner.tenants.update')
+    ->whereNumber('id');
 
 Route::get(
     '/owner/tenants/{id}',

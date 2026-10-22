@@ -1,99 +1,15 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trọ Ơi | Chi tiết sự cố</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-<style>
-  .detail-panel { background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; height: 100%; }
-  
-  /* Timeline Styles */
-  .timeline { position: relative; padding-left: 30px; list-style: none; margin: 0; }
-  .timeline::before { content: ''; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; background: #eef0ef; }
-  .timeline-item { position: relative; margin-bottom: 24px; }
-  .timeline-item:last-child { margin-bottom: 0; }
-  .timeline-dot { position: absolute; left: -30px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid #eef0ef; z-index: 2; transition: 0.3s; }
-  
-  /* Timeline Statuses */
-  .timeline-item.done .timeline-dot { border-color: var(--green); background: var(--green); }
-  .timeline-item.active .timeline-dot { border-color: var(--blue); background: var(--blue); box-shadow: 0 0 0 4px var(--blue-soft); }
-  
-  .timeline-content { background: #fafafa; border-radius: 12px; padding: 16px; border: 1px solid #eef0ef; margin-left: 10px; }
-  .timeline-date { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
-  
-  /* Info Grid */
-  .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
-  .info-item { background: #fdfdfd; padding: 12px 16px; border-radius: 12px; border: 1px solid #f0f0f0; }
-  .info-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
-  .info-value { font-size: 14px; font-weight: 700; color: var(--text); }
-  
-  .img-gallery img { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; cursor: pointer; border: 1px solid #eef0ef; transition: 0.2s; }
-  .img-gallery img:hover { border-color: var(--green); transform: scale(1.05); }
-  
-  /* Custom Badge */
-  .badge-status.processing { background: rgba(13, 110, 253, 0.1); color: #0d6efd; padding: 8px 16px; border-radius: 99px; font-weight: 800; font-size: 12px; }
-</style>
-</head>
-<body>
 
-<nav class="navbar navbar-expand-lg app-navbar">
-  <div class="container-fluid">
-    <a class="logo" href="{{ route('tenant.home') }}">Trọ <span>Ơi</span></a>
-    <div class="collapse navbar-collapse" id="mainMenu">
-      <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('favorites.index') }}">Yêu thích</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">Lịch xem phòng</a></li>
-        <li class="nav-item">
-          <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-        </li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link active text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
-      </ul>
+@extends('layout.tenant')
 
-       <div class="navbar-actions skeleton-box">
-        <div class="hide-on-skeleton d-flex align-items-center gap-3">
-          <!-- Thêm text-decoration-none vào class -->
-          <a href="{{ route('tenant.notifications.index') }}" class="notif-btn text-decoration-none">
-            🔔<span class="notif-dot"></span>
-          </a>
-          
-          <!-- Thêm text-decoration-none vào class -->
-          <div class="dropdown">
-              <button class="user-chip text-decoration-none dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <span class="user-avatar">{{ $authInitials ?? 'NT' }}</span>
-                  <span class="user-meta">
-                      <span class="user-name d-block">{{ $authUser->name ?? 'Người dùng' }}</span>
-                      <span class="user-role">Người thuê</span>
-                  </span>
-                  <span class="caret">▾</span>
-              </button>
+@section('title', 'Tổng quan | Trọ Ơi')
 
-              <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-                  <form method="POST" action="{{ route('logout') }}"
-                      class="m-0">
-                      @csrf
+@push('styles')
+     <link rel="stylesheet"
+          href="{{ asset('css/tv3/tenant/maintenance/show.css') }}">
+@endpush
 
-                      <button type="submit"
-                          class="dropdown-item">
-                          ↪ Đăng xuất
-                      </button>
-                  </form>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
+@section('content')
+
 
 <div class="page-wrap" style="padding-top: 40px; max-width: 1000px;">
 
@@ -230,4 +146,4 @@
   </div>
 
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@endsection

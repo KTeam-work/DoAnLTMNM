@@ -125,11 +125,12 @@ class TenantDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('Layout.tenant', [
-            'user' => $user,
-            'rooms' => $rooms,
-            'favoriteRoomIds' => $favoriteRoomIds,
-            'appointments' => $appointments,
-        ]);
+       return view('tenant.dashboard', [
+        'user' => $user,
+        'lastName' => $user->last_name ?? $user->name,
+        'rooms' => $rooms,
+        'favoriteRoomIds' => $favoriteRoomIds,
+        'appointments' => $appointments,
+    ]);
     }
 }

@@ -1,106 +1,13 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trọ Ơi | Thông báo của bạn</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-<style>
-  .skeleton-mode .hide-on-skeleton { opacity: 0; visibility: hidden; }
-  .skeleton-mode .skeleton-box { background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; color: transparent !important; border-color: transparent !important; pointer-events: none; }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
-  
-  /* Notification Panel */
-  .notify-panel { background: #fff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; overflow: hidden; }
-  .notify-header { padding: 20px 32px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; background: #fff; }
-  
-  /* Filter Tabs */
-  .filter-tabs { display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
-  .filter-tab { padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; color: var(--muted); background: #fff; border: 1px solid #e0e0e0; text-decoration: none; transition: 0.2s; white-space: nowrap; }
-  .filter-tab:hover, .filter-tab.active { background: var(--green-dark); color: #fff; border-color: var(--green-dark); }
+@extends('layout.tenant')
 
-  /* Notify Item */
-  .notify-item { padding: 24px 32px; border-bottom: 1px solid #f9f9f9; display: flex; gap: 20px; transition: 0.2s; text-decoration: none; color: inherit; align-items: flex-start; }
-  .notify-item:last-child { border-bottom: none; }
-  .notify-item:hover { background: #fafafa; }
-  
-  /* Unread State */
-  .notify-item.unread { background: #f4faf8; position: relative; }
-  .notify-item.unread::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--green); }
-  .notify-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; display: inline-block; flex-shrink: 0; margin-top: 6px; }
+@section('title', 'Tổng quan | Trọ Ơi')
 
-  /* Icons matched to DB 'type' */
-  .notify-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .icon-invoice { background: #fff7d7; color: #9b6a00; }      /* type: invoice */
-  .icon-maintenance { background: #eaf2fc; color: #0d6efd; }  /* type: maintenance */
-  .icon-contract { background: #eaf3ef; color: var(--green-dark); } /* type: contract */
-  .icon-appointment { background: #fdf0ed; color: var(--red); } /* type: viewing_appointment */
+@push('styles')
+     <link rel="stylesheet"
+          href="{{ asset('css/tv3/tenant/notificaitons/index.css') }}">
+@endpush
 
-  .notify-time { font-size: 12px; color: #aaa; margin-top: 8px; font-weight: 600; }
-  .mark-read-btn { font-size: 13px; font-weight: 700; color: var(--green); cursor: pointer; text-decoration: none; transition: 0.2s; }
-  .mark-read-btn:hover { color: var(--green-dark); text-decoration: underline; }
-</style>
-</head>
-<body class="skeleton-mode">
-
-<nav class="navbar navbar-expand-lg app-navbar">
-  <div class="container-fluid">
-    <a class="logo" href="{{ route('tenant.home') }}">Trọ <span>Ơi</span></a>
-    <div class="collapse navbar-collapse" id="mainMenu">
-      <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">Lịch xem</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
-      </ul>
-      
-      <!-- Cái chuông thông báo -->
-     <div class="navbar-actions skeleton-box">
-        <div class="hide-on-skeleton d-flex align-items-center gap-3">
-          <!-- Thêm text-decoration-none vào class -->
-          <a href="{{ route('tenant.notifications.index') }}" class="notif-btn text-decoration-none">
-            🔔<span class="notif-dot"></span>
-          </a>
-          
-          <!-- Thêm text-decoration-none vào class -->
-          <div class="dropdown">
-              <button class="user-chip text-decoration-none dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <span class="user-avatar">{{ $authInitials ?? 'NT' }}</span>
-                  <span class="user-meta">
-                      <span class="user-name d-block">{{ $authUser->name ?? 'Người dùng' }}</span>
-                      <span class="user-role">Người thuê</span>
-                  </span>
-                  <span class="caret">▾</span>
-              </button>
-
-              <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-                  <form method="POST" action="{{ route('logout') }}"
-                      class="m-0">
-                      @csrf
-
-                      <button type="submit"
-                          class="dropdown-item">
-                          ↪ Đăng xuất
-                      </button>
-                  </form>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
+@section('content')
 
 <div class="page-wrap" style="padding-top: 40px; max-width: 850px; margin: 0 auto;">
   
@@ -179,11 +86,10 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(() => { document.body.classList.remove('skeleton-mode'); }, 600); 
-  });
-</script>
-</body>
-</html>
+
+@push('scripts')
+    <script src="{{ asset('js/tv3/tenant/notificaiton/index.js') }}"></script>
+@endpush
+
+
+@endsection

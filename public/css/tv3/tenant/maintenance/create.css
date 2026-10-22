@@ -1,0 +1,19 @@
+
+  .form-panel { background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
+  .form-control, .form-select { border-radius: 12px; padding: 14px 18px; border: 1px solid #e0e0e0; font-size: 14px; background: #fafafa; transition: all 0.2s ease; }
+  .form-control:focus, .form-select:focus { background: #fff; border-color: var(--green); box-shadow: 0 0 0 4px rgba(32, 88, 79, 0.1); }
+  .form-label { font-size: 12px; font-weight: 800; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  /* Advanced Radio Cards for Priority */
+  .radio-card-input { display: none; }
+  .radio-card { border: 2px solid #eef0ef; border-radius: 14px; padding: 20px; cursor: pointer; transition: 0.2s; background: #fff; height: 100%; }
+  .radio-card:hover { border-color: #d1d5d3; }
+  .radio-card-input:checked + .radio-card.urgent { border-color: var(--red); background: var(--red-soft); box-shadow: 0 4px 15px rgba(198, 91, 74, 0.15); }
+  .radio-card-input:checked + .radio-card.normal { border-color: var(--green); background: var(--green-soft); box-shadow: 0 4px 15px rgba(32, 88, 79, 0.15); }
+  
+  /* Drag & Drop File Zone */
+  .upload-zone { border: 2px dashed #d1d5d3; border-radius: 16px; padding: 40px 20px; text-align: center; background: #fafafa; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .upload-zone:hover { border-color: var(--green); background: rgba(32, 88, 79, 0.03); }
+  .upload-icon { width: 56px; height: 56px; background: #fff; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--green); }
+  
+  .btn-brand { border-radius: 12px; font-weight: 800; transition: 0.2s; letter-spacing: 0.3px; }

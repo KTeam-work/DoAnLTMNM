@@ -1,0 +1,27 @@
+
+  .skeleton-mode .hide-on-skeleton { opacity: 0; visibility: hidden; }
+  .skeleton-mode .skeleton-box { background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; color: transparent !important; border-color: transparent !important; pointer-events: none; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
+  
+  /* Enterprise Ticket Card */
+  .ticket-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 16px; padding: 20px; transition: all 0.3s ease; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; align-items: stretch; gap: 20px; position: relative; overflow: hidden; }
+  .ticket-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e0e0e0; transition: 0.3s; }
+  .ticket-card.priority-urgent::before { background: var(--red); }
+  .ticket-card.priority-normal::before { background: var(--blue); }
+  .ticket-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(32, 88, 79, 0.08); border-color: var(--green-soft); }
+  
+  .ticket-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .ticket-icon.dien-nuoc { background: var(--blue-soft); color: var(--blue); }
+  .ticket-icon.dien-lanh { background: var(--green-soft); color: var(--green); }
+  .ticket-icon.noi-that { background: var(--yellow-light); color: #9b6a00; }
+
+  /* Summary Metrics */
+  .metric-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+  .metric-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+  .filter-tabs { display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+  .filter-tab { padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; color: var(--muted); background: #fff; border: 1px solid #e0e0e0; text-decoration: none; transition: 0.2s; white-space: nowrap; }
+  .filter-tab:hover, .filter-tab.active { background: var(--green-dark); color: #fff; border-color: var(--green-dark); }

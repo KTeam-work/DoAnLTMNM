@@ -1,0 +1,29 @@
+
+  .skeleton-mode .hide-on-skeleton { opacity: 0; visibility: hidden; }
+  .skeleton-mode .skeleton-box { background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; color: transparent !important; border-color: transparent !important; pointer-events: none; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; }
+  
+  /* Panel & Form */
+  .review-panel { background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; height: 100%; }
+  .form-control { border-radius: 12px; padding: 14px 18px; border: 1px solid #e0e0e0; font-size: 14px; background: #fafafa; transition: 0.2s; }
+  .form-control:focus { background: #fff; border-color: var(--yellow); box-shadow: 0 0 0 4px rgba(245, 200, 75, 0.15); }
+  
+  /* CSS-only Star Rating */
+  .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 8px; }
+  .star-rating input { display: none; }
+  .star-rating label { font-size: 36px; color: #e0e0e0; cursor: pointer; transition: 0.2s; line-height: 1; margin: 0; }
+  .star-rating input:checked ~ label, 
+  .star-rating label:hover, 
+  .star-rating label:hover ~ label { color: var(--yellow); }
+  
+  /* Review Cards */
+  .review-card { padding: 20px; border-radius: 16px; border: 1px solid #f0f0f0; background: #fafafa; margin-bottom: 16px; transition: 0.3s; }
+  .review-card:hover { border-color: #e6dcc2; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+  .static-stars { color: var(--yellow); font-size: 16px; letter-spacing: 2px; }
+  
+  /* Status Badges */
+  .badge-visible { background: rgba(32, 88, 79, 0.1); color: var(--green-dark); padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; }
+  .badge-hidden { background: var(--red-soft); color: var(--red); padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; }
