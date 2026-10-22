@@ -1,119 +1,17 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trọ Ơi | Đánh giá & Nhận xét</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-<style>
-  .skeleton-mode .hide-on-skeleton { opacity: 0; visibility: hidden; }
-  .skeleton-mode .skeleton-box { background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; color: transparent !important; border-color: transparent !important; pointer-events: none; }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; }
-  
-  /* Panel & Form */
-  .review-panel { background: #fff; border-radius: 20px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; height: 100%; }
-  .form-control { border-radius: 12px; padding: 14px 18px; border: 1px solid #e0e0e0; font-size: 14px; background: #fafafa; transition: 0.2s; }
-  .form-control:focus { background: #fff; border-color: var(--yellow); box-shadow: 0 0 0 4px rgba(245, 200, 75, 0.15); }
-  
-  /* CSS-only Star Rating */
-  .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 8px; }
-  .star-rating input { display: none; }
-  .star-rating label { font-size: 36px; color: #e0e0e0; cursor: pointer; transition: 0.2s; line-height: 1; margin: 0; }
-  .star-rating input:checked ~ label, 
-  .star-rating label:hover, 
-  .star-rating label:hover ~ label { color: var(--yellow); }
-  
-  /* Review Cards */
-  .review-card { padding: 20px; border-radius: 16px; border: 1px solid #f0f0f0; background: #fafafa; margin-bottom: 16px; transition: 0.3s; }
-  .review-card:hover { border-color: #e6dcc2; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-  .static-stars { color: var(--yellow); font-size: 16px; letter-spacing: 2px; }
-  
-  /* Status Badges */
-  .badge-visible { background: rgba(32, 88, 79, 0.1); color: var(--green-dark); padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; }
-  .badge-hidden { background: var(--red-soft); color: var(--red); padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; }
-</style>
-</head>
-<body class="skeleton-mode">
 
-<nav class="navbar navbar-expand-lg app-navbar">
-  <div class="container-fluid">
-    <a class="logo" href="{{ route('tenant.home') }}">Trọ <span>Ơi</span></a>
-    <div class="collapse navbar-collapse" id="mainMenu">
-      <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-         <li class="nav-item">
-          <a
-            class="app-nav-link text-decoration-none"
-            href="{{ route('rooms.index') }}"
-          >
-            Tìm phòng
-          </a>
-        </li>
-        
-           <li class="nav-item">
-          <a
-            class="app-nav-link text-decoration-none"
-            href="{{ route('favorites.index') }}"
-          >
-            Yêu thích
-          </a>
-        </li>
-        <li class="nav-item">
-          <a
-            class="app-nav-link text-decoration-none"
-            href="{{ route('appointments.index') }}"
-          >
-            Lịch xem phòng
-          </a>
-        </li>
 
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-        <li class="nav-item"><a class="app-nav-link active text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
-      </ul>
-      <div class="navbar-actions skeleton-box">
-        <div class="hide-on-skeleton d-flex align-items-center gap-3">
-          <!-- Thêm text-decoration-none vào class -->
-          <a href="{{ route('tenant.notifications.index') }}" class="notif-btn text-decoration-none">
-            🔔<span class="notif-dot"></span>
-          </a>
-          
-          <!-- Thêm text-decoration-none vào class -->
-          <div class="dropdown">
-              <button class="user-chip text-decoration-none dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <span class="user-avatar">{{ $authInitials ?? 'NT' }}</span>
-                  <span class="user-meta">
-                      <span class="user-name d-block">{{ $authUser->name ?? 'Người dùng' }}</span>
-                      <span class="user-role">Người thuê</span>
-                  </span>
-                  <span class="caret">▾</span>
-              </button>
 
-              <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-                  <form method="POST" action="{{ route('logout') }}"
-                      class="m-0">
-                      @csrf
+@extends('layout.tenant')
 
-                      <button type="submit"
-                          class="dropdown-item">
-                          ↪ Đăng xuất
-                      </button>
-                  </form>
-              </div>
-          </div>
-        </div>
-      </div>
-  </div>
-</nav>
+@section('title', 'Tổng quan | Trọ Ơi')
+
+@push('styles')
+     <link rel="stylesheet"
+          href="{{ asset('css/tv3/tenant/reviews/index.css') }}">
+@endpush
+
+@section('content')
+
 
 <div class="page-wrap" style="padding-top: 40px; max-width: 1100px;">
   
@@ -232,11 +130,9 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(() => { document.body.classList.remove('skeleton-mode'); }, 600); 
-  });
-</script>
-</body>
-</html>
+@push('scripts')
+    <script src="{{ asset('js/tv3/tenant/reivews/index.js') }}"></script>
+@endpush
+
+
+@endsection

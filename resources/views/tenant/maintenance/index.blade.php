@@ -1,97 +1,15 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trọ Ơi | Quản lý Sự cố</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-<style>
-  .skeleton-mode .hide-on-skeleton { opacity: 0; visibility: hidden; }
-  .skeleton-mode .skeleton-box { background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; color: transparent !important; border-color: transparent !important; pointer-events: none; }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-up { animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-  .delay-1 { animation-delay: 0.1s; } .delay-2 { animation-delay: 0.2s; } .delay-3 { animation-delay: 0.3s; }
-  
-  /* Enterprise Ticket Card */
-  .ticket-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 16px; padding: 20px; transition: all 0.3s ease; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); display: flex; align-items: stretch; gap: 20px; position: relative; overflow: hidden; }
-  .ticket-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e0e0e0; transition: 0.3s; }
-  .ticket-card.priority-urgent::before { background: var(--red); }
-  .ticket-card.priority-normal::before { background: var(--blue); }
-  .ticket-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(32, 88, 79, 0.08); border-color: var(--green-soft); }
-  
-  .ticket-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-  .ticket-icon.dien-nuoc { background: var(--blue-soft); color: var(--blue); }
-  .ticket-icon.dien-lanh { background: var(--green-soft); color: var(--green); }
-  .ticket-icon.noi-that { background: var(--yellow-light); color: #9b6a00; }
 
-  /* Summary Metrics */
-  .metric-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-  .metric-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+@extends('layout.tenant')
 
-  .filter-tabs { display: flex; gap: 12px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
-  .filter-tab { padding: 8px 16px; border-radius: 99px; font-size: 13px; font-weight: 700; color: var(--muted); background: #fff; border: 1px solid #e0e0e0; text-decoration: none; transition: 0.2s; white-space: nowrap; }
-  .filter-tab:hover, .filter-tab.active { background: var(--green-dark); color: #fff; border-color: var(--green-dark); }
-</style>
-</head>
-<body>
+@section('title', 'Tổng quan | Trọ Ơi')
 
-<nav class="navbar navbar-expand-lg app-navbar">
-  <div class="container-fluid">
-    <a class="logo" href="{{ route('tenant.home') }}">Trọ <span>Ơi</span></a>
-    <div class="collapse navbar-collapse" id="mainMenu">
-      <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('favorites.index') }}">Yêu thích</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">Lịch xem phòng</a></li>
-         <li class="nav-item">
-          <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-        </li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link active text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
-      </ul>
-     <div class="navbar-actions skeleton-box">
-        <div class="hide-on-skeleton d-flex align-items-center gap-3">
-          <!-- Thêm text-decoration-none vào class -->
-          <a href="{{ route('tenant.notifications.index') }}" class="notif-btn text-decoration-none">
-            🔔<span class="notif-dot"></span>
-          </a>
-          
-          <!-- Thêm text-decoration-none vào class -->
-          <div class="dropdown">
-              <button class="user-chip text-decoration-none dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <span class="user-avatar">{{ $authInitials ?? 'NT' }}</span>
-                  <span class="user-meta">
-                      <span class="user-name d-block">{{ $authUser->name ?? 'Người dùng' }}</span>
-                      <span class="user-role">Người thuê</span>
-                  </span>
-                  <span class="caret">▾</span>
-              </button>
+@push('styles')
+     <link rel="stylesheet"
+          href="{{ asset('css/tv3/tenant/maintenance/index.css') }}">
+@endpush
 
-              <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-                  <form method="POST" action="{{ route('logout') }}"
-                      class="m-0">
-                      @csrf
+@section('content')
 
-                      <button type="submit"
-                          class="dropdown-item">
-                          ↪ Đăng xuất
-                      </button>
-                  </form>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
 
 <div class="page-wrap" style="padding-top: 30px; max-width: 1000px;">
   
@@ -193,11 +111,10 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(() => { document.body.classList.remove('skeleton-mode'); }, 600); 
-  });
-</script>
-</body>
-</html>
+
+@push('scripts')
+    <script src="{{ asset('js/tv3/tenant/maintencance/index.js') }}"></script>
+@endpush
+
+
+@endsection

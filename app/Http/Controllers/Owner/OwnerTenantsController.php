@@ -62,16 +62,124 @@ class OwnerTenantsController extends Controller{
         return view('owner.tenants.create', compact('contracts'));
     }
 
-    public function show(Request $request, int $id)
-    {
-        return view('owner.tenants.show', compact('id'));
-    }
+   
 
-    public function edit(Request $request)
-    {
-        return view('owner.tenants.edit');
-    }
+public function show(Request $request, int $id)
+{
+    $owner = $request->user() && $request->user()->role === 'owner'
+        ? $request->user()
+        : (
+            config('app.demo_guest')
+                ? User::query()
+                    ->where('role', 'owner')
+                    ->orderBy('id')
+                    ->first()
+                : $this->owner($request)
+        );
 
+    abort_unless($owner, 403, 'Không tìm thấy chủ trọ.');
+
+    // Lấy người thuê thuộc hợp đồng của chủ trọ này
+    $tenant = User::query()
+        ->where('role', 'tenant')
+        ->whereHas('rentedContracts', function ($query) use ($owner) {
+            $query->where('owner_id', $owner->id);
+        })
+        ->with([
+            'rentedContracts' => function ($query) use ($owner) {
+                $query->where('owner_id', $owner->id)
+                    ->with([
+                        'room.property',
+                        'tenant:id,name,email,phone',
+                        'members',
+                    ]);
+            },
+        ])
+        ->findOrFail($id);
+
+    // Lấy hợp đồng của người thuê với chủ trọ hiện tại
+    $contract = $tenant->rentedContracts
+        ->sortByDesc('created_at')
+        ->first();
+
+    // Thông tin phòng và nhà trọ
+    $room = $contract?->room;
+    $property = $room?->property;
+
+    // Danh sách người ở cùng trong hợp đồng
+    $members = $contract?->members ?? collect();
+
+    return view('owner.tenants.show', compact(
+        'tenant',
+        'contract',
+        'room',
+        'property',
+        'members'
+    ));
+}
+
+
+public function edit(Request $request, int $id)
+{
+    $owner = $request->user() && $request->user()->role === 'owner'
+        ? $request->user()
+        : (config('app.demo_guest')
+            ? User::query()
+                ->where('role', 'owner')
+                ->orderBy('id')
+                ->first()
+            : $this->owner($request));
+
+    abort_unless($owner, 403, 'Không tìm thấy chủ trọ.');
+
+    $tenant = User::query()
+        ->where('role', 'tenant')
+        ->whereHas('rentedContracts', function ($query) use ($owner) {
+            $query->where('owner_id', $owner->id);
+        })
+        ->findOrFail($id);
+
+    return view('owner.tenants.edit', compact('tenant'));
+}
+
+
+public function update(Request $request, int $id)
+{
+    $owner = $request->user() && $request->user()->role === 'owner'
+        ? $request->user()
+        : (config('app.demo_guest')
+            ? User::query()
+                ->where('role', 'owner')
+                ->orderBy('id')
+                ->first()
+            : $this->owner($request));
+
+    abort_unless($owner, 403, 'Không tìm thấy chủ trọ.');
+
+    $tenant = User::query()
+        ->where('role', 'tenant')
+        ->whereHas('rentedContracts', function ($query) use ($owner) {
+            $query->where('owner_id', $owner->id);
+        })
+        ->findOrFail($id);
+
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $tenant->id],
+        'phone' => ['nullable', 'string', 'max:20'],
+    ], [
+        'name.required' => 'Vui lòng nhập họ và tên.',
+        'email.required' => 'Vui lòng nhập email.',
+        'email.email' => 'Email không đúng định dạng.',
+        'email.unique' => 'Email này đã được sử dụng.',
+    ]);
+
+    $tenant->update($validated);
+
+    return redirect()
+        ->route('owner.tenants.show', $tenant->id)
+        ->with('success', 'Cập nhật hồ sơ người thuê thành công.');
+}
     private function owner(Request $request): User
     {
         $user = $request->user();

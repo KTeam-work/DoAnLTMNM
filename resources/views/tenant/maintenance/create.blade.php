@@ -1,89 +1,15 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trọ Ơi | Báo cáo sự cố mới</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-<style>
-  .form-panel { background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
-  .form-control, .form-select { border-radius: 12px; padding: 14px 18px; border: 1px solid #e0e0e0; font-size: 14px; background: #fafafa; transition: all 0.2s ease; }
-  .form-control:focus, .form-select:focus { background: #fff; border-color: var(--green); box-shadow: 0 0 0 4px rgba(32, 88, 79, 0.1); }
-  .form-label { font-size: 12px; font-weight: 800; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-  
-  /* Advanced Radio Cards for Priority */
-  .radio-card-input { display: none; }
-  .radio-card { border: 2px solid #eef0ef; border-radius: 14px; padding: 20px; cursor: pointer; transition: 0.2s; background: #fff; height: 100%; }
-  .radio-card:hover { border-color: #d1d5d3; }
-  .radio-card-input:checked + .radio-card.urgent { border-color: var(--red); background: var(--red-soft); box-shadow: 0 4px 15px rgba(198, 91, 74, 0.15); }
-  .radio-card-input:checked + .radio-card.normal { border-color: var(--green); background: var(--green-soft); box-shadow: 0 4px 15px rgba(32, 88, 79, 0.15); }
-  
-  /* Drag & Drop File Zone */
-  .upload-zone { border: 2px dashed #d1d5d3; border-radius: 16px; padding: 40px 20px; text-align: center; background: #fafafa; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .upload-zone:hover { border-color: var(--green); background: rgba(32, 88, 79, 0.03); }
-  .upload-icon { width: 56px; height: 56px; background: #fff; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--green); }
-  
-  .btn-brand { border-radius: 12px; font-weight: 800; transition: 0.2s; letter-spacing: 0.3px; }
-</style>
-</head>
-<body>
 
-<nav class="navbar navbar-expand-lg app-navbar">
-  <div class="container-fluid">
-    <a class="logo" href="{{ route('tenant.home') }}">Trọ <span>Ơi</span></a>
-    <div class="collapse navbar-collapse" id="mainMenu">
-      <ul class="navbar-nav mx-auto align-items-lg-center">
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.home') }}">Trang chủ</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">Tìm phòng</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('favorites.index') }}">Yêu thích</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">Lịch xem phòng</a></li>
-         <li class="nav-item">
-          <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-        </li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
-        <li class="nav-item"><a class="app-nav-link active text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-        <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
-      </ul>
-       <div class="navbar-actions skeleton-box">
-        <div class="hide-on-skeleton d-flex align-items-center gap-3">
-          <!-- Thêm text-decoration-none vào class -->
-          <a href="{{ route('tenant.notifications.index') }}" class="notif-btn text-decoration-none">
-            🔔<span class="notif-dot"></span>
-          </a>
-          
-          <!-- Thêm text-decoration-none vào class -->
-          <div class="dropdown">
-              <button class="user-chip text-decoration-none dropdown-toggle"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <span class="user-avatar">{{ $authInitials ?? 'NT' }}</span>
-                  <span class="user-meta">
-                      <span class="user-name d-block">{{ $authUser->name ?? 'Người dùng' }}</span>
-                      <span class="user-role">Người thuê</span>
-                  </span>
-                  <span class="caret">▾</span>
-              </button>
 
-              <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-                  <form method="POST" action="{{ route('logout') }}"
-                      class="m-0">
-                      @csrf
+@extends('layout.tenant')
 
-                      <button type="submit"
-                          class="dropdown-item">
-                          ↪ Đăng xuất
-                      </button>
-                  </form>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
+@section('title', 'Tổng quan | Trọ Ơi')
+
+@push('styles')
+     <link rel="stylesheet"
+          href="{{ asset('css/tv3/tenant/maintenance/create.css') }}">
+@endpush
+
+@section('content')
 
 <div class="page-wrap" style="padding-top: 40px; max-width: 900px;">
   
@@ -240,27 +166,10 @@
   </div>
 
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-(function () {
-  var contractSelect = document.getElementById('contractSelect');
-  var roomName = document.getElementById('roomName');
-  function syncRoom() {
-    if (!contractSelect) return;
-    var opt = contractSelect.options[contractSelect.selectedIndex];
-    roomName.textContent = opt ? (opt.getAttribute('data-room') || '—') : '—';
-  }
-  if (contractSelect) { contractSelect.addEventListener('change', syncRoom); syncRoom(); }
-  var zone = document.getElementById('uploadZone');
-  var input = document.getElementById('imageInput');
-  var hint = document.getElementById('uploadHint');
-  if (zone && input) {
-    zone.addEventListener('click', function () { input.click(); });
-    input.addEventListener('change', function () {
-      if (input.files.length) hint.textContent = 'Đã chọn: ' + input.files[0].name;
-    });
-  }
-})();
-</script>
-</body>
-</html>
+
+@push('scripts')
+    <script src="{{ asset('js/tv3/tenant/maintencance/create.js') }}"></script>
+@endpush
+
+
+@endsection
