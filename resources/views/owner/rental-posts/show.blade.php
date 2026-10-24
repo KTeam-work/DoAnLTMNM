@@ -31,6 +31,33 @@
                 'hidden' => 'Đã ẩn',
             ];
         @endphp
+        
+        {{-- THƯ VIỆN ẢNH TIN ĐĂNG --}}
+        <div class="rental-gallery mb-4">
+            <h5 class="mb-3">Hình ảnh phòng trọ</h5>
+
+            <div class="image-preview-grid">
+                @forelse ($post->images as $image)
+                    <div class="existing-image">
+                        <img
+                            src="{{ asset('storage/' . $image->image_path) }}"
+                            alt="Ảnh {{ $post->title }}"
+                            class="rental-preview-image"
+                            loading="lazy"
+                        >
+
+                        @if ($image->is_thumbnail)
+                            <span class="thumbnail-label">Ảnh đại diện</span>
+                        @endif
+                    </div>
+                @empty
+                    <p class="text-secondary">
+                        Tin đăng này chưa có hình ảnh.
+                    </p>
+                @endforelse
+            </div>
+        </div>
+
 
         <div class="label">Trạng thái</div>
         <div class="value">{{ $labels[$post->status] ?? $post->status }}</div>

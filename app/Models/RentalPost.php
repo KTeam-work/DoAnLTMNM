@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 class RentalPost extends Model
 {
     protected $table = 'rental_posts';
@@ -22,5 +22,11 @@ class RentalPost extends Model
     public function room(): BelongsTo
     {
         return $this->belongsTo(Room::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(RentalPostImage::class)
+            ->orderBy('sort_order');
     }
 }

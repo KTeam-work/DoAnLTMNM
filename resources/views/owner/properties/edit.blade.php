@@ -1,37 +1,132 @@
+
 @extends('Layout.landlord')
 
 @section('title', 'Sửa nhà | Trọ Ơi')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/properties/edit.css') }}">
+
+    <style>
+        .property-images-section {
+            margin-bottom: 28px;
+        }
+
+        .property-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .property-image-item {
+            position: relative;
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid #dce5df;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .property-image-item img {
+            display: block;
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .property-image-item.is-deleted {
+            opacity: .45;
+            border-color: #dc3545;
+        }
+
+        .property-image-item.is-deleted img {
+            filter: grayscale(1);
+        }
+
+        .image-thumbnail-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            margin-top: 12px;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .image-delete-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            margin-top: 10px;
+            color: #dc3545;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .image-thumbnail-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: #e6f3eb;
+            color: #20584f;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .new-image-preview {
+            display: none;
+        }
+
+        .new-image-preview img {
+            margin-bottom: 8px;
+        }
+
+        .image-help {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .image-empty {
+            padding: 20px;
+            border: 1px dashed #cbd5ce;
+            border-radius: 10px;
+            color: #6b7280;
+            text-align: center;
+        }
+    </style>
 @endpush
 
 @section('content')
-
-
     <div class="owner-page">
 
-        <nav class="navbar navbar-expand-lg app-navbar">
-            <div class="container-fluid">
-                <a class="logo" href="{{ route('landlord.dashboard') }}">
-                    Trọ <span>Ơi</span>
-                </a>
+     
 
-                <div class="ms-auto d-flex gap-2">
+        <main class="edit-container">
+                    
+                <div class="d-flex justify-content-end mb-3">
                     <a href="{{ route('owner.properties.index') }}" class="btn-back">
                         ← Danh sách nhà
                     </a>
-                </div>
-            </div>
-        </nav>
-
-        <main class="edit-container">
-
+              </div>
             <div class="page-heading">
                 <div class="eyebrow">Owner workspace</div>
                 <h1>Sửa thông tin nhà trọ</h1>
                 <p>Cập nhật thông tin cho nhà trọ: {{ $property->name }}</p>
             </div>
+
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -53,11 +148,110 @@
 
                 <div class="edit-card-body">
 
-                    <form action="{{ route('owner.properties.update', $property->id) }}"
-                          method="POST">
+                    <form
+                        action="{{ route('owner.properties.update', $property->id) }}"
+                        method="POST"
+                        enctype="multipart/form-data"
+                        id="editPropertyForm">
+
                         @csrf
                         @method('PUT')
 
+                        {{-- QUẢN LÝ ẢNH HIỆN TẠI --}}
+                        <div class="property-images-section">
+                            <label class="form-label">
+                                Ảnh nhà trọ hiện tại
+                            </label>
+
+                            @if ($property->images->isNotEmpty())
+                                <div class="property-images-grid">
+                                    @foreach ($property->images as $image)
+                                        <div
+                                            class="property-image-item"
+                                            data-image-item="{{ $image->id }}">
+
+                                            <img
+                                                src="{{ asset('storage/' . ltrim($image->image_path, '/')) }}"
+                                                alt="Ảnh nhà trọ"
+                                                loading="lazy">
+
+                                            @if ($image->is_thumbnail)
+                                                <span class="image-thumbnail-badge">
+                                                    Ảnh đại diện hiện tại
+                                                </span>
+                                            @endif
+
+                                            <label class="image-thumbnail-label">
+                                                <input
+                                                    type="radio"
+                                                    name="thumbnail_image"
+                                                    value="{{ $image->id }}"
+                                                    class="thumbnail-radio"
+                                                    {{ old('thumbnail_image', $property->images->firstWhere('is_thumbnail', true)?->id) == $image->id ? 'checked' : '' }}>
+
+                                                <span>Chọn làm ảnh đại diện</span>
+                                            </label>
+
+                                            <label class="image-delete-label">
+                                                <input
+                                                    type="checkbox"
+                                                    name="delete_images[]"
+                                                    value="{{ $image->id }}"
+                                                    class="delete-image-checkbox"
+                                                    {{ in_array((string) $image->id, old('delete_images', [])) ? 'checked' : '' }}>
+
+                                                <span>Đánh dấu xóa ảnh này</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="image-empty">
+                                    Nhà trọ chưa có ảnh. Mày có thể thêm ảnh mới bên dưới.
+                                </div>
+                            @endif
+
+                            <p class="image-help">
+                                Chọn ảnh đại diện bằng nút tròn. Đánh dấu xóa ảnh nếu không muốn giữ ảnh đó.
+                                Ảnh chỉ bị xóa sau khi mày bấm Lưu thay đổi.
+                            </p>
+                        </div>
+
+                        <hr>
+
+                        {{-- THÊM ẢNH MỚI --}}
+                        <div class="mb-4">
+                            <label for="images" class="form-label">
+                                Thêm ảnh nhà trọ
+                            </label>
+
+                            <input
+                                type="file"
+                                id="images"
+                                name="images[]"
+                                class="form-control @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror"
+                                accept="image/jpeg,image/png,image/webp"
+                                multiple>
+
+                            @error('images')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            @error('images.*')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                            <p class="image-help">
+                                Có thể chọn nhiều ảnh JPG, PNG hoặc WEBP. Mỗi ảnh tối đa 5 MB.
+                                Bỏ trống nếu không muốn thêm ảnh.
+                            </p>
+
+                            <div id="newImagePreview" class="property-images-grid new-image-preview"></div>
+                        </div>
+
+                        <hr>
+
+                        {{-- TÊN NHÀ --}}
                         <div class="mb-4">
                             <label for="name" class="form-label">
                                 Tên nhà trọ <span class="required">*</span>
@@ -77,6 +271,7 @@
                             @enderror
                         </div>
 
+                        {{-- LOẠI HÌNH --}}
                         <div class="mb-4">
                             <label for="type" class="form-label">
                                 Loại hình <span class="required">*</span>
@@ -87,6 +282,7 @@
                                 name="type"
                                 class="form-select @error('type') is-invalid @enderror"
                                 required>
+
                                 <option value="rooming_house"
                                     {{ old('type', $property->type) === 'rooming_house' ? 'selected' : '' }}>
                                     Nhà trọ
@@ -108,6 +304,7 @@
                             @enderror
                         </div>
 
+                        {{-- ĐỊA CHỈ --}}
                         <div class="mb-4">
                             <label for="address" class="form-label">
                                 Địa chỉ chi tiết <span class="required">*</span>
@@ -127,6 +324,7 @@
                             @enderror
                         </div>
 
+                        {{-- QUẬN VÀ PHƯỜNG --}}
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label for="district" class="form-label">
@@ -167,11 +365,10 @@
                             </div>
                         </div>
 
+                        {{-- TỌA ĐỘ --}}
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label for="latitude" class="form-label">
-                                    Vĩ độ
-                                </label>
+                                <label for="latitude" class="form-label">Vĩ độ</label>
 
                                 <input
                                     type="number"
@@ -190,9 +387,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="longitude" class="form-label">
-                                    Kinh độ
-                                </label>
+                                <label for="longitude" class="form-label">Kinh độ</label>
 
                                 <input
                                     type="number"
@@ -211,6 +406,7 @@
                             </div>
                         </div>
 
+                        {{-- TRẠNG THÁI --}}
                         <div class="mb-4">
                             <label for="status" class="form-label">
                                 Trạng thái <span class="required">*</span>
@@ -221,6 +417,7 @@
                                 name="status"
                                 class="form-select @error('status') is-invalid @enderror"
                                 required>
+
                                 <option value="active"
                                     {{ old('status', $property->status) === 'active' ? 'selected' : '' }}>
                                     Đang hoạt động
@@ -237,10 +434,9 @@
                             @enderror
                         </div>
 
+                        {{-- MÔ TẢ --}}
                         <div class="mb-4">
-                            <label for="description" class="form-label">
-                                Mô tả
-                            </label>
+                            <label for="description" class="form-label">Mô tả</label>
 
                             <textarea
                                 id="description"
@@ -273,7 +469,8 @@
             </section>
         </main>
     </div>
-
-
-
 @endsection
+
+@push('scripts')
+       <script src="{{ asset('js/tv3/properties/edit.js') }}"></script>
+@endpush

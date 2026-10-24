@@ -1,113 +1,17 @@
 
-<!DOCTYPE html>
-<html lang="vi">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trọ Ơi | Đặt lịch xem phòng</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+@extends('layout.tenant')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+@section('title', 'Tổng quan | Trọ Ơi')
 
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-</head>
+@push('styles')
+     
+@endpush
 
-<body>
+@section('content')
 
-    {{-- NAVBAR --}}
-    <nav class="navbar navbar-expand-lg app-navbar">
-        <div class="container-fluid">
 
-            <a class="logo" href="{{ route('tenant') }}">
-                Trọ <span>Ơi</span>
-            </a>
-
-            <button
-                class="navbar-toggler bg-light"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mainMenu"
-                aria-controls="mainMenu"
-                aria-expanded="false"
-                aria-label="Mở menu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="mainMenu">
-                <ul class="navbar-nav mx-auto align-items-lg-center">
-
-                    <li class="nav-item">
-                        <a class="app-nav-link text-decoration-none" href="{{ route('tenant') }}">
-                            Trang chủ
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link text-decoration-none" href="{{ route('rooms.index') }}">
-                            Tìm phòng
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link text-decoration-none" href="{{ route('favorites.index') }}">
-                            Yêu thích
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link active text-decoration-none" href="{{ route('appointments.index') }}">
-                            Lịch xem phòng
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link text-decoration-none" href="{{ route('appointments.index') }}">
-                            Hợp đồng
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="app-nav-link text-decoration-none" href="{{ url('/tenant/invoices/index') }}">
-                            Hóa đơn
-                        </a>
-                    </li>
-
-                </ul>
-
-                <div class="navbar-actions">
-                    <a
-                        class="notif-btn text-decoration-none"
-                        href="{{ route('appointments.index') }}"
-                        aria-label="Thông báo">
-                        🔔
-                    </a>
-
-                    <a href="{{ route('appointments.index') }}" class="user-chip text-decoration-none">
-                        <span class="user-avatar">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'NT', 0, 1)) }}
-                        </span>
-
-                        <span class="user-meta">
-                            <span class="user-name d-block">
-                                {{ auth()->user()->name ?? 'Người thuê' }}
-                            </span>
-                            <span class="user-role">Người thuê</span>
-                        </span>
-
-                        <span class="caret">▾</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <main class="page-wrap">
 
@@ -497,20 +401,13 @@
         @endif
     </main>
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-    </script>
 
-    <script>
-        // Khi đổi phòng, giữ trang đặt lịch và truyền ID phòng qua URL.
-        document.getElementById('room_id')?.addEventListener('change', function () {
-            if (this.value) {
-                const url = new URL(window.location.href);
-                url.searchParams.set('id', this.value);
-                window.location.href = url.toString();
-            }
-        });
-    </script>
 
-</body>
-</html>
+@push('scripts')
+    <script src="{{ asset('js/tv2/appointments/create.js') }}"></script>
+@endpush
+
+
+
+    @endsection
+  
