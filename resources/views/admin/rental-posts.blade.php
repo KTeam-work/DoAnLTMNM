@@ -1,704 +1,198 @@
-<!DOCTYPE html>
 
-<html lang="vi">
+@extends('Layout.admin')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@section('title', 'Quản lý tin đăng | Trọ Ơi')
 
-<title>Kiểm duyệt tin đăng - Trọ Ơi</title>
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/tv1/rental-posts.css') }}">
+@endpush
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+@section('content')
+@php
+    $query = trim(request('q', ''));
+    $status = request('status', '');
 
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet">
+    $posts = \App\Models\RentalPost::with('room')
+        ->when($query !== '', function ($builder) use ($query) {
+            $builder->where(function ($sub) use ($query) {
+                $sub->where('title', 'like', "%{$query}%")
+                    ->orWhere('description', 'like', "%{$query}%")
+                    ->orWhereHas('room', function ($roomQuery) use ($query) {
+                        $roomQuery->where('name', 'like', "%{$query}%")
+                            ->orWhere('room_code', 'like', "%{$query}%");
+                    });
+            });
+        })
+        ->when($status !== '', fn ($builder) => $builder->where('status', $status))
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet">
-
-<link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-
-
-</head>
-
-<body>
-
-
-<nav class="app-navbar">
-
-
-<div class="container-fluid h-100">
-
-    <div class="d-flex align-items-center justify-content-between h-100">
-
-        <!-- LOGO -->
-
-        <a href="{{ route('admin.dashboard') }}"
-           class="logo text-decoration-none">
-
-            Trọ <span>Ơi</span>
-            <small>ADMIN</small>
-
-        </a>
-
-
-        <!-- MENU -->
-
-        <div class="d-flex align-items-center gap-1">
-
-            <a href="{{ route('admin.dashboard') }}"
-               class="app-nav-link text-decoration-none">
-                Dashboard
-            </a>
-
-            <a href="{{ route('admin.users') }}"
-               class="app-nav-link text-decoration-none">
-                Tài khoản
-            </a>
-
-            <a href="{{ route('admin.rental-posts') }}"
-               class="app-nav-link active text-decoration-none">
-                Kiểm duyệt tin
-            </a>
-
-            <a href="{{ route('admin.statistics') }}"
-               class="app-nav-link text-decoration-none">
-                Thống kê
-            </a>
-
-        </div>
-
-
-        <!-- ADMIN -->
-
-        <div class="navbar-actions">
-
-            <div class="user-chip">
-
-                <div class="user-avatar">
-                    AD
-                </div>
-
-                <div class="user-meta">
-
-                    <div class="user-name">
-                        Admin
-                    </div>
-
-                    <div class="user-role">
-                        Quản trị viên
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-</nav>
-
-<!-- ================= CONTENT ================= -->
-
-<div class="page-wrap">
-
-<!-- HEADER -->
+    $statusLabels = [
+        'draft' => 'Bản nháp',
+        'pending' => 'Chờ duyệt',
+        'published' => 'Đã đăng',
+        'rejected' => 'Từ chối',
+        'hidden' => 'Đang ẩn',
+    ];
+@endphp
 
 <div class="page-header">
-
     <div>
-
-        <h1 class="page-title">
-            Kiểm duyệt tin đăng
-        </h1>
-
-        <div class="page-desc">
-            Xem xét, phê duyệt hoặc từ chối các tin cho thuê phòng
-        </div>
-
+        <h2 class="page-title">Quản lý tin đăng</h2>
+        <div class="page-desc">Kiểm tra và quản lý tin cho thuê trên Trọ Ơi.</div>
     </div>
-
 </div>
 
+<div class="rp-summary">
+    @foreach ([
+        'pending' => 'Chờ duyệt',
+        'published' => 'Đã đăng',
+        'rejected' => 'Bị từ chối',
+        'hidden' => 'Đang ẩn',
+    ] as $key => $label)
+        <a class="rp-summary-card {{ $status === $key ? 'selected' : '' }}"
+           href="{{ route('admin.rental-posts', ['status' => $key]) }}">
+            <span>{{ $label }}</span>
+            <strong>{{ \App\Models\RentalPost::where('status', $key)->count() }}</strong>
+        </a>
+    @endforeach
+</div>
 
-<!-- ================= FILTER ================= -->
+<div class="rp-panel">
+    <form method="GET" action="{{ route('admin.rental-posts') }}" class="rp-filters">
+        <input
+            type="search"
+            name="q"
+            value="{{ $query }}"
+            placeholder="Tìm tên tin hoặc phòng..."
+            aria-label="Tìm tin đăng"
+        >
 
-<div class="panel mb-4">
+        <select name="status" aria-label="Lọc trạng thái">
+            <option value="">Tất cả trạng thái</option>
+            @foreach ($statusLabels as $key => $label)
+                <option value="{{ $key }}" @selected($status === $key)>
+                    {{ $label }}
+                </option>
+            @endforeach
+        </select>
 
-    <div class="panel-head">
-
-        <h2 class="panel-title">
-            Tìm kiếm và lọc tin đăng
-        </h2>
-
-    </div>
-
-
-    <form method="GET"
-          action="{{ route('admin.rental-posts') }}">
-
-        <div class="row g-3">
-
-            <!-- Tìm kiếm -->
-
-            <div class="col-12 col-lg-6">
-
-                <label class="form-label">
-                    Tìm kiếm
-                </label>
-
-                <input
-                    type="text"
-                    name="search"
-                    class="form-control"
-                    placeholder="Tên tin đăng hoặc tên chủ trọ..."
-                    value="{{ request('search') }}"
-                >
-
-            </div>
-
-
-            <!-- Trạng thái -->
-
-            <div class="col-12 col-md-6 col-lg-3">
-
-                <label class="form-label">
-                    Trạng thái
-                </label>
-
-                <select name="status" class="form-select">
-
-                    <option value="">
-                        Tất cả
-                    </option>
-
-                    <option value="pending"
-                        {{ request('status') == 'pending' ? 'selected' : '' }}>
-                        Chờ duyệt
-                    </option>
-
-                    <option value="approved"
-                        {{ request('status') == 'approved' ? 'selected' : '' }}>
-                        Đã duyệt
-                    </option>
-
-                    <option value="rejected"
-                        {{ request('status') == 'rejected' ? 'selected' : '' }}>
-                        Từ chối
-                    </option>
-
-                    <option value="hidden"
-                        {{ request('status') == 'hidden' ? 'selected' : '' }}>
-                        Đã ẩn
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- Sắp xếp -->
-
-            <div class="col-12 col-md-6 col-lg-3">
-
-                <label class="form-label">
-                    Sắp xếp
-                </label>
-
-                <select name="sort" class="form-select">
-
-                    <option value="newest"
-                        {{ request('sort', 'newest') == 'newest' ? 'selected' : '' }}>
-                        Mới nhất
-                    </option>
-
-                    <option value="oldest"
-                        {{ request('sort') == 'oldest' ? 'selected' : '' }}>
-                        Cũ nhất
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- BUTTON -->
-
-            <div class="col-12">
-
-                <button type="submit"
-                        class="btn-brand">
-                    Tìm kiếm
-                </button>
-
-                <a href="{{ route('admin.rental-posts') }}"
-                   class="btn-outline-brand text-decoration-none">
-                    Đặt lại
-                </a>
-
-            </div>
-
-        </div>
-
+        <button type="submit" class="rp-btn rp-btn-primary">Lọc tin</button>
+        <a href="{{ route('admin.rental-posts') }}" class="rp-btn rp-btn-light">Đặt lại</a>
     </form>
 
-</div>
+    @if (session('success'))
+        <div class="rp-alert success">{{ session('success') }}</div>
+    @endif
 
-
-<!-- ================= RENTAL POSTS ================= -->
-
-<div class="panel">
-
-    <div class="panel-head">
-
-        <div>
-
-            <h2 class="panel-title">
-                Danh sách tin đăng
-            </h2>
-
-            <div class="page-desc">
-                Các tin đăng được gửi lên hệ thống
-            </div>
-
+    @if ($errors->any())
+        <div class="rp-alert error">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
         </div>
-
-        <span class="badge-status pending">
-            14 tin chờ duyệt
-        </span>
-
-    </div>
-
+    @endif
 
     <div class="table-responsive">
-
-        <table class="data-table">
-
+        <table class="rp-table">
             <thead>
-
-            <tr>
-
-                <th>
-                    Tin đăng
-                </th>
-
-                <th>
-                    Chủ trọ
-                </th>
-
-                <th>
-                    Giá thuê
-                </th>
-
-                <th>
-                    Ngày đăng
-                </th>
-
-                <th>
-                    Trạng thái
-                </th>
-
-                <th>
-                    Thao tác
-                </th>
-
-            </tr>
-
+                <tr>
+                    <th>Tin đăng</th>
+                    <th>Phòng</th>
+                    <th>Giá thuê</th>
+                    <th>Ngày tạo</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
             </thead>
-
-
             <tbody>
-
-
-            <!-- ================= POST 1 ================= -->
-
-            <tr>
-
-                <td>
-
-                    <div class="cell-title">
-                        Phòng trọ full nội thất Quận 7
-                    </div>
-
-                    <div class="cell-sub">
-                        25m² · Có máy lạnh · Có wifi
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <div class="cell-title">
-                        Nguyễn Văn A
-                    </div>
-
-                    <div class="cell-sub">
-                        nguyenvana@gmail.com
-                    </div>
-
-                </td>
-
-
-                <td>
-                    2,8 triệu/tháng
-                </td>
-
-
-                <td>
-                    07/09/2026
-                </td>
-
-
-                <td>
-
-                    <span class="badge-status pending">
-                        Chờ duyệt
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <div class="d-flex gap-1">
-
-                        <button type="button"
-                                class="btn-brand btn-sm">
-                            Duyệt
-                        </button>
-
-                        <button type="button"
-                                class="btn-outline-brand btn-sm">
-                            Từ chối
-                        </button>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-
-            <!-- ================= POST 2 ================= -->
-
-            <tr>
-
-                <td>
-
-                    <div class="cell-title">
-                        Phòng trọ gần HUIT
-                    </div>
-
-                    <div class="cell-sub">
-                        20m² · Có gác · Giờ giấc tự do
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <div class="cell-title">
-                        Trần Văn B
-                    </div>
-
-                    <div class="cell-sub">
-                        tranvanb@gmail.com
-                    </div>
-
-                </td>
-
-
-                <td>
-                    2,5 triệu/tháng
-                </td>
-
-
-                <td>
-                    07/09/2026
-                </td>
-
-
-                <td>
-
-                    <span class="badge-status pending">
-                        Chờ duyệt
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <div class="d-flex gap-1">
-
-                        <button type="button"
-                                class="btn-brand btn-sm">
-                            Duyệt
-                        </button>
-
-                        <button type="button"
-                                class="btn-outline-brand btn-sm">
-                            Từ chối
-                        </button>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-
-            <!-- ================= POST 3 ================= -->
-
-            <tr>
-
-                <td>
-
-                    <div class="cell-title">
-                        Phòng trọ có máy lạnh
-                    </div>
-
-                    <div class="cell-sub">
-                        30m² · Full nội thất · Ban công
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <div class="cell-title">
-                        Lê Văn C
-                    </div>
-
-                    <div class="cell-sub">
-                        levanc@gmail.com
-                    </div>
-
-                </td>
-
-
-                <td>
-                    3,2 triệu/tháng
-                </td>
-
-
-                <td>
-                    06/09/2026
-                </td>
-
-
-                <td>
-
-                    <span class="badge-status pending">
-                        Chờ duyệt
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <div class="d-flex gap-1">
-
-                        <button type="button"
-                                class="btn-brand btn-sm">
-                            Duyệt
-                        </button>
-
-                        <button type="button"
-                                class="btn-outline-brand btn-sm">
-                            Từ chối
-                        </button>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-
-            <!-- ================= POST 4 ================= -->
-
-            <tr>
-
-                <td>
-
-                    <div class="cell-title">
-                        Phòng trọ giá rẻ Bình Thạnh
-                    </div>
-
-                    <div class="cell-sub">
-                        18m² · Gần chợ · Có camera
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <div class="cell-title">
-                        Phạm Minh T
-                    </div>
-
-                    <div class="cell-sub">
-                        minht@gmail.com
-                    </div>
-
-                </td>
-
-
-                <td>
-                    2,2 triệu/tháng
-                </td>
-
-
-                <td>
-                    05/09/2026
-                </td>
-
-
-                <td>
-
-                    <span class="badge-status approved">
-                        Đã duyệt
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <button type="button"
-                            class="btn-outline-brand btn-sm">
-                        Ẩn tin
-                    </button>
-
-                </td>
-
-            </tr>
-
-
-            <!-- ================= POST 5 ================= -->
-
-            <tr>
-
-                <td>
-
-                    <div class="cell-title">
-                        Căn hộ mini gần trường
-                    </div>
-
-                    <div class="cell-sub">
-                        35m² · Nội thất cơ bản · Có thang máy
-                    </div>
-
-                </td>
-
-
-                <td>
-
-                    <div class="cell-title">
-                        Hoàng Tuấn
-                    </div>
-
-                    <div class="cell-sub">
-                        tuan@gmail.com
-                    </div>
-
-                </td>
-
-
-                <td>
-                    4 triệu/tháng
-                </td>
-
-
-                <td>
-                    04/09/2026
-                </td>
-
-
-                <td>
-
-                    <span class="badge-status rejected">
-                        Từ chối
-                    </span>
-
-                </td>
-
-
-                <td>
-
-                    <button type="button"
-                            class="btn-outline-brand btn-sm">
-                        Xem lý do
-                    </button>
-
-                </td>
-
-            </tr>
-
-
+                @forelse ($posts as $post)
+                    <tr>
+                        <td>
+                            <strong>{{ $post->title }}</strong>
+                            <div class="rp-description">
+                                {{ \Illuminate\Support\Str::limit($post->description, 100) }}
+                            </div>
+                            @if ($post->rejection_reason)
+                                <div class="rp-reason">
+                                    Lý do từ chối: {{ $post->rejection_reason }}
+                                </div>
+                            @endif
+                        </td>
+                        <td>
+                            {{ $post->room?->name ?? 'Phòng không còn tồn tại' }}
+                            @if ($post->room?->room_code)
+                                <div class="rp-description">{{ $post->room->room_code }}</div>
+                            @endif
+                        </td>
+                        <td>
+                            @if ($post->room)
+                                {{ number_format((float) $post->room->price, 0, ',', '.') }} đ
+                                <div class="rp-description">
+                                    {{ number_format((float) $post->room->area, 2, ',', '.') }} m²
+                                </div>
+                            @else
+                                —
+                            @endif
+                        </td>
+                        <td>{{ $post->created_at?->format('d/m/Y') ?? '—' }}</td>
+                        <td>
+                            <span class="rp-status status-{{ $post->status }}">
+                                {{ $statusLabels[$post->status] ?? $post->status }}
+                            </span>
+                        </td>
+                        <td>
+                            <details class="rp-actions">
+                                <summary>Quản lý</summary>
+                                <form method="POST"
+                                      action="{{ route('admin.rental-posts.update-status', $post->id) }}"
+                                      class="rp-action-form"
+                                      data-confirm-status>
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <label for="status-{{ $post->id }}">Trạng thái mới</label>
+                                    <select name="status"
+                                            id="status-{{ $post->id }}"
+                                            required>
+                                        @foreach ($statusLabels as $key => $label)
+                                            <option value="{{ $key }}"
+                                                @selected($post->status === $key)>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    <label for="reason-{{ $post->id }}">
+                                        Lý do từ chối (nếu có)
+                                    </label>
+                                    <textarea name="rejection_reason"
+                                              id="reason-{{ $post->id }}"
+                                              rows="2"
+                                              maxlength="500"
+                                              placeholder="Nhập lý do nếu từ chối">{{ $post->rejection_reason }}</textarea>
+
+                                    <button type="submit" class="rp-btn rp-btn-primary">
+                                        Lưu trạng thái
+                                    </button>
+                                </form>
+                            </details>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="rp-empty">Không tìm thấy tin đăng phù hợp.</td>
+                    </tr>
+                @endforelse
             </tbody>
-
         </table>
-
     </div>
 
-
-    <!-- ================= PAGINATION ================= -->
-
-    <div class="d-flex justify-content-between align-items-center mt-4">
-
-        <div class="page-desc">
-            Hiển thị 1 - 5 trong 128 tin đăng
-        </div>
-
-
-        <div class="d-flex gap-1">
-
-            <button type="button"
-                    class="btn-outline-brand btn-sm">
-                ‹
-            </button>
-
-            <button type="button"
-                    class="btn-brand btn-sm">
-                1
-            </button>
-
-            <button type="button"
-                    class="btn-outline-brand btn-sm">
-                2
-            </button>
-
-            <button type="button"
-                    class="btn-outline-brand btn-sm">
-                3
-            </button>
-
-            <button type="button"
-                    class="btn-outline-brand btn-sm">
-                ›
-            </button>
-
-        </div>
-
-    </div>
-
+    <div class="rp-pagination">{{ $posts->links() }}</div>
 </div>
+@endsection
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
+@push('scripts')
+    <script src="{{ asset('js/tv1/rental-posts.js') }}" defer></script>
+@endpush

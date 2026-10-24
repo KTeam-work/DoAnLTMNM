@@ -1,674 +1,136 @@
-<!DOCTYPE html>
-<html lang="vi">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('Layout.admin')
 
-    <title>Quản lý tài khoản - Trọ Ơi</title>
+@section('title', 'Quản lý người dùng | Trọ Ơi')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/tv1/users.css') }}?v=5">
+@endpush
 
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet">
+@section('content')
+@php
+    $query = trim(request('q', ''));
+    $role = request('role', '');
+    $status = request('status', '');
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    $users = \App\Models\User::query()
+        ->when($query !== '', function ($builder) use ($query) {
+            $builder->where(function ($sub) use ($query) {
+                $sub->where('name', 'like', "%{$query}%")
+                    ->orWhere('email', 'like', "%{$query}%")
+                    ->orWhere('phone', 'like', "%{$query}%")
+                    ->orWhere('user_code', 'like', "%{$query}%");
+            });
+        })
+        ->when($role !== '', fn ($builder) => $builder->where('role', $role))
+        ->when($status !== '', fn ($builder) => $builder->where('status', $status))
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+@endphp
 
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-</head>
-
-<body>
-
-{{-- ================= NAVBAR ================= --}}
-
-<nav class="app-navbar">
-
-    <div class="container-fluid h-100">
-
-        <div class="d-flex align-items-center justify-content-between h-100">
-
-            {{-- LOGO --}}
-
-            <a href="{{ route('admin.dashboard') }}"
-               class="logo text-decoration-none">
-
-                Trọ <span>Ơi</span>
-                <small>ADMIN</small>
-
-            </a>
-
-
-            {{-- MENU --}}
-
-            <div class="d-flex align-items-center gap-1">
-
-                <a href="{{ route('admin.dashboard') }}"
-                   class="app-nav-link text-decoration-none">
-
-                    Dashboard
-
-                </a>
-
-
-                <a href="{{ route('admin.users') }}"
-                   class="app-nav-link active text-decoration-none">
-
-                    Tài khoản
-
-                </a>
-
-
-                <a href="{{ route('admin.rental-posts') }}"
-                   class="app-nav-link text-decoration-none">
-
-                    Kiểm duyệt tin
-
-                </a>
-
-
-                <a href="{{ route('admin.statistics') }}"
-                   class="app-nav-link text-decoration-none">
-
-                    Thống kê
-
-                </a>
-
-            </div>
-
-
-            {{-- ADMIN --}}
-
-            <div class="navbar-actions">
-
-                <div class="user-chip">
-
-                    <div class="user-avatar">
-                        AD
-                    </div>
-
-                    <div class="user-meta">
-
-                        <div class="user-name">
-                            Admin
-                        </div>
-
-                        <div class="user-role">
-                            Quản trị viên
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Quản lý người dùng</h2>
+        <div class="page-desc">Danh sách tài khoản trên nền tảng Trọ Ơi.</div>
     </div>
-
-</nav>
-
-
-{{-- ================= CONTENT ================= --}}
-
-<div class="page-wrap">
-
-    {{-- HEADER --}}
-
-    <div class="page-header">
-
-        <div>
-
-            <h1 class="page-title">
-                Quản lý tài khoản
-            </h1>
-
-            <div class="page-desc">
-                Quản lý người dùng, vai trò và trạng thái tài khoản
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- ================= FILTER ================= --}}
-
-    <div class="panel mb-4">
-
-        <div class="panel-head">
-
-            <h2 class="panel-title">
-                Tìm kiếm và lọc
-            </h2>
-
-        </div>
-
-
-        <form method="GET"
-              action="{{ route('admin.users') }}">
-
-            <div class="row g-3">
-
-                {{-- TÌM KIẾM --}}
-
-                <div class="col-12 col-lg-6">
-
-                    <label class="form-label">
-                        Tìm kiếm
-                    </label>
-
-                    <input
-                        type="text"
-                        name="search"
-                        class="form-control"
-                        placeholder="Tên, email hoặc số điện thoại..."
-                        value="{{ request('search') }}"
-                    >
-
-                </div>
-
-
-                {{-- VAI TRÒ --}}
-
-                <div class="col-12 col-md-6 col-lg-3">
-
-                    <label class="form-label">
-                        Vai trò
-                    </label>
-
-                    <select name="role" class="form-select">
-
-                        <option value="">
-                            Tất cả
-                        </option>
-
-                        <option value="admin"
-                            {{ request('role') == 'admin' ? 'selected' : '' }}>
-                            Admin
-                        </option>
-
-                        <option value="owner"
-                            {{ request('role') == 'owner' ? 'selected' : '' }}>
-                            Owner
-                        </option>
-
-                        <option value="tenant"
-                            {{ request('role') == 'tenant' ? 'selected' : '' }}>
-                            Tenant
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                {{-- TRẠNG THÁI --}}
-
-                <div class="col-12 col-md-6 col-lg-3">
-
-                    <label class="form-label">
-                        Trạng thái
-                    </label>
-
-                    <select name="status" class="form-select">
-
-                        <option value="">
-                            Tất cả
-                        </option>
-
-                        <option value="active"
-                            {{ request('status') == 'active' ? 'selected' : '' }}>
-                            Hoạt động
-                        </option>
-
-                        <option value="blocked"
-                            {{ request('status') == 'blocked' ? 'selected' : '' }}>
-                            Bị khóa
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                {{-- BUTTON --}}
-
-                <div class="col-12">
-
-                    <button type="submit"
-                            class="btn-brand">
-
-                        Tìm kiếm
-
-                    </button>
-
-
-                    <a href="{{ route('admin.users') }}"
-                       class="btn-outline-brand text-decoration-none">
-
-                        Đặt lại
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </form>
-
-    </div>
-
-
-    {{-- ================= USER TABLE ================= --}}
-
-    <div class="panel">
-
-        <div class="panel-head">
-
-            <div>
-
-                <h2 class="panel-title">
-                    Danh sách tài khoản
-                </h2>
-
-                <div class="page-desc">
-                    Tổng cộng 1.248 tài khoản
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="table-responsive">
-
-            <table class="data-table">
-
-                <thead>
-
-                <tr>
-
-                    <th>
-                        Tài khoản
-                    </th>
-
-                    <th>
-                        Số điện thoại
-                    </th>
-
-                    <th>
-                        Vai trò
-                    </th>
-
-                    <th>
-                        Trạng thái
-                    </th>
-
-                    <th>
-                        Ngày tạo
-                    </th>
-
-                    <th>
-                        Thao tác
-                    </th>
-
-                </tr>
-
-                </thead>
-
-
-                <tbody>
-
-
-                {{-- USER 1 --}}
-
-                <tr>
-
-                    <td>
-
-                        <div class="d-flex align-items-center gap-2">
-
-                            <div class="avatar-sm">
-                                NM
-                            </div>
-
-                            <div>
-
-                                <div class="cell-title">
-                                    Nguyễn Minh
-                                </div>
-
-                                <div class="cell-sub">
-                                    minh@gmail.com
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-                        0901234567
-                    </td>
-
-                    <td>
-                        Owner
-                    </td>
-
-                    <td>
-
-                        <span class="badge-status active">
-                            Hoạt động
-                        </span>
-
-                    </td>
-
-                    <td>
-                        05/09/2026
-                    </td>
-
-                    <td>
-
-                        <button class="btn-outline-brand btn-sm">
-                            Khóa
-                        </button>
-
-                    </td>
-
-                </tr>
-
-
-                {{-- USER 2 --}}
-
-                <tr>
-
-                    <td>
-
-                        <div class="d-flex align-items-center gap-2">
-
-                            <div class="avatar-sm">
-                                TA
-                            </div>
-
-                            <div>
-
-                                <div class="cell-title">
-                                    Trần Anh
-                                </div>
-
-                                <div class="cell-sub">
-                                    anh@gmail.com
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-                        0912345678
-                    </td>
-
-                    <td>
-                        Tenant
-                    </td>
-
-                    <td>
-
-                        <span class="badge-status active">
-                            Hoạt động
-                        </span>
-
-                    </td>
-
-                    <td>
-                        04/09/2026
-                    </td>
-
-                    <td>
-
-                        <button class="btn-outline-brand btn-sm">
-                            Khóa
-                        </button>
-
-                    </td>
-
-                </tr>
-
-
-                {{-- USER 3 --}}
-
-                <tr>
-
-                    <td>
-
-                        <div class="d-flex align-items-center gap-2">
-
-                            <div class="avatar-sm">
-                                LH
-                            </div>
-
-                            <div>
-
-                                <div class="cell-title">
-                                    Lê Hoàng
-                                </div>
-
-                                <div class="cell-sub">
-                                    hoang@gmail.com
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-                        0987654321
-                    </td>
-
-                    <td>
-                        Owner
-                    </td>
-
-                    <td>
-
-                        <span class="badge-status blocked">
-                            Bị khóa
-                        </span>
-
-                    </td>
-
-                    <td>
-                        02/09/2026
-                    </td>
-
-                    <td>
-
-                        <button class="btn-brand btn-sm">
-                            Mở khóa
-                        </button>
-
-                    </td>
-
-                </tr>
-
-
-                {{-- USER 4 --}}
-
-                <tr>
-
-                    <td>
-
-                        <div class="d-flex align-items-center gap-2">
-
-                            <div class="avatar-sm">
-                                PV
-                            </div>
-
-                            <div>
-
-                                <div class="cell-title">
-                                    Phạm Văn Nam
-                                </div>
-
-                                <div class="cell-sub">
-                                    nam@gmail.com
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-                        0934567890
-                    </td>
-
-                    <td>
-                        Tenant
-                    </td>
-
-                    <td>
-
-                        <span class="badge-status active">
-                            Hoạt động
-                        </span>
-
-                    </td>
-
-                    <td>
-                        01/09/2026
-                    </td>
-
-                    <td>
-
-                        <button class="btn-outline-brand btn-sm">
-                            Khóa
-                        </button>
-
-                    </td>
-
-                </tr>
-
-
-                {{-- USER 5 --}}
-
-                <tr>
-
-                    <td>
-
-                        <div class="d-flex align-items-center gap-2">
-
-                            <div class="avatar-sm">
-                                HT
-                            </div>
-
-                            <div>
-
-                                <div class="cell-title">
-                                    Hoàng Tuấn
-                                </div>
-
-                                <div class="cell-sub">
-                                    tuan@gmail.com
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </td>
-
-                    <td>
-                        0978123456
-                    </td>
-
-                    <td>
-                        Owner
-                    </td>
-
-                    <td>
-
-                        <span class="badge-status active">
-                            Hoạt động
-                        </span>
-
-                    </td>
-
-                    <td>
-                        30/08/2026
-                    </td>
-
-                    <td>
-
-                        <button class="btn-outline-brand btn-sm">
-                            Khóa
-                        </button>
-
-                    </td>
-
-                </tr>
-
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-        {{-- ================= PAGINATION ================= --}}
-
-        <div class="d-flex justify-content-between align-items-center mt-4">
-
-            <div class="page-desc">
-                Hiển thị 1 - 5 trong 1.248 tài khoản
-            </div>
-
-
-            <div class="d-flex gap-1">
-
-                <button class="btn-outline-brand btn-sm">
-                    ‹
-                </button>
-
-                <button class="btn-brand btn-sm">
-                    1
-                </button>
-
-                <button class="btn-outline-brand btn-sm">
-                    2
-                </button>
-
-                <button class="btn-outline-brand btn-sm">
-                    3
-                </button>
-
-                <button class="btn-outline-brand btn-sm">
-                    ›
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
 </div>
 
+<div class="tv1-stats-row">
+    <div class="tv1-stat-card">
+        <span>Tổng tài khoản</span>
+        <strong>{{ \App\Models\User::count() }}</strong>
+    </div>
+    <div class="tv1-stat-card">
+        <span>Chủ trọ</span>
+        <strong>{{ \App\Models\User::where('role', 'owner')->count() }}</strong>
+    </div>
+    <div class="tv1-stat-card">
+        <span>Người thuê</span>
+        <strong>{{ \App\Models\User::where('role', 'tenant')->count() }}</strong>
+    </div>
+    <div class="tv1-stat-card">
+        <span>Tài khoản bị khóa</span>
+        <strong>{{ \App\Models\User::where('status', 'inactive')->count() }}</strong>
+    </div>
+</div>
 
-{{-- BOOTSTRAP JS --}}
+<div class="tv1-panel">
+    <form method="GET" action="{{ route('admin.users') }}" class="tv1-filter-form">
+        <input
+            type="search"
+            name="q"
+            value="{{ $query }}"
+            placeholder="Tìm tên, email, số điện thoại..."
+            aria-label="Tìm kiếm người dùng"
+        >
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <select name="role" aria-label="Lọc vai trò">
+            <option value="">Tất cả vai trò</option>
+            <option value="admin" @selected($role === 'admin')>Quản trị viên</option>
+            <option value="owner" @selected($role === 'owner')>Chủ trọ</option>
+            <option value="tenant" @selected($role === 'tenant')>Người thuê</option>
+        </select>
 
-</body>
+        <select name="status" aria-label="Lọc trạng thái">
+            <option value="">Tất cả trạng thái</option>
+            <option value="active" @selected($status === 'active')>Hoạt động</option>
+            <option value="inactive" @selected($status === 'inactive')>Bị khóa</option>
+        </select>
 
-</html>
+        <button type="submit" class="tv1-btn-primary">Tìm kiếm</button>
+        <a href="{{ route('admin.users') }}" class="tv1-btn-secondary">Đặt lại</a>
+    </form>
+
+    <div class="table-responsive">
+        <table class="tv1-table">
+            <thead>
+                <tr>
+                    <th>Mã tài khoản</th>
+                    <th>Người dùng</th>
+                    <th>Liên hệ</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($users as $user)
+                    <tr>
+                        <td>{{ $user->user_code ?: '—' }}</td>
+                        <td>
+                            <div class="tv1-user-name">{{ $user->name }}</div>
+                            <div class="tv1-subtext">{{ $user->email }}</div>
+                        </td>
+                        <td>{{ $user->phone ?: '—' }}</td>
+                        <td>
+                            @switch($user->role)
+                                @case('admin') Quản trị viên @break
+                                @case('owner') Chủ trọ @break
+                                @case('tenant') Người thuê @break
+                                @default {{ $user->role ?: 'Chưa phân quyền' }}
+                            @endswitch
+                        </td>
+                        <td>
+                            <span class="tv1-status {{ $user->status === 'active' ? 'is-active' : 'is-inactive' }}">
+                                {{ $user->status === 'active' ? 'Hoạt động' : ($user->status === 'inactive' ? 'Bị khóa' : ($user->status ?: 'Chưa xác định')) }}
+                            </span>
+                        </td>
+                        <td>{{ $user->created_at?->format('d/m/Y') ?? '—' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="tv1-empty">Không tìm thấy người dùng phù hợp.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tv1-pagination">{{ $users->links() }}</div>
+</div>
+@endsection
+
+@push('scripts')
+    <script src="{{ asset('js/tv1/users.js') }}" defer></script>
+@endpush
