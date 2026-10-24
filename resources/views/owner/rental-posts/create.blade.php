@@ -29,7 +29,11 @@
             </div>
         @endif
 
-        <form action="{{ route('owner.rental-posts.store') }}" method="POST">
+      <form
+            action="{{ route('owner.rental-posts.store') }}"
+            method="POST"
+            enctype="multipart/form-data"
+        >
             @csrf
 
             <div class="mb-3">
@@ -62,6 +66,32 @@
                           placeholder="Mô tả vị trí, tiện nghi và điều kiện thuê..."
                           required>{{ old('description') }}</textarea>
             </div>
+    
+      
+{{-- CHỌN ẢNH PHÒNG --}}
+<div class="mb-4">
+    <label for="images" class="form-label fw-semibold">
+        Hình ảnh phòng trọ
+    </label>
+
+    <input
+        type="file"
+        name="images[]"
+        id="images"
+        class="form-control"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        required
+    >
+
+    <small class="text-secondary d-block mt-2">
+        Chọn từ 1 đến 10 ảnh, tối đa 5 MB mỗi ảnh.
+    </small>
+
+    <div id="imagePreview" class="image-preview-grid mt-3"></div>
+</div>
+
+
 
             <div class="mb-3">
                 <label class="form-label">Trạng thái</label>
@@ -86,5 +116,8 @@
     </div>
 </div>
 
+@push('scripts')
+    <script src="{{ asset('js/tv3/rental_protal/create.js') }}"></script>
+@endpush
 
 @endsection

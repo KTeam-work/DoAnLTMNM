@@ -500,3 +500,75 @@
             .list-heading { padding: 18px 16px 0; }
             .results-count { padding: 0 16px 16px; }
         }
+
+/* Lưới hiển thị ảnh */
+.image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+}
+
+.rental-preview-image {
+    display: block;
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.existing-image {
+    min-width: 0;
+}
+
+.thumbnail-label {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #e6f0eb;
+    color: #20584f;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.remove-image {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #dc2626;
+}
+
+.post-image {
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.post-thumbnail {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 150px;
+    object-fit: cover;
+}
+
+.image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    background: #f1f5f9;
+    font-size: 36px;
+}
+
+@media (max-width: 576px) {
+    .image-preview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .rental-preview-image {
+        height: 120px;
+    }
+}

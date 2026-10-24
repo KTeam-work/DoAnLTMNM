@@ -1,196 +1,19 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-    <title>Trọ Ơi | Lịch xem phòng</title>
-
-    <!-- Bootstrap -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
-    <!-- Font -->
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com">
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-
-    <!-- CSS chính -->
-    <link
-        rel="stylesheet"
-        href="{{ asset('css/styles.css') }}">
-
-</head>
-
-<body>
-
-
-    <!-- =========================================================
-     NAVBAR
-========================================================= -->
-
-    <nav class="navbar navbar-expand-lg app-navbar">
-
-        <div class="container-fluid">
-
-            <!-- LOGO -->
-            <a
-                class="logo"
-                href="{{ route('tenant.home') }}">
-                Trọ <span>Ơi</span>
-            </a>
-
-
-            <!-- MOBILE BUTTON -->
-            <button
-                class="navbar-toggler bg-light"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mainMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-
-            <div
-                class="collapse navbar-collapse"
-                id="mainMenu">
-
-                <!-- MENU -->
-                <ul class="navbar-nav mx-auto align-items-lg-center">
-
-                    <li class="nav-item">
-
-                        <a
-                            class="app-nav-link text-decoration-none"
-                            href="{{ route('tenant.home') }}">
-                            Trang chủ
-                        </a>
-
-                    </li>
-
-
-                    <li class="nav-item">
-
-                        <a
-                            class="app-nav-link text-decoration-none"
-                            href="{{ route('rooms.index') }}">
-                            Tìm phòng
-                        </a>
-
-                    </li>
-
-
-                    <li class="nav-item">
-
-                        <a
-                            class="app-nav-link text-decoration-none"
-                            href="{{ route('favorites.index') }}">
-                            Yêu thích
-                        </a>
-
-                    </li>
-
-
-                    <li class="nav-item">
-
-                        <a
-                            class="app-nav-link active text-decoration-none"
-                            href="{{ route('appointments.index') }}">
-                            Lịch xem phòng
-                        </a>
-
-                    </li>
-
-
-                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.contracts.index') }}">Hợp Đồng</a></li>
-                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ url('/tenant/invoices/index') }}">Hóa đơn</a></li>
-
-                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
-                    <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
-
-                </ul>
-
-
-                <!-- USER -->
-                <div class="navbar-actions">
-
-                    <button
-                        class="notif-btn"
-                        type="button"
-                        title="Thông báo">
-                        🔔
-                        <span class="notif-dot"></span>
-                    </button>
-
-
-                    <div class="dropdown">
-                        <button class="user-chip dropdown-toggle"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <span class="user-avatar">
-                                {{ $authInitials ?? 'NT' }}
-                            </span>
-
-                            <span class="user-meta">
-
-                                <span class="user-name d-block">
-                                    {{ $authUser->name ?? 'Người dùng' }}
-                                </span>
-
-                                <span class="user-role">
-                                    Người thuê
-                                </span>
-
-                            </span>
-
-
-                            <span class="caret">
-                                ▾
-                            </span>
-                        </button>
-
-                        <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-                            <form method="POST" action="{{ route('logout') }}"
-                                class="m-0">
-                                @csrf
-
-                                <button type="submit"
-                                    class="dropdown-item">
-                                    ↪ Đăng xuất
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </nav>
 
 
 
-    <!-- =========================================================
-     MAIN
-========================================================= -->
+@extends('layout.tenant')
+
+@section('title', 'Tổng quan | Trọ Ơi')
+
+@push('styles')
+     
+@endpush
+
+@section('content')
+
+
+
+
 
     <div class="page-wrap">
 
@@ -795,12 +618,5 @@
     </div>
 
 
-    <!-- Bootstrap JS -->
-
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
-</html>
-```
+@endsection
+  

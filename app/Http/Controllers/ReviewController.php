@@ -34,9 +34,7 @@ class ReviewController extends Controller
         return response()->json(['data' => $reviews]);
     }
 
-    /**
-     * Chính sách: một review/phòng/tenant — gửi lại sẽ cập nhật đánh giá cũ.
-     */
+ 
     public function store(Request $request)
     {
         $tenant = $this->actingTenant($request);
@@ -77,12 +75,23 @@ class ReviewController extends Controller
             );
         }
 
+       $review->load('room');
+
         if (! $request->expectsJson()) {
             return redirect()->route('tenant.reviews.index')
                 ->with('success', 'Cảm ơn bạn! Đánh giá đã được hệ thống ghi nhận.');
         }
 
-        return response()->json(['message' => 'Review saved.', 'data' => $review], 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Cảm ơn bạn! Đánh giá đã được hệ thống ghi nhận.',
+            'review' => [
+                'rating' => $review->rating,
+                'room_name' => $review->room->name ?? '',
+                'comment' => $review->comment,
+                'created_at' => $review->created_at->format('d/m/Y'),
+            ]
+        ], 201);
     }
 
     private function actingTenant(Request $request): User

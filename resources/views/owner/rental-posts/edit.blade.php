@@ -34,7 +34,11 @@
             </div>
         @endif
 
-        <form action="{{ route('owner.rental-posts.update', $post) }}" method="POST">
+       <form
+                action="{{ route('owner.rental-posts.update', $post) }}"
+                method="POST"
+                enctype="multipart/form-data"
+            >
             @csrf
             @method('PUT')
 
@@ -64,6 +68,69 @@
                 <textarea name="description" class="form-control" rows="6" required>{{ old('description', $post->description) }}</textarea>
             </div>
 
+            
+{{-- ẢNH HIỆN TẠI --}}
+<div class="mb-4">
+    <label class="form-label fw-semibold">
+        Ảnh hiện tại
+    </label>
+
+    <div class="image-preview-grid">
+        @forelse ($post->images as $image)
+            <div class="existing-image">
+                <img
+                    src="{{ asset('storage/' . $image->image_path) }}"
+                    alt="Ảnh phòng trọ"
+                    class="rental-preview-image"
+                >
+
+                @if ($image->is_thumbnail)
+                    <span class="thumbnail-label">Ảnh đại diện</span>
+                @endif
+
+                <label class="remove-image">
+                    <input
+                        type="checkbox"
+                        name="remove_images[]"
+                        value="{{ $image->id }}"
+                    >
+                    Xóa ảnh này
+                </label>
+            </div>
+        @empty
+            <p class="text-secondary">
+                Tin đăng chưa có ảnh.
+            </p>
+        @endforelse
+    </div>
+</div>
+
+        {{-- THÊM ẢNH MỚI --}}
+        <div class="mb-4">
+            <label for="images" class="form-label fw-semibold">
+                Thêm ảnh mới
+            </label>
+
+            <input
+                type="file"
+                name="images[]"
+                id="images"
+                class="form-control"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+            >
+
+            <small class="text-secondary d-block mt-2">
+                Có thể chọn thêm tối đa 10 ảnh mới.
+                Để trống nếu không muốn thêm ảnh.
+            </small>
+
+            <div id="imagePreview" class="image-preview-grid mt-3"></div>
+        </div>
+
+       
+
+
             <div class="mb-3">
                 <label class="form-label">Trạng thái</label>
                 <select name="status" class="form-select" required>
@@ -85,6 +152,11 @@
         </form>
     </div>
 </div>
+
+
+@push('scripts')
+    <script src="{{ asset('js/tv3/rental_protal/edit.js') }}"></script>
+@endpush
 
 
 @endsection

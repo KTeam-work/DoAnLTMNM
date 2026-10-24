@@ -134,9 +134,22 @@
                          data-search="{{ $searchText }}">
 
                     <div class="post-image">
-                        <div class="image-placeholder">🏠</div>
-                    </div>
+                        @php
+                            $thumbnail = $post->images->firstWhere('is_thumbnail', true)
+                                ?? $post->images->first();
+                        @endphp
 
+                        @if ($thumbnail)
+                            <img
+                                src="{{ asset('storage/' . $thumbnail->image_path) }}"
+                                alt="{{ $post->title }}"
+                                class="post-thumbnail"
+                                loading="lazy"
+                            >
+                        @else
+                            <div class="image-placeholder">🏠</div>
+                        @endif
+                    </div>
                     <div class="post-info">
                         <h3>{{ $post->title }}</h3>
 
