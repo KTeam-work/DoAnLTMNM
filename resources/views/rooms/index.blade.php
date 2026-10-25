@@ -1,315 +1,222 @@
 
 @extends('layout.tenant')
 
-@section('title', 'Tổng quan | Trọ Ơi')
+@section('title', 'Tìm phòng trọ | Trọ Ơi')
 
 @push('styles')
-     
+    <link rel="stylesheet" href="{{ asset('css/tv2/rooms/index.css') }}">
 @endpush
 
 @section('content')
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-kicker">🔎 TÌM KIẾM PHÒNG TRỌ</div>
 
+        <h1>
+            Tìm phòng phù hợp,<br>
+            <span class="highlight">ở đúng nơi bạn muốn.</span>
+        </h1>
 
+        <p class="hero-desc">
+            Khám phá phòng trọ phù hợp với ngân sách và nhu cầu của bạn.
+        </p>
 
-    <section class="hero">
+        <form id="room-search-form"
+              action="{{ route('rooms.index') }}"
+              method="GET">
 
-        <div class="hero-inner">
-
-            <div class="hero-kicker">
-                🔎 TÌM KIẾM PHÒNG TRỌ
-            </div>
-
-            <h1>
-                Tìm phòng phù hợp,
-                <br>
-                <span class="highlight">
-                    ở đúng nơi bạn muốn.
-                </span>
-            </h1>
-
-            <p class="hero-desc">
-                Khám phá phòng trọ, căn hộ và nhà cho thuê phù hợp
-                với nhu cầu của bạn.
-            </p>
-
-
-            <!-- SEARCH -->
             <div class="search-panel">
-
                 <div class="row g-0 align-items-center">
 
                     <div class="col-lg-3">
                         <div class="search-field">
+                            <label for="keyword" class="field-label">
+                                Từ khóa
+                            </label>
+                            <input
+                                id="keyword"
+                                name="keyword"
+                                type="search"
+                                class="room-filter-input"
+                                value="{{ request('keyword') }}"
+                                placeholder="Tên phòng, địa chỉ..."
+                            >
+                        </div>
+                    </div>
 
-                            <span class="field-label">
+                    <div class="col-lg-2">
+                        <div class="search-field">
+                            <label for="district" class="field-label">
                                 Khu vực
-                            </span>
-
-                            <div class="field-value">
-                                📍 TP. Hồ Chí Minh
-                            </div>
-
+                            </label>
+                            <select id="district"
+                                    name="district"
+                                    class="room-filter-input">
+                                <option value="">Tất cả khu vực</option>
+                                @foreach ($districts as $district)
+                                    <option value="{{ $district }}"
+                                        @selected(request('district') == $district)>
+                                        {{ $district }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
-
 
                     <div class="col-lg-2">
-
                         <div class="search-field">
-
-                            <span class="field-label">
-                                Khoảng giá
-                            </span>
-
-                            <div class="field-value field-muted">
-                                Tất cả mức giá
-                            </div>
-
+                            <label for="min_price" class="field-label">
+                                Giá từ (đ/tháng)
+                            </label>
+                            <input
+                                id="min_price"
+                                name="min_price"
+                                type="number"
+                                min="0"
+                                class="room-filter-input"
+                                value="{{ request('min_price') }}"
+                                placeholder="Ví dụ: 2000000"
+                            >
                         </div>
-
                     </div>
-
 
                     <div class="col-lg-2">
-
                         <div class="search-field">
-
-                            <span class="field-label">
-                                Diện tích
-                            </span>
-
-                            <div class="field-value field-muted">
-                                Tất cả
-                            </div>
-
+                            <label for="max_price" class="field-label">
+                                Giá đến (đ/tháng)
+                            </label>
+                            <input
+                                id="max_price"
+                                name="max_price"
+                                type="number"
+                                min="0"
+                                class="room-filter-input"
+                                value="{{ request('max_price') }}"
+                                placeholder="Ví dụ: 5000000"
+                            >
                         </div>
-
                     </div>
-
-
-                    <div class="col-lg-2">
-
-                        <div class="search-field">
-
-                            <span class="field-label">
-                                Tiện ích
-                            </span>
-
-                            <div class="field-value field-muted">
-                                Tất cả
-                            </div>
-
-                        </div>
-
-                    </div>
-
 
                     <div class="col-lg-3 p-2">
-
-                        <button class="search-btn">
+                        <button type="submit" class="search-btn">
                             🔎 Tìm kiếm phòng
                         </button>
-
                     </div>
 
+                    <div class="col-md-6">
+                        <div class="search-field">
+                            <label for="min_area" class="field-label">
+                                Diện tích tối thiểu (m²)
+                            </label>
+                            <input
+                                id="min_area"
+                                name="min_area"
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                class="room-filter-input"
+                                value="{{ request('min_area') }}"
+                                placeholder="Ví dụ: 20"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="search-field">
+                            <label for="max_area" class="field-label">
+                                Diện tích tối đa (m²)
+                            </label>
+                            <input
+                                id="max_area"
+                                name="max_area"
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                class="room-filter-input"
+                                value="{{ request('max_area') }}"
+                                placeholder="Ví dụ: 40"
+                            >
+                        </div>
+                    </div>
                 </div>
 
-            </div>
+                <div class="room-amenities-filter">
+                    <div class="field-label">TIỆN ÍCH</div>
 
-
-            <!-- QUICK FILTER -->
-            <div class="quick-filters">
-
-                <span class="quick-filter">
-                    ≤ 2 triệu
-                </span>
-
-                <span class="quick-filter">
-                    2 - 3 triệu
-                </span>
-
-                <span class="quick-filter">
-                    3 - 5 triệu
-                </span>
-
-                <span class="quick-filter">
-                    Có máy lạnh
-                </span>
-
-                <span class="quick-filter">
-                    Có gác
-                </span>
-
-                <span class="quick-filter">
-                    Có ban công
-                </span>
-
-                <span class="quick-filter">
-                    Nuôi thú cưng
-                </span>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =========================================================
-     ROOM LIST
-========================================================= -->
-    <div class="page-wrap">
-
-        <div class="page-header">
-
-            <div>
-
-                <h2 class="page-title">
-                    Danh sách phòng
-                </h2>
-
-                <div class="page-desc">
-                    Tìm thấy {{ $rooms->total() }} phòng phù hợp với nhu cầu của bạn.
-                </div>
-
-            </div>
-
-            <a
-                href="{{ url('/tenant') }}"
-                class="section-link">
-                ← Về trang chủ
-            </a>
-
-        </div>
-
-
-        <!-- =====================================================
-         ROOM CARDS
-    ====================================================== -->
-
-        <div class="row g-4">
-
-            @forelse ($rooms as $room)
-
-            @php
-            $favoriteId = $favoriteIdsByRoom[$room->id] ?? null;
-            $isFavorite = $favoriteId !== null;
-            @endphp
-
-            <div class="col-md-6 col-lg-4">
-                <div class="room-card">
-
-                    {{-- Nút thêm hoặc bỏ yêu thích --}}
-                    <form
-                        action="{{ $isFavorite
-                        ? route('favorites.destroy', $favoriteId)
-                        : route('favorites.store') }}"
-                        method="POST"
-                        class="favorite-form">
-                        @csrf
-
-                        @if ($isFavorite)
-                        @method('DELETE')
-                        @else
-                        <input
-                            type="hidden"
-                            name="room_id"
-                            value="{{ $room->id }}">
-                        @endif
-
-                        <button
-                            type="submit"
-                            class="fav-btn"
-                            title="{{ $isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích' }}"
-                            aria-label="{{ $isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích' }}"
-                            @if ($isFavorite)
-                            style="color: #e53935;"
-                            @endif>
-                            {{ $isFavorite ? '♥' : '♡' }}
-                        </button>
-                    </form>
-
-                    {{-- Ảnh minh họa --}}
-                    <img
-                        class="room-img"
-                        src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
-                        alt="{{ $room->name ?? 'Phòng trọ' }}"
-                        loading="lazy">
-
-                    <div class="room-body">
-
-                        <div class="room-badges">
-                            <span class="badge-room">
-                                Mã phòng: {{ $room->room_code ?? $room->id }}
-                            </span>
-                        </div>
-
-                        <div class="room-title">
-                            {{ $room->name ?? 'Phòng trọ' }}
-                        </div>
-
-                        <div class="room-address">
-                            {{ $room->property?->address ?? 'Chưa cập nhật địa chỉ' }}
-
-                            @if ($room->property?->ward)
-                            , {{ $room->property->ward }}
-                            @endif
-
-                            @if ($room->property?->district)
-                            , {{ $room->property->district }}
-                            @endif
-                        </div>
-
-                        <div class="room-stats">
-                            <span>
-                                📐 {{ number_format((float) $room->area, 0, ',', '.') }} m²
-                            </span>
-
-                            @forelse ($room->amenities->take(2) as $amenity)
-                            <span>{{ $amenity->name }}</span>
-                            @empty
-                            <span>Chưa cập nhật tiện ích</span>
-                            @endforelse
-                        </div>
-
-                        <div class="room-bottom">
-                            <div class="room-price">
-                                {{ number_format((float) $room->price, 0, ',', '.') }} đ
-                                <small>/ tháng</small>
-                            </div>
-
-                            <a
-                                href="{{ route('rooms.show', $room->id) }}"
-                                class="detail-btn">
-                                Xem phòng
-                            </a>
-                        </div>
-
+                    <div class="room-amenities-options">
+                        @foreach ($amenities as $amenity)
+                            <label class="room-amenity-option">
+                                <input
+                                    type="checkbox"
+                                    name="amenities[]"
+                                    value="{{ $amenity->id }}"
+                                    @checked(in_array(
+                                        (string) $amenity->id,
+                                        array_map('strval', (array) request('amenities', []))
+                                    ))
+                                >
+                                <span>{{ $amenity->name }}</span>
+                            </label>
+                        @endforeach
                     </div>
                 </div>
             </div>
+        </form>
 
-            @empty
+        <div class="quick-filters">
+            <button type="button" class="quick-filter"
+                    data-min-price="0" data-max-price="2000000">
+                Dưới 2 triệu
+            </button>
 
-            <div class="col-12">
-                <div class="alert alert-light text-center py-5">
-                    <h5>Chưa tìm thấy phòng phù hợp</h5>
-                    <p class="mb-0">
-                        Hiện chưa có phòng nào đáp ứng điều kiện tìm kiếm.
-                    </p>
-                </div>
+            <button type="button" class="quick-filter"
+                    data-min-price="2000000" data-max-price="3000000">
+                2–3 triệu
+            </button>
+
+            <button type="button" class="quick-filter"
+                    data-min-price="3000000" data-max-price="5000000">
+                3–5 triệu
+            </button>
+
+            <button type="button" class="quick-filter" id="clear-room-filters">
+                Xóa bộ lọc
+            </button>
+        </div>
+    </div>
+</section>
+
+<div class="page-wrap">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Danh sách phòng</h2>
+            <div class="page-desc" id="room-result-count"
+                 aria-live="polite">
+                Tìm thấy {{ $rooms->total() }} phòng phù hợp.
             </div>
-
-            @endforelse
-
         </div>
 
-        <div class="d-flex justify-content-center mt-4">
-            {{ $rooms->links() }}
-        </div>
-
-
+        <a href="{{ url('/tenant') }}" class="section-link">
+            ← Về trang chủ
+        </a>
     </div>
 
+    <div id="room-results"
+         aria-live="polite"
+         aria-busy="false">
+        @include('rooms.partials.results', [
+            'rooms' => $rooms,
+            'favoriteIdsByRoom' => $favoriteIdsByRoom
+        ])
+    </div>
+
+    <div id="room-search-error" class="alert alert-danger d-none"
+         role="alert">
+        Không thể tải danh sách phòng. Em thử lại nhé.
+    </div>
+</div>
 @endsection
-  
+
+@push('scripts')
+    <script src="{{ asset('js/tv2/rooms/index.js') }}" defer></script>
+@endpush
