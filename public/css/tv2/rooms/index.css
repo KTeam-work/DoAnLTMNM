@@ -1,0 +1,140 @@
+
+/* ========================================
+   TRỌ ƠI - TRANG TÌM KIẾM PHÒNG
+   Kế thừa bảng màu CSS chung của nhóm
+======================================== */
+
+.room-filter-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 7px 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+}
+
+.room-filter-input:focus {
+    box-shadow: 0 2px 0 var(--yellow);
+}
+
+.room-filter-input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+.room-amenities-filter {
+    padding: 14px;
+    border-top: 1px solid #eee6d4;
+}
+
+.room-amenities-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 10px;
+}
+
+.room-amenity-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fffdf8;
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+}
+
+.room-amenity-option:has(input:checked) {
+    border-color: var(--green);
+    background: var(--green-soft);
+    color: var(--green-dark);
+}
+
+.room-amenity-option input {
+    accent-color: var(--green);
+}
+
+button.quick-filter {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+button.quick-filter:hover,
+button.quick-filter:focus-visible {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--green-dark);
+}
+
+.fav-btn.is-favorite {
+    color: var(--red);
+}
+
+.room-empty-state {
+    padding: 54px 20px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--white);
+    text-align: center;
+}
+
+.room-empty-icon {
+    margin-bottom: 10px;
+    color: var(--green);
+    font-size: 42px;
+}
+
+.room-empty-state h3 {
+    color: var(--green-dark);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.room-empty-state p {
+    margin-bottom: 20px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+#room-results[aria-busy="true"] {
+    opacity: .55;
+    pointer-events: none;
+}
+
+.room-pagination nav {
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 991.98px) {
+    .room-filter-input {
+        padding: 6px 0;
+    }
+
+    .search-field {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .room-amenities-filter {
+        padding: 12px 8px;
+    }
+
+    .room-amenity-option {
+        font-size: 11px;
+    }
+
+    .room-empty-state {
+        padding: 38px 16px;
+    }
+}
