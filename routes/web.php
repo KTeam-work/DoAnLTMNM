@@ -144,6 +144,43 @@ Route::middleware('auth')->group(function () {
         return view('admin.rental-posts');
     })->name('admin.rental-posts');
 
+    
+Route::patch('/admin/rental-posts/{post}/status', function (
+    \Illuminate\Http\Request $request,
+    \App\Models\RentalPost $post
+) {
+    abort_unless($request->user()->role === 'admin', 403);
+
+    $validated = $request->validate([
+        'status' => ['required', \Illuminate\Validation\Rule::in([
+            'draft', 'pending', 'published', 'rejected', 'hidden',
+        ])],
+        'rejection_reason' => ['nullable', 'string', 'max:500'],
+    ]);
+
+    if ($validated['status'] === 'rejected' &&
+        trim($validated['rejection_reason'] ?? '') === '') {
+        return back()
+            ->withErrors(['rejection_reason' => 'Vui lòng nhập lý do từ chối.'])
+            ->withInput();
+    }
+
+    $post->status = $validated['status'];
+
+    if ($post->status === 'published') {
+        $post->published_at ??= now();
+        $post->rejection_reason = null;
+    } elseif ($post->status === 'rejected') {
+        $post->rejection_reason = trim($validated['rejection_reason']);
+    } else {
+        $post->rejection_reason = null;
+    }
+
+    $post->save();
+
+    return back()->with('success', 'Đã cập nhật trạng thái tin đăng.');
+})->name('admin.rental-posts.update-status');
+
 
     Route::get('/admin/statistics', function () {
 

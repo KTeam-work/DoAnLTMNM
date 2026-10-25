@@ -1,0 +1,395 @@
+
+/* =========================================
+   TRO OI - ADMIN USER MANAGEMENT
+   File: public/css/tv1/users.css
+   ========================================= */
+
+.page-wrap {
+    padding: 30px 32px 40px;
+    min-height: calc(100vh - 170px);
+    background: #f8f5eb;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 26px;
+}
+
+.page-title {
+    margin: 0 0 7px;
+    color: #20584f;
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-size: 27px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.page-desc {
+    color: #78847d;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Thẻ thống kê */
+
+.tv1-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.tv1-stat-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    min-width: 0;
+    padding: 23px 22px;
+    overflow: hidden;
+    border: 1px solid #e8e6dc;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(32, 88, 79, 0.05);
+}
+
+.tv1-stat-card::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #20584f;
+    content: "";
+}
+
+.tv1-stat-card:nth-child(2)::before {
+    background: #4b9a7d;
+}
+
+.tv1-stat-card:nth-child(3)::before {
+    background: #6d91d7;
+}
+
+.tv1-stat-card:nth-child(4)::before {
+    background: #d97470;
+}
+
+.tv1-stat-card > span {
+    color: #77847c;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.tv1-stat-card > strong {
+    color: #20584f;
+    font-size: 31px;
+    font-weight: 800;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+/* Khung nội dung */
+
+.tv1-panel {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid #e8e6dc;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(32, 88, 79, 0.05);
+}
+
+/* Bộ lọc và tìm kiếm */
+
+.tv1-filter-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+    margin-bottom: 23px;
+}
+
+.tv1-filter-form input,
+.tv1-filter-form select {
+    width: auto;
+    max-width: 100%;
+    min-height: 43px;
+    padding: 10px 13px;
+    border: 1px solid #dfe5df;
+    border-radius: 9px;
+    outline: none;
+    background: #fff;
+    color: #344a41;
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-size: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tv1-filter-form input {
+    flex: 1 1 240px;
+    min-width: 180px;
+}
+
+.tv1-filter-form select {
+    flex: 0 1 175px;
+    min-width: 145px;
+    cursor: pointer;
+}
+
+.tv1-filter-form input:focus,
+.tv1-filter-form select:focus {
+    border-color: #4b9a7d;
+    box-shadow: 0 0 0 3px rgba(75, 154, 125, 0.13);
+}
+
+.tv1-btn-primary,
+.tv1-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 43px;
+    padding: 10px 17px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.tv1-btn-primary {
+    background: #20584f;
+    color: #fff;
+}
+
+.tv1-btn-primary:hover {
+    background: #17463e;
+    color: #fff;
+}
+
+.tv1-btn-secondary {
+    border-color: #dfe5df;
+    background: #fff;
+    color: #52655b;
+}
+
+.tv1-btn-secondary:hover {
+    border-color: #20584f;
+    background: #edf4ef;
+    color: #20584f;
+}
+
+/* Bảng người dùng */
+
+.tv1-panel .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e8ebe5;
+    border-radius: 11px;
+}
+
+.tv1-table {
+    width: 100%;
+    min-width: 850px;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+.tv1-table thead th {
+    padding: 16px 15px;
+    border: 0;
+    border-bottom: 1px solid #e4e9e2;
+    background: #edf4ef;
+    color: #20584f;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tv1-table tbody td {
+    padding: 16px 15px;
+    border: 0;
+    border-bottom: 1px solid #eef0eb;
+    background: #fff;
+    color: #506057;
+    font-size: 12px;
+    line-height: 1.7;
+    vertical-align: middle;
+}
+
+.tv1-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tv1-table tbody tr:hover td {
+    background: #fafbf7;
+}
+
+.tv1-user-name {
+    color: #263f35;
+    font-size: 13px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.tv1-subtext {
+    margin-top: 3px;
+    color: #89958d;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+}
+
+.tv1-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.tv1-status.is-active {
+    background: #e3f3e9;
+    color: #28764c;
+}
+
+.tv1-status.is-inactive {
+    background: #fbe8e5;
+    color: #b7473e;
+}
+
+.tv1-empty {
+    padding: 35px 15px !important;
+    color: #87938b !important;
+    text-align: center;
+}
+
+/* Phân trang Laravel */
+
+.tv1-pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+    overflow-x: auto;
+}
+
+.tv1-pagination nav {
+    max-width: 100%;
+}
+
+.tv1-pagination nav > div:first-child {
+    margin-bottom: 10px;
+}
+
+.tv1-pagination nav > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.tv1-pagination nav p {
+    margin: 0;
+    color: #77847c;
+    font-size: 12px;
+}
+
+.tv1-pagination nav a,
+.tv1-pagination nav span[aria-current="page"] span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 7px 11px;
+    border: 1px solid #dfe5df;
+    border-radius: 8px;
+    background: #fff;
+    color: #20584f;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.tv1-pagination nav span[aria-current="page"] span {
+    border-color: #20584f;
+    background: #20584f;
+    color: #fff;
+}
+
+.tv1-pagination nav span[aria-disabled="true"] span {
+    color: #a5ada7;
+}
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+    .tv1-stats-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tv1-panel {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .page-wrap {
+        padding: 22px 14px 30px;
+    }
+
+    .page-title {
+        font-size: 22px;
+    }
+
+    .tv1-stats-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .tv1-stat-card {
+        padding: 18px;
+    }
+
+    .tv1-stat-card > strong {
+        font-size: 27px;
+    }
+
+    .tv1-panel {
+        padding: 13px;
+        border-radius: 12px;
+    }
+
+    .tv1-filter-form {
+        align-items: stretch;
+    }
+
+    .tv1-filter-form input,
+    .tv1-filter-form select {
+        flex: 1 1 100%;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .tv1-btn-primary,
+    .tv1-btn-secondary {
+        flex: 1;
+    }
+
+    .tv1-pagination {
+        justify-content: center;
+    }
+}
