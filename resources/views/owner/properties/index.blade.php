@@ -372,6 +372,28 @@
                                 placeholder="VD: 106.721">
                         </div>
                     </div>
+                    
+                    {{-- BẢN ĐỒ CHỌN VỊ TRÍ --}}
+                    <div class="mt-4">
+                        <label class="form-label fw-semibold">
+                            📍 Chọn vị trí nhà trọ trên bản đồ
+                        </label>
+
+                        <p class="text-muted small">
+                            Bấm vào vị trí trên bản đồ để tự động lấy tọa độ.
+                        </p>
+
+                        <div
+                            id="propertyMap"
+                            style="width: 100%; height: 350px; border-radius: 12px;
+                                overflow: hidden; background: #f1f5f9;">
+                        </div>
+
+                        <div id="mapStatus" class="form-text mt-2">
+                            Hãy chọn vị trí nhà trọ trên bản đồ.
+                        </div>
+                    </div>
+
 
                     {{-- TRẠNG THÁI --}}
                     <div class="mb-3 mt-3">
@@ -455,6 +477,10 @@
 {{-- XEM TRƯỚC ẢNH --}}
 @push('scripts')
     <script src="{{ asset('js/tv3/properties/index.js') }}"></script>
+        <script
+        async
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google_maps.key') }}&callback=initPropertyMap&loading=async">
+    </script>
 
 @endpush
 
