@@ -47,4 +47,8 @@ return [
         'qr_template' => env('SEPAY_QR_TEMPLATE', 'compact2'),
     ],
 
+    'google_maps' => [
+    'key' => env('GOOGLE_MAPS_API_KEY'),
+    ],
+
 ];

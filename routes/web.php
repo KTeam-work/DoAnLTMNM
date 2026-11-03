@@ -40,6 +40,8 @@ use App\Http\Controllers\Owner\OwnerRentalPostController;
 |--------------------------------------------------------------------------
 */
 
+Route::view('/map-test', 'tenant.map-test');
+
 Route::get('/', function () {
 
     if (!Auth::check()) {
