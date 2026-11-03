@@ -1,5 +1,13 @@
   @php
-      $userName = $user->name ?? 'Người dùng';
+      $currentUser = auth()->user() ?? $user ?? $tenant ?? null;
+      $userName = $currentUser?->name ?? 'Người dùng';
+      $userEmail = $currentUser?->email ?? '';
+      $userRole = match ($currentUser?->role ?? '') {
+          'owner' => 'Chủ trọ',
+          'admin' => 'Quản trị viên',
+          default => 'Người thuê',
+      };
+
       $nameParts = preg_split('/\s+/', trim($userName));
       $lastName = $nameParts[count($nameParts) - 1] ?? $userName;
 
@@ -48,105 +56,120 @@
                           Yêu thích
                       </a>
                   </li>
-                 <li class="nav-item">
-                `   <a class="app-nav-link text-decoration-none
-                        {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
-                    href="{{ route('appointments.index') }}">
-                        Lịch xem phòng
-                    </a>
-                </li>`
+                  <li class="nav-item">
+                      <a class="app-nav-link text-decoration-none
+                          {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
+                          href="{{ route('appointments.index') }}">
+                          Lịch xem phòng
+                      </a>
+                  </li>
                   <!-- HỢP ĐỒNG -->
-                <li class="nav-item">
-                    <a class="app-nav-link text-decoration-none
-                        {{ request()->routeIs('tenant.contracts.*') ? 'active' : '' }}"
-                    href="{{ route('tenant.contracts.index') }}">
-                        Hợp đồng
-                    </a>
-                </li>
+                  <li class="nav-item">
+                      <a class="app-nav-link text-decoration-none
+                          {{ request()->routeIs('tenant.contracts.*') ? 'active' : '' }}"
+                          href="{{ route('tenant.contracts.index') }}">
+                          Hợp đồng
+                      </a>
+                  </li>
                   <!-- HÓA ĐƠN -->
-                <li class="nav-item">
-                    <a class="app-nav-link text-decoration-none
-                        {{ request()->routeIs('tenant.invoices.*') ? 'active' : '' }}"
-                    href="{{ route('tenant.invoices.index') }}">
-                        Hóa đơn
-                    </a>
-                </li>
+                  <li class="nav-item">
+                      <a class="app-nav-link text-decoration-none
+                          {{ request()->routeIs('tenant.invoices.*') ? 'active' : '' }}"
+                          href="{{ route('tenant.invoices.index') }}">
+                          Hóa đơn
+                      </a>
+                  </li>
                   <!-- SỬA CHỮA -->
                   <li class="nav-item">
-                        <a class="app-nav-link text-decoration-none
-                            {{ request()->routeIs('tenant.maintenance.*') ? 'active' : '' }}"
-                        href="{{ route('tenant.maintenance.index') }}">
-                            Sửa chữa
-                        </a>
-                    </li>
+                      <a class="app-nav-link text-decoration-none
+                          {{ request()->routeIs('tenant.maintenance.*') ? 'active' : '' }}"
+                          href="{{ route('tenant.maintenance.index') }}">
+                          Sửa chữa
+                      </a>
+                  </li>
                   <!-- ĐÁNH GIÁ -->
-                <li class="nav-item">
-                    <a class="app-nav-link text-decoration-none
-                        {{ request()->routeIs('tenant.reviews.*') ? 'active' : '' }}"
-                    href="{{ route('tenant.reviews.index') }}">
-                        Đánh giá
-                    </a>
-                </li>
+                  <li class="nav-item">
+                      <a class="app-nav-link text-decoration-none
+                          {{ request()->routeIs('tenant.reviews.*') ? 'active' : '' }}"
+                          href="{{ route('tenant.reviews.index') }}">
+                          Đánh giá
+                      </a>
+                  </li>
+
+                  <!-- TRỢ LÝ AI -->
+                  <li class="nav-item">
+                      <a class="app-nav-link text-decoration-none
+                          {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
+                          href="{{ route('chatbot.index') }}">
+                          🤖 Trợ lý AI
+                      </a>
+                  </li>
               </ul>
 
             
             <div class="navbar-actions">
-                {{-- THÔNG BÁO --}}
-                <button class="notif-btn" type="button" title="Thông báo">
-                    🔔
-                    <span class="notif-dot"></span>
-                </button>
+                @if($currentUser)
+                    {{-- THÔNG BÁO --}}
+                    <a class="notif-btn text-decoration-none" href="{{ route('tenant.notifications.index') }}" title="Thông báo">
+                        🔔
+                        <span class="notif-dot"></span>
+                    </a>
 
-                {{-- TÀI KHOẢN NGƯỜI DÙNG --}}
-                <div class="dropdown user-dropdown">
-                    <button
-                        class="user-chip dropdown-toggle"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        data-bs-auto-close="true"
-                        aria-expanded="false"
-                    >
-                        <span class="user-avatar">
-                            {{ $userInitials }}
-                        </span>
-
-                        <span class="user-meta">
-                            <span class="user-name">
-                                {{ $userName }}
+                    {{-- TÀI KHOẢN NGƯỜI DÙNG --}}
+                    <div class="dropdown user-dropdown">
+                        <button
+                            class="user-chip dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="true"
+                            aria-expanded="false"
+                        >
+                            <span class="user-avatar">
+                                {{ $userInitials }}
                             </span>
-                            <span class="user-role">
-                                Người thuê
-                            </span>
-                        </span>
-                    </button>
 
-                    {{-- MENU CHỈ HIỆN KHI BẤM --}}
-                    <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
-                        <div class="dropdown-user-info">
-                            <div class="dropdown-user-name">
-                                {{ $userName }}
+                            <span class="user-meta">
+                                <span class="user-name">
+                                    {{ $userName }}
+                                </span>
+                                <span class="user-role">
+                                    {{ $userRole }}
+                                </span>
+                            </span>
+                        </button>
+
+                        {{-- MENU CHỈ HIỆN KHI BẤM --}}
+                        <div class="dropdown-menu dropdown-menu-end user-dropdown-menu">
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-user-name">
+                                    {{ $userName }}
+                                </div>
+
+                                <div class="dropdown-user-email">
+                                    {{ $userEmail }}
+                                </div>
                             </div>
 
-                            <div class="dropdown-user-email">
-                                {{ $user->email ?? '' }}
-                            </div>
+                            <div class="dropdown-divider-custom"></div>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+
+                                <button
+                                    type="submit"
+                                    class="dropdown-item-custom dropdown-logout"
+                                >
+                                    <span class="logout-icon">↪</span>
+                                    Đăng xuất
+                                </button>
+                            </form>
                         </div>
-
-                        <div class="dropdown-divider-custom"></div>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <button
-                                type="submit"
-                                class="dropdown-item-custom dropdown-logout"
-                            >
-                                <span class="logout-icon">↪</span>
-                                Đăng xuất
-                            </button>
-                        </form>
                     </div>
-                </div>
+                @else
+                    <a href="{{ route('login') }}" class="btn-brand text-decoration-none" style="padding: 8px 18px; font-size: 13px; border-radius: 10px;">
+                        Đăng nhập
+                    </a>
+                @endif
             </div>
           </div>
       </div>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -19,3 +20,6 @@ Route::get('/test', function () {
         'message' => 'API hoạt động bình thường!'
     ]);
 });
+
+
+Route::post('/sepay/webhook', [PaymentController::class, 'webhook']);

@@ -72,8 +72,8 @@
                             @endif
                         </div>
                         <div class="form-group">
-                            <label>Kỳ ghi chỉ số <span>*</span></label>
-                            <input type="month" name="month" class="custom-input" value="{{ old('month', $prefillMonth) }}" required>
+                            <label>Tháng ghi chỉ số <span>*</span></label>
+                            <input type="month" name="month" class="custom-input" value="{{ old('month', $prefillMonth) }}" lang="vi" title="Chọn tháng và năm ghi chỉ số" required>
                         </div>
                     </div>
                     <div class="form-group mb-0">

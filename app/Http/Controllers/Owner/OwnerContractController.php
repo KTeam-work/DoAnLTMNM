@@ -7,10 +7,12 @@ use App\Models\Contract;
 use App\Models\ContractMember;
 use App\Models\ContractTermination;
 use App\Models\Room;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class OwnerContractController extends Controller{
@@ -65,6 +67,13 @@ class OwnerContractController extends Controller{
             ->orderBy('name')
             ->get();
         $tenants = User::query()->where('role', 'tenant')->where('status', 'active')->orderBy('name')->get(['id', 'name', 'email', 'phone']);
+        $services = Service::query()
+            ->where('owner_id', $owner->id)
+            ->where('status', 'active')
+            // Điện và nước đã được tính theo chỉ số, không phải dịch vụ cố định của hợp đồng.
+            ->whereNotIn('unit', ['kWh', 'm³'])
+            ->orderBy('name')
+            ->get(['id', 'name', 'unit', 'price']);
 
         // Yêu cầu thuê (lịch xem phòng) mà người thuê gửi tới các phòng của chủ trọ.
         // Dùng để chọn nhanh người thuê + phòng khi tạo hợp đồng.
@@ -84,7 +93,7 @@ class OwnerContractController extends Controller{
             ->limit(20)
             ->get();
 
-        return view('owner.contracts.create-form', compact('rooms', 'tenants', 'requests'));
+        return view('owner.contracts.create-form', compact('rooms', 'tenants', 'services', 'requests'));
     }
 
     public function show(Request $request, Contract $contract)
@@ -118,6 +127,10 @@ class OwnerContractController extends Controller{
             'payment_cycle' => ['nullable', 'in:monthly,quarterly'],
             'terms' => ['nullable', 'string'],
             'status' => ['nullable', 'in:draft,active'],
+            'service_ids' => ['nullable', 'array'],
+            'service_ids.*' => ['integer', 'distinct'],
+            'service_quantities' => ['nullable', 'array'],
+            'service_quantities.*' => ['nullable', 'numeric', 'min:0.01'],
         ]);
 
         $room = Room::query()->with('property')->findOrFail($data['room_id']);
@@ -127,16 +140,39 @@ class OwnerContractController extends Controller{
         abort_unless($tenant->role === 'tenant' && $tenant->status === 'active', 422, 'The selected user is not an active tenant.');
         abort_if(Contract::query()->where('room_id', $room->id)->where('status', 'active')->exists(), 422, 'The room already has an active contract.');
 
+        $selectedServiceIds = collect($data['service_ids'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
+        $services = Service::query()
+            ->where('owner_id', $owner->id)
+            ->where('status', 'active')
+            ->whereNotIn('unit', ['kWh', 'm³'])
+            ->whereIn('id', $selectedServiceIds)
+            ->get(['id', 'price']);
+        abort_unless($services->count() === $selectedServiceIds->count(), 422, 'Một hoặc nhiều dịch vụ không hợp lệ.');
+
         $status = $data['status'] ?? 'draft';
-        $contract = DB::transaction(function () use ($data, $owner, $room, $status) {
+        $contractData = Arr::except($data, ['service_ids', 'service_quantities']);
+        $contract = DB::transaction(function () use ($contractData, $data, $owner, $room, $services, $status) {
             $contract = Contract::query()->create([
-                ...$data,
+                ...$contractData,
                 'contract_code' => $this->contractCode(),
                 'owner_id' => $owner->id,
                 'payment_cycle' => $data['payment_cycle'] ?? 'monthly',
                 'status' => $status,
                 'signed_at' => $status === 'active' ? now() : null,
             ]);
+
+            $quantities = $data['service_quantities'] ?? [];
+            foreach ($services as $service) {
+                DB::table('contract_services')->insert([
+                    'contract_id' => $contract->id,
+                    'service_id' => $service->id,
+                    'quantity' => $quantities[$service->id] ?? 1,
+                    'unit_price' => $service->price,
+                    'status' => 'active',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
             if ($status === 'active') {
                 $room->update(['status' => 'rented']);

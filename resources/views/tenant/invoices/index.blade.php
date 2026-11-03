@@ -137,9 +137,19 @@
             <td class="text-end" style="padding-right: 20px;">
               <div class="d-flex justify-content-end align-items-center gap-2 skeleton-box rounded">
                 @if(in_array($invoice->status, ['unpaid', 'pending', 'overdue']))
-                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}#pay" class="btn-brand hide-on-skeleton text-decoration-none" style="padding: 6px 16px; font-size: 12px;{{ $isOverdue ? ' background: var(--red); color: white;' : '' }}">Thanh toán</a>
+                  <button type="button" class="btn-brand hide-on-skeleton btn-pay-qr border-0"
+                          data-invoice-id="{{ $invoice->id }}"
+                          data-invoice-code="{{ $invoice->invoice_code }}"
+                          style="padding: 6px 14px; font-size: 12px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;{{ $isOverdue ? ' background: var(--red); color: white;' : '' }}">
+                    📱 Thanh toán QR
+                  </button>
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
+                @elseif($invoice->status === 'paid')
+                  <span class="hide-on-skeleton badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 12px; padding: 6px 10px; border-radius: 6px;">✓ Đã thanh toán</span>
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
                 @else
-                  <span class="hide-on-skeleton" style="font-size: 12px; color: var(--muted); padding-right: 8px; font-weight: 600;">✓ Hoàn tất</span>
+                  <span class="hide-on-skeleton" style="font-size: 12px; color: var(--muted); padding-right: 8px; font-weight: 600;">{{ $statusLabels[$invoice->status] ?? $invoice->status }}</span>
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
                 @endif
                 <div class="dropdown action-dropdown hide-on-skeleton">
                   <button class="btn dropdown-toggle border-0 shadow-none text-muted" type="button" data-bs-toggle="dropdown">⋮</button>
@@ -163,8 +173,11 @@
 </div>
 
 
+@include('tenant.invoices.partials.qr_modal')
+
 @push('scripts')
     <script src="{{ asset('js/tv3/tenant/invoices/index.js') }}"></script>
+    <script src="{{ asset('js/tv3/tenant/invoices/sepay_qr.js') }}"></script>
 @endpush
 
 

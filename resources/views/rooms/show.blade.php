@@ -44,41 +44,6 @@
 
 @section('content')
 
-
-
-<!-- =========================================================
-     HEADER
-============================================================== -->
-
-<header class="room-detail-header">
-
-    <div class="room-detail-header-inner">
-
-
-
-        <a
-            href="{{ route('tenant') }}"
-            class="logo"
-        >
-            Trọ <span>Ơi</span>
-        </a>
-
-
-
-        <a
-            href="{{ route('rooms.index') }}"
-            class="back-room"
-        >
-            ← Quay lại danh sách phòng
-        </a>
-
-    </div>
-
-</header>
-
-
-
-
 <main class="room-detail-page">
 
     <div class="room-detail-container">
@@ -117,7 +82,17 @@
 
         @else
 
-
+            <!-- =========================
+                 QUAY LẠI DANH SÁCH
+            ========================== -->
+            <div class="mb-3">
+                <a
+                    href="{{ route('rooms.index') }}"
+                    class="back-room"
+                >
+                    ← Quay lại danh sách phòng
+                </a>
+            </div>
 
             <!-- =========================
                  HÌNH ẢNH

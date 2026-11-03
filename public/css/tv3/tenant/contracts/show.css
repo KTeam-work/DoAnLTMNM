@@ -1,279 +1,274 @@
+/* =========================================================
+   TENANT CONTRACT DETAIL - TV3 THEME (TRỌ ƠI)
+   ========================================================= */
 
+/* Top bar / Breadcrumb */
+.breadcrumb-custom {
+    font-size: 13px;
+    color: #78837e;
+    font-weight: 500;
+}
 
-        * {
-            box-sizing: border-box;
-        }
+.text-light-gray {
+    color: #cbd5e1;
+}
 
-        /* Đã xóa màu nền và font chữ fix cứng ở đây để đồng bộ với styles.css chung */
+/* Page Header Card */
+.contract-header-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 22px 28px;
+    margin-bottom: 24px;
+    border: 1px solid #eef2f0;
+    box-shadow: 0 4px 20px rgba(32, 88, 79, 0.03);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
 
-        .container-page {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px 50px;
-        }
+.contract-header-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: #213430;
+}
 
-        /* TOP */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
+.contract-header-desc {
+    color: #78837e;
+    font-size: 13px;
+    margin-top: 4px;
+}
 
-        .back-link {
-            color: #555;
-            text-decoration: none;
-            font-size: 14px;
-        }
+/* Action buttons */
+.action-buttons-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        .back-link:hover {
-            color: #dc3545;
-        }
+/* Panel / Cards */
+.panel-card {
+    background: #ffffff;
+    border: 1px solid #eef2f0;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(32, 88, 79, 0.03);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
 
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
+.panel-card-head {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f1f4f3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .btn-custom {
-            padding: 8px 14px;
-            border-radius: 7px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-        }
+.panel-card-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #213430;
+}
 
-        .btn-pdf {
-            border: 1px solid #dc3545;
-            color: #dc3545;
-        }
+/* Info Grid */
+.info-grid-custom {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    padding: 24px;
+}
 
-        .btn-pdf:hover {
-            background: #dc3545;
-            color: white;
-        }
+.cell-sub {
+    color: #78837e;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+}
 
-        .btn-liquidation {
-            border: 1px solid #dc3545;
-            color: #dc3545;
-        }
+.info-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #173d37;
+}
 
-        .btn-liquidation:hover {
-            background: #dc3545;
-            color: white;
-        }
+.info-value.price-highlight {
+    color: #20584f;
+    font-size: 17px;
+    font-weight: 800;
+}
 
-        /* HEADER */
-        .page-header {
-            background: white;
-            border-radius: 10px;
-            padding: 22px 25px;
-            margin-bottom: 20px;
-            border: 1px solid #e9ecef;
-        }
+/* Service Table */
+.service-table-wrap {
+    overflow-x: auto;
+    padding: 8px 16px 16px;
+}
 
-        .page-title {
-            margin: 0 0 7px;
-            font-size: 25px;
-            font-weight: 700;
-        }
+.service-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
 
-        .text-brand {
-            color: #dc3545;
-        }
+.service-table th {
+    background: #faf8f5;
+    color: #78837e;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 14px 18px;
+    border-bottom: 1px solid #f0eadc;
+    border-top: 1px solid #f0eadc;
+}
 
-        .page-desc {
-            color: #6c757d;
-            font-size: 14px;
-        }
+.service-table th:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
 
-        .badge-status {
-            display: inline-block;
-            padding: 7px 13px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-        }
+.service-table th:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
 
-        .resolved {
-            background: #dff6e7;
-            color: #198754;
-        }
+.service-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f3f5f4;
+    font-size: 13px;
+    color: #213430;
+    vertical-align: middle;
+}
 
-        /* PANEL */
-        .panel {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-        }
+.service-table tr:last-child td {
+    border-bottom: none;
+}
 
-        .panel-head {
-            padding: 16px 20px;
-            border-bottom: 1px solid #eee;
-        }
+/* Right sidebar: Owner & Members */
+.owner-box-content,
+.member-box-content {
+    padding: 24px;
+}
 
-        .panel-title {
-            margin: 0;
-            font-size: 17px;
-            font-weight: 700;
-        }
+.person-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
 
-        /* INFO */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            padding: 22px;
-        }
+.person-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: #eaf3ef;
+    color: #20584f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
+}
 
-        .cell-sub {
-            color: #8a8f98;
-            font-size: 13px;
-            margin-bottom: 7px;
-        }
+.person-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #173d37;
+    margin-bottom: 2px;
+}
 
-        .info-value {
-            font-size: 15px;
-            font-weight: 600;
-        }
+.btn-call-owner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    background: #20584f;
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(32, 88, 79, 0.15);
+}
 
-        .price {
-            color: #dc3545;
-            font-size: 16px;
-        }
+.btn-call-owner:hover {
+    background: #17463e;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(32, 88, 79, 0.22);
+}
 
-        /* TABLE */
-        .table-wrapper {
-            overflow-x: auto;
-        }
+/* Status Badges */
+.badge-status-contract {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+.badge-status-contract::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
 
-        .data-table th {
-            background: #fafafa;
-            color: #6c757d;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 14px 20px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
+.badge-status-contract.active {
+    background: #eaf8f1;
+    color: #1b8a5a;
+}
 
-        .data-table td {
-            padding: 16px 20px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
+.badge-status-contract.expired {
+    background: #feeceb;
+    color: #c53030;
+}
 
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
+.badge-status-contract.terminated {
+    background: #f1f2f2;
+    color: #64746e;
+}
 
-        .text-end {
-            text-align: right !important;
-        }
+.badge-status-contract.draft {
+    background: #fef7e7;
+    color: #b7791f;
+}
 
-        /* RIGHT COLUMN */
-        .owner-box,
-        .member-box {
-            padding: 20px;
-        }
+/* Responsive */
+@media (max-width: 991px) {
+    .info-grid-custom {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
 
-        .person {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            margin-bottom: 18px;
-        }
-
-        .avatar-sm {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: #ffe5e8;
-            color: #dc3545;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .person-name {
-            font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .call-button {
-            display: block;
-            width: 100%;
-            text-align: center;
-            text-decoration: none;
-            border: 1px solid #dc3545;
-            color: #dc3545;
-            border-radius: 7px;
-            padding: 9px;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-
-        .call-button:hover {
-            background: #dc3545;
-            color: white;
-        }
-
-        .member-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .top-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .action-buttons {
-                width: 100%;
-            }
-
-            .btn-custom {
-                flex: 1;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 15px;
-            }
-
-            .info-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 576px) {
-            .container-page {
-                padding: 20px 12px;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .page-title {
-                font-size: 21px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
+@media (max-width: 576px) {
+    .contract-header-card {
+        padding: 18px;
+    }
+    .info-grid-custom {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+    .action-buttons-group {
+        width: 100%;
+        flex-direction: column;
+    }
+    .action-buttons-group a,
+    .action-buttons-group button {
+        width: 100%;
+        justify-content: center;
+    }
+}

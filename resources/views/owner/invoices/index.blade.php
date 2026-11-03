@@ -150,8 +150,21 @@
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label small fw-bold">Kỳ thanh toán</label>
-          <input type="month" name="month" class="form-control" value="{{ $currentMonth }}" required>
+          <label for="invoice-contract" class="form-label small fw-bold">Người thuê / phòng</label>
+          <select id="invoice-contract" name="contract_id" class="form-select">
+            <option value="">Tất cả người thuê đang có hợp đồng hiệu lực</option>
+            @foreach($activeContracts as $contract)
+              <option value="{{ $contract->id }}">
+                {{ $contract->room->name ?? 'Phòng chưa xác định' }} — {{ $contract->tenant->name ?? 'Người thuê chưa xác định' }}
+              </option>
+            @endforeach
+          </select>
+          <div class="form-text">Chọn một người thuê để lập hóa đơn riêng, hoặc giữ “Tất cả” để phát hành hàng loạt.</div>
+        </div>
+        <div class="mb-3">
+          <label for="invoice-month" class="form-label small fw-bold">Tháng tính tiền</label>
+          <input id="invoice-month" type="month" name="month" class="form-control" value="{{ $currentMonth }}" lang="vi" title="Chọn tháng và năm tính tiền" required>
+          <div class="form-text">Chọn tháng và năm cần tính hóa đơn.</div>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-bold">Giảm giá chung (đ, tùy chọn)</label>

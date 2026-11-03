@@ -1,89 +1,88 @@
-
 @extends('layout.tenant')
 
-@section('title', 'Tổng quan | Trọ Ơi')
+@section('title', 'Chi tiết hợp đồng #' . $contract->contract_code . ' | Trọ Ơi')
 
 @push('styles')
-     <link rel="stylesheet"
-          href="{{ asset('css/tv3/tenant/contracts/show.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/tenant/contracts/show.css') }}">
 @endpush
 
 @section('content')
 
+<div class="page-wrap" id="contract-detail-page" style="padding-top: 25px;">
 
-
-<div class="container-page">
-
-    <!-- BREADCRUMB / ACTION -->
-    <div class="top-bar">
-        <a href="{{ route('tenant.contracts.index') }}" class="back-link">
-            ← Quay lại danh sách hợp đồng
-        </a>
-
-        <div class="action-buttons">
-            <a href="{{ route('tenant.maintenance.create', ['contract_id' => $contract->id]) }}" class="btn-custom text-decoration-none" style="border: 1px solid #16834b; color: #16834b;">
-                ＋ Tạo yêu cầu mới
-            </a>
-            <button class="btn-custom btn-pdf">
-                📥 Tải file PDF
-            </button>
-            <button class="btn-custom btn-liquidation">
-                ⚠️ Yêu cầu thanh lý
-            </button>
-        </div>
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb-custom mb-3 animate-up delay-1">
+        <a href="{{ route('tenant.home') }}" class="text-decoration-none text-muted">Trang chủ</a>
+        <span class="mx-2 text-light-gray">/</span>
+        <a href="{{ route('tenant.contracts.index') }}" class="text-decoration-none text-muted">Hợp đồng</a>
+        <span class="mx-2 text-light-gray">/</span>
+        <span class="fw-bold" style="color: #20584f;">Chi tiết #{{ $contract->contract_code }}</span>
     </div>
 
+    @php
+        $statusLabels = [
+            'active' => 'Đang hiệu lực',
+            'expired' => 'Hết hạn',
+            'terminated' => 'Đã thanh lý',
+            'draft' => 'Nháp'
+        ];
+    @endphp
 
-    <!-- PAGE HEADER -->
-    <div class="page-header d-flex justify-content-between align-items-center">
+    <!-- PAGE HEADER CARD -->
+    <div class="contract-header-card animate-up delay-1">
         <div>
-            <h2 class="page-title">
-                Chi tiết hợp đồng
-                <span class="text-brand">#{{ $contract->contract_code }}</span>
-            </h2>
-            <div class="page-desc">
-                Thông tin chi tiết về phòng thuê, chi phí cố định và các dịch vụ đi kèm.
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span style="font-size: 20px;">📄</span>
+                <h2 class="contract-header-title">
+                    Hợp đồng <span style="color: #20584f;">#{{ $contract->contract_code }}</span>
+                </h2>
+                <span class="badge-status-contract {{ $contract->status }} ms-2">
+                    {{ $statusLabels[$contract->status] ?? $contract->status }}
+                </span>
+            </div>
+            <div class="contract-header-desc">
+                Phòng: <strong>{{ $contract->room->name ?? '—' }}</strong> · Khu trọ: <strong>{{ $contract->room->property->name ?? '' }}</strong>
             </div>
         </div>
 
-        <span class="badge-status resolved">
-            {{ ['draft' => 'Nháp', 'active' => 'Đang hiệu lực', 'expired' => 'Hết hạn', 'terminated' => 'Đã thanh lý'][$contract->status] ?? $contract->status }}
-        </span>
+        <div class="action-buttons-group">
+            <a href="{{ route('tenant.maintenance.create', ['contract_id' => $contract->id]) }}" class="btn btn-outline-brand d-inline-flex align-items-center gap-1">
+                ＋ Yêu cầu sửa chữa
+            </a>
+            <button type="button" class="btn btn-outline-brand d-inline-flex align-items-center gap-1" onclick="window.print()">
+                🖨️ In hợp đồng
+            </button>
+        </div>
     </div>
 
+    <!-- MAIN CONTENT GRID -->
+    <div class="row g-4 animate-up delay-2">
 
-    <!-- MAIN CONTENT -->
-    <div class="row g-3">
-
-        <!-- LEFT -->
+        <!-- CỘT TRÁI (8 CỘT) -->
         <div class="col-lg-8">
 
-            <!-- THÔNG TIN PHÒNG -->
-            <div class="panel mb-3">
-                <div class="panel-head">
-                    <h3 class="panel-title">
-                        Thông tin phòng & Giá thuê
-                    </h3>
+            <!-- THÔNG TIN PHÒNG & GIÁ THUÊ -->
+            <div class="panel-card">
+                <div class="panel-card-head">
+                    <h3 class="panel-card-title">🏠 Thông tin phòng &amp; Chi phí</h3>
                 </div>
 
-                <div class="info-grid">
+                <div class="info-grid-custom">
                     <div>
                         <div class="cell-sub">Phòng thuê</div>
-                        <div class="info-value">
-                            {{ $contract->room->name ?? '—' }}
-                        </div>
-                        <div class="cell-sub mt-1">{{ $contract->room->property->name ?? '' }}</div>
+                        <div class="info-value">{{ $contract->room->name ?? '—' }}</div>
+                        <small class="text-muted">{{ $contract->room->property->name ?? '' }}</small>
                     </div>
 
                     <div>
                         <div class="cell-sub">Tiền thuê hàng tháng</div>
-                        <div class="info-value price">
+                        <div class="info-value price-highlight">
                             {{ number_format((float)$contract->rent) }} đ/tháng
                         </div>
                     </div>
 
                     <div>
-                        <div class="cell-sub">Tiền cọc</div>
+                        <div class="cell-sub">Tiền cọc phòng</div>
                         <div class="info-value">
                             {{ number_format((float)$contract->deposit) }} đ
                         </div>
@@ -112,33 +111,37 @@
 
                     <div>
                         <div class="cell-sub">Chốt điện ban đầu</div>
-                        <div class="info-value">{{ number_format((float)$contract->initial_electricity_reading) }}</div>
+                        <div class="info-value">
+                            {{ number_format((float)$contract->initial_electricity_reading) }} kWh
+                        </div>
                     </div>
 
                     <div>
                         <div class="cell-sub">Chốt nước ban đầu</div>
-                        <div class="info-value">{{ number_format((float)$contract->initial_water_reading) }}</div>
+                        <div class="info-value">
+                            {{ number_format((float)$contract->initial_water_reading) }} m³
+                        </div>
                     </div>
 
                     @if($contract->termination)
                     <div>
                         <div class="cell-sub">Quyết toán cọc</div>
-                        <div class="info-value">Hoàn {{ number_format((float)$contract->termination->refund_amount) }} đ</div>
+                        <div class="info-value text-success">
+                            Hoàn {{ number_format((float)$contract->termination->refund_amount) }} đ
+                        </div>
                     </div>
                     @endif
                 </div>
             </div>
 
-            <!-- DỊCH VỤ -->
-            <div class="panel">
-                <div class="panel-head">
-                    <h3 class="panel-title">
-                        Bảng giá Dịch vụ & Điện nước
-                    </h3>
+            <!-- BẢNG GIÁ DỊCH VỤ & ĐIỆN NƯỚC -->
+            <div class="panel-card">
+                <div class="panel-card-head">
+                    <h3 class="panel-card-title">💡 Bảng giá dịch vụ &amp; Tiện ích</h3>
                 </div>
 
-                <div class="table-wrapper">
-                    <table class="data-table">
+                <div class="service-table-wrap">
+                    <table class="service-table">
                         <thead>
                             <tr>
                                 <th>Loại dịch vụ</th>
@@ -148,32 +151,44 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>⚡ Điện sinh hoạt</td>
-                                <td>Theo chỉ số đồng hồ</td>
-                                <td class="text-end">
-                                    <strong>3.500 đ / kWh</strong>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 18px;">⚡</span>
+                                        <strong>Điện sinh hoạt</strong>
+                                    </div>
                                 </td>
+                                <td>Theo chỉ số đồng hồ thực tế</td>
+                                <td class="text-end fw-bold" style="color: #20584f;">3.500 đ / kWh</td>
                             </tr>
                             <tr>
-                                <td>💧 Nước sinh hoạt</td>
-                                <td>Theo số người ở</td>
-                                <td class="text-end">
-                                    <strong>100.000 đ / người</strong>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 18px;">💧</span>
+                                        <strong>Nước sinh hoạt</strong>
+                                    </div>
                                 </td>
+                                <td>Theo số người ở / tháng</td>
+                                <td class="text-end fw-bold" style="color: #20584f;">100.000 đ / người</td>
                             </tr>
                             <tr>
-                                <td>🌐 Internet / Wifi</td>
-                                <td>Cố định theo phòng</td>
-                                <td class="text-end">
-                                    <strong>50.000 đ / phòng</strong>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 18px;">🌐</span>
+                                        <strong>Internet / Wi-Fi</strong>
+                                    </div>
                                 </td>
+                                <td>Trọn gói theo phòng</td>
+                                <td class="text-end fw-bold" style="color: #20584f;">50.000 đ / phòng</td>
                             </tr>
                             <tr>
-                                <td>🧹 Vệ sinh & Rác</td>
-                                <td>Theo số người ở</td>
-                                <td class="text-end">
-                                    <strong>30.000 đ / người</strong>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 18px;">🧹</span>
+                                        <strong>Vệ sinh &amp; Rác</strong>
+                                    </div>
                                 </td>
+                                <td>Theo số người ở / tháng</td>
+                                <td class="text-end fw-bold" style="color: #20584f;">30.000 đ / người</td>
                             </tr>
                         </tbody>
                     </table>
@@ -182,81 +197,73 @@
 
         </div>
 
-        <!-- RIGHT -->
+        <!-- CỘT PHẢI (4 CỘT) -->
         <div class="col-lg-4">
 
-            <!-- CHỦ TRỌ -->
-            <div class="panel mb-3">
-                <div class="panel-head">
-                    <h3 class="panel-title">
-                        Thông tin Chủ trọ
-                    </h3>
+            <!-- THÔNG TIN CHỦ TRỌ -->
+            <div class="panel-card">
+                <div class="panel-card-head">
+                    <h3 class="panel-card-title">👤 Thông tin Chủ trọ</h3>
                 </div>
 
-                <div class="owner-box">
-                    <div class="person">
-                        <div class="avatar-sm">
-                            {{ strtoupper(substr($contract->owner->name ?? '?', 0, 2)) }}
+                <div class="owner-box-content">
+                    <div class="person-item">
+                        <div class="person-avatar">
+                            {{ strtoupper(mb_substr($contract->owner->name ?? 'CT', 0, 2)) }}
                         </div>
                         <div>
-                            <div class="person-name">
-                                {{ $contract->owner->name ?? '—' }}
-                            </div>
-                            <div class="cell-sub">
-                                SĐT: {{ $contract->owner->phone ?? '—' }}
-                            </div>
+                            <div class="person-name">{{ $contract->owner->name ?? 'Chủ nhà' }}</div>
+                            <div class="text-muted" style="font-size: 12px;">SĐT: {{ $contract->owner->phone ?? '—' }}</div>
+                            <div class="text-muted" style="font-size: 12px;">Email: {{ $contract->owner->email ?? '—' }}</div>
                         </div>
                     </div>
 
-                    <a href="tel:{{ $contract->owner->phone ?? '' }}" class="call-button">
+                    @if(!empty($contract->owner->phone))
+                    <a href="tel:{{ $contract->owner->phone }}" class="btn-call-owner">
                         📞 Gọi cho chủ trọ
                     </a>
+                    @endif
                 </div>
             </div>
 
-            <!-- THÀNH VIÊN -->
-            <div class="panel">
-                <div class="panel-head">
-                    <div class="member-header">
-                        <h3 class="panel-title">
-                            Thành viên phòng
-                        </h3>
-                        <span class="cell-sub mb-0">
-                            {{ 1 + $contract->members->count() }} người
-                        </span>
-                    </div>
+            <!-- THÀNH VIÊN PHÒNG -->
+            <div class="panel-card">
+                <div class="panel-card-head">
+                    <h3 class="panel-card-title">👥 Thành viên phòng</h3>
+                    <span class="badge bg-light text-dark border fw-bold px-2 py-1" style="border-radius: 8px; font-size: 11px;">
+                        {{ 1 + $contract->members->count() }} người
+                    </span>
                 </div>
 
-                <div class="member-box">
-                    <div class="person mb-3">
-                        <div class="avatar-sm">
-                            {{ strtoupper(substr($contract->tenant->name ?? '?', 0, 2)) }}
+                <div class="member-box-content">
+                    <!-- Người đại diện ký hợp đồng -->
+                    <div class="person-item">
+                        <div class="person-avatar">
+                            {{ strtoupper(mb_substr($contract->tenant->name ?? 'NG', 0, 2)) }}
                         </div>
                         <div>
-                            <div class="person-name">
-                                {{ $contract->tenant->name ?? '—' }}
-                            </div>
-                            <div class="cell-sub">
-                                Người đại diện hợp đồng
-                            </div>
+                            <div class="person-name">{{ $contract->tenant->name ?? '—' }}</div>
+                            <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 11px;">Người đứng tên HĐ</span>
                         </div>
                     </div>
+
+                    <!-- Danh sách người ở cùng -->
                     @forelse($contract->members as $member)
-                    <div class="person {{ $loop->last ? 'mb-0' : 'mb-3' }}">
-                        <div class="avatar-sm">
-                            {{ strtoupper(substr($member->name, 0, 2)) }}
+                    <div class="person-item {{ $loop->last ? 'mb-0' : '' }}">
+                        <div class="person-avatar" style="background: #f4f6f8; color: #536561;">
+                            {{ strtoupper(mb_substr($member->name, 0, 2)) }}
                         </div>
                         <div>
-                            <div class="person-name">
-                                {{ $member->name }}
-                            </div>
-                            <div class="cell-sub">
+                            <div class="person-name">{{ $member->name }}</div>
+                            <div class="text-muted" style="font-size: 12px;">
                                 {{ $member->relationship ?? 'Người ở cùng' }}{{ $member->phone ? ' · ' . $member->phone : '' }}
                             </div>
                         </div>
                     </div>
                     @empty
-                    <div class="cell-sub mb-0">Chưa có người ở cùng.</div>
+                    <div class="text-muted text-center py-2" style="font-size: 13px;">
+                        Chưa có người ở cùng đăng ký.
+                    </div>
                     @endforelse
                 </div>
             </div>
@@ -266,6 +273,5 @@
     </div>
 
 </div>
-
 
 @endsection

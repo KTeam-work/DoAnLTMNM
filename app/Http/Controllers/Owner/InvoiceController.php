@@ -36,6 +36,12 @@ class InvoiceController extends Controller
         $invoices = $query->paginate(15)->withQueryString();
         $filters = $request->only(['month', 'status']);
         $currentMonth = $request->input('month', now()->format('Y-m'));
+        $activeContracts = Contract::query()
+            ->where('owner_id', $owner->id)
+            ->where('status', 'active')
+            ->with(['room:id,name', 'tenant:id,name'])
+            ->orderBy('room_id')
+            ->get();
 
         $base = Invoice::query()->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id));
         $monthBase = (clone $base)->whereDate('billing_month', Carbon::parse($currentMonth)->startOfMonth());
@@ -47,7 +53,7 @@ class InvoiceController extends Controller
         ];
 
         if (! $request->expectsJson()) {
-            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth'));
+            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth', 'activeContracts'));
         }
 
         return response()->json(['data' => $invoices]);
@@ -151,14 +157,9 @@ class InvoiceController extends Controller
                 ['type' => 'water', 'description' => "Nước: {$reading->water_old} → {$reading->water_new} ({$wUse} m³)", 'quantity' => $wUse, 'unit_price' => (float) $reading->water_price, 'amount' => $wUse * (float) $reading->water_price, 'service_id' => null],
             ];
 
-            // Dịch vụ gắn với hợp đồng; nếu chưa gắn thì dùng dịch vụ đang hoạt động của chủ trọ.
+            // Chỉ tính các dịch vụ đã được gắn trực tiếp vào hợp đồng.
             $contractServices = DB::table('contract_services')
                 ->where('contract_id', $contract->id)->where('status', 'active')->get();
-            if ($contractServices->isEmpty()) {
-                $contractServices = Service::query()->where('owner_id', $contract->owner_id)
-                    ->where('status', 'active')->whereNotIn('unit', ['kWh', 'm³'])
-                    ->get()->map(fn ($s) => (object) ['service_id' => $s->id, 'quantity' => 1, 'unit_price' => (float) $s->price]);
-            }
             foreach ($contractServices as $cs) {
                 $service = Service::query()->find($cs->service_id);
                 if (! $service || $service->status !== 'active') {

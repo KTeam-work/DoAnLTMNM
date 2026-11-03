@@ -34,5 +34,17 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-flash-lite-latest'),
+    ],
+
+    'sepay' => [
+        'bank_name' => env('SEPAY_BANK_NAME', 'MSB'),
+        'bank_account' => env('SEPAY_BANK_ACCOUNT', '0000000001'),
+        'account_name' => env('SEPAY_ACCOUNT_NAME', 'SEPAY TEST'),
+        'webhook_token' => env('SEPAY_WEBHOOK_TOKEN'),
+        'qr_template' => env('SEPAY_QR_TEMPLATE', 'compact2'),
+    ],
 
 ];

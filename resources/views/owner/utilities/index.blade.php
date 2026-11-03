@@ -97,8 +97,8 @@
         </select>
       </div>
       <div class="col-md-4">
-        <label class="filter-label">Kỳ ghi chỉ số</label>
-        <input type="month" name="month" class="custom-input" value="{{ $month }}">
+        <label class="filter-label">Tháng ghi chỉ số</label>
+        <input type="month" name="month" class="custom-input" value="{{ $month }}" lang="vi" title="Chọn tháng và năm ghi chỉ số">
       </div>
       <div class="col-md-4 d-flex align-items-end gap-2">
         <button type="submit" class="btn-brand flex-grow-1" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>

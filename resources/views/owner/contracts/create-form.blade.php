@@ -127,6 +127,33 @@
                         </select>
                     </div>
                     <div class="col-12">
+                        <label class="form-label">Dịch vụ áp dụng cho hợp đồng</label>
+                        <div class="form-text mb-2">Chỉ hiển thị dịch vụ đang hoạt động của bạn. Điện, nước sẽ được tính theo chỉ số hàng tháng.</div>
+                        @forelse($services as $service)
+                            <div class="border rounded-3 p-3 mb-2 bg-light">
+                                <div class="row align-items-center g-2">
+                                    <div class="col-md-7">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="service_ids[]" value="{{ $service->id }}" id="service-{{ $service->id }}" @checked(in_array((string) $service->id, array_map('strval', old('service_ids', [])), true))>
+                                            <label class="form-check-label fw-semibold" for="service-{{ $service->id }}">
+                                                {{ $service->name }} <span class="text-muted fw-normal">— {{ number_format((float) $service->price) }} đ/{{ $service->unit }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">Số lượng</span>
+                                            <input type="number" name="service_quantities[{{ $service->id }}]" min="0.01" step="0.01" class="form-control" value="{{ old('service_quantities.' . $service->id, 1) }}" aria-label="Số lượng {{ $service->name }}">
+                                            <span class="input-group-text">{{ $service->unit }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="alert alert-light border mb-0">Bạn chưa có dịch vụ đang hoạt động. Hãy thêm dịch vụ trong mục Quản lý dịch vụ nếu cần.</div>
+                        @endforelse
+                    </div>
+                    <div class="col-12">
                         <label class="form-label">Điều khoản</label>
                         <textarea name="terms" class="form-control" rows="4">{{ old('terms') }}</textarea>
                     </div>

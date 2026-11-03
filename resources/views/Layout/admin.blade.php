@@ -89,6 +89,15 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a
+                            class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
+                            href="{{ route('chatbot.index') }}"
+                        >
+                            🤖 Trợ lý AI
+                        </a>
+                    </li>
+
                 </ul>
 
                 <div class="navbar-actions">

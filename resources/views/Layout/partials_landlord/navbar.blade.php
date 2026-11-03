@@ -187,6 +187,15 @@
                     </ul>
                 </li>
 
+                {{-- TRỢ LÝ AI --}}
+                <li class="nav-item">
+                    <a
+                        class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
+                        href="{{ route('chatbot.index') }}">
+                        🤖 Trợ lý AI
+                    </a>
+                </li>
+
             </ul>
 
             {{-- THÔNG TIN TÀI KHOẢN --}}

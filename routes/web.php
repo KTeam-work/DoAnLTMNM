@@ -10,6 +10,8 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\PaymentController;
 
 use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
 use App\Http\Controllers\Owner\PaymentController as OwnerPaymentController;
@@ -377,6 +379,21 @@ Route::post(
 )->name('tenant.payment.store');
 
 Route::post(
+    '/tenant/invoices/{id}/pay-qr',
+    [\App\Http\Controllers\Tenant\PaymentController::class, 'createOrGetQrPayment']
+)->name('tenant.invoices.pay_qr');
+
+Route::get(
+    '/tenant/invoices/{id}/payment-status',
+    [\App\Http\Controllers\Tenant\PaymentController::class, 'checkPaymentStatus']
+)->name('tenant.invoices.payment_status');
+
+Route::post(
+    '/tenant/invoices/{id}/simulate-sepay',
+    [\App\Http\Controllers\Tenant\PaymentController::class, 'simulateSepayWebhook']
+)->name('tenant.invoices.simulate_sepay');
+
+Route::post(
     '/tenant/payment/callback',
     [\App\Http\Controllers\Tenant\PaymentController::class, 'callback']
 )->name('tenant.payment.callback');
@@ -640,3 +657,21 @@ Route::resource(
     'owner/rental-posts',
     OwnerRentalPostController::class
 )->names('owner.rental-posts');
+
+// Chat box
+Route::middleware(['auth', 'throttle:20,1'])->group(function () {
+
+    Route::get('/chatbot', [
+        ChatbotController::class,
+        'index'
+    ])->name('chatbot.index');
+
+    Route::post('/chatbot/send', [
+        ChatbotController::class,
+        'sendMessage'
+    ])->name('chatbot.send');
+
+});
+
+// QR 
+Route::post('/sepay/webhook', [PaymentController::class, 'webhook']);
