@@ -143,7 +143,21 @@ class OwnerRoomController extends Controller
         if ($room->contracts()->exists()) {
             return redirect()
                 ->route('owner.rooms.index')
-                ->with('error', 'Không thể xóa phòng đang có hợp đồng.');
+                ->with('error', 'Không thể xóa phòng đang có lịch sử hợp đồng.');
+        }
+
+        // Không xóa phòng đang có tin đăng cho thuê đang chờ duyệt hoặc đang hiển thị
+        if ($room->rentalPosts()->whereIn('status', ['published', 'pending'])->exists()) {
+            return redirect()
+                ->route('owner.rooms.index')
+                ->with('error', 'Không thể xóa phòng đang có bài đăng cho thuê trên hệ thống.');
+        }
+
+        // Không xóa phòng đang có yêu cầu bảo trì chưa xử lý xong
+        if ($room->maintenanceRequests()->whereIn('status', ['pending', 'processing'])->exists()) {
+            return redirect()
+                ->route('owner.rooms.index')
+                ->with('error', 'Không thể xóa phòng đang có yêu cầu sửa chữa chưa hoàn thành.');
         }
 
         $room->delete();

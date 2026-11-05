@@ -18,26 +18,28 @@
     </div>
     <div class="d-flex gap-2">
       <button class="btn-outline-brand">📥 Xuất Excel</button>
-      <a class="btn-brand" href="{{ route('owner.utilities.create') }}" >+ Ghi chỉ số mới</a>
+      <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" >+ Ghi chỉ số mới</a>
     </div>
   </div>
 
   <!-- STAT CARDS -->
   @php
       $totalRooms = $rooms->count();
-      $currentMonth = \Carbon\Carbon::parse($month)->startOfMonth();
-      $readingsThisMonth = $readings->filter(fn($r) => \Carbon\Carbon::parse($r->month)->isSameMonth($currentMonth));
-      $doneCount = $readingsThisMonth->count();
-      $totalKwh = $readingsThisMonth->sum(fn($r) => (float)$r->electricity_new - (float)$r->electricity_old);
-      $totalM3 = $readingsThisMonth->sum(fn($r) => (float)$r->water_new - (float)$r->water_old);
-      $totalMoney = $readingsThisMonth->sum(fn($r) => ((float)$r->electricity_new - (float)$r->electricity_old) * (float)$r->electricity_price + ((float)$r->water_new - (float)$r->water_old) * (float)$r->water_price);
+      $currentMonth = $month ? \Carbon\Carbon::parse($month)->startOfMonth() : null;
+      $displayedReadings = $currentMonth
+          ? $readings->filter(fn($r) => \Carbon\Carbon::parse($r->month)->isSameMonth($currentMonth))
+          : $readings;
+      $doneCount = $displayedReadings->count();
+      $totalKwh = $displayedReadings->sum(fn($r) => (float)$r->electricity_new - (float)$r->electricity_old);
+      $totalM3 = $displayedReadings->sum(fn($r) => (float)$r->water_new - (float)$r->water_old);
+      $totalMoney = $displayedReadings->sum(fn($r) => ((float)$r->electricity_new - (float)$r->electricity_old) * (float)$r->electricity_price + ((float)$r->water_new - (float)$r->water_old) * (float)$r->water_price);
   @endphp
   <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon">🏠</div>
-          <span class="stat-trend muted">{{ $currentMonth->format('m/Y') }}</span>
+          <span class="stat-trend muted">{{ $currentMonth ? $currentMonth->format('m/Y') : 'Tất cả các kỳ' }}</span>
         </div>
         <div class="stat-value">{{ $totalRooms }}</div>
         <div class="stat-label">Tổng số phòng quản lý</div>
@@ -48,10 +50,10 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon green">⚡</div>
-          <span class="stat-trend">Còn {{ max(0, $totalRooms - $doneCount) }} phòng</span>
+          <span class="stat-trend">{{ $currentMonth ? 'Còn ' . max(0, $totalRooms - $doneCount) . ' phòng' : 'Tổng lượt ghi' }}</span>
         </div>
-        <div class="stat-value">{{ $doneCount }} <small>/ {{ $totalRooms }}</small></div>
-        <div class="stat-label">Đã chốt chỉ số</div>
+        <div class="stat-value">{{ $doneCount }} @if($currentMonth)<small>/ {{ $totalRooms }}</small>@endif</div>
+        <div class="stat-label">{{ $currentMonth ? 'Đã chốt chỉ số' : 'Bản ghi điện nước' }}</div>
       </div>
     </div>
 
@@ -59,7 +61,7 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon blue">💧</div>
-          <span class="stat-trend">Tháng hiện tại</span>
+          <span class="stat-trend">{{ $currentMonth ? 'Kỳ ' . $currentMonth->format('m/Y') : 'Toàn bộ kỳ' }}</span>
         </div>
         <div class="stat-value">{{ number_format($totalKwh + $totalM3) }}</div>
         <div class="stat-label">Tổng tiêu thụ (kWh + m³)</div>
@@ -84,9 +86,12 @@
     @if(session('success'))
       <div class="alert alert-success mb-3">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+      <div class="alert alert-danger mb-3">{{ session('error') }}</div>
+    @endif
     
     <!-- FILTERS -->
-    <form method="GET" action="{{ route('owner.utilities.index') }}" class="row g-3 mb-4">
+    <form method="GET" action="{{ route('owner.utilities.index') }}" class="row g-3 mb-3">
       <div class="col-md-4">
         <label class="filter-label">Phòng</label>
         <select name="room_id" class="custom-input">
@@ -97,14 +102,32 @@
         </select>
       </div>
       <div class="col-md-4">
-        <label class="filter-label">Tháng ghi chỉ số</label>
+        <label class="filter-label">Tháng ghi chỉ số (để trống để xem tất cả)</label>
         <input type="month" name="month" class="custom-input" value="{{ $month }}" lang="vi" title="Chọn tháng và năm ghi chỉ số">
       </div>
       <div class="col-md-4 d-flex align-items-end gap-2">
         <button type="submit" class="btn-brand flex-grow-1" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>
-        <a href="{{ route('owner.utilities.index') }}" class="btn-outline-brand text-decoration-none" style="height: 44px; display: inline-flex; align-items: center;">Xóa lọc</a>
+        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none" style="height: 44px; display: inline-flex; align-items: center; white-space: nowrap;">Tất cả kỳ</a>
       </div>
     </form>
+
+    <!-- STATUS BAR -->
+    <div class="d-flex align-items-center justify-content-between mb-4 px-1 flex-wrap gap-2">
+      <div class="text-muted small">
+        @if($month)
+          Đang xem kỳ: <strong class="text-dark">{{ \Carbon\Carbon::parse($month)->format('m/Y') }}</strong>
+        @else
+          Đang xem: <strong class="text-dark">Tất cả các kỳ</strong>
+        @endif
+        @if($selectedRoomId)
+          &bull; Phòng: <strong class="text-dark">{{ $rooms->firstWhere('id', $selectedRoomId)?->name ?? $selectedRoomId }}</strong>
+        @endif
+        &bull; Hiển thị: <strong class="text-dark">{{ $readings->count() }} bản ghi</strong>
+      </div>
+      @if($month)
+        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="small text-decoration-none" style="color: var(--brand-dark, #a85827); font-weight: 600;">Xem tất cả các tháng &rarr;</a>
+      @endif
+    </div>
 
     <!-- TABLE -->
     <div class="table-responsive">
@@ -139,7 +162,7 @@
                 </div>
               </div>
             </td>
-            <td>{{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</td>
+            <td><strong style="color: #4b3621;">{{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</strong></td>
             <td>
               <div>Cũ: <strong>{{ number_format((float)$reading->electricity_old) }}</strong></div>
               <div class="mt-1">Mới: <strong>{{ number_format((float)$reading->electricity_new) }}</strong></div>
@@ -159,12 +182,32 @@
             </td>
             <td><span class="badge-status occupied">Đã ghi</span></td>
             <td class="text-end">
-              <a class="btn-brand" style="padding: 6px 12px;" href="{{ route('owner.utilities.create', ['id' => $reading->id]) }}">✏️ Sửa</a>
+              <div class="d-flex justify-content-end gap-1">
+                <a class="btn-brand" style="padding: 6px 12px;" href="{{ route('owner.utilities.create', ['id' => $reading->id]) }}">✏️ Sửa</a>
+                <form method="POST" action="{{ route('owner.utilities.destroy', $reading) }}" onsubmit="return confirm('Bạn có chắc muốn xóa bản ghi chỉ số tháng {{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }} của phòng {{ $reading->room->name ?? '' }}?');" style="display:inline;">
+                  @csrf
+                  @method('DELETE')
+                  <button type="submit" class="btn-outline-brand" style="padding: 6px 10px; color: #dc3545; border-color: #f5c6cb;" title="Xóa bản ghi">🗑️</button>
+                </form>
+              </div>
             </td>
           </tr>
           @empty
           <tr>
-            <td colspan="8" class="text-center text-muted py-5">Chưa có chỉ số điện nước nào.</td>
+            <td colspan="8" class="text-center text-muted py-5">
+              <div style="font-size: 1.1rem; font-weight: 500; margin-bottom: 8px;">
+                Chưa có chỉ số điện nước nào{{ $month ? ' trong kỳ ' . \Carbon\Carbon::parse($month)->format('m/Y') : '' }}.
+              </div>
+              @if($month)
+                <div class="mt-2">
+                  <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">Xem tất cả các kỳ khác</a>
+                </div>
+              @else
+                <div class="mt-2">
+                  <a href="{{ route('owner.utilities.create') }}" class="btn-brand text-decoration-none" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">+ Ghi chỉ số mới ngay</a>
+                </div>
+              @endif
+            </td>
           </tr>
           @endforelse
         </tbody>

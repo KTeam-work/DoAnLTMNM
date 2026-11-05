@@ -31,13 +31,18 @@ class Room extends Model
         return $this->hasMany(UtilityReading::class);
     }
     public function rentalPosts(): HasMany
-{
-    return $this->hasMany(RentalPost::class);
-}
+    {
+        return $this->hasMany(RentalPost::class);
+    }
 
-public function amenities(): BelongsToMany
-{
-    return $this->belongsToMany(Amenity::class, 'room_amenities')
-        ->withTimestamps();
-}
+    public function maintenanceRequests(): HasMany
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
+
+    public function amenities(): BelongsToMany
+    {
+        return $this->belongsToMany(Amenity::class, 'room_amenities')
+            ->withTimestamps();
+    }
 }

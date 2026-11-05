@@ -486,6 +486,11 @@ Route::get(
 )->name('owner.utilities.index');
 
 Route::get(
+    '/owner/utilities/previous-reading',
+    [OwnerUtilitiesController::class, 'getPreviousReading']
+)->name('owner.utilities.previous-reading');
+
+Route::get(
     '/owner/utilities/create',
     [OwnerUtilitiesController::class, 'create']
 )->name('owner.utilities.create');
@@ -499,6 +504,11 @@ Route::put(
     '/owner/utilities/{utilityReading?}',
     [OwnerUtilitiesController::class, 'update']
 )->name('owner.utilities.update');
+
+Route::delete(
+    '/owner/utilities/{utilityReading}',
+    [OwnerUtilitiesController::class, 'destroy']
+)->name('owner.utilities.destroy');
 
 
 /*
