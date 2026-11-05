@@ -26,4 +26,9 @@ class UtilityReading extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
 }

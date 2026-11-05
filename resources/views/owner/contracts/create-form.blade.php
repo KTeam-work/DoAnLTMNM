@@ -1,7 +1,7 @@
 
 @extends('Layout.landlord')
 
-@section('title', 'Quản lý họp đồng | Trọ Ơi')
+@section('title', 'Quản lý hợp đồng | Trọ Ơi')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/contracts/create_form.css') }}">
@@ -67,7 +67,7 @@
             <h2 class="panel-title">Thông tin hợp đồng</h2>
             <form method="POST" action="{{ route('owner.contracts.store') }}">
                 @csrf
-                @if ($errors->any())
+                @if (isset($errors) && $errors->any())
                     <div class="alert alert-danger">
                         <ul class="mb-0">
                             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach

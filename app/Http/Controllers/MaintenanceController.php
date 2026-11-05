@@ -65,13 +65,13 @@ class MaintenanceController extends Controller
             'image' => ['nullable', 'image', 'max:10240'],
         ]);
 
-        // Chống gửi yêu cầu cho hợp đồng không thuộc tenant.
-        $contract = Contract::query()->where('tenant_id', $tenant->id)->find($data['contract_id']);
+        // Chống gửi yêu cầu cho hợp đồng không thuộc tenant hoặc đã hết hiệu lực.
+        $contract = Contract::query()->where('tenant_id', $tenant->id)->where('status', 'active')->find($data['contract_id']);
         if (! $contract) {
             if (! $request->expectsJson()) {
-                return back()->withErrors(['contract_id' => 'Hợp đồng không thuộc tài khoản của bạn.'])->withInput();
+                return back()->withErrors(['contract_id' => 'Hợp đồng không thuộc tài khoản của bạn hoặc đã kết thúc.'])->withInput();
             }
-            abort(422, 'The contract does not belong to you.');
+            abort(422, 'The contract does not belong to you or is no longer active.');
         }
 
         $imagePath = null;

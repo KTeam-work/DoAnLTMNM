@@ -21,8 +21,27 @@ class OwnerUtilitiesController extends Controller
                 ? User::query()->where('role', 'owner')->orderBy('id')->first()
                 : $this->owner($request));
 
-        $month = $request->input('month', now()->format('Y-m'));
         $selectedRoomId = $request->input('room_id');
+
+        // Xác định tháng lọc:
+        // - Nếu user truyền ?all=1 hoặc form gửi month rỗng: hiển thị tất cả ($month = null)
+        // - Nếu user chọn tháng cụ thể: lọc theo tháng đó ($month = Y-m)
+        // - Nếu truy cập lần đầu không có tham số:
+        //   + Nếu tháng hiện tại có bản ghi: lọc theo tháng hiện tại
+        //   + Nếu tháng hiện tại chưa có bản ghi: để null (hiển thị tất cả) để chủ trọ thấy ngay dữ liệu đã tạo
+        if ($request->boolean('all') || ($request->has('month') && ! $request->filled('month'))) {
+            $month = null;
+        } elseif ($request->filled('month')) {
+            $month = $request->input('month');
+        } else {
+            $currentMonthStr = now()->format('Y-m');
+            $hasCurrentMonth = $owner && UtilityReading::query()
+                ->whereHas('room.property', fn ($query) => $query->where('owner_id', $owner->id))
+                ->whereDate('month', Carbon::parse($currentMonthStr)->startOfMonth())
+                ->exists();
+
+            $month = $hasCurrentMonth ? $currentMonthStr : null;
+        }
 
         $readings = $owner
             ? UtilityReading::query()
@@ -31,6 +50,7 @@ class OwnerUtilitiesController extends Controller
                 ->when($month, fn ($query) => $query->whereDate('month', Carbon::parse($month)->startOfMonth()))
                 ->with('room:id,name,room_code,property_id')
                 ->orderByDesc('month')
+                ->orderBy('room_id')
                 ->get()
             : collect();
 
@@ -89,10 +109,37 @@ class OwnerUtilitiesController extends Controller
                 ->find($request->input('id'));
         }
 
-        $prefillRoomId = $request->input('room_id', $reading?->room_id);
+        $prefillRoomId = $request->input('room_id', $reading?->room_id ?? $rooms->first()?->id);
         $prefillMonth = $request->input('month', $reading ? Carbon::parse($reading->month)->format('Y-m') : now()->format('Y-m'));
 
-        return view('owner.utilities.create', compact('rooms', 'reading', 'prefillRoomId', 'prefillMonth'));
+        $initialPrevious = null;
+        if (! $reading && $prefillRoomId && $owner) {
+            $room = $rooms->firstWhere('id', (int) $prefillRoomId);
+            if ($room) {
+                $initialPrevious = $this->getPreviousReadingInfo($room, $prefillMonth);
+            }
+        }
+
+        return view('owner.utilities.create', compact('rooms', 'reading', 'prefillRoomId', 'prefillMonth', 'initialPrevious'));
+    }
+
+    /**
+     * AJAX: Lấy chỉ số điện nước kỳ trước liền kề (hoặc từ hợp đồng) khi chọn phòng/tháng.
+     */
+    public function getPreviousReading(Request $request)
+    {
+        $owner = $this->actingOwner($request);
+        $roomId = $request->integer('room_id');
+        $month = $request->input('month', now()->format('Y-m'));
+
+        if (! $roomId) {
+            return response()->json(['error' => 'Vui lòng chọn phòng.'], 400);
+        }
+
+        $room = $this->ownedRoom($owner, $roomId);
+        $info = $this->getPreviousReadingInfo($room, $month);
+
+        return response()->json($info);
     }
 
     public function store(Request $request)
@@ -118,7 +165,9 @@ class OwnerUtilitiesController extends Controller
         $reading = UtilityReading::query()->create($data);
 
         if (! $request->expectsJson()) {
-            return redirect()->route('owner.utilities.index')->with('success', 'Đã ghi chỉ số điện nước.');
+            $monthParam = Carbon::parse($data['month'])->format('Y-m');
+            return redirect()->route('owner.utilities.index', ['month' => $monthParam])
+                ->with('success', 'Đã ghi chỉ số điện nước tháng ' . Carbon::parse($data['month'])->format('m/Y') . '.');
         }
 
         return response()->json(['message' => 'Utility reading created.', 'data' => $reading->load('room:id,name,room_code')], 201);
@@ -160,10 +209,42 @@ class OwnerUtilitiesController extends Controller
         $utilityReading->update($data);
 
         if (! $request->expectsJson()) {
-            return redirect()->route('owner.utilities.index')->with('success', 'Đã cập nhật chỉ số điện nước.');
+            $monthParam = isset($data['month'])
+                ? Carbon::parse($data['month'])->format('Y-m')
+                : Carbon::parse($utilityReading->month)->format('Y-m');
+
+            return redirect()->route('owner.utilities.index', ['month' => $monthParam])
+                ->with('success', 'Đã cập nhật chỉ số điện nước tháng ' . Carbon::parse($monthParam)->format('m/Y') . '.');
         }
 
         return response()->json(['message' => 'Utility reading updated.', 'data' => $utilityReading->fresh()->load('room:id,name,room_code')]);
+    }
+
+    public function destroy(Request $request, UtilityReading $utilityReading)
+    {
+        $owner = $this->actingOwner($request);
+        $this->ownedRoom($owner, $utilityReading->room_id);
+
+        $monthParam = Carbon::parse($utilityReading->month)->format('Y-m');
+
+        // Không cho phép xóa chỉ số đã được gắn với hóa đơn
+        if ($utilityReading->invoice()->exists()) {
+            $msg = 'Không thể xóa chỉ số này vì đã được dùng để lập hóa đơn tiền phòng.';
+            if (! $request->expectsJson()) {
+                return redirect()->route('owner.utilities.index', ['month' => $monthParam])
+                    ->with('error', $msg);
+            }
+            abort(422, $msg);
+        }
+
+        $utilityReading->delete();
+
+        if (! $request->expectsJson()) {
+            return redirect()->route('owner.utilities.index', ['month' => $monthParam])
+                ->with('success', 'Đã xóa bản ghi chỉ số điện nước.');
+        }
+
+        return response()->json(['message' => 'Utility reading deleted.']);
     }
 
     private function validatedReading(Request $request, bool $updating = false): array
@@ -182,23 +263,83 @@ class OwnerUtilitiesController extends Controller
         ]);
     }
 
-    private function previousReadings(Room $room, string $month): array
+    /**
+     * Truy xuất thông tin chỉ số cũ và đơn giá cho một phòng tại tháng mục tiêu:
+     * 1. Tìm bản ghi chỉ số gần nhất trước tháng mục tiêu -> lấy electricity_new, water_new
+     * 2. Nếu chưa có -> tìm chỉ số ban đầu từ hợp đồng thuê đang hiệu lực
+     * 3. Mặc định là 0
+     */
+    public function getPreviousReadingInfo(Room $room, string $month): array
     {
-        $previous = $room->utilityReadings()->whereDate('month', '<', $month)->latest('month')->first();
+        $targetMonth = Carbon::parse($month)->startOfMonth()->toDateString();
+
+        // Kiểm tra xem tháng này phòng đã chốt chỉ số chưa
+        $existing = UtilityReading::query()
+            ->where('room_id', $room->id)
+            ->whereDate('month', $targetMonth)
+            ->first();
+
+        // 1. Tìm kỳ trước gần nhất
+        $previous = $room->utilityReadings()
+            ->whereDate('month', '<', $targetMonth)
+            ->latest('month')
+            ->first();
+
         if ($previous) {
-            return [(float) $previous->electricity_new, (float) $previous->water_new];
+            return [
+                'electricity_old' => (float) $previous->electricity_new,
+                'water_old' => (float) $previous->water_new,
+                'electricity_price' => (float) $previous->electricity_price,
+                'water_price' => (float) $previous->water_price,
+                'source' => 'Bản ghi kỳ ' . Carbon::parse($previous->month)->format('m/Y'),
+                'source_type' => 'previous_reading',
+                'already_exists' => (bool) $existing,
+                'existing_id' => $existing?->id,
+                'existing_month' => $existing ? Carbon::parse($existing->month)->format('m/Y') : null,
+            ];
         }
 
+        // 2. Tìm từ hợp đồng thuê hiệu lực
         $contract = Contract::query()
             ->where('room_id', $room->id)
             ->whereIn('status', ['active', 'expired', 'terminated'])
-            ->whereDate('start_date', '<=', $month)
+            ->whereDate('start_date', '<=', $targetMonth)
             ->latest('start_date')
             ->first();
 
-        return $contract
-            ? [(float) $contract->initial_electricity_reading, (float) $contract->initial_water_reading]
-            : [0, 0];
+        if ($contract) {
+            return [
+                'electricity_old' => (float) $contract->initial_electricity_reading,
+                'water_old' => (float) $contract->initial_water_reading,
+                'electricity_price' => 3500.0,
+                'water_price' => 20000.0,
+                'source' => 'Chỉ số đầu hợp đồng (' . Carbon::parse($contract->start_date)->format('d/m/Y') . ')',
+                'source_type' => 'contract',
+                'already_exists' => (bool) $existing,
+                'existing_id' => $existing?->id,
+                'existing_month' => $existing ? Carbon::parse($existing->month)->format('m/Y') : null,
+            ];
+        }
+
+        // 3. Mặc định
+        return [
+            'electricity_old' => 0.0,
+            'water_old' => 0.0,
+            'electricity_price' => 3500.0,
+            'water_price' => 20000.0,
+            'source' => 'Mặc định (chưa có dữ liệu trước)',
+            'source_type' => 'default',
+            'already_exists' => (bool) $existing,
+            'existing_id' => $existing?->id,
+            'existing_month' => $existing ? Carbon::parse($existing->month)->format('m/Y') : null,
+        ];
+    }
+
+    private function previousReadings(Room $room, string $month): array
+    {
+        $info = $this->getPreviousReadingInfo($room, $month);
+
+        return [$info['electricity_old'], $info['water_old']];
     }
 
     private function assertNewReadingsAreValid(array $data): void
