@@ -96,12 +96,12 @@
                       </a>
                   </li>
 
-                  <!-- TRỢ LÝ AI -->
+                  <!-- TRỢ LÝ HỖ TRỢ -->
                   <li class="nav-item">
                       <a class="app-nav-link text-decoration-none
                           {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
                           href="{{ route('chatbot.index') }}">
-                          🤖 Trợ lý AI
+                          💬 Trợ lý hỗ trợ
                       </a>
                   </li>
               </ul>

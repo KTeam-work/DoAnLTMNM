@@ -102,9 +102,12 @@ class User extends Authenticatable
 
     
     public function favorites()
-{
-    return $this->hasMany(Favorite::class);
-}
+    {
+        return $this->hasMany(Favorite::class);
+    }
 
-
+    public function postReports()
+    {
+        return $this->hasMany(PostReport::class, 'reporter_id');
+    }
 }

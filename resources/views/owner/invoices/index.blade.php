@@ -18,6 +18,12 @@
       <div class="page-desc">Kỳ thanh toán hiện tại: <strong>Tháng {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</strong></div>
     </div>
     <div class="d-flex gap-2">
+      <form action="{{ route('owner.invoices.process-due-now') }}" method="POST" class="m-0" onsubmit="return confirm('Hệ thống sẽ quét ngày hết hạn của các hóa đơn, gửi thông báo nhắc nợ và cập nhật trạng thái Quá hạn. Tiếp tục?')">
+        @csrf
+        <button type="submit" class="btn btn-outline-success fw-bold d-flex align-items-center gap-1" style="border-radius: 8px; padding: 8px 14px; font-size: 13px;" title="Kích hoạt kiểm tra hạn hóa đơn tự động">
+          ⚡ Quét nợ &amp; Cập nhật quá hạn
+        </button>
+      </form>
       <button class="btn-brand" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
         <i class="bi bi-magic me-1"></i> Tạo hóa đơn tháng
       </button>
@@ -118,6 +124,7 @@
             <td><span class="badge-status {{ $displayStatus }}">{{ $statusLabels[$displayStatus] ?? $displayStatus }}</span></td>
             <td class="text-end">
               <a href="{{ route('owner.invoices.show', $invoice->id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i> Xem</a>
+              <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-sm btn-outline-success ms-1" title="In / Xuất PDF">🖨️ In</a>
             </td>
           </tr>
           @empty
@@ -165,6 +172,23 @@
           <label for="invoice-month" class="form-label small fw-bold">Tháng tính tiền</label>
           <input id="invoice-month" type="month" name="month" class="form-control" value="{{ $currentMonth }}" lang="vi" title="Chọn tháng và năm tính tiền" required>
           <div class="form-text">Chọn tháng và năm cần tính hóa đơn.</div>
+        </div>
+        <div class="mb-3">
+          <label for="invoice-due-date" class="form-label small fw-bold">Hạn chót thanh toán (tùy chọn)</label>
+          <input id="invoice-due-date" type="date" name="due_date" class="form-control" value="{{ now()->addDays(7)->toDateString() }}">
+          <div class="d-flex flex-wrap gap-1 mt-2">
+            <span class="small text-muted me-1" style="font-size: 11px;">Chọn nhanh để test:</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" onclick="document.getElementById('invoice-due-date').value='{{ now()->addDays(7)->toDateString() }}'">
+              Bình thường (+7 ngày)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="document.getElementById('invoice-due-date').value='{{ now()->addDays(2)->toDateString() }}'">
+              Test nhắc nợ (+2 ngày)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 11px;" onclick="document.getElementById('invoice-due-date').value='{{ now()->subDays(2)->toDateString() }}'">
+              Test quá hạn (-2 ngày)
+            </button>
+          </div>
+          <div class="form-text" style="font-size: 11px;">💡 Bấm <strong>"Test quá hạn"</strong> để tạo ngay hóa đơn quá hạn cho giáo viên xem demo!</div>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-bold">Giảm giá chung (đ, tùy chọn)</label>

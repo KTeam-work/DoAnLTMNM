@@ -50,6 +50,7 @@ class Notification extends Model
                 'invoice' => $this->reference_id ? route('tenant.invoices.show', $this->reference_id) : null,
                 'maintenance' => $this->reference_id ? route('tenant.maintenance.show', $this->reference_id) : null,
                 'contract' => $this->reference_id ? route('tenant.contracts.show', $this->reference_id) : null,
+                'rental_post' => route('owner.rental-posts.index'),
                 default => null,
             };
         } catch (\Throwable) {

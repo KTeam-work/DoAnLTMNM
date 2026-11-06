@@ -82,6 +82,21 @@
 
                     <li class="nav-item">
                         <a
+                            class="app-nav-link text-decoration-none {{ request()->routeIs('admin.reports*') ? 'active' : '' }}"
+                            href="{{ route('admin.reports.index') }}"
+                        >
+                            Báo cáo vi phạm
+                            @php
+                                $pendingReportsCount = \Illuminate\Support\Facades\Schema::hasTable('post_reports') ? \App\Models\PostReport::where('status', 'pending')->count() : 0;
+                            @endphp
+                            @if($pendingReportsCount > 0)
+                                <span class="badge bg-danger rounded-pill ms-1" style="font-size: 10px;">{{ $pendingReportsCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a
                             class="app-nav-link text-decoration-none {{ request()->routeIs('admin.statistics') ? 'active' : '' }}"
                             href="{{ route('admin.statistics') }}"
                         >
@@ -94,7 +109,7 @@
                             class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
                             href="{{ route('chatbot.index') }}"
                         >
-                            🤖 Trợ lý AI
+                            💬 Trợ lý hỗ trợ
                         </a>
                     </li>
 

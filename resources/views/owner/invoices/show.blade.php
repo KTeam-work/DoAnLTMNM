@@ -13,13 +13,21 @@
 <main class="page-wrap">
   <a href="{{ route('owner.invoices.index') }}" class="back-link">← Quay lại danh sách hóa đơn</a>
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 my-3">
-    <h1 class="h4 fw-bold mb-0" style="color: var(--green-dark);">#{{ $invoice->invoice_code }}</h1>
-    @php
-      $statusLabels = ['unpaid' => 'Chưa thanh toán', 'pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'overdue' => 'Quá hạn', 'cancelled' => 'Đã hủy'];
-      $isOverdue = in_array($invoice->status, ['unpaid', 'pending']) && $invoice->due_date < now()->toDateString();
-      $displayStatus = $isOverdue ? 'overdue' : $invoice->status;
-    @endphp
-    <span class="badge-status {{ $displayStatus }}">{{ $statusLabels[$displayStatus] ?? $displayStatus }}</span>
+    <div class="d-flex align-items-center gap-2">
+      <h1 class="h4 fw-bold mb-0" style="color: var(--green-dark);">#{{ $invoice->invoice_code }}</h1>
+      @php
+        $statusLabels = ['unpaid' => 'Chưa thanh toán', 'pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'overdue' => 'Quá hạn', 'cancelled' => 'Đã hủy'];
+        $isOverdue = in_array($invoice->status, ['unpaid', 'pending']) && $invoice->due_date < now()->toDateString();
+        $displayStatus = $isOverdue ? 'overdue' : $invoice->status;
+      @endphp
+      <span class="badge-status {{ $displayStatus }}">{{ $statusLabels[$displayStatus] ?? $displayStatus }}</span>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-success fw-bold d-flex align-items-center gap-1 shadow-sm" style="border-radius: 8px; font-size: 13px; padding: 7px 16px;">
+        🖨️ In hóa đơn / Xuất PDF
+      </a>
+    </div>
   </div>
 
   <div class="panel">

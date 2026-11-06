@@ -59,6 +59,32 @@ class InvoiceController extends Controller
         return response()->json(['data' => $invoice]);
     }
 
+    /**
+     * Mẫu in hóa đơn và xuất PDF cho khách thuê.
+     */
+    public function print(Request $request, $id)
+    {
+        $tenant = $this->actingTenant($request);
+
+        $invoice = Invoice::query()
+            ->whereHas('contract', fn ($q) => $q->where('tenant_id', $tenant->id))
+            ->with([
+                'items.service:id,name',
+                'contract.room.property',
+                'contract.tenant:id,name,phone',
+                'contract.owner:id,name,phone',
+                'utilityReading',
+                'payments'
+            ])
+            ->findOrFail($id);
+
+        return view('invoices.print', [
+            'invoice' => $invoice,
+            'backUrl' => route('tenant.invoices.show', $invoice->id),
+            'role' => 'tenant',
+        ]);
+    }
+
     private function actingTenant(Request $request): User
     {
         $user = $request->user();

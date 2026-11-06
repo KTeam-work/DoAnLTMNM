@@ -218,14 +218,14 @@
           <div class="d-flex flex-column gap-2 print-hide mt-3">
             <div class="row g-2 mt-1">
               <div class="col-6">
-                <button onclick="window.print()" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center gap-2" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
+                <a href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center gap-2 text-decoration-none" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
                   🖨️ In Hóa Đơn
-                </button>
+                </a>
               </div>
               <div class="col-6">
-                <button onclick="window.print()" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center gap-2" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
+                <a href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center gap-2 text-decoration-none" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
                   📥 Lưu PDF
-                </button>
+                </a>
               </div>
             </div>
           </div>

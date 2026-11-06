@@ -6,6 +6,7 @@ use App\Models\Contract;
 use App\Models\Room;
 use App\Models\User;
 use App\Models\UtilityReading;
+use App\Services\GeminiService;
 use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
@@ -140,6 +141,42 @@ class OwnerUtilitiesController extends Controller
         $info = $this->getPreviousReadingInfo($room, $month);
 
         return response()->json($info);
+    }
+
+    /**
+     * AJAX: Nhận diện chỉ số từ ảnh chụp công tơ điện / đồng hồ nước.
+     */
+    public function scanMeter(Request $request, GeminiService $gemini)
+    {
+        $this->actingOwner($request);
+
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
+            'meter_type' => ['nullable', 'string', 'in:electricity,water,auto'],
+        ], [
+            'image.required' => 'Vui lòng chọn ảnh chụp đồng hồ đo.',
+            'image.image' => 'File tải lên phải là hình ảnh hợp lệ.',
+            'image.mimes' => 'Hệ thống hỗ trợ các định dạng: JPEG, PNG, JPG, WEBP.',
+            'image.max' => 'Dung lượng ảnh tối đa là 10MB.',
+        ]);
+
+        $file = $request->file('image');
+        $meterType = $request->input('meter_type', 'auto');
+
+        try {
+            $result = $gemini->scanMeterReading(
+                $file->getRealPath(),
+                $file->getMimeType(),
+                $meterType === 'auto' ? null : $meterType
+            );
+
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể nhận diện số từ ảnh chụp: ' . $e->getMessage(),
+            ], 422);
+        }
     }
 
     public function store(Request $request)

@@ -187,12 +187,12 @@
                     </ul>
                 </li>
 
-                {{-- TRỢ LÝ AI --}}
+                {{-- TRỢ LÝ HỖ TRỢ --}}
                 <li class="nav-item">
                     <a
                         class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
                         href="{{ route('chatbot.index') }}">
-                        🤖 Trợ lý AI
+                        💬 Trợ lý hỗ trợ
                     </a>
                 </li>
 
@@ -202,13 +202,21 @@
             <div class="navbar-actions">
 
                 {{-- THÔNG BÁO --}}
-                <button
-                    class="notif-btn"
-                    type="button"
+                @php
+                    $unreadOwnerNotifs = \Illuminate\Support\Facades\Auth::check()
+                        ? \App\Models\Notification::where('user_id', \Illuminate\Support\Facades\Auth::id())->whereNull('read_at')->count()
+                        : 0;
+                @endphp
+                <a
+                    href="{{ route('owner.notifications.index') }}"
+                    class="notif-btn text-decoration-none"
                     aria-label="Thông báo"
-                    title="Thông báo">
+                    title="Thông báo ({{ $unreadOwnerNotifs }} chưa đọc)">
                     🔔
-                </button>
+                    @if($unreadOwnerNotifs > 0)
+                        <span class="notif-dot"></span>
+                    @endif
+                </a>
 
                 {{-- DROPDOWN TÀI KHOẢN --}}
                 <div class="dropdown user-dropdown">
