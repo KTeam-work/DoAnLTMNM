@@ -9,7 +9,7 @@
   .badge-status.pending{background:var(--yellow-light);color:#9b6a00;}
   .badge-status.paid{background:var(--green-soft);color:var(--green);}
   .badge-status.overdue{background:var(--red-soft);color:var(--red);}
-  .badge-status.cancelled{background:#f0eadc;color:var(--muted);}
+  .badge-status.cancelled{background:#f1f5f9;color:var(--muted);}
   .data-table{width:100%;border-collapse:collapse;font-size:.88rem;}
   .data-table thead th{font-size:.72rem;color:var(--muted);font-weight:700;padding:.6rem;border-bottom:1px solid var(--border);}
   .data-table tbody td{padding:.7rem .6rem;border-bottom:1px dashed var(--border);}

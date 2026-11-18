@@ -12,7 +12,7 @@
             padding: 30px;
             font-family: Arial, sans-serif;
             background: #f5f7f5;
-            color: #213430;
+            color: #0f172a;
         }
 
         .map-container {
@@ -54,14 +54,27 @@
 <body>
     <div class="map-container">
         <h1>Vị trí phòng trọ</h1>
-        <p>Xem vị trí trên Google Maps.</p>
+        <p>Xem vị trí trên Google Maps (Hỗ trợ cả tọa độ Kinh độ, Vĩ độ và Địa chỉ).</p>
+
+        @php
+            $lat = request('lat');
+            $lng = request('lng');
+            $q = request('q');
+            if (!empty($lat) && !empty($lng)) {
+                $target = "{$lat},{$lng}";
+            } elseif (!empty($q)) {
+                $target = $q;
+            } else {
+                $target = '10.7826,106.6958'; // Hồ Con Rùa tọa độ mặc định
+            }
+        @endphp
 
         <iframe
             title="Bản đồ vị trí phòng trọ"
             loading="lazy"
             allowfullscreen
-            referrerpolicy="strict-origin-when-cross-origin"
-            src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google_maps.key') }}&q={{ urlencode('Hồ Con Rùa, Thành phố Hồ Chí Minh') }}">
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://maps.google.com/maps?q={{ urlencode($target) }}&hl=vi&z=16&output=embed">
         </iframe>
     </div>
 </body>

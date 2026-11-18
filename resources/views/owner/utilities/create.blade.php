@@ -7,7 +7,7 @@
     <style>
         .source-hint {
             font-size: 11.5px;
-            color: #20584f;
+            color: #0c2340;
             font-weight: 600;
             display: inline-flex;
             align-items: center;

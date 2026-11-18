@@ -168,12 +168,12 @@
             @if($canPayQr)
               <!-- Nút thanh toán nhanh QR SePay -->
               <div class="mb-3 p-3 rounded-4 text-center" style="background: #f4f8f6; border: 1px solid #d2e4dc;">
-                <div class="fw-bold mb-1" style="color: #20584f; font-size: 15px;">Thanh toán tự động 24/7</div>
+                <div class="fw-bold mb-1" style="color: #0c2340; font-size: 15px;">Thanh toán tự động 24/7</div>
                 <div class="text-muted mb-3" style="font-size: 12px;">Quét mã QR qua app ngân hàng, hệ thống tự động gạch nợ sau 3 - 5 giây.</div>
                 <button type="button" class="btn btn-brand w-100 py-3 btn-pay-qr border-0 shadow-sm"
                         data-invoice-id="{{ $invoice->id }}"
                         data-invoice-code="{{ $invoice->invoice_code }}"
-                        style="background: #20584f; color: white; border-radius: 12px; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        style="background: #0c2340; color: white; border-radius: 12px; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                   📱 Thanh toán ngay qua QR SePay
                 </button>
               </div>

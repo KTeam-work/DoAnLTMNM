@@ -11,25 +11,94 @@
  
  <section class="hero">
         <div class="hero-inner">
-            <div class="hero-kicker">
-                👋 CHÀO {{ mb_strtoupper($lastName) }},
-                TÌM PHÒNG MỚI HÔM NAY?
+            <div class="row align-items-center g-4 g-lg-5 mb-4">
+                <!-- CỘT TRÁI: TIÊU ĐỀ & GIỚI THIỆU -->
+                <div class="col-lg-6">
+                    <div class="hero-kicker">
+                        CHÀO {{ mb_strtoupper($lastName) }}, TÌM PHÒNG MỚI HÔM NAY?
+                    </div>
+
+                    <h1>
+                        Tìm phòng phù hợp,<br>
+                        <span class="highlight">ở đúng nơi bạn muốn.</span>
+                    </h1>
+
+                    <p class="hero-desc">
+                        Khám phá phòng trọ đang được đăng cho thuê.
+                        Lọc theo khu vực, giá và diện tích để tìm nơi ở phù hợp nhất với bạn.
+                    </p>
+
+                    <div class="hero-features d-flex flex-wrap gap-2 pt-1">
+                        <span class="hero-feature-pill">Xác thực chính chủ</span>
+                        <span class="hero-feature-pill">Xem phòng trực tiếp</span>
+                        <span class="hero-feature-pill">Hợp đồng điện tử</span>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI: SLIDER ẢNH NHÀ / PHÒNG TRỌ ĐỔI QUA LẠI -->
+                <div class="col-lg-6">
+                    <div id="heroHouseCarousel" class="carousel slide carousel-fade hero-slider" data-bs-ride="carousel" data-bs-interval="3500">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#heroHouseCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#heroHouseCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#heroHouseCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                            <button type="button" data-bs-target="#heroHouseCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                        </div>
+
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" class="hero-slider-img" alt="Căn hộ cao cấp">
+                                <div class="hero-slider-overlay">
+                                    <span class="slider-tag">Nổi bật</span>
+                                    <h5 class="slider-title">Căn Hộ Duplex Cao Cấp</h5>
+                                    <div class="slider-price">Từ 4.500.000 đ/tháng</div>
+                                </div>
+                            </div>
+
+                            <div class="carousel-item">
+                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80" class="hero-slider-img" alt="Studio hiện đại">
+                                <div class="hero-slider-overlay">
+                                    <span class="slider-tag">Phòng mới</span>
+                                    <h5 class="slider-title">Studio Full Nội Thất Hiện Đại</h5>
+                                    <div class="slider-price">Từ 3.800.000 đ/tháng</div>
+                                </div>
+                            </div>
+
+                            <div class="carousel-item">
+                                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80" class="hero-slider-img" alt="Nhà trọ ban công">
+                                <div class="hero-slider-overlay">
+                                    <span class="slider-tag">Xem nhiều nhất</span>
+                                    <h5 class="slider-title">Phòng Trọ Ban Công Thoáng Mát</h5>
+                                    <div class="slider-price">Từ 2.600.000 đ/tháng</div>
+                                </div>
+                            </div>
+
+                            <div class="carousel-item">
+                                <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80" class="hero-slider-img" alt="Căn hộ mini">
+                                <div class="hero-slider-overlay">
+                                    <span class="slider-tag">An ninh 24/7</span>
+                                    <h5 class="slider-title">Căn Hộ Mini Tiện Nghi Đầy Đủ</h5>
+                                    <div class="slider-price">Từ 3.200.000 đ/tháng</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="carousel-control-prev slider-control" type="button" data-bs-target="#heroHouseCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Trước</span>
+                        </button>
+                        <button class="carousel-control-next slider-control" type="button" data-bs-target="#heroHouseCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Sau</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            <h1>
-                Tìm phòng phù hợp,<br>
-                <span class="highlight">ở đúng nơi bạn muốn.</span>
-            </h1>
-
-            <p class="hero-desc">
-                Khám phá phòng trọ đang được đăng cho thuê.
-                Lọc theo khu vực, giá và diện tích để tìm nơi ở phù hợp.
-            </p>
 
             <!-- FORM TÌM KIẾM -->
             <form method="GET"
                 action="{{ route('tenant.dashboard') }}"
-                class="search-panel"
+                class="search-panel search-panel-pill"
                 id="search-panel">
 
                 <div class="row g-0 align-items-center">
@@ -79,7 +148,7 @@
 
                     <div class="col-lg-3 p-2">
                         <button type="submit" class="search-btn">
-                            🔎 Tìm kiếm phòng
+                            Tìm kiếm phòng
                         </button>
                     </div>
                 </div>

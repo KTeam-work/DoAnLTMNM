@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Property;
 
+use App\Services\ResendService;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -109,5 +111,50 @@ class User extends Authenticatable
     public function postReports()
     {
         return $this->hasMany(PostReport::class, 'reporter_id');
+    }
+
+
+    // sendPasswordResetNotification
+      public function sendPasswordResetNotification($token): void
+    {
+        $url = route('password.reset', [
+            'token' => $token,
+            'email' => $this->email,
+        ]);
+
+        $html = '
+            <div style="font-family:Arial,sans-serif;
+                        max-width:600px;margin:auto;padding:25px;
+                        border:1px solid #ddd;border-radius:10px;">
+
+                <h2>Yêu cầu đặt lại mật khẩu</h2>
+
+                <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu
+                   cho tài khoản của bạn.</p>
+
+                <p>Nhấn vào nút bên dưới để tạo mật khẩu mới:</p>
+
+                <a href="' . e($url) . '"
+                   style="display:inline-block;
+                          padding:12px 22px;
+                          background:#2563eb;
+                          color:white;
+                          text-decoration:none;
+                          border-radius:6px;">
+                    Đặt lại mật khẩu
+                </a>
+
+                <p>Liên kết có hiệu lực trong 60 phút.</p>
+
+                <p>Nếu bạn không yêu cầu thao tác này,
+                   hãy bỏ qua email.</p>
+            </div>
+        ';
+
+        app(ResendService::class)->sendEmail(
+            $this->email,
+            'Yêu cầu đặt lại mật khẩu',
+            $html
+        );
     }
 }

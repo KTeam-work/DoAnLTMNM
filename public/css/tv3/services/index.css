@@ -4,7 +4,7 @@
         .property-name { color: var(--green-dark); font-size: 17px; font-weight: 800; }
         .property-address { margin-top: 4px; color: var(--muted); font-size: 12px; }
         .property-select { width: 100%; padding: 11px 13px; background: #fff; border: 1px solid var(--border); border-radius: 11px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: .2s; }
-        .property-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(32, 88, 79, .08); }
+        .property-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(12, 35, 64, .08); }
 
         /* STATS */
         .service-stat-card { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 20px 22px; height: 100%; }
@@ -22,10 +22,10 @@
         /* TABLE */
         .service-table { width: 100%; margin: 0; border-collapse: collapse; }
         .service-table thead th { background: #fcfaf3; color: var(--muted); font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; padding: 13px 18px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        .service-table tbody td { padding: 16px 18px; vertical-align: middle; border-bottom: 1px solid #f0eadc; color: var(--text); font-size: 12.5px; }
+        .service-table tbody td { padding: 16px 18px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; color: var(--text); font-size: 12.5px; }
         .service-table tbody tr:last-child td { border-bottom: 0; }
         .service-table tbody tr { transition: .18s; }
-        .service-table tbody tr:hover { background: #fdfbf5; }
+        .service-table tbody tr:hover { background: #ffffff; }
 
         /* SERVICE INFO */
         .service-wrapper { display: flex; align-items: center; gap: 12px; }

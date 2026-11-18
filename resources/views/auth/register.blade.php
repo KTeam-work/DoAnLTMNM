@@ -311,7 +311,7 @@
 
         font-weight: 800;
 
-        color: #20584f;
+        color: #0c2340;
 
         letter-spacing: 2px;
 
@@ -341,7 +341,7 @@
         border: 7px solid #f5f0e6;
 
         box-shadow:
-            inset 0 0 0 2px rgba(32, 88, 79, .10);
+            inset 0 0 0 2px rgba(12, 35, 64, .10);
     }
 
     .owner-desk {
@@ -444,21 +444,9 @@
 
     .content {
         width: 100%;
-
-        max-width: 1200px;
-
         min-height: calc(100vh - 48px);
-
         position: relative;
-
         z-index: 5;
-
-        display: flex;
-
-        flex-direction: column;
-
-        justify-content: space-between;
-
         padding: 38px 42px;
     }
 
@@ -468,19 +456,18 @@
     ===================================================== */
 
     .logo {
-        display: block;
-
+        position: absolute;
+        top: 28px;
+        left: 4.5%;
+        z-index: 40;
         color: #ffffff;
-
-        font-size: 23px;
-
+        font-size: 26px;
         font-weight: 800;
-
         letter-spacing: -0.8px;
-
         line-height: 1;
-
         text-decoration: none;
+        display: inline-flex;
+        align-items: center;
     }
 
     .logo span {
@@ -493,57 +480,90 @@
     ===================================================== */
 
     .intro {
-        color: white;
-
-        width: 45%;
-
-        margin-bottom: 40px;
+        position: absolute;
+        left: 4.5%;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 440px;
+        max-width: calc(100% - 520px);
+        z-index: 25;
+        background: rgba(12, 35, 64, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 34px 38px;
+        border-radius: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.28);
+        color: #ffffff;
     }
 
     .intro-label {
-        display: inline-block;
-
-        padding: 7px 12px;
-
-        border-radius: 20px;
-
-        background: rgba(255, 255, 255, .13);
-
-        font-size: 10px;
-
-        font-weight: 600;
-
-        margin-bottom: 18px;
-
-        backdrop-filter: blur(5px);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
     }
 
     .intro h1 {
-        margin: 0;
-
-        font-size: 44px;
-
-        line-height: 1.2;
-
-        letter-spacing: -1.5px;
-
+        margin: 0 0 14px;
+        font-size: clamp(30px, 3vw, 42px);
+        line-height: 1.15;
+        letter-spacing: -1.2px;
         font-weight: 800;
+        color: #ffffff;
     }
 
     .intro h1 span {
-        color: #f2dfb5;
+        color: #f59e0b;
     }
 
     .intro p {
-        margin-top: 20px;
+        margin: 0 0 20px;
+        max-width: 100%;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.7;
+    }
 
-        max-width: 440px;
+    .intro-features {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
 
-        color: rgba(255, 255, 255, .75);
-
+    .intro-feature-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         font-size: 13px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.95);
+    }
 
-        line-height: 1.8;
+    .intro-feature-check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #ef7d27;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 800;
+        flex-shrink: 0;
     }
 
 
@@ -694,10 +714,10 @@
     }
 
     .field input:focus {
-        border-color: #20584f;
+        border-color: #0c2340;
 
         box-shadow:
-            0 0 0 3px rgba(32, 88, 79, .07);
+            0 0 0 3px rgba(12, 35, 64, .07);
     }
 
     .field input.input-error {
@@ -799,7 +819,7 @@
     }
 
     .role-input:checked + .role {
-        border-color: #20584f;
+        border-color: #0c2340;
 
         background: #f1f7f5;
     }
@@ -821,7 +841,7 @@
     }
 
     .role-input:checked + .role .role-icon {
-        background: #20584f;
+        background: #0c2340;
     }
 
     .role-text strong {
@@ -862,11 +882,11 @@
     .terms input {
         margin-top: 2px;
 
-        accent-color: #20584f;
+        accent-color: #0c2340;
     }
 
     .terms a {
-        color: #20584f;
+        color: #0c2340;
 
         font-weight: 600;
 
@@ -887,7 +907,7 @@
 
         border-radius: 9px;
 
-        background: #20584f;
+        background: #0c2340;
 
         color: white;
 
@@ -900,13 +920,13 @@
         cursor: pointer;
 
         box-shadow:
-            0 7px 16px rgba(32, 88, 79, .16);
+            0 7px 16px rgba(12, 35, 64, .16);
 
         transition: .2s;
     }
 
     .register-button:hover {
-        background: #17463e;
+        background: #071526;
 
         transform: translateY(-1px);
     }
@@ -927,7 +947,7 @@
     }
 
     .login a {
-        color: #20584f;
+        color: #0c2340;
 
         font-weight: 700;
 
@@ -935,7 +955,7 @@
     }
 
     .login a:hover {
-        color: #17463e;
+        color: #071526;
 
         text-decoration: underline;
     }
@@ -944,6 +964,24 @@
     /* =====================================================
        RESPONSIVE
     ===================================================== */
+
+    @media(max-width: 1100px) {
+        .register-card {
+            right: 2.5%;
+            width: 400px;
+            padding: 30px;
+        }
+
+        .intro {
+            left: 3%;
+            width: 360px;
+            padding: 26px 28px;
+        }
+
+        .intro h1 {
+            font-size: 32px;
+        }
+    }
 
     @media(max-width: 900px) {
 
@@ -960,17 +998,16 @@
         .content {
             min-height: 100vh;
 
-            padding: 28px;
+            padding: 25px 20px;
+        }
+
+        .logo {
+            top: 25px;
+            left: 25px;
         }
 
         .intro {
-            width: 100%;
-
-            margin-top: 80px;
-        }
-
-        .intro h1 {
-            font-size: 34px;
+            display: none;
         }
 
         .register-card {
@@ -985,7 +1022,7 @@
 
             max-width: 500px;
 
-            margin: 0 auto;
+            margin: 75px auto 30px;
         }
 
         .tenant-window {
@@ -1067,19 +1104,29 @@
 }
 
 .password-wrapper input {
-    padding-right: 42px;
+    padding-right: 44px;
+}
+
+/* Ẩn con mắt tự động của trình duyệt Edge/IE khi gõ mật khẩu */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input::-ms-reveal,
+input::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .toggle-password {
     position: absolute;
 
     top: 50%;
-    right: 10px;
+    right: 12px;
 
     transform: translateY(-50%);
 
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
 
     display: flex;
     align-items: center;
@@ -1092,20 +1139,23 @@
 
     color: #64736f;
 
-    font-size: 14px;
-
     cursor: pointer;
 
-    transition: .2s ease;
+    transition: color .2s ease;
 }
 
 .toggle-password:hover {
-    color: #20584f;
-    transform: translateY(-50%) scale(1.08);
+    color: #0c2340;
 }
 
 .toggle-password:focus {
     outline: none;
+}
+
+.toggle-password svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
 }
 
 </style>
@@ -1190,9 +1240,9 @@
 
     <!-- LOGO -->
 
-    <div class="logo">
+    <a href="{{ url('/') }}" class="logo">
         Trọ <span>Ơi</span>
-    </div>
+    </a>
 
 
     <!-- INTRO -->
@@ -1214,6 +1264,21 @@
             lưu lại những nơi bạn yêu thích và kết nối trực tiếp
             với chủ trọ.
         </p>
+
+        <div class="intro-features">
+            <div class="intro-feature-item">
+                <span class="intro-feature-check">✓</span>
+                <span>Tìm trọ nhanh chóng, an tâm</span>
+            </div>
+            <div class="intro-feature-item">
+                <span class="intro-feature-check">✓</span>
+                <span>Kết nối trực tiếp chủ trọ</span>
+            </div>
+            <div class="intro-feature-item">
+                <span class="intro-feature-check">✓</span>
+                <span>Đăng tin cho thuê dễ dàng</span>
+            </div>
+        </div>
 
     </div>
 
@@ -1534,8 +1599,16 @@
                 class="toggle-password"
                 data-target="password"
                 aria-label="Hiện mật khẩu"
+                tabindex="-1"
             >
-                👁
+                <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-closed" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
             </button>
 
         </div>
@@ -1575,8 +1648,16 @@
                 class="toggle-password"
                 data-target="password_confirmation"
                 aria-label="Hiện mật khẩu"
+                tabindex="-1"
             >
-                👁
+                <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-closed" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
             </button>
 
         </div>
@@ -1650,7 +1731,6 @@
     </div>
 
 </div>
-```
 
 </div>
 
@@ -1726,21 +1806,17 @@ document.querySelectorAll(".toggle-password").forEach(function (button) {
 
         if (!input) return;
 
-        if (input.type === "password") {
+        const isPassword = input.type === "password";
+        input.type = isPassword ? "text" : "password";
 
-            input.type = "text";
-
-            button.innerText = "🙈";
-            button.setAttribute("aria-label", "Ẩn mật khẩu");
-
-        } else {
-
-            input.type = "password";
-
-            button.innerText = "👁";
-            button.setAttribute("aria-label", "Hiện mật khẩu");
-
+        const eyeOpen = button.querySelector(".eye-open");
+        const eyeClosed = button.querySelector(".eye-closed");
+        if (eyeOpen && eyeClosed) {
+            eyeOpen.style.display = isPassword ? "none" : "block";
+            eyeClosed.style.display = isPassword ? "block" : "none";
         }
+        button.setAttribute("aria-label", isPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+        button.setAttribute("aria-pressed", String(isPassword));
 
     });
 

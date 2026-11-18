@@ -9,10 +9,22 @@
         $owner = optional($property)->owner;
         $activePost = $room->rentalPosts->first() ?? \App\Models\RentalPost::where('room_id', $room->id)->latest()->first();
 
+        $lat = optional($property)->latitude;
+        $lng = optional($property)->longitude;
+        $hasCoords = !empty($lat) && !empty($lng) && is_numeric($lat) && is_numeric($lng);
+
+        $fullAddress = trim(implode(', ', array_filter([
+            optional($property)->address,
+            optional($property)->ward,
+            optional($property)->district,
+        ])));
+
+        $mapQuery = $hasCoords ? "{$lat},{$lng}" : ($fullAddress ?: (optional($property)->address ?? 'Thành phố Hồ Chí Minh'));
+
         $room = [
             'title' => $room->name,
             'id' => $room->id,
-            'address' => optional($property)->address ?? 'Chưa cập nhật địa chỉ',
+            'address' => $fullAddress ?: (optional($property)->address ?? 'Chưa cập nhật địa chỉ'),
             'price' => number_format((float) $room->price, 0, ',', '.') . 'đ',
             'area' => number_format((float) $room->area, 0, ',', '.') . ' m²',
             'people' => $room->max_people . ' người',
@@ -26,7 +38,11 @@
                 ?? ['WC riêng', 'Wi-Fi', 'Chỗ để xe'],
             'landlord' => optional($owner)->name ?? 'Chủ trọ',
             'phone' => optional($owner)->phone ?? '',
-            'map' => optional($property)->address ?? 'Chưa cập nhật vị trí',
+            'latitude' => $lat,
+            'longitude' => $lng,
+            'has_coords' => $hasCoords,
+            'map_query' => $mapQuery,
+            'map' => $fullAddress ?: (optional($property)->address ?? 'Chưa cập nhật vị trí'),
         ];
     } else {
         $room = null;
@@ -336,39 +352,48 @@
 
 
                     <!-- =========================
-                         GOOGLE MAP
+                         VỊ TRÍ PHÒNG TRỌ (GOOGLE MAPS)
                     ========================== -->
 
                     <section class="room-content-card">
 
-                        <h2>
-                            📍 Vị trí phòng
-                        </h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <h2 style="margin: 0;">
+                                📍 Vị trí phòng trọ
+                            </h2>
+
+                            @if(!empty($room['has_coords']))
+                                <span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(12, 35, 64, 0.08); border: 1px solid rgba(12, 35, 64, 0.15); border-radius: 999px; font-size: 12px; font-weight: 700; color: #0c2340;">
+                                    🎯 Tọa độ GPS: {{ number_format((float)$room['latitude'], 5) }}, {{ number_format((float)$room['longitude'], 5) }}
+                                </span>
+                            @endif
+                        </div>
 
                         <div class="section-line"></div>
 
+                        <div class="map-address" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                📌 <span>{{ $room['address'] }}</span>
+                            </div>
 
-
-                        <div class="map-address">
-
-                            📌
-
-                            {{ $room['map'] }}
-
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query={{ urlencode($room['map_query']) }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style="font-size: 13px; font-weight: 700; color: #ef7d27; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                            >
+                                Mở chỉ đường trên Google Maps ↗
+                            </a>
                         </div>
 
-
-
                         <div class="map-wrapper">
-
                             <iframe
                                 class="room-map"
-                                src="https://www.google.com/maps?q={{ urlencode($room['map']) }}&output=embed"
+                                src="https://maps.google.com/maps?q={{ urlencode($room['map_query']) }}&hl=vi&z=16&output=embed"
                                 allowfullscreen
                                 loading="lazy"
                                 referrerpolicy="no-referrer-when-downgrade"
                             ></iframe>
-
                         </div>
 
                     </section>

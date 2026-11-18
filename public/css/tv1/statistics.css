@@ -26,7 +26,7 @@
 
 .stats-title {
     margin: 0 0 8px;
-    color: #20584f;
+    color: #0c2340;
     font-size: 28px;
     font-weight: 800;
     line-height: 1.35;
@@ -48,7 +48,7 @@
     padding: 11px 17px;
     border: 0;
     border-radius: 10px;
-    background: #20584f;
+    background: #0c2340;
     color: #fff;
     font-size: 13px;
     font-weight: 700;
@@ -57,7 +57,7 @@
 }
 
 .stats-export-btn:hover {
-    background: #17463e;
+    background: #071526;
     transform: translateY(-1px);
 }
 
@@ -84,7 +84,7 @@
     border: 1px solid #e7e8df;
     border-radius: 16px;
     background: #fff;
-    box-shadow: 0 5px 18px rgba(32, 88, 79, 0.045);
+    box-shadow: 0 5px 18px rgba(12, 35, 64, 0.045);
 }
 
 .stats-card-icon {
@@ -129,7 +129,7 @@
 
 .stats-card-info h2 {
     margin: 0 0 7px;
-    color: #20584f;
+    color: #0c2340;
     font-size: 29px;
     font-weight: 800;
     line-height: 1.2;
@@ -157,7 +157,7 @@
     border: 1px solid #e7e8df;
     border-radius: 16px;
     background: #fff;
-    box-shadow: 0 5px 18px rgba(32, 88, 79, 0.045);
+    box-shadow: 0 5px 18px rgba(12, 35, 64, 0.045);
 }
 
 .stats-panel-header {
@@ -171,7 +171,7 @@
 
 .stats-panel-header h2 {
     margin: 0 0 7px;
-    color: #20584f;
+    color: #0c2340;
     font-size: 17px;
     font-weight: 800;
     line-height: 1.5;
@@ -190,7 +190,7 @@
     padding: 7px 11px;
     border-radius: 20px;
     background: #edf4ef;
-    color: #20584f;
+    color: #0c2340;
     font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
@@ -303,7 +303,7 @@
 }
 
 .stats-table th {
-    color: #20584f;
+    color: #0c2340;
     font-weight: 800;
     white-space: nowrap;
 }
@@ -326,7 +326,7 @@
 }
 
 .stats-table td:last-child {
-    color: #20584f;
+    color: #0c2340;
     font-weight: 800;
 }
 

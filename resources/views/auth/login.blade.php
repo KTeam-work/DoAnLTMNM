@@ -22,7 +22,7 @@
             min-height: 100vh;
             font-family: "Be Vietnam Pro", sans-serif;
             background: #dfe5e1;
-            color: #17463e;
+            color: #071526;
         }
 
         .page {
@@ -62,15 +62,16 @@
 
         .window {
             position: absolute;
-            left: 10%;
-            top: 13%;
-            width: 245px;
-            height: 260px;
-            border: 13px solid #f1e8d7;
+            left: 8%;
+            top: 10%;
+            width: 220px;
+            height: 220px;
+            border: 10px solid #f1e8d7;
             border-radius: 12px;
             background: linear-gradient(135deg, #7ca49c, #b6c9bd);
-            box-shadow: 0 20px 45px rgba(68,71,61,.18);
-            z-index: 3;
+            box-shadow: 0 20px 45px rgba(68,71,61,.14);
+            opacity: .65;
+            z-index: 2;
         }
 
         .window::before,
@@ -98,31 +99,31 @@
 
         .window-light {
             position: absolute;
-            width: 75px;
-            height: 75px;
-            right: 27px;
-            top: 30px;
+            width: 65px;
+            height: 65px;
+            right: 22px;
+            top: 24px;
             border-radius: 50%;
             background: #f4d99f;
-            box-shadow: 0 0 40px rgba(244,217,159,.7);
+            box-shadow: 0 0 35px rgba(244,217,159,.6);
         }
 
         .curtain {
             position: absolute;
-            top: 7%;
-            left: 6%;
-            width: 70px;
-            height: 330px;
+            top: 6%;
+            left: 5%;
+            width: 50px;
+            height: 220px;
             background: linear-gradient(90deg, #7e8170, #a9a88d, #777866);
-            border-radius: 0 0 20px 20px;
-            opacity: .92;
-            z-index: 4;
+            border-radius: 0 0 16px 16px;
+            opacity: .28;
+            z-index: 2;
         }
 
         .curtain-right {
-            left: 27%;
-            width: 48px;
-            opacity: .65;
+            left: 23%;
+            width: 40px;
+            opacity: .2;
         }
 
         .picture {
@@ -232,100 +233,103 @@
 
         .desk {
             position: absolute;
-            left: 4%;
-            bottom: 20%;
-            width: 210px;
-            height: 115px;
-            z-index: 7;
+            left: 3%;
+            bottom: 4%;
+            width: 185px;
+            height: 90px;
+            z-index: 5;
+            opacity: .8;
         }
 
         .desk-top {
             position: absolute;
             top: 0;
-            width: 210px;
-            height: 24px;
+            width: 185px;
+            height: 18px;
             border-radius: 6px;
             background: #765b49;
         }
 
         .desk-leg {
             position: absolute;
-            top: 20px;
-            width: 13px;
-            height: 100px;
+            top: 16px;
+            width: 10px;
+            height: 74px;
             background: #604a3c;
         }
 
-        .desk-leg.left { left: 18px; }
-        .desk-leg.right { right: 18px; }
+        .desk-leg.left { left: 16px; }
+        .desk-leg.right { right: 16px; }
 
         .chair {
             position: absolute;
-            left: 10%;
-            bottom: 14%;
-            width: 85px;
-            height: 100px;
-            z-index: 8;
+            left: 8%;
+            bottom: 2%;
+            width: 72px;
+            height: 80px;
+            z-index: 6;
+            opacity: .8;
         }
 
         .chair-seat {
             position: absolute;
-            top: 18px;
-            width: 85px;
-            height: 25px;
-            border-radius: 8px;
+            top: 16px;
+            width: 72px;
+            height: 20px;
+            border-radius: 7px;
             background: #526d64;
         }
 
         .chair-back {
             position: absolute;
-            left: 7px;
-            top: -20px;
-            width: 70px;
-            height: 50px;
-            border-radius: 10px;
+            left: 6px;
+            top: -16px;
+            width: 60px;
+            height: 40px;
+            border-radius: 8px;
             background: #5f7d73;
         }
 
         .chair-leg {
             position: absolute;
-            top: 39px;
-            width: 8px;
-            height: 65px;
+            top: 32px;
+            width: 7px;
+            height: 48px;
             background: #57483d;
         }
 
-        .chair-leg.one { left: 12px; }
-        .chair-leg.two { right: 12px; }
+        .chair-leg.one { left: 10px; }
+        .chair-leg.two { right: 10px; }
 
         .lamp {
             position: absolute;
-            left: 11%;
-            bottom: 42%;
-            z-index: 9;
+            left: 6%;
+            bottom: 12%;
+            z-index: 7;
+            opacity: .85;
         }
 
         .lamp-base {
-            width: 50px;
-            height: 10px;
-            border-radius: 10px;
+            width: 42px;
+            height: 8px;
+            border-radius: 8px;
             background: #59483c;
         }
 
         .lamp-neck {
-            width: 5px;
-            height: 65px;
-            margin-left: 22px;
+            width: 4px;
+            height: 52px;
+            margin-left: 19px;
             background: #59483c;
         }
 
         .lamp-head {
-            width: 55px;
-            height: 35px;
-            margin-left: -3px;
-            border-radius: 50% 50% 10px 10px;
+            width: 46px;
+            height: 28px;
+            margin-left: -2px;
+            border-radius: 50% 50% 8px 8px;
             background: #e6c77f;
-            box-shadow: 0 0 45px rgba(239,202,119,.75);
+            box-shadow: 0 0 35px rgba(239,202,119,.6);
         }
 
         .plant {
@@ -379,56 +383,104 @@
 
         .logo {
             position: absolute;
-            top: 38px;
-            left: 42px;
-            color: #17463e;
-            font-size: 23px;
+            top: 28px;
+            left: 4.5%;
+            color: #0c2340;
+            font-size: 26px;
             font-weight: 800;
             letter-spacing: -.8px;
             line-height: 1;
             text-decoration: none;
+            z-index: 40;
+            display: inline-flex;
+            align-items: center;
         }
 
         .logo span { color: #ef7d27; }
 
         .intro {
             position: absolute;
-            left: 6%;
-            top: 31%;
-            width: 390px;
-            color: #17463e;
-            z-index: 15;
+            left: 4.5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 440px;
+            max-width: calc(100% - 520px);
+            z-index: 25;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 34px 38px;
+            border-radius: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 20px 45px rgba(12, 35, 64, 0.10);
+            color: #0c2340;
         }
 
         .intro-label {
-            display: inline-block;
-            padding: 7px 13px;
-            margin-bottom: 15px;
-            border-radius: 50px;
-            background: rgba(32,88,79,.12);
-            border: 1px solid rgba(32,88,79,.2);
-            color: #17463e;
-            font-size: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            margin-bottom: 16px;
+            border-radius: 999px;
+            background: rgba(12, 35, 64, 0.07);
+            border: 1px solid rgba(12, 35, 64, 0.14);
+            color: #0c2340;
+            font-size: 11px;
             font-weight: 800;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
         }
 
         .intro h1 {
-            font-size: clamp(38px, 4vw, 58px);
-            line-height: 1.08;
-            letter-spacing: -2.4px;
+            font-size: clamp(30px, 3vw, 42px);
+            line-height: 1.15;
+            letter-spacing: -1.2px;
             font-weight: 800;
+            color: #0c2340;
+            margin: 0 0 14px;
         }
 
-        .intro h1 span { color: #72543f; }
+        .intro h1 span { color: #ef7d27; }
 
         .intro p {
-            margin-top: 18px;
-            max-width: 370px;
-            color: #17463e;
+            margin: 0 0 20px;
+            max-width: 100%;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.7;
+        }
+
+        .intro-features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(12, 35, 64, 0.08);
+        }
+
+        .intro-feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 13px;
             font-weight: 600;
-            line-height: 1.8;
+            color: #1e293b;
+        }
+
+        .intro-feature-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0c2340;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            flex-shrink: 0;
         }
 
         .login-card {
@@ -448,7 +500,7 @@
         }
 
         .login-card h2 {
-            color: #17463e;
+            color: #071526;
             font-size: 29px;
             font-weight: 800;
         }
@@ -508,21 +560,31 @@
         }
 
         .input:focus {
-            border-color: #20584f;
-            box-shadow: 0 0 0 3px rgba(32,88,79,.1);
+            border-color: #0c2340;
+            box-shadow: 0 0 0 3px rgba(12, 35, 64,.1);
             background: #fff;
         }
 
         .password-wrapper { position: relative; }
         .password-input { padding-right: 48px; }
 
+        /* Ẩn con mắt tự động của trình duyệt Edge/IE khi gõ mật khẩu */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear,
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
         .toggle-password {
             position: absolute;
             top: 50%;
             right: 12px;
             transform: translateY(-50%);
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -530,8 +592,19 @@
             border-radius: 6px;
             background: transparent;
             color: #64736f;
-            font-size: 16px;
             cursor: pointer;
+            padding: 0;
+            transition: color .2s ease;
+        }
+
+        .toggle-password:hover {
+            color: #0c2340;
+        }
+
+        .toggle-password svg {
+            width: 19px;
+            height: 19px;
+            pointer-events: none;
         }
 
         .toggle-password:focus-visible,
@@ -557,10 +630,10 @@
             color: #64736f;
         }
 
-        .remember input { accent-color: #20584f; }
+        .remember input { accent-color: #0c2340; }
 
         .forgot {
-            color: #20584f;
+            color: #0c2340;
             font-weight: 700;
             text-decoration: none;
         }
@@ -570,7 +643,7 @@
             min-height: 50px;
             border: none;
             border-radius: 11px;
-            background: #20584f;
+            background: #0c2340;
             color: white;
             font-family: inherit;
             font-size: 13px;
@@ -580,9 +653,9 @@
         }
 
         .btn-login:hover {
-            background: #17463e;
+            background: #071526;
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(32,88,79,.2);
+            box-shadow: 0 8px 20px rgba(12, 35, 64,.2);
         }
 
         .btn-login:disabled {
@@ -615,7 +688,7 @@
         }
 
         .register a {
-            color: #20584f;
+            color: #0c2340;
             font-weight: 800;
             text-decoration: none;
         }
@@ -624,17 +697,18 @@
 
         @media (max-width: 1050px) {
             .login-card {
-                right: 2.5%;
-                width: 390px;
+                right: 2%;
+                width: 380px;
                 padding: 30px;
             }
 
             .intro {
-                left: 5%;
-                width: 330px;
+                left: 3%;
+                width: 360px;
+                padding: 26px 28px;
             }
 
-            .intro h1 { font-size: 44px; }
+            .intro h1 { font-size: 32px; }
         }
 
         @media (max-width: 850px) {
@@ -769,6 +843,21 @@
                 quản lý tin đăng và kết nối với cộng đồng
                 trên Trọ Ơi.
             </p>
+
+            <div class="intro-features">
+                <div class="intro-feature-item">
+                    <span class="intro-feature-check">✓</span>
+                    <span>Phòng trọ xác thực 100%</span>
+                </div>
+                <div class="intro-feature-item">
+                    <span class="intro-feature-check">✓</span>
+                    <span>Giá thuê và tiện ích minh bạch</span>
+                </div>
+                <div class="intro-feature-item">
+                    <span class="intro-feature-check">✓</span>
+                    <span>Kết nối trực tiếp chủ trọ</span>
+                </div>
+            </div>
         </section>
 
         <section class="login-card" aria-labelledby="loginTitle">
@@ -839,9 +928,20 @@
                             type="button"
                             class="toggle-password"
                             id="togglePassword"
+                            data-target="password"
                             aria-label="Hiện mật khẩu"
                             aria-pressed="false"
-                        >👁</button>
+                            tabindex="-1"
+                        >
+                            <svg class="eye-open" xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-closed" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
@@ -856,10 +956,10 @@
                         Ghi nhớ đăng nhập
                     </label>
 
-                    <a href="#" class="forgot" id="forgotLink">
-                        Quên mật khẩu?
+                  <a href="{{ route('password.request') }}" class="forgot">
+            Quên mật khẩu?
                     </a>
-                </div>
+          </div>
 
                 <button
                     type="submit"
@@ -886,14 +986,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const loginButton = document.getElementById("loginButton");
     const passwordInput = document.getElementById("password");
     const togglePassword = document.getElementById("togglePassword");
-    const forgotLink = document.getElementById("forgotLink");
+  
 
     if (togglePassword && passwordInput) {
         togglePassword.addEventListener("click", function () {
             const showing = passwordInput.type === "password";
 
             passwordInput.type = showing ? "text" : "password";
-            togglePassword.textContent = showing ? "🙈" : "👁";
+            const eyeOpen = togglePassword.querySelector(".eye-open");
+            const eyeClosed = togglePassword.querySelector(".eye-closed");
+            if (eyeOpen && eyeClosed) {
+                eyeOpen.style.display = showing ? "none" : "block";
+                eyeClosed.style.display = showing ? "block" : "none";
+            }
             togglePassword.setAttribute(
                 "aria-label",
                 showing ? "Ẩn mật khẩu" : "Hiện mật khẩu"
@@ -921,12 +1026,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    if (forgotLink) {
-        forgotLink.addEventListener("click", function (event) {
-            event.preventDefault();
-            alert("Chức năng quên mật khẩu chưa được cấu hình.");
-        });
-    }
 });
 </script>
 </body>

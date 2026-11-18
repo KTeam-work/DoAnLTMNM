@@ -12,6 +12,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+
 
 use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
 use App\Http\Controllers\Owner\PaymentController as OwnerPaymentController;
@@ -32,6 +34,8 @@ use App\Http\Controllers\Tenant\TenantDashboardController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\OwnerRoomController;
 use App\Http\Controllers\Owner\OwnerRentalPostController;
+
+
 
 
 /*
@@ -729,3 +733,28 @@ Route::middleware(['auth', 'throttle:20,1'])->group(function () {
 
 // QR 
 Route::post('/sepay/webhook', [PaymentController::class, 'webhook']);
+
+
+// Quên mật khẩu
+Route::get('/forgot-password', [
+    ForgotPasswordController::class,
+    'showForgotForm'
+])->middleware('guest')->name('password.request');
+
+// Gửi link đặt lại mật khẩu
+Route::post('/forgot-password', [
+    ForgotPasswordController::class,
+    'sendResetLink'
+])->middleware('guest')->name('password.email');
+
+// Hiển thị form đặt lại mật khẩu
+Route::get('/reset-password/{token}', [
+    ForgotPasswordController::class,
+    'showResetForm'
+])->middleware('guest')->name('password.reset');
+
+// Cập nhật mật khẩu mới
+Route::post('/reset-password', [
+    ForgotPasswordController::class,
+    'resetPassword'
+])->middleware('guest')->name('password.update');

@@ -5,7 +5,7 @@
             --light-green: #e6f0eb;
             --yellow: #ffb800;
             --background: #f9f9f6;
-            --border: #e6dcc2;
+            --border: #e2e8f0;
             --text: #1f2937;
             --muted: #6b7280;
         }
@@ -130,7 +130,7 @@
             border-radius: 11px;
             outline: none;
             background: #fff;
-            color: #213430;
+            color: #0f172a;
             padding: 0 14px;
             font-family: inherit;
             font-size: 12px;
@@ -176,7 +176,7 @@
 
         .data-table tbody td {
             padding: 16px 12px;
-            border-bottom: 1px solid #f0eadc;
+            border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
         }
 
@@ -190,7 +190,7 @@
 
         .room-name {
             font-weight: 800;
-            color: #213430;
+            color: #0f172a;
         }
 
         .room-code {
@@ -236,7 +236,7 @@
 
         .badge-status.hidden,
         .badge-status.other {
-            background: #f0eadc;
+            background: #f1f5f9;
             color: #6b7280;
         }
 

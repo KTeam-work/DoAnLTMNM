@@ -11,7 +11,7 @@
 
     <style>
         :root {
-            --brand-green: #20584f;
+            --brand-navy: #0c2340;
             --brand-green-dark: #123731;
             --brand-yellow: #f5c84c;
             --text-dark: #1e293b;
@@ -126,7 +126,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            border-bottom: 2px solid var(--brand-green);
+            border-bottom: 2px solid var(--brand-navy);
             padding-bottom: 14px;
             margin-bottom: 16px;
         }
@@ -134,7 +134,7 @@
         .property-info h2 {
             font-size: 19px;
             font-weight: 800;
-            color: var(--brand-green);
+            color: var(--brand-navy);
             margin-bottom: 4px;
             text-transform: uppercase;
             letter-spacing: -0.3px;
@@ -153,7 +153,7 @@
         .logo-text {
             font-size: 24px;
             font-weight: 900;
-            color: var(--brand-green);
+            color: var(--brand-navy);
             letter-spacing: -1px;
             line-height: 1;
         }
@@ -235,7 +235,7 @@
         .party-box {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-left: 3px solid var(--brand-green);
+            border-left: 3px solid var(--brand-navy);
             border-radius: 6px;
             padding: 10px 14px;
             font-size: 12.5px;
@@ -244,7 +244,7 @@
         .party-title {
             font-size: 11px;
             font-weight: 800;
-            color: var(--brand-green);
+            color: var(--brand-navy);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 6px;
@@ -320,8 +320,8 @@
         }
 
         .grand-total-row {
-            border-top: 2px solid var(--brand-green);
-            border-bottom: 2px solid var(--brand-green);
+            border-top: 2px solid var(--brand-navy);
+            border-bottom: 2px solid var(--brand-navy);
             background: #f0fdf4;
         }
 
@@ -329,7 +329,7 @@
             padding: 8px 8px;
             font-size: 15px;
             font-weight: 800;
-            color: var(--brand-green);
+            color: var(--brand-navy);
         }
 
         .words-box {

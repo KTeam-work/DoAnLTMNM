@@ -1,7 +1,7 @@
 
         body {
-            background: #f8f5eb;
-            color: #213430;
+            background: #f8fafc;
+            color: #0f172a;
             font-family: 'Be Vietnam Pro', sans-serif;
         }
 
@@ -20,7 +20,7 @@
         }
 
         .eyebrow {
-            color: #20584f;
+            color: #0c2340;
             font-size: 12px;
             font-weight: 800;
             letter-spacing: 1.4px;
@@ -35,13 +35,13 @@
         }
 
         .page-heading p {
-            color: #78837e;
+            color: #64748b;
             margin: 8px 0 0;
         }
 
         .btn-owner {
             border: none;
-            background: #20584f;
+            background: #0c2340;
             color: white;
             border-radius: 14px;
             padding: 12px 18px;
@@ -50,7 +50,7 @@
         }
 
         .btn-owner:hover {
-            background: #17463e;
+            background: #071526;
             color: white;
             transform: translateY(-1px);
         }
@@ -64,10 +64,10 @@
 
         .stat-card {
             background: white;
-            border: 1px solid #e6dcc2;
+            border: 1px solid #e2e8f0;
             border-radius: 22px;
             padding: 20px;
-            box-shadow: 0 8px 28px rgba(32, 88, 79, .05);
+            box-shadow: 0 8px 28px rgba(12, 35, 64, .05);
         }
 
         .stat-top {
@@ -80,8 +80,8 @@
             width: 46px;
             height: 46px;
             border-radius: 15px;
-            background: #eaf3ef;
-            color: #20584f;
+            background: #eff6ff;
+            color: #0c2340;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -95,21 +95,21 @@
         }
 
         .stat-card span {
-            color: #78837e;
+            color: #64748b;
             font-size: 13px;
         }
 
         .content-card {
             background: white;
-            border: 1px solid #e6dcc2;
+            border: 1px solid #e2e8f0;
             border-radius: 24px;
-            box-shadow: 0 10px 32px rgba(32, 88, 79, .05);
+            box-shadow: 0 10px 32px rgba(12, 35, 64, .05);
             overflow: hidden;
         }
 
         .card-header-owner {
             padding: 22px 24px;
-            border-bottom: 1px solid #eee7d8;
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -124,7 +124,7 @@
 
         .card-header-owner p {
             margin: 4px 0 0;
-            color: #78837e;
+            color: #64748b;
             font-size: 13px;
         }
 
@@ -136,7 +136,7 @@
         }
 
         .property-card {
-            border: 1px solid #e6dcc2;
+            border: 1px solid #e2e8f0;
             border-radius: 20px;
             overflow: hidden;
             background: #fff;
@@ -146,7 +146,7 @@
 
         .property-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 14px 35px rgba(32, 88, 79, .10);
+            box-shadow: 0 14px 35px rgba(12, 35, 64, .10);
         }
 
         .property-image {
@@ -165,8 +165,8 @@
             position: absolute;
             top: 12px;
             right: 12px;
-            background: #eaf3ef;
-            color: #20584f;
+            background: #eff6ff;
+            color: #0c2340;
             padding: 7px 11px;
             border-radius: 20px;
             font-size: 11px;
@@ -175,7 +175,7 @@
 
         .property-status.inactive {
             background: #f1f1ef;
-            color: #78837e;
+            color: #64748b;
         }
 
         .property-body {
@@ -190,14 +190,14 @@
         }
 
         .property-address {
-            color: #78837e;
+            color: #64748b;
             font-size: 12px;
             min-height: 38px;
             overflow-wrap: anywhere;
         }
 
         .property-description {
-            color: #78837e;
+            color: #64748b;
             font-size: 12px;
             margin-top: 10px;
             overflow-wrap: anywhere;
@@ -206,15 +206,15 @@
         .property-meta {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            border-top: 1px solid #eee7d8;
-            border-bottom: 1px solid #eee7d8;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
             margin: 16px 0;
             padding: 12px 0;
             text-align: center;
         }
 
         .property-meta div {
-            border-right: 1px solid #eee7d8;
+            border-right: 1px solid #e2e8f0;
             padding: 0 4px;
         }
 
@@ -229,7 +229,7 @@
         }
 
         .property-meta span {
-            color: #78837e;
+            color: #64748b;
             font-size: 10px;
         }
 
@@ -255,13 +255,13 @@
         }
 
         .btn-light-owner {
-            background: #eaf3ef;
-            color: #20584f;
+            background: #eff6ff;
+            color: #0c2340;
         }
 
         .btn-light-owner:hover {
             background: #dcebe4;
-            color: #17463e;
+            color: #071526;
         }
 
         .btn-delete-owner {
@@ -284,7 +284,7 @@
             grid-column: 1 / -1;
             text-align: center;
             padding: 50px 20px;
-            color: #78837e;
+            color: #64748b;
         }
 
         .empty-property-icon {
@@ -299,7 +299,7 @@
         }
 
         .modal-header {
-            background: #20584f;
+            background: #0c2340;
             color: white;
             border: none;
             padding: 20px 24px;
@@ -313,13 +313,13 @@
         .form-select {
             border-radius: 12px;
             padding: 11px 13px;
-            border-color: #e6dcc2;
+            border-color: #e2e8f0;
         }
 
         .form-control:focus,
         .form-select:focus {
-            border-color: #20584f;
-            box-shadow: 0 0 0 .2rem rgba(32, 88, 79, .10);
+            border-color: #0c2340;
+            box-shadow: 0 0 0 .2rem rgba(12, 35, 64, .10);
         }
 
         .required {

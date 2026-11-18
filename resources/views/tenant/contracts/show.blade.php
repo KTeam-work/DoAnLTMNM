@@ -16,7 +16,7 @@
         <span class="mx-2 text-light-gray">/</span>
         <a href="{{ route('tenant.contracts.index') }}" class="text-decoration-none text-muted">Hợp đồng</a>
         <span class="mx-2 text-light-gray">/</span>
-        <span class="fw-bold" style="color: #20584f;">Chi tiết #{{ $contract->contract_code }}</span>
+        <span class="fw-bold" style="color: #0c2340;">Chi tiết #{{ $contract->contract_code }}</span>
     </div>
 
     @php
@@ -34,7 +34,7 @@
             <div class="d-flex align-items-center gap-2 mb-1">
                 <span style="font-size: 20px;">📄</span>
                 <h2 class="contract-header-title">
-                    Hợp đồng <span style="color: #20584f;">#{{ $contract->contract_code }}</span>
+                    Hợp đồng <span style="color: #0c2340;">#{{ $contract->contract_code }}</span>
                 </h2>
                 <span class="badge-status-contract {{ $contract->status }} ms-2">
                     {{ $statusLabels[$contract->status] ?? $contract->status }}
@@ -158,7 +158,7 @@
                                     </div>
                                 </td>
                                 <td>Theo chỉ số đồng hồ thực tế</td>
-                                <td class="text-end fw-bold" style="color: #20584f;">3.500 đ / kWh</td>
+                                <td class="text-end fw-bold" style="color: #0c2340;">3.500 đ / kWh</td>
                             </tr>
                             <tr>
                                 <td>
@@ -168,7 +168,7 @@
                                     </div>
                                 </td>
                                 <td>Theo số người ở / tháng</td>
-                                <td class="text-end fw-bold" style="color: #20584f;">100.000 đ / người</td>
+                                <td class="text-end fw-bold" style="color: #0c2340;">100.000 đ / người</td>
                             </tr>
                             <tr>
                                 <td>
@@ -178,7 +178,7 @@
                                     </div>
                                 </td>
                                 <td>Trọn gói theo phòng</td>
-                                <td class="text-end fw-bold" style="color: #20584f;">50.000 đ / phòng</td>
+                                <td class="text-end fw-bold" style="color: #0c2340;">50.000 đ / phòng</td>
                             </tr>
                             <tr>
                                 <td>
@@ -188,7 +188,7 @@
                                     </div>
                                 </td>
                                 <td>Theo số người ở / tháng</td>
-                                <td class="text-end fw-bold" style="color: #20584f;">30.000 đ / người</td>
+                                <td class="text-end fw-bold" style="color: #0c2340;">30.000 đ / người</td>
                             </tr>
                         </tbody>
                     </table>

@@ -1,14 +1,14 @@
 
         :root {
-            --green: #20584f;
-            --green-dark: #17463e;
-            --green-soft: #eaf3ef;
-            --cream: #f8f5eb;
+            --green: #0c2340;
+            --green-dark: #071526;
+            --green-soft: #eff6ff;
+            --cream: #f8fafc;
             --yellow: #f5c84b;
             --yellow-light: #fff7d7;
-            --text: #213430;
-            --muted: #78837e;
-            --border: #e6dcc2;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
             --white: #ffffff;
             --red: #c65b4a;
             --red-soft: #fbe9e6;
@@ -34,7 +34,7 @@
         .app-navbar {
             background: var(--green);
             min-height: 74px;
-            box-shadow: 0 3px 14px rgba(20,55,47,.12);
+            box-shadow: 0 3px 14px rgba(12, 35, 64,.12);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -204,7 +204,7 @@
             border-radius: 18px;
             padding: 24px;
             margin-bottom: 22px;
-            box-shadow: 0 4px 12px rgba(20,55,47,.03);
+            box-shadow: 0 4px 12px rgba(12, 35, 64,.03);
         }
 
         .card-header {
