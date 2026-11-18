@@ -34,11 +34,40 @@
                     </button>
                 </form>
 
+                @php
+                    $cardImg = null;
+                    $firstPost = $room->rentalPosts->first();
+                    if ($firstPost && $firstPost->relationLoaded('images') && $firstPost->images->isNotEmpty()) {
+                        $pPath = $firstPost->images->first()->image_path;
+                        $cardImg = \Illuminate\Support\Str::startsWith($pPath, ['http://', 'https://', '//'])
+                            ? $pPath
+                            : asset('storage/' . ltrim($pPath, '/'));
+                    }
+                    if (!$cardImg) {
+                        $rImages = is_array($room->images) ? $room->images : (json_decode($room->images ?? '[]', true) ?: []);
+                        if (!empty($rImages[0])) {
+                            $cardImg = \Illuminate\Support\Str::startsWith($rImages[0], ['http://', 'https://', '//'])
+                                ? $rImages[0]
+                                : asset('storage/' . ltrim($rImages[0], '/'));
+                        }
+                    }
+                    if (!$cardImg && $room->property && $room->property->relationLoaded('images') && $room->property->images->isNotEmpty()) {
+                        $propPath = $room->property->images->first()->image_path;
+                        $cardImg = \Illuminate\Support\Str::startsWith($propPath, ['http://', 'https://', '//'])
+                            ? $propPath
+                            : asset('storage/' . ltrim($propPath, '/'));
+                    }
+                    if (!$cardImg) {
+                        $cardImg = 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';
+                    }
+                @endphp
+
                 <img
                     class="room-img"
-                    src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
+                    src="{{ $cardImg }}"
                     alt="{{ $room->name ?? 'Phòng trọ' }}"
                     loading="lazy"
+                    onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';"
                 >
 
                 <div class="room-body">

@@ -11,6 +11,19 @@
 
 
 <main class="page-wrap">
+  @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+      {{ session('success') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+  @endif
+  @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+      {{ session('error') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+  @endif
+
   <a href="{{ route('owner.invoices.index') }}" class="back-link">← Quay lại danh sách hóa đơn</a>
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 my-3">
     <div class="d-flex align-items-center gap-2">
@@ -24,8 +37,17 @@
     </div>
 
     <div class="d-flex gap-2">
+      @if($invoice->status !== 'paid' && $invoice->status !== 'cancelled')
+        <form action="{{ route('owner.invoices.record-cash', $invoice->id) }}" method="POST" class="m-0" onsubmit="return confirm('Xác nhận khách đã nộp {{ number_format((float) $invoice->total) }} đ tiền mặt trực tiếp?')">
+          @csrf
+          <button type="submit" class="btn btn-success fw-bold d-flex align-items-center gap-1 shadow-sm" style="border-radius: 8px; font-size: 13px; padding: 7px 16px;">
+            Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
+          </button>
+        </form>
+      @endif
+
       <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-success fw-bold d-flex align-items-center gap-1 shadow-sm" style="border-radius: 8px; font-size: 13px; padding: 7px 16px;">
-        🖨️ In hóa đơn / Xuất PDF
+        In hóa đơn / Xuất PDF
       </a>
     </div>
   </div>

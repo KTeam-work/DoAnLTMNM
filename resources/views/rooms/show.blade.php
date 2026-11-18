@@ -21,6 +21,59 @@
 
         $mapQuery = $hasCoords ? "{$lat},{$lng}" : ($fullAddress ?: (optional($property)->address ?? 'Thành phố Hồ Chí Minh'));
 
+        $rawImages = [];
+
+        // 1. Lấy ảnh từ bài đăng cho thuê (Rental Post images)
+        if ($activePost) {
+            $postImages = $activePost->relationLoaded('images') ? $activePost->images : $activePost->images()->get();
+            foreach ($postImages as $postImg) {
+                if (!empty($postImg->image_path)) {
+                    $rawImages[] = $postImg->image_path;
+                }
+            }
+        }
+
+        // 2. Lấy ảnh từ trường images của Room (nếu có)
+        $roomImgs = is_array($room->images) ? $room->images : (json_decode($room->images ?? '[]', true) ?: []);
+        if (!empty($roomImgs)) {
+            foreach ($roomImgs as $rImg) {
+                if (!empty($rImg)) {
+                    $rawImages[] = $rImg;
+                }
+            }
+        }
+
+        // 3. Lấy ảnh từ khu trọ (Property images) nếu chưa có ảnh
+        if (empty($rawImages) && $property) {
+            $propImages = $property->relationLoaded('images') ? $property->images : $property->images()->get();
+            foreach ($propImages as $pImg) {
+                if (!empty($pImg->image_path)) {
+                    $rawImages[] = $pImg->image_path;
+                }
+            }
+        }
+
+        // 4. Chuẩn hóa đường dẫn thành URL hợp lệ
+        $finalImages = [];
+        foreach ($rawImages as $img) {
+            if (empty($img)) continue;
+            if (\Illuminate\Support\Str::startsWith($img, ['http://', 'https://', '//'])) {
+                $finalImages[] = $img;
+            } elseif (\Illuminate\Support\Str::startsWith($img, ['storage/', '/storage/'])) {
+                $finalImages[] = asset(ltrim($img, '/'));
+            } else {
+                $finalImages[] = asset('storage/' . ltrim($img, '/'));
+            }
+        }
+
+        // 5. Nếu vẫn chưa có ảnh -> Dùng ảnh mẫu chất lượng cao
+        if (empty($finalImages)) {
+            $finalImages = [
+                'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80',
+            ];
+        }
+
         $room = [
             'title' => $room->name,
             'id' => $room->id,
@@ -30,9 +83,7 @@
             'people' => $room->max_people . ' người',
             'bathroom' => 'WC riêng',
             'type' => ucfirst($room->status ?? 'Phòng trọ'),
-            'images' => is_array($room->images)
-                ? $room->images
-                : (json_decode($room->images ?? '[]', true) ?: []),
+            'images' => $finalImages,
             'description' => $room->description ?? 'Không có mô tả chi tiết.',
             'amenities' => optional($room->amenities)->pluck('name')->toArray()
                 ?? ['WC riêng', 'Wi-Fi', 'Chỗ để xe'],
@@ -145,6 +196,8 @@
                         <img
                             src="{{ $image }}"
                             alt="{{ $room['title'] }}"
+                            loading="lazy"
+                            onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';"
                         >
 
 

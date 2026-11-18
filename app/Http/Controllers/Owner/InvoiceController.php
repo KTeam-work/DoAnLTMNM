@@ -9,6 +9,7 @@ use App\Models\Notification;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\UtilityReading;
+use App\Services\ResendService;
 use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
@@ -139,7 +140,7 @@ class InvoiceController extends Controller
             ->where('status', 'active')
             ->whereDate('start_date', '<=', $billingMonth->copy()->endOfMonth())
             ->when($data['contract_id'] ?? null, fn ($q, $id) => $q->where('id', $id))
-            ->with('room')
+            ->with(['room.property', 'tenant'])
             ->get();
 
         if ($contracts->isEmpty()) {
@@ -241,6 +242,32 @@ class InvoiceController extends Controller
                 'invoice',
                 $invoice->id
             );
+
+            // Bắn email thông báo hóa đơn kèm thông tin đăng nhập và 2 cách thanh toán qua Gmail cho khách
+            try {
+                $tenant = $contract->tenant;
+                if ($tenant && !empty($tenant->email)) {
+                    /** @var ResendService $resendService */
+                    $resendService = app(ResendService::class);
+                    $resendService->sendInvoiceEmail(
+                        toEmail: $tenant->email,
+                        tenantName: $tenant->name,
+                        roomName: $contract->room->name ?? 'Phòng trọ',
+                        propertyName: $contract->room->property->name ?? 'Khu trọ',
+                        invoiceCode: $invoice->invoice_code,
+                        billingMonth: $billingMonth->format('m/Y'),
+                        totalAmount: $invoice->total,
+                        dueDate: Carbon::parse($invoice->due_date)->format('d/m/Y'),
+                        invoiceId: $invoice->id,
+                        initialPassword: $tenant->initial_password ?? null
+                    );
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email hóa đơn qua Resend: ' . $e->getMessage(), [
+                    'invoice_id' => $invoice->id,
+                    'tenant_email' => $contract->tenant->email ?? null,
+                ]);
+            }
 
             return $invoice->id;
         });

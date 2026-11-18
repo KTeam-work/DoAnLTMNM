@@ -21,9 +21,11 @@ class RoomController extends Controller
         $query = Room::query()
             ->with([
                 'property.owner',
+                'property.images',
                 'amenities',
                 'rentalPosts' => function ($query) {
-                    $query->where('status', 'published');
+                    $query->where('status', 'published')
+                        ->with('images');
                 },
             ])
             ->where('status', 'available')
@@ -150,13 +152,15 @@ class RoomController extends Controller
         $room = Room::query()
             ->with([
                 'property.owner',
+                'property.images',
                 'amenities',
                 'rentalPosts' => function ($query) {
                     $query->where('status', 'published')
                         ->where(function ($query) {
                             $query->whereNull('expired_at')
                                 ->orWhere('expired_at', '>', now());
-                        });
+                        })
+                        ->with('images');
                 },
             ])
             ->where('status', 'available')

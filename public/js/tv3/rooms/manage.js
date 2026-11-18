@@ -2,6 +2,7 @@
             document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('roomSearch');
             const statusFilter = document.getElementById('statusFilter');
+            const tabBtns = document.querySelectorAll('.segmented-tab');
             const rows = Array.from(document.querySelectorAll('.room-row'));
             const noResults = document.getElementById('noSearchResults');
             const resultCount = document.getElementById('resultCount');
@@ -47,6 +48,26 @@
             }
 
             searchInput.addEventListener('input', filterRooms);
-            statusFilter.addEventListener('change', filterRooms);
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    const val = this.value;
+                    tabBtns.forEach(btn => {
+                        btn.classList.toggle('active', (btn.dataset.status || '') === val);
+                    });
+                    filterRooms();
+                });
+            }
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const val = this.dataset.status || '';
+                    if (statusFilter) {
+                        statusFilter.value = val;
+                    }
+                    filterRooms();
+                });
+            });
         });
 

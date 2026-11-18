@@ -24,7 +24,7 @@
     </div>
 
     <!-- =================================================
-         STAT CARDS
+         SEGMENTED FILTER TABS (NO ICONS)
     ================================================= -->
     @php
         $totalContracts = $contracts->count();
@@ -32,43 +32,27 @@
         $expiringContracts = $contracts->filter(function($c) {
             return $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60 && $c->status === 'active';
         })->count();
+        $terminatedContracts = $contracts->whereIn('status', ['terminated', 'expired'])->count();
     @endphp
 
-    <div class="row g-3 mb-4 animate-up delay-2">
-        <!-- CARD 1: Tổng hợp đồng -->
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-top mb-3">
-                    <div class="stat-icon blue">📋</div>
-                    <span class="stat-trend text-primary">Tất cả</span>
-                </div>
-                <div class="stat-label">Tổng hợp đồng</div>
-                <div class="stat-value">{{ str_pad($totalContracts, 2, '0', STR_PAD_LEFT) }}</div>
-            </div>
-        </div>
-
-        <!-- CARD 2: Đang hiệu lực -->
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-top mb-3">
-                    <div class="stat-icon green">✅</div>
-                    <span class="stat-trend text-success">Đang thuê</span>
-                </div>
-                <div class="stat-label">Đang hiệu lực</div>
-                <div class="stat-value" style="color: #1b8a5a;">{{ str_pad($activeContracts, 2, '0', STR_PAD_LEFT) }}</div>
-            </div>
-        </div>
-
-        <!-- CARD 3: Sắp hết hạn -->
-        <div class="col-md-4">
-            <div class="stat-card">
-                <div class="stat-top mb-3">
-                    <div class="stat-icon yellow">⏳</div>
-                    <span class="stat-trend text-warning" style="color: #b7791f !important;">Cần lưu ý</span>
-                </div>
-                <div class="stat-label">Sắp hết hạn</div>
-                <div class="stat-value" style="color: #b7791f;">{{ str_pad($expiringContracts, 2, '0', STR_PAD_LEFT) }}</div>
-            </div>
+    <div class="segmented-filter-wrapper mb-4 animate-up delay-2">
+        <div class="segmented-filter-bar" role="tablist">
+            <button type="button" class="segmented-tab active" data-filter="all">
+                <span class="tab-label">Tất cả</span>
+                <span class="tab-count">{{ $totalContracts }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="active">
+                <span class="tab-label">Đang hiệu lực</span>
+                <span class="tab-count">{{ $activeContracts }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="expiring">
+                <span class="tab-label">Sắp hết hạn</span>
+                <span class="tab-count">{{ $expiringContracts }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="terminated">
+                <span class="tab-label">Đã kết thúc</span>
+                <span class="tab-count">{{ $terminatedContracts }}</span>
+            </button>
         </div>
     </div>
 
@@ -114,7 +98,12 @@
                     @endphp
 
                     @forelse($contracts as $contract)
-                    <tr class="contract-row">
+                    @php
+                        $isExpiring = $contract->end_date && \Carbon\Carbon::parse($contract->end_date)->diffInDays(now(), false) > -60 && $contract->status === 'active';
+                    @endphp
+                    <tr class="contract-row" 
+                        data-status="{{ $contract->status }}"
+                        data-expiring="{{ $isExpiring ? '1' : '0' }}">
                         <!-- MÃ HỢP ĐỒNG -->
                         <td style="padding-left: 20px;">
                             <div class="fw-bold" style="color: #0c2340; font-size: 14px;">#{{ $contract->contract_code }}</div>
@@ -125,7 +114,7 @@
                         <td>
                             <div class="fw-bold text-dark" style="font-size: 14px;">{{ $contract->room->name ?? '—' }}</div>
                             <div class="text-muted" style="font-size: 12px;">
-                                📍 {{ $contract->room->property->name ?? '' }} · {{ $contract->room->property->district ?? '' }}
+                                {{ $contract->room->property->name ?? '' }} · {{ $contract->room->property->district ?? '' }}
                             </div>
                         </td>
 
@@ -166,12 +155,16 @@
                     @empty
                     <tr>
                         <td colspan="6" class="text-center text-muted py-5">
-                            <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
                             <div class="fw-bold text-dark">Bạn chưa có hợp đồng thuê nào.</div>
                             <div class="text-muted small mt-1">Khi bạn ký hợp đồng với chủ nhà, thông tin sẽ xuất hiện tại đây.</div>
                         </td>
                     </tr>
                     @endforelse
+                    <tr id="noFilterResultRow" style="display: none;">
+                        <td colspan="6" class="text-center text-muted py-4">
+                            Không tìm thấy hợp đồng nào phù hợp bộ lọc.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -180,24 +173,66 @@
 
 @push('scripts')
 <script>
-    // Live filter search cho bảng hợp đồng
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('contractSearchInput');
-        if (!searchInput) return;
+        const tabBtns = document.querySelectorAll('.segmented-tab');
+        const rows = document.querySelectorAll('#contractsTable tbody tr.contract-row');
+        const noFilterResultRow = document.getElementById('noFilterResultRow');
 
-        searchInput.addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
-            const rows = document.querySelectorAll('#contractsTable tbody tr.contract-row');
+        let currentFilter = 'all';
+        let currentQuery = '';
+
+        function applyFilter() {
+            let visibleCount = 0;
 
             rows.forEach(row => {
+                const status = row.getAttribute('data-status') || '';
+                const isExpiring = row.getAttribute('data-expiring') === '1';
                 const text = row.textContent.toLowerCase();
-                if (text.includes(query)) {
+
+                // Status check
+                let matchesStatus = false;
+                if (currentFilter === 'all') {
+                    matchesStatus = true;
+                } else if (currentFilter === 'active') {
+                    matchesStatus = (status === 'active');
+                } else if (currentFilter === 'expiring') {
+                    matchesStatus = isExpiring;
+                } else if (currentFilter === 'terminated') {
+                    matchesStatus = (status === 'terminated' || status === 'expired');
+                }
+
+                // Search check
+                const matchesSearch = !currentQuery || text.includes(currentQuery);
+
+                if (matchesStatus && matchesSearch) {
                     row.style.display = '';
+                    visibleCount++;
                 } else {
                     row.style.display = 'none';
                 }
             });
+
+            if (noFilterResultRow) {
+                noFilterResultRow.style.display = (rows.length > 0 && visibleCount === 0) ? '' : 'none';
+            }
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.getAttribute('data-filter') || 'all';
+                applyFilter();
+            });
         });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                currentQuery = this.value.toLowerCase().trim();
+                applyFilter();
+            });
+        }
     });
 </script>
 @endpush

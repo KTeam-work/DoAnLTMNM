@@ -36,22 +36,38 @@
     </div>
 </div>
 
-<div class="tv1-stats-row">
-    <div class="tv1-stat-card">
-        <span>Tổng tài khoản</span>
-        <strong>{{ \App\Models\User::count() }}</strong>
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
     </div>
-    <div class="tv1-stat-card">
-        <span>Chủ trọ</span>
-        <strong>{{ \App\Models\User::where('role', 'owner')->count() }}</strong>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
     </div>
-    <div class="tv1-stat-card">
-        <span>Người thuê</span>
-        <strong>{{ \App\Models\User::where('role', 'tenant')->count() }}</strong>
-    </div>
-    <div class="tv1-stat-card">
-        <span>Tài khoản bị khóa</span>
-        <strong>{{ \App\Models\User::where('status', 'inactive')->count() }}</strong>
+@endif
+
+<div class="segmented-filter-wrapper mb-4">
+    <div class="segmented-filter-bar" role="tablist">
+        <a href="{{ route('admin.users') }}" class="segmented-tab {{ empty($role) && empty($status) ? 'active' : '' }}">
+            <span class="tab-label">Tất cả</span>
+            <span class="tab-count">{{ \App\Models\User::count() }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['role' => 'owner']) }}" class="segmented-tab {{ $role === 'owner' ? 'active' : '' }}">
+            <span class="tab-label">Chủ trọ</span>
+            <span class="tab-count">{{ \App\Models\User::where('role', 'owner')->count() }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['role' => 'tenant']) }}" class="segmented-tab {{ $role === 'tenant' ? 'active' : '' }}">
+            <span class="tab-label">Người thuê</span>
+            <span class="tab-count">{{ \App\Models\User::where('role', 'tenant')->count() }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="segmented-tab {{ $status === 'inactive' ? 'active' : '' }}">
+            <span class="tab-label">Bị khóa</span>
+            <span class="tab-count">{{ \App\Models\User::where('status', 'inactive')->count() }}</span>
+        </a>
     </div>
 </div>
 
@@ -92,12 +108,19 @@
                     <th>Vai trò</th>
                     <th>Trạng thái</th>
                     <th>Ngày tạo</th>
+                    <th class="text-center" style="width: 140px;">Hành động</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($users as $user)
                     <tr>
-                        <td>{{ $user->user_code ?: '—' }}</td>
+                        <td>
+                            @if($user->user_code)
+                                <code class="px-2 py-1 rounded bg-light border fw-bold text-dark" style="font-size: 11.5px;">{{ $user->user_code }}</code>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>
                             <div class="tv1-user-name">{{ $user->name }}</div>
                             <div class="tv1-subtext">{{ $user->email }}</div>
@@ -117,10 +140,29 @@
                             </span>
                         </td>
                         <td>{{ $user->created_at?->format('d/m/Y') ?? '—' }}</td>
+                        <td class="text-center">
+                            @if ($user->id === auth()->id())
+                                <span class="badge bg-light text-muted border py-1 px-2" style="font-size: 11px;">Tài khoản của bạn</span>
+                            @else
+                                <form method="POST" action="{{ route('admin.users.update-status', $user) }}" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    @if ($user->status === 'active')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận KHÓA tài khoản {{ $user->name }} ({{ $user->email }})?\nNgười dùng này sẽ không thể đăng nhập vào hệ thống.')" title="Khóa tài khoản này">
+                                            Khóa
+                                        </button>
+                                    @else
+                                        <button type="submit" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận MỞ KHÓA cho tài khoản {{ $user->name }} ({{ $user->email }})?')" title="Mở khóa tài khoản này">
+                                            Mở khóa
+                                        </button>
+                                    @endif
+                                </form>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="tv1-empty">Không tìm thấy người dùng phù hợp.</td>
+                        <td colspan="7" class="tv1-empty">Không tìm thấy người dùng phù hợp.</td>
                     </tr>
                 @endforelse
             </tbody>
