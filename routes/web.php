@@ -12,6 +12,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+
 
 use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
 use App\Http\Controllers\Owner\PaymentController as OwnerPaymentController;
@@ -32,6 +34,8 @@ use App\Http\Controllers\Tenant\TenantDashboardController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\OwnerRoomController;
 use App\Http\Controllers\Owner\OwnerRentalPostController;
+
+
 
 
 /*
@@ -195,6 +199,11 @@ Route::patch('/admin/rental-posts/{post}/status', function (
         return view('admin.statistics');
     })->name('admin.statistics');
 
+    Route::get('/admin/reports', [\App\Http\Controllers\Admin\PostReportController::class, 'index'])
+        ->name('admin.reports.index');
+    Route::put('/admin/reports/{id}', [\App\Http\Controllers\Admin\PostReportController::class, 'update'])
+        ->name('admin.reports.update');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -241,6 +250,9 @@ Route::get('/rooms', [RoomController::class, 'index'])
 Route::get('/rooms/{id}', [RoomController::class, 'show'])
     ->name('rooms.show');
 
+Route::post('/rental-posts/{post}/report', [\App\Http\Controllers\Tenant\PostReportController::class, 'store'])
+    ->name('tenant.reports.store');
+
 
 Route::get('/favorites', [FavoriteController::class, 'index'])
     ->name('favorites.index');
@@ -279,6 +291,11 @@ Route::get(
     '/tenant/invoices/{id}',
     [InvoiceController::class, 'show']
 )->name('tenant.invoices.show');
+
+Route::get(
+    '/tenant/invoices/{id}/print',
+    [InvoiceController::class, 'print']
+)->name('tenant.invoices.print');
 
 
 /*
@@ -490,6 +507,11 @@ Route::get(
     [OwnerUtilitiesController::class, 'getPreviousReading']
 )->name('owner.utilities.previous-reading');
 
+Route::post(
+    '/owner/utilities/scan-meter',
+    [OwnerUtilitiesController::class, 'scanMeter']
+)->name('owner.utilities.scan-meter');
+
 Route::get(
     '/owner/utilities/create',
     [OwnerUtilitiesController::class, 'create']
@@ -563,10 +585,20 @@ Route::get(
     [OwnerInvoiceController::class, 'show']
 )->name('owner.invoices.show');
 
+Route::get(
+    '/owner/invoices/{invoice}/print',
+    [OwnerInvoiceController::class, 'print']
+)->name('owner.invoices.print');
+
 Route::post(
     '/owner/invoices',
     [OwnerInvoiceController::class, 'store']
 )->name('owner.invoices.store');
+
+Route::post(
+    '/owner/invoices/process-due-now',
+    [OwnerInvoiceController::class, 'processDueNow']
+)->name('owner.invoices.process-due-now');
 
 
 /*
@@ -670,6 +702,20 @@ Route::resource(
     OwnerRentalPostController::class
 )->names('owner.rental-posts');
 
+/*
+|--------------------------------------------------------------------------
+| CHỦ TRỌ - THÔNG BÁO
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/owner/notifications', [NotificationController::class, 'ownerIndex'])
+        ->name('owner.notifications.index');
+    Route::post('/owner/notifications/mark-read', [NotificationController::class, 'markAllAsRead'])
+        ->name('owner.notifications.mark_read');
+    Route::match(['post', 'put'], '/owner/notifications/{id}/read', [NotificationController::class, 'markAsRead'])
+        ->name('owner.notifications.read');
+});
+
 // Chat box
 Route::middleware(['auth', 'throttle:20,1'])->group(function () {
 
@@ -687,3 +733,28 @@ Route::middleware(['auth', 'throttle:20,1'])->group(function () {
 
 // QR 
 Route::post('/sepay/webhook', [PaymentController::class, 'webhook']);
+
+
+// Quên mật khẩu
+Route::get('/forgot-password', [
+    ForgotPasswordController::class,
+    'showForgotForm'
+])->middleware('guest')->name('password.request');
+
+// Gửi link đặt lại mật khẩu
+Route::post('/forgot-password', [
+    ForgotPasswordController::class,
+    'sendResetLink'
+])->middleware('guest')->name('password.email');
+
+// Hiển thị form đặt lại mật khẩu
+Route::get('/reset-password/{token}', [
+    ForgotPasswordController::class,
+    'showResetForm'
+])->middleware('guest')->name('password.reset');
+
+// Cập nhật mật khẩu mới
+Route::post('/reset-password', [
+    ForgotPasswordController::class,
+    'resetPassword'
+])->middleware('guest')->name('password.update');

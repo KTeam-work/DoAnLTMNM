@@ -7,7 +7,7 @@
     <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
       
       <!-- Modal Header -->
-      <div class="modal-header text-white" style="background: #20584f; padding: 18px 24px;">
+      <div class="modal-header text-white" style="background: #0c2340; padding: 18px 24px;">
         <div class="d-flex align-items-center gap-2">
           <span style="font-size: 22px;">📱</span>
           <div>
@@ -79,7 +79,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
                   <div>
                     <span class="text-muted d-block" style="font-size: 12px;">Số tiền:</span>
-                    <strong class="fs-5" style="color: #20584f;" id="modalAmountText">0 đ</strong>
+                    <strong class="fs-5" style="color: #0c2340;" id="modalAmountText">0 đ</strong>
                   </div>
                   <button type="button" class="btn btn-sm btn-light border px-2 py-1 fw-bold text-muted" id="btnCopyAmount" onclick="copyRawAmount()" title="Sao chép">
                     📋 Chép

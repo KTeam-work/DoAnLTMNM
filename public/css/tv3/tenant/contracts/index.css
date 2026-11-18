@@ -8,14 +8,14 @@
     border: 1px solid #eef2f0;
     border-radius: 20px;
     padding: 20px 22px;
-    box-shadow: 0 4px 15px rgba(32, 88, 79, 0.04);
+    box-shadow: 0 4px 15px rgba(12, 35, 64, 0.04);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     height: 100%;
 }
 
 .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(32, 88, 79, 0.09);
+    box-shadow: 0 12px 28px rgba(12, 35, 64, 0.09);
     border-color: #d2e4dc;
 }
 
@@ -53,14 +53,14 @@
 
 .stat-label {
     font-size: 13px;
-    color: #78837e;
+    color: #64748b;
     font-weight: 500;
 }
 
 .stat-value {
     font-size: 28px;
     font-weight: 800;
-    color: #173d37;
+    color: #0c2340;
     margin-top: 4px;
     line-height: 1.2;
 }
@@ -75,7 +75,7 @@
     background: #ffffff;
     border-radius: 20px;
     border: 1px solid #eef2f0;
-    box-shadow: 0 4px 20px rgba(32, 88, 79, 0.03);
+    box-shadow: 0 4px 20px rgba(12, 35, 64, 0.03);
     padding: 24px;
 }
 
@@ -91,7 +91,7 @@
 .content-panel-title {
     font-size: 18px;
     font-weight: 800;
-    color: #213430;
+    color: #0f172a;
     margin: 0;
 }
 
@@ -110,8 +110,8 @@
 
 .search-box-custom:focus-within {
     background: #fff;
-    border-color: #20584f;
-    box-shadow: 0 0 0 3px rgba(32, 88, 79, 0.08);
+    border-color: #0c2340;
+    box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.08);
 }
 
 .search-box-custom input {
@@ -119,7 +119,7 @@
     background: transparent;
     outline: none;
     font-size: 13px;
-    color: #213430;
+    color: #0f172a;
     width: 100%;
     margin-left: 8px;
 }
@@ -132,7 +132,7 @@
 }
 
 .data-table-contracts thead th {
-    color: #8b9691;
+    color: #64748b;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
@@ -151,7 +151,7 @@
 
 .data-table-contracts tbody tr:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(32, 88, 79, 0.08);
+    box-shadow: 0 8px 24px rgba(12, 35, 64, 0.08);
     border-color: #d2e4dc;
 }
 
@@ -216,8 +216,8 @@
 
 /* Action button */
 .btn-view-contract {
-    background: #eaf3ef;
-    color: #20584f;
+    background: #eff6ff;
+    color: #0c2340;
     font-weight: 700;
     font-size: 12px;
     padding: 8px 16px;
@@ -230,7 +230,7 @@
 }
 
 .btn-view-contract:hover {
-    background: #20584f;
+    background: #0c2340;
     color: #fff;
     transform: translateY(-1px);
 }

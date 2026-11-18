@@ -18,9 +18,7 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
-    'resend' => [
-        'key' => env('RESEND_API_KEY'),
-    ],
+ 
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
@@ -50,5 +48,11 @@ return [
     'google_maps' => [
     'key' => env('GOOGLE_MAPS_API_KEY'),
     ],
+
+    'resend' => [
+    'key' => env('RESEND_API_KEY'),
+    'from_email' => env('RESEND_FROM_EMAIL'),
+    'from_name' => env('RESEND_FROM_NAME'),
+],
 
 ];

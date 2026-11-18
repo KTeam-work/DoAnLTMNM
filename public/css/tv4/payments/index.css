@@ -1,8 +1,8 @@
 
   :root{
-    --forest: #20584f;
+    --forest: #0c2340;
     --forest-deep: #163e37;
-    --forest-tint: #eaf3ef;
+    --forest-tint: #eff6ff;
     --amber: #b5792a;
     --amber-tint: #fbf1e3;
     --bank: #2f5fa8;
@@ -27,7 +27,7 @@
   .app-navbar{
     background: var(--forest);
     min-height: 74px;
-    box-shadow: 0 3px 14px rgba(20,55,47,.12);
+    box-shadow: 0 3px 14px rgba(12, 35, 64,.12);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -170,7 +170,7 @@
   .panel-title{ font-size: 1.05rem; font-weight: 700; }
 
   .form-control, .form-select{ border-color: var(--line); font-size: 0.85rem; }
-  .form-control:focus, .form-select:focus{ border-color: var(--forest); box-shadow: 0 0 0 3px rgba(32,88,79,0.12); }
+  .form-control:focus, .form-select:focus{ border-color: var(--forest); box-shadow: 0 0 0 3px rgba(12, 35, 64,0.12); }
 
   .data-table{ width: 100%; border-collapse: separate; border-spacing: 0; }
   .data-table thead th{

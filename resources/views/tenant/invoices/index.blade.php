@@ -155,6 +155,7 @@
                   <button class="btn dropdown-toggle border-0 shadow-none text-muted" type="button" data-bs-toggle="dropdown">⋮</button>
                   <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
                     <li><a class="dropdown-item py-2" href="{{ route('tenant.invoices.show', $invoice->id) }}">👁️ Xem chi tiết</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank">🖨️ In hóa đơn / Lưu PDF</a></li>
                   </ul>
                 </div>
               </div>

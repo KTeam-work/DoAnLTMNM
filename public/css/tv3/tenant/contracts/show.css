@@ -5,7 +5,7 @@
 /* Top bar / Breadcrumb */
 .breadcrumb-custom {
     font-size: 13px;
-    color: #78837e;
+    color: #64748b;
     font-weight: 500;
 }
 
@@ -20,7 +20,7 @@
     padding: 22px 28px;
     margin-bottom: 24px;
     border: 1px solid #eef2f0;
-    box-shadow: 0 4px 20px rgba(32, 88, 79, 0.03);
+    box-shadow: 0 4px 20px rgba(12, 35, 64, 0.03);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -32,11 +32,11 @@
     margin: 0;
     font-size: 24px;
     font-weight: 800;
-    color: #213430;
+    color: #0f172a;
 }
 
 .contract-header-desc {
-    color: #78837e;
+    color: #64748b;
     font-size: 13px;
     margin-top: 4px;
 }
@@ -53,7 +53,7 @@
     background: #ffffff;
     border: 1px solid #eef2f0;
     border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(32, 88, 79, 0.03);
+    box-shadow: 0 4px 20px rgba(12, 35, 64, 0.03);
     overflow: hidden;
     margin-bottom: 24px;
 }
@@ -70,7 +70,7 @@
     margin: 0;
     font-size: 16px;
     font-weight: 800;
-    color: #213430;
+    color: #0f172a;
 }
 
 /* Info Grid */
@@ -82,7 +82,7 @@
 }
 
 .cell-sub {
-    color: #78837e;
+    color: #64748b;
     font-size: 12px;
     text-transform: uppercase;
     font-weight: 600;
@@ -93,11 +93,11 @@
 .info-value {
     font-size: 15px;
     font-weight: 700;
-    color: #173d37;
+    color: #0c2340;
 }
 
 .info-value.price-highlight {
-    color: #20584f;
+    color: #0c2340;
     font-size: 17px;
     font-weight: 800;
 }
@@ -116,14 +116,14 @@
 
 .service-table th {
     background: #faf8f5;
-    color: #78837e;
+    color: #64748b;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .5px;
     padding: 14px 18px;
-    border-bottom: 1px solid #f0eadc;
-    border-top: 1px solid #f0eadc;
+    border-bottom: 1px solid #f1f5f9;
+    border-top: 1px solid #f1f5f9;
 }
 
 .service-table th:first-child {
@@ -140,7 +140,7 @@
     padding: 14px 18px;
     border-bottom: 1px solid #f3f5f4;
     font-size: 13px;
-    color: #213430;
+    color: #0f172a;
     vertical-align: middle;
 }
 
@@ -165,8 +165,8 @@
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: #eaf3ef;
-    color: #20584f;
+    background: #eff6ff;
+    color: #0c2340;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -178,7 +178,7 @@
 .person-name {
     font-weight: 700;
     font-size: 14px;
-    color: #173d37;
+    color: #0c2340;
     margin-bottom: 2px;
 }
 
@@ -190,21 +190,21 @@
     width: 100%;
     text-align: center;
     text-decoration: none;
-    background: #20584f;
+    background: #0c2340;
     color: #ffffff;
     border-radius: 12px;
     padding: 12px 18px;
     font-size: 13px;
     font-weight: 700;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 14px rgba(32, 88, 79, 0.15);
+    box-shadow: 0 4px 14px rgba(12, 35, 64, 0.15);
 }
 
 .btn-call-owner:hover {
-    background: #17463e;
+    background: #071526;
     color: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(32, 88, 79, 0.22);
+    box-shadow: 0 6px 18px rgba(12, 35, 64, 0.22);
 }
 
 /* Status Badges */

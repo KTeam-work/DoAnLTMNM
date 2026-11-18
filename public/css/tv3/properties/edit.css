@@ -1,8 +1,8 @@
 
 
         body {
-            background: #f8f5eb;
-            color: #213430;
+            background: #f8fafc;
+            color: #0f172a;
             font-family: 'Be Vietnam Pro', sans-serif;
         }
 
@@ -17,7 +17,7 @@
         }
 
         .eyebrow {
-            color: #20584f;
+            color: #0c2340;
             font-size: 12px;
             font-weight: 800;
             letter-spacing: 1.4px;
@@ -31,19 +31,19 @@
         }
 
         .page-heading p {
-            color: #78837e;
+            color: #64748b;
         }
 
         .edit-card {
             background: white;
-            border: 1px solid #e6dcc2;
+            border: 1px solid #e2e8f0;
             border-radius: 22px;
             overflow: hidden;
-            box-shadow: 0 10px 32px rgba(32, 88, 79, .05);
+            box-shadow: 0 10px 32px rgba(12, 35, 64, .05);
         }
 
         .edit-card-header {
-            background: #20584f;
+            background: #0c2340;
             color: white;
             padding: 22px 26px;
         }
@@ -78,17 +78,17 @@
         .form-select {
             border-radius: 12px;
             padding: 11px 13px;
-            border-color: #e6dcc2;
+            border-color: #e2e8f0;
         }
 
         .form-control:focus,
         .form-select:focus {
-            border-color: #20584f;
-            box-shadow: 0 0 0 .2rem rgba(32, 88, 79, .10);
+            border-color: #0c2340;
+            box-shadow: 0 0 0 .2rem rgba(12, 35, 64, .10);
         }
 
         .btn-owner {
-            background: #20584f;
+            background: #0c2340;
             color: white;
             border: none;
             border-radius: 12px;
@@ -99,13 +99,13 @@
         }
 
         .btn-owner:hover {
-            background: #17463e;
+            background: #071526;
             color: white;
         }
 
         .btn-back {
-            background: #eaf3ef;
-            color: #20584f;
+            background: #eff6ff;
+            color: #0c2340;
             border-radius: 12px;
             padding: 12px 20px;
             font-weight: 700;
@@ -115,11 +115,11 @@
 
         .btn-back:hover {
             background: #dcebe4;
-            color: #17463e;
+            color: #071526;
         }
 
         .form-text {
-            color: #78837e;
+            color: #64748b;
         }
 
         @media (max-width: 576px) {

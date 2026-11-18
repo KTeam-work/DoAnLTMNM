@@ -3,15 +3,15 @@
    ========================================================= */
 
 body {
-    background: #f8f5eb !important;
-    color: #213430;
+    background: #f8fafc !important;
+    color: #0f172a;
     font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 .owner-page {
     width: 100%;
     min-height: calc(100vh - 70px);
-    background: #f8f5eb;
+    background: #f8fafc;
 }
 
 .owner-main {
@@ -30,7 +30,7 @@ body {
 }
 
 .eyebrow {
-    color: #20584f;
+    color: #0c2340;
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 1.4px;
@@ -42,19 +42,19 @@ body {
     font-size: 30px;
     font-weight: 800;
     margin: 0;
-    color: #213430;
+    color: #0f172a;
     letter-spacing: -0.5px;
 }
 
 .page-heading p {
-    color: #78837e;
+    color: #64748b;
     margin: 8px 0 0;
     font-size: 14px;
 }
 
 .btn-owner {
     border: none;
-    background: #20584f;
+    background: #0c2340;
     color: white;
     border-radius: 14px;
     padding: 12px 20px;
@@ -65,14 +65,14 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(32, 88, 79, .15);
+    box-shadow: 0 4px 14px rgba(12, 35, 64, .15);
 }
 
 .btn-owner:hover {
-    background: #17463e;
+    background: #163b65;
     color: white;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(32, 88, 79, .22);
+    box-shadow: 0 6px 18px rgba(12, 35, 64, .22);
 }
 
 /* ================= STATS GRID ================= */
@@ -85,16 +85,16 @@ body {
 
 .stat-card {
     background: #ffffff;
-    border: 1px solid #e6dcc2;
+    border: 1px solid #e2e8f0;
     border-radius: 22px;
     padding: 22px;
-    box-shadow: 0 8px 28px rgba(32, 88, 79, .05);
+    box-shadow: 0 8px 28px rgba(12, 35, 64, .05);
     transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(32, 88, 79, .08);
+    box-shadow: 0 12px 32px rgba(12, 35, 64, .08);
 }
 
 .stat-top {
@@ -106,15 +106,15 @@ body {
 .stat-top span {
     font-size: 14px;
     font-weight: 600;
-    color: #536561;
+    color: #64748b;
 }
 
 .stat-icon {
     width: 46px;
     height: 46px;
     border-radius: 15px;
-    background: #eaf3ef;
-    color: #20584f;
+    background: #eff6ff;
+    color: #0c2340;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -141,14 +141,14 @@ body {
     display: block;
     font-size: 28px;
     font-weight: 800;
-    color: #173d37;
+    color: #0c2340;
     margin-top: 14px;
     line-height: 1.2;
 }
 
 .stat-card span.stat-sub {
     display: block;
-    color: #78837e;
+    color: #64748b;
     font-size: 13px;
     margin-top: 5px;
 }
@@ -156,9 +156,9 @@ body {
 /* ================= CONTENT CARD ================= */
 .content-card {
     background: #ffffff;
-    border: 1px solid #e6dcc2;
+    border: 1px solid #e2e8f0;
     border-radius: 24px;
-    box-shadow: 0 10px 32px rgba(32, 88, 79, .05);
+    box-shadow: 0 10px 32px rgba(12, 35, 64, .05);
     overflow: hidden;
     height: 100%;
     display: flex;
@@ -167,7 +167,7 @@ body {
 
 .card-header-owner {
     padding: 20px 24px;
-    border-bottom: 1px solid #eee7d8;
+    border-bottom: 1px solid #f1f5f9;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -178,18 +178,18 @@ body {
     font-size: 18px;
     font-weight: 800;
     margin: 0;
-    color: #213430;
+    color: #0f172a;
 }
 
 .card-header-owner p {
     margin: 4px 0 0;
-    color: #78837e;
+    color: #64748b;
     font-size: 13px;
 }
 
 .btn-light-owner {
-    background: #eaf3ef;
-    color: #20584f;
+    background: #eff6ff;
+    color: #0c2340;
     font-size: 13px;
     font-weight: 700;
     padding: 8px 16px;
@@ -203,8 +203,8 @@ body {
 }
 
 .btn-light-owner:hover {
-    background: #dbebe3;
-    color: #17463e;
+    background: #dbeafe;
+    color: #163b65;
     transform: translateY(-1px);
 }
 
@@ -222,22 +222,22 @@ body {
 }
 
 .data-table thead th {
-    color: #8b9691;
+    color: #64748b;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .6px;
     padding: 16px 20px 12px;
-    border-bottom: 1px solid #f0eadc;
-    background: #faf8f2;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
     white-space: nowrap;
 }
 
 .data-table tbody td {
     padding: 16px 20px;
-    border-bottom: 1px solid #f4f0e6;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
-    color: #213430;
+    color: #0f172a;
     font-size: 13px;
 }
 
@@ -250,24 +250,24 @@ body {
 }
 
 .data-table tbody tr:hover td {
-    background: #faf8f2;
+    background: #f8fafc;
 }
 
 .cell-title {
     font-weight: 700;
-    color: #1a332d;
+    color: #0f172a;
     font-size: 14px;
     margin-bottom: 2px;
 }
 
 .cell-sub {
-    color: #8a9691;
+    color: #64748b;
     font-size: 12px;
 }
 
 .price-text {
     font-weight: 800;
-    color: #20584f;
+    color: #0c2340;
     font-size: 14px;
 }
 
@@ -324,8 +324,8 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    background: #eaf3ef;
-    color: #20584f;
+    background: #eff6ff;
+    color: #0c2340;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -338,15 +338,15 @@ body {
     display: inline-block;
     padding: 3px 9px;
     border-radius: 8px;
-    background: #faf6ed;
-    border: 1px solid #ebdcc5;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
     font-size: 12px;
     font-weight: 700;
-    color: #4b3d2b;
+    color: #0c2340;
 }
 
 .appointment-time-badge {
-    color: #8a9691;
+    color: #64748b;
     font-size: 11px;
     margin-top: 3px;
 }
@@ -354,7 +354,7 @@ body {
 .empty-state {
     text-align: center;
     padding: 45px 20px;
-    color: #78837e;
+    color: #64748b;
 }
 
 .empty-state-icon {

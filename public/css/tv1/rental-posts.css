@@ -17,14 +17,14 @@
 }
 
 .rp-summary-card.selected {
-    border-color: #20584f;
-    box-shadow: 0 0 0 2px #20584f15;
+    border-color: #0c2340;
+    box-shadow: 0 0 0 2px #0c234015;
 }
 
 .rp-summary-card strong {
     display: block;
     margin-top: 8px;
-    color: #20584f;
+    color: #0c2340;
     font-size: 26px;
 }
 
@@ -72,15 +72,15 @@
 }
 
 .rp-btn-primary {
-    background: #20584f;
-    border-color: #20584f;
+    background: #0c2340;
+    border-color: #0c2340;
     color: #fff;
 }
 
 .rp-btn-light {
     background: #fff;
     border-color: #dfe5e1;
-    color: #20584f;
+    color: #0c2340;
 }
 
 .rp-table {
@@ -132,7 +132,7 @@
 
 .rp-actions summary {
     cursor: pointer;
-    color: #20584f;
+    color: #0c2340;
     font-weight: 600;
 }
 

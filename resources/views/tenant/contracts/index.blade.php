@@ -117,7 +117,7 @@
                     <tr class="contract-row">
                         <!-- MÃ HỢP ĐỒNG -->
                         <td style="padding-left: 20px;">
-                            <div class="fw-bold" style="color: #20584f; font-size: 14px;">#{{ $contract->contract_code }}</div>
+                            <div class="fw-bold" style="color: #0c2340; font-size: 14px;">#{{ $contract->contract_code }}</div>
                             <small class="text-muted">Kỳ: {{ $contract->payment_cycle === 'quarterly' ? 'Hàng quý' : 'Hàng tháng' }}</small>
                         </td>
 
@@ -141,7 +141,7 @@
 
                         <!-- GIÁ -->
                         <td>
-                            <div class="fw-bold" style="color: #20584f; font-size: 15px;">
+                            <div class="fw-bold" style="color: #0c2340; font-size: 15px;">
                                 {{ number_format((float)$contract->rent) }} đ
                             </div>
                             <div class="text-muted" style="font-size: 12px;">

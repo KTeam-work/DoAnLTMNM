@@ -1,12 +1,12 @@
 
 :root {
-    --primary: #20584f;
-    --primary-dark: #17463e;
-    --primary-light: #eaf3ef;
-    --background: #f8f5eb;
-    --text: #213430;
-    --muted: #78837e;
-    --border: #e6dcc2;
+    --primary: #0c2340;
+    --primary-dark: #071526;
+    --primary-light: #eff6ff;
+    --background: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
     --yellow: #f5c84b;
 }
 
@@ -235,8 +235,8 @@ body {
     display: inline-block;
     padding: 8px 13px;
     border-radius: 20px;
-    background: #eaf3ef;
-    color: #20584f;
+    background: #eff6ff;
+    color: #0c2340;
     font-size: 12px;
     font-weight: 700;
 }
@@ -319,8 +319,8 @@ body {
 }
 
 .alert-success {
-    background: #eaf3ef;
-    color: #20584f;
+    background: #eff6ff;
+    color: #0c2340;
     border: 1px solid #d9e5df;
 }
 

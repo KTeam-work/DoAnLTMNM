@@ -51,7 +51,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.properties.*') ? 'active' : '' }}"
                                 href="{{ route('owner.properties.index') }}">
-                                🏠 Quản lý nhà
+                                Quản lý nhà
                             </a>
                         </li>
 
@@ -59,7 +59,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.rooms.*') ? 'active' : '' }}"
                                 href="{{ route('owner.rooms.index') }}">
-                                🚪 Quản lý phòng
+                                Quản lý phòng
                             </a>
                         </li>
                     </ul>
@@ -81,7 +81,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.tenants.*') ? 'active' : '' }}"
                                 href="{{ route('owner.tenants.manage') }}">
-                                👤 Người thuê
+                                Người thuê
                             </a>
                         </li>
 
@@ -89,7 +89,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.contracts.*') ? 'active' : '' }}"
                                 href="{{ route('owner.contracts.index') }}">
-                                📝 Hợp đồng
+                                Hợp đồng
                             </a>
                         </li>
                     </ul>
@@ -111,7 +111,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.services.*') ? 'active' : '' }}"
                                 href="{{ route('owner.services.index') }}">
-                                ✨ Dịch vụ
+                                Dịch vụ
                             </a>
                         </li>
 
@@ -119,7 +119,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.utilities.*') ? 'active' : '' }}"
                                 href="{{ route('owner.utilities.index') }}">
-                                ⚡ Điện nước
+                                Điện nước
                             </a>
                         </li>
 
@@ -127,7 +127,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.invoices.*') ? 'active' : '' }}"
                                 href="{{ route('owner.invoices.index') }}">
-                                🧾 Hóa đơn
+                                Hóa đơn
                             </a>
                         </li>
 
@@ -135,7 +135,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.payments.*') ? 'active' : '' }}"
                                 href="{{ route('owner.payments.index') }}">
-                                💰 Giao dịch
+                                Giao dịch
                             </a>
                         </li>
                     </ul>
@@ -157,7 +157,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.rental-posts.*') ? 'active' : '' }}"
                                 href="{{ route('owner.rental-posts.index') }}">
-                                📢 Tin đăng
+                                Tin đăng
                             </a>
                         </li>
 
@@ -165,7 +165,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.appointments.*') ? 'active' : '' }}"
                                 href="{{ route('owner.appointments.index') }}">
-                                📅 Lịch xem phòng
+                                Lịch xem phòng
                             </a>
                         </li>
 
@@ -173,7 +173,7 @@
                             <a
                                 class="dropdown-item {{ request()->is('owner/maintenance*') ? 'active' : '' }}"
                                 href="{{ url('/owner/maintenance') }}">
-                                🛠️ Sửa chữa
+                                Sửa chữa
                             </a>
                         </li>
 
@@ -181,18 +181,18 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.reviews.*') ? 'active' : '' }}"
                                 href="{{ route('owner.reviews.index') }}">
-                                ⭐ Đánh giá
+                                Đánh giá
                             </a>
                         </li>
                     </ul>
                 </li>
 
-                {{-- TRỢ LÝ AI --}}
+                {{-- TRỢ LÝ HỖ TRỢ --}}
                 <li class="nav-item">
                     <a
                         class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
                         href="{{ route('chatbot.index') }}">
-                        🤖 Trợ lý AI
+                        Trợ lý hỗ trợ
                     </a>
                 </li>
 
@@ -202,13 +202,21 @@
             <div class="navbar-actions">
 
                 {{-- THÔNG BÁO --}}
-                <button
-                    class="notif-btn"
-                    type="button"
+                @php
+                    $unreadOwnerNotifs = \Illuminate\Support\Facades\Auth::check()
+                        ? \App\Models\Notification::where('user_id', \Illuminate\Support\Facades\Auth::id())->whereNull('read_at')->count()
+                        : 0;
+                @endphp
+                <a
+                    href="{{ route('owner.notifications.index') }}"
+                    class="notif-btn text-decoration-none"
                     aria-label="Thông báo"
-                    title="Thông báo">
+                    title="Thông báo ({{ $unreadOwnerNotifs }} chưa đọc)">
                     🔔
-                </button>
+                    @if($unreadOwnerNotifs > 0)
+                        <span class="notif-dot"></span>
+                    @endif
+                </a>
 
                 {{-- DROPDOWN TÀI KHOẢN --}}
                 <div class="dropdown user-dropdown">

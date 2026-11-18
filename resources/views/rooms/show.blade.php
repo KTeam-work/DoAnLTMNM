@@ -7,11 +7,24 @@
     if (isset($room) && $room instanceof \App\Models\Room) {
         $property = $room->property;
         $owner = optional($property)->owner;
+        $activePost = $room->rentalPosts->first() ?? \App\Models\RentalPost::where('room_id', $room->id)->latest()->first();
+
+        $lat = optional($property)->latitude;
+        $lng = optional($property)->longitude;
+        $hasCoords = !empty($lat) && !empty($lng) && is_numeric($lat) && is_numeric($lng);
+
+        $fullAddress = trim(implode(', ', array_filter([
+            optional($property)->address,
+            optional($property)->ward,
+            optional($property)->district,
+        ])));
+
+        $mapQuery = $hasCoords ? "{$lat},{$lng}" : ($fullAddress ?: (optional($property)->address ?? 'Thành phố Hồ Chí Minh'));
 
         $room = [
             'title' => $room->name,
             'id' => $room->id,
-            'address' => optional($property)->address ?? 'Chưa cập nhật địa chỉ',
+            'address' => $fullAddress ?: (optional($property)->address ?? 'Chưa cập nhật địa chỉ'),
             'price' => number_format((float) $room->price, 0, ',', '.') . 'đ',
             'area' => number_format((float) $room->area, 0, ',', '.') . ' m²',
             'people' => $room->max_people . ' người',
@@ -25,7 +38,11 @@
                 ?? ['WC riêng', 'Wi-Fi', 'Chỗ để xe'],
             'landlord' => optional($owner)->name ?? 'Chủ trọ',
             'phone' => optional($owner)->phone ?? '',
-            'map' => optional($property)->address ?? 'Chưa cập nhật vị trí',
+            'latitude' => $lat,
+            'longitude' => $lng,
+            'has_coords' => $hasCoords,
+            'map_query' => $mapQuery,
+            'map' => $fullAddress ?: (optional($property)->address ?? 'Chưa cập nhật vị trí'),
         ];
     } else {
         $room = null;
@@ -85,6 +102,27 @@
             <!-- =========================
                  QUAY LẠI DANH SÁCH
             ========================== -->
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if(isset($errors) && $errors->any())
+                <div class="alert alert-danger mb-3">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="mb-3">
                 <a
                     href="{{ route('rooms.index') }}"
@@ -314,39 +352,48 @@
 
 
                     <!-- =========================
-                         GOOGLE MAP
+                         VỊ TRÍ PHÒNG TRỌ (GOOGLE MAPS)
                     ========================== -->
 
                     <section class="room-content-card">
 
-                        <h2>
-                            📍 Vị trí phòng
-                        </h2>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <h2 style="margin: 0;">
+                                📍 Vị trí phòng trọ
+                            </h2>
+
+                            @if(!empty($room['has_coords']))
+                                <span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(12, 35, 64, 0.08); border: 1px solid rgba(12, 35, 64, 0.15); border-radius: 999px; font-size: 12px; font-weight: 700; color: #0c2340;">
+                                    🎯 Tọa độ GPS: {{ number_format((float)$room['latitude'], 5) }}, {{ number_format((float)$room['longitude'], 5) }}
+                                </span>
+                            @endif
+                        </div>
 
                         <div class="section-line"></div>
 
+                        <div class="map-address" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                📌 <span>{{ $room['address'] }}</span>
+                            </div>
 
-
-                        <div class="map-address">
-
-                            📌
-
-                            {{ $room['map'] }}
-
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query={{ urlencode($room['map_query']) }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style="font-size: 13px; font-weight: 700; color: #ef7d27; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                            >
+                                Mở chỉ đường trên Google Maps ↗
+                            </a>
                         </div>
 
-
-
                         <div class="map-wrapper">
-
                             <iframe
                                 class="room-map"
-                                src="https://www.google.com/maps?q={{ urlencode($room['map']) }}&output=embed"
+                                src="https://maps.google.com/maps?q={{ urlencode($room['map_query']) }}&hl=vi&z=16&output=embed"
                                 allowfullscreen
                                 loading="lazy"
                                 referrerpolicy="no-referrer-when-downgrade"
                             ></iframe>
-
                         </div>
 
                     </section>
@@ -495,16 +542,12 @@
 
                         <div class="contact-buttons">
 
-
-
                             <a
                                 href="tel:{{ $room['phone'] }}"
                                 class="btn-contact"
                             >
                                 📞 Gọi chủ trọ
                             </a>
-
-
 
                             <a
                                 href="#"
@@ -514,6 +557,20 @@
                             </a>
 
                         </div>
+
+                        @if(isset($activePost) && $activePost)
+                            <div class="mt-3 text-center border-top pt-2">
+                                @auth
+                                    <button type="button" class="btn btn-link text-muted text-decoration-none small p-0" data-bs-toggle="modal" data-bs-target="#reportModal" style="font-size: 12.5px;">
+                                        🚩 Báo cáo tin đăng vi phạm
+                                    </button>
+                                @else
+                                    <a href="{{ route('login') }}" class="text-muted text-decoration-none small" style="font-size: 12.5px;">
+                                        🚩 Đăng nhập để báo cáo vi phạm
+                                    </a>
+                                @endauth
+                            </div>
+                        @endif
 
                     </div>
 
@@ -527,7 +584,57 @@
 
 </main>
 
+@if(isset($activePost) && $activePost && auth()->check())
+<!-- MODAL BÁO CÁO VI PHẠM -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="background: #fff8f8; border-bottom: 1px solid #fee2e2; border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                <h5 class="modal-title text-danger fw-bold fs-6" id="reportModalLabel">
+                    🚩 Báo cáo tin đăng vi phạm
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <form action="{{ route('tenant.reports.store', $activePost->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-3">
+                        Ý kiến đóng góp của bạn giúp cộng đồng Trọ Ơi an toàn, minh bạch hơn. Vui lòng chọn lý do và mô tả sự việc.
+                    </p>
 
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Lý do vi phạm <span class="text-danger">*</span></label>
+                        <select name="reason" class="form-select form-select-sm" required>
+                            <option value="">-- Chọn lý do --</option>
+                            <option value="fake_info">Tin giả, hình ảnh/địa chỉ sai sự thật</option>
+                            <option value="price_mismatch">Giá thực tế không đúng với giá đăng</option>
+                            <option value="fraud_scam">Dấu hiệu lừa đảo / yêu cầu chuyển cọc mờ ám</option>
+                            <option value="contact_failed">Số điện thoại ảo, không thể liên hệ</option>
+                            <option value="inappropriate">Nội dung, hình ảnh thô tục, phản cảm</option>
+                            <option value="other">Lý do khác</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Mô tả chi tiết <span class="text-danger">*</span></label>
+                        <textarea name="description" class="form-control form-control-sm" rows="3" placeholder="Mô tả cụ thể vấn đề bạn gặp phải (tối thiểu 10 ký tự)..." required minlength="10"></textarea>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold small">Ảnh chụp bằng chứng (nếu có)</label>
+                        <input type="file" name="evidence_image" class="form-control form-control-sm" accept="image/*">
+                        <div class="form-text small" style="font-size: 11px;">Chụp ảnh tin nhắn, biên nhận cọc hoặc thực tế phòng (tối đa 5MB).</div>
+                    </div>
+                </div>
+                <div class="modal-footer p-3 bg-light" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-sm btn-danger px-3">Gửi báo cáo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 
 @endsection
   

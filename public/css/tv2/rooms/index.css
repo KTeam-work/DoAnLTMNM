@@ -1,65 +1,158 @@
-
 /* ========================================
-   TRỌ ƠI - TRANG TÌM KIẾM PHÒNG
-   Kế thừa bảng màu CSS chung của nhóm
+   TRỌ ƠI - TRANG TÌM KIẾM PHÒNG (NAVY LUXURY THEME)
 ======================================== */
+
+.search-panel {
+    margin-top: 26px;
+    padding: 20px 24px;
+    border-radius: 24px;
+    background: #ffffff;
+    color: var(--text);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    box-shadow: 0 20px 45px -10px rgba(7, 21, 38, 0.22);
+}
+
+.search-row-main {
+    padding-bottom: 2px;
+}
+
+.search-field {
+    min-height: 56px;
+    padding: 6px 16px;
+    border-right: 1px solid #e2e8f0;
+}
+
+.search-field.no-border,
+.search-btn-col .search-field {
+    border-right: 0;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
 .room-filter-input {
     display: block;
     width: 100%;
     min-width: 0;
-    padding: 7px 0;
+    padding: 6px 0;
     border: 0;
     outline: none;
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 12px;
+    font-size: 13.5px;
+    font-weight: 600;
 }
 
 .room-filter-input:focus {
-    box-shadow: 0 2px 0 var(--yellow);
+    box-shadow: 0 2px 0 #2563eb;
 }
 
 .room-filter-input::placeholder {
     color: var(--muted);
-    opacity: 1;
+    opacity: 0.9;
 }
 
+.search-btn {
+    width: 100%;
+    height: 50px;
+    border: 0;
+    border-radius: 999px;
+    background: #0c2340;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(12, 35, 64, 0.2);
+    transition: all 0.2s ease;
+}
+
+.search-btn:hover {
+    background: #163b65;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(12, 35, 64, 0.3);
+}
+
+/* Hàng bộ lọc diện tích */
+.search-row-secondary {
+    padding-top: 14px;
+    margin-top: 14px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.secondary-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.secondary-input {
+    width: 140px;
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.secondary-input:focus {
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+/* Tiện ích */
 .room-amenities-filter {
-    padding: 14px;
-    border-top: 1px solid #eee6d4;
+    padding-top: 14px;
+    margin-top: 14px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .room-amenities-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 9px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .room-amenity-option {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 7px 11px;
+    gap: 6px;
+    padding: 6px 14px;
     border: 1px solid var(--border);
     border-radius: 999px;
-    background: #fffdf8;
+    background: #ffffff;
     color: var(--text);
     font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background .2s, border-color .2s;
+    transition: all .2s ease;
+}
+
+.room-amenity-option:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
 }
 
 .room-amenity-option:has(input:checked) {
-    border-color: var(--green);
-    background: var(--green-soft);
-    color: var(--green-dark);
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
 }
 
 .room-amenity-option input {
-    accent-color: var(--green);
+    accent-color: #2563eb;
 }
 
 button.quick-filter {
@@ -69,9 +162,10 @@ button.quick-filter {
 
 button.quick-filter:hover,
 button.quick-filter:focus-visible {
-    background: var(--yellow);
-    border-color: var(--yellow);
-    color: var(--green-dark);
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #0c2340;
+    transform: translateY(-1px);
 }
 
 .fav-btn.is-favorite {
@@ -79,21 +173,22 @@ button.quick-filter:focus-visible {
 }
 
 .room-empty-state {
-    padding: 54px 20px;
+    padding: 56px 24px;
     border: 1px solid var(--border);
-    border-radius: 18px;
-    background: var(--white);
+    border-radius: 20px;
+    background: #ffffff;
     text-align: center;
+    box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.05);
 }
 
 .room-empty-icon {
-    margin-bottom: 10px;
-    color: var(--green);
-    font-size: 42px;
+    margin-bottom: 12px;
+    color: #0c2340;
+    font-size: 46px;
 }
 
 .room-empty-state h3 {
-    color: var(--green-dark);
+    color: #0c2340;
     font-size: 20px;
     font-weight: 800;
 }
@@ -101,7 +196,7 @@ button.quick-filter:focus-visible {
 .room-empty-state p {
     margin-bottom: 20px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 13.5px;
 }
 
 #room-results[aria-busy="true"] {
@@ -115,19 +210,36 @@ button.quick-filter:focus-visible {
 }
 
 @media (max-width: 991.98px) {
+    .search-panel {
+        padding: 18px 16px;
+        border-radius: 20px;
+    }
+
+    .search-field {
+        border-right: 0;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 8px 10px;
+    }
+
     .room-filter-input {
         padding: 6px 0;
     }
 
-    .search-field {
-        padding-top: 10px;
-        padding-bottom: 10px;
+    .search-btn {
+        margin-top: 10px;
+        border-radius: 12px;
+        height: 48px;
     }
 }
 
 @media (max-width: 575.98px) {
+    .search-panel {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
     .room-amenities-filter {
-        padding: 12px 8px;
+        padding: 12px 4px 4px;
     }
 
     .room-amenity-option {

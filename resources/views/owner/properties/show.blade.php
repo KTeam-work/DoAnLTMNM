@@ -103,6 +103,33 @@
                     <div class="info-value">{{ $property->longitude ?? 'Chưa cập nhật' }}</div>
                 </div>
 
+                @php
+                    $propLat = $property->latitude;
+                    $propLng = $property->longitude;
+                    $propHasCoords = !empty($propLat) && !empty($propLng) && is_numeric($propLat) && is_numeric($propLng);
+                    $propAddress = trim(implode(', ', array_filter([$property->address, $property->ward, $property->district])));
+                    $propMapQuery = $propHasCoords ? "{$propLat},{$propLng}" : ($propAddress ?: null);
+                @endphp
+
+                @if($propMapQuery)
+                <div class="col-12 mt-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="info-label mb-0">Bản đồ vị trí</div>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($propMapQuery) }}" target="_blank" rel="noopener noreferrer" class="small text-decoration-none fw-semibold" style="color: #ef7d27;">
+                            Xem trên Google Maps ↗
+                        </a>
+                    </div>
+                    <div style="border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+                        <iframe
+                            style="width: 100%; height: 260px; border: 0; display: block;"
+                            src="https://maps.google.com/maps?q={{ urlencode($propMapQuery) }}&hl=vi&z=16&output=embed"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                        ></iframe>
+                    </div>
+                </div>
+                @endif
+
                 <div class="col-12">
                     <div class="info-label">Mô tả</div>
                     <div class="info-value" style="font-weight: 400; white-space: pre-line;">

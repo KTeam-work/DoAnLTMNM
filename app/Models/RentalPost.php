@@ -29,4 +29,9 @@ class RentalPost extends Model
         return $this->hasMany(RentalPostImage::class)
             ->orderBy('sort_order');
     }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(PostReport::class);
+    }
 }

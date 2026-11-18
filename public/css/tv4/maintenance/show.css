@@ -8,4 +8,4 @@
   .badge-status.pending{background:var(--yellow-light);color:#9b6a00;}
   .badge-status.processing{background:var(--blue-soft);color:var(--blue);}
   .badge-status.completed{background:var(--green-soft);color:var(--green);}
-  .badge-status.rejected{background:#f0eadc;color:var(--muted);}
+  .badge-status.rejected{background:#f1f5f9;color:var(--muted);}

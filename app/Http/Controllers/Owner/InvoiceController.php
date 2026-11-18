@@ -76,6 +76,49 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Mẫu in hóa đơn và xuất PDF chuẩn A4.
+     */
+    public function print(Request $request, int $id)
+    {
+        $owner = $this->actingOwner($request);
+
+        $invoice = Invoice::query()
+            ->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id))
+            ->with([
+                'items.service:id,name',
+                'contract.room.property',
+                'contract.tenant:id,name,phone',
+                'contract.owner:id,name,phone',
+                'utilityReading',
+                'payments'
+            ])
+            ->findOrFail($id);
+
+        return view('invoices.print', [
+            'invoice' => $invoice,
+            'backUrl' => route('owner.invoices.show', $invoice->id),
+            'role' => 'owner',
+        ]);
+    }
+
+    /**
+     * Kích hoạt quét nợ và cập nhật quá hạn thủ công từ Web UI (phục vụ Demo & Vận hành).
+     */
+    public function processDueNow(Request $request)
+    {
+        $owner = $this->actingOwner($request);
+
+        $stats = \App\Console\Commands\ProcessDueInvoicesCommand::processDueInvoices(false, $owner->id);
+
+        $summary = "Đã quét {$stats['total_scanned']} hóa đơn: "
+            . "Đã gửi {$stats['upcoming_reminders']} nhắc nợ sắp hạn, "
+            . "{$stats['due_today_reminders']} nhắc nợ hôm nay, "
+            . "đã cập nhật {$stats['marked_overdue']} hóa đơn quá hạn.";
+
+        return back()->with('success', $summary);
+    }
+
+    /**
      * Tạo hóa đơn tháng: 1 hợp đồng (contract_id) hoặc hàng loạt.
      */
     public function store(Request $request)
@@ -86,8 +129,10 @@ class InvoiceController extends Controller
             'month' => ['required', 'date'],
             'contract_id' => ['nullable', 'integer', 'exists:contracts,id'],
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'due_date' => ['nullable', 'date'],
         ]);
         $billingMonth = Carbon::parse($data['month'])->startOfMonth();
+        $dueDate = !empty($data['due_date']) ? Carbon::parse($data['due_date'])->toDateString() : null;
 
         $contracts = Contract::query()
             ->where('owner_id', $owner->id)
@@ -120,7 +165,7 @@ class InvoiceController extends Controller
                 $skipped[] = $contract->room->name . ' (thiếu chỉ số điện nước)';
                 continue;
             }
-            $created[] = $this->buildInvoice($contract, $reading, $billingMonth, (float) ($data['discount'] ?? 0));
+            $created[] = $this->buildInvoice($contract, $reading, $billingMonth, (float) ($data['discount'] ?? 0), $dueDate);
         }
 
         if ($created === []) {
@@ -145,9 +190,9 @@ class InvoiceController extends Controller
         ], 201);
     }
 
-    private function buildInvoice(Contract $contract, UtilityReading $reading, Carbon $billingMonth, float $discount): int
+    private function buildInvoice(Contract $contract, UtilityReading $reading, Carbon $billingMonth, float $discount, ?string $dueDate = null): int
     {
-        return DB::transaction(function () use ($contract, $reading, $billingMonth, $discount) {
+        return DB::transaction(function () use ($contract, $reading, $billingMonth, $discount, $dueDate) {
             $eUse = (float) $reading->electricity_new - (float) $reading->electricity_old;
             $wUse = (float) $reading->water_new - (float) $reading->water_old;
 
@@ -172,6 +217,7 @@ class InvoiceController extends Controller
 
             $subtotal = array_sum(array_column($items, 'amount'));
             $discount = min($discount, $subtotal);
+            $invoiceDueDate = $dueDate ?: now()->addDays(7)->toDateString();
 
             $invoice = Invoice::query()->create([
                 'invoice_code' => $this->invoiceCode($billingMonth),
@@ -179,7 +225,7 @@ class InvoiceController extends Controller
                 'utility_reading_id' => $reading->id,
                 'billing_month' => $billingMonth->toDateString(),
                 'issue_date' => now()->toDateString(),
-                'due_date' => now()->addDays(10)->toDateString(),
+                'due_date' => $invoiceDueDate,
                 'subtotal' => $subtotal,
                 'discount' => $discount,
                 'total' => $subtotal - $discount,

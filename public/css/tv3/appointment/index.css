@@ -1,7 +1,7 @@
 
         body {
-            background: #f8f5eb;
-            color: #213430;
+            background: #f8fafc;
+            color: #0f172a;
             font-family: 'Be Vietnam Pro', sans-serif;
         }
 
@@ -20,7 +20,7 @@
         }
 
         .eyebrow {
-            color: #20584f;
+            color: #0c2340;
             font-size: 12px;
             font-weight: 800;
             letter-spacing: 1.5px;
@@ -34,7 +34,7 @@
         }
 
         .heading p, .summary-card small {
-            color: #78837e;
+            color: #64748b;
         }
 
         .summary-grid {
@@ -46,7 +46,7 @@
 
         .summary-card {
             background: white;
-            border: 1px solid #e6dcc2;
+            border: 1px solid #e2e8f0;
             border-radius: 18px;
             padding: 20px;
         }
@@ -64,7 +64,7 @@
             width: 42px;
             height: 42px;
             border-radius: 13px;
-            background: #eaf3ef;
+            background: #eff6ff;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -91,22 +91,22 @@
             font-weight: 700;
             text-decoration: none;
             background: white;
-            border: 1px solid #e6dcc2;
+            border: 1px solid #e2e8f0;
             color: #53635e;
         }
 
         .filter-link.active, .filter-link:hover {
-            background: #20584f;
-            border-color: #20584f;
+            background: #0c2340;
+            border-color: #0c2340;
             color: white;
         }
 
         .panel {
             background: white;
-            border: 1px solid #e6dcc2;
+            border: 1px solid #e2e8f0;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 10px 32px rgba(32, 88, 79, .06);
+            box-shadow: 0 10px 32px rgba(12, 35, 64, .06);
             margin-bottom: 22px;
         }
 
@@ -117,7 +117,7 @@
             flex-wrap: wrap;
             gap: 12px;
             padding: 20px 22px;
-            border-bottom: 1px solid #eee7d8;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .panel-title {
@@ -161,9 +161,9 @@
         .dot-cancelled { background: #cf6254; }
 
         .fc {
-            --fc-border-color: #eee7d8;
+            --fc-border-color: #e2e8f0;
             --fc-today-bg-color: #f0f7f3;
-            color: #213430;
+            color: #0f172a;
         }
 
         .fc .fc-toolbar-title {
@@ -172,8 +172,8 @@
         }
 
         .fc .fc-button {
-            background: #20584f;
-            border-color: #20584f;
+            background: #0c2340;
+            border-color: #0c2340;
             border-radius: 9px;
             font-weight: 700;
             box-shadow: none !important;
@@ -182,8 +182,8 @@
         .fc .fc-button:hover,
         .fc .fc-button:active,
         .fc .fc-button-primary:not(:disabled).fc-button-active {
-            background: #17463e;
-            border-color: #17463e;
+            background: #071526;
+            border-color: #071526;
         }
 
         .fc .fc-event {
@@ -209,7 +209,7 @@
         .empty-state {
             text-align: center;
             padding: 22px;
-            color: #78837e;
+            color: #64748b;
         }
 
         .empty-state .emoji {
@@ -230,7 +230,7 @@
         }
 
         .modal-header {
-            background: #20584f;
+            background: #0c2340;
             color: white;
             padding: 20px 24px;
         }
@@ -249,7 +249,7 @@
 
         .detail-row {
             padding: 13px 0;
-            border-bottom: 1px solid #eee7d8;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .detail-row:last-child {
@@ -257,7 +257,7 @@
         }
 
         .detail-label {
-            color: #78837e;
+            color: #64748b;
             font-size: 12px;
             margin-bottom: 5px;
         }
@@ -281,8 +281,8 @@
         }
 
         .status-confirmed {
-            background: #eaf3ef;
-            color: #20584f;
+            background: #eff6ff;
+            color: #0c2340;
         }
 
         .status-completed {
@@ -303,12 +303,12 @@
         }
 
         .btn-owner {
-            background: #20584f;
+            background: #0c2340;
             color: white;
         }
 
         .btn-owner:hover {
-            background: #17463e;
+            background: #071526;
             color: white;
         }
 
