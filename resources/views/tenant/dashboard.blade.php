@@ -202,6 +202,12 @@
                         ? ($images[0] ?? null)
                         : null;
 
+                    if (!$roomImage && !empty($room->post_image)) {
+                        $roomImage = \Illuminate\Support\Str::startsWith($room->post_image, ['http://', 'https://', '//'])
+                            ? $room->post_image
+                            : asset('storage/' . ltrim($room->post_image, '/'));
+                    }
+
                     $isFavorite = in_array(
                         (int) $room->id,
                         $favoriteRoomIds,

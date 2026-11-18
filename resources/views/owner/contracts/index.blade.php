@@ -22,56 +22,42 @@
         <a href="{{ route('owner.contracts.create') }}" class="btn btn-success rounded-pill px-4 py-2 fw-medium shadow-sm text-decoration-none">+ Tạo hợp đồng mới</a>
     </div>
 
-    <!-- THỐNG KÊ -->
+    <!-- BỘ LỌC TRẠNG THÁI (NO ICONS) -->
     @php
         $total = $contracts->count();
         $active = $contracts->where('status', 'active')->count();
         $expiring = $contracts->filter(fn($c) => $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count();
         $terminated = $contracts->where('status', 'terminated')->count();
     @endphp
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="stat-card-modern d-flex align-items-center gap-3">
-                <div class="icon-box bg-blue-soft">📋</div>
-                <div>
-                    <div class="text-muted small fw-medium mb-1">Tổng hợp đồng</div>
-                    <div class="fs-4 fw-bold text-dark">{{ $total }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card-modern d-flex align-items-center gap-3">
-                <div class="icon-box bg-green-soft">✅</div>
-                <div>
-                    <div class="text-muted small fw-medium mb-1">Đang hiệu lực</div>
-                    <div class="fs-4 fw-bold text-dark">{{ $active }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card-modern d-flex align-items-center gap-3">
-                <div class="icon-box bg-orange-soft">⏳</div>
-                <div>
-                    <div class="text-muted small fw-medium mb-1">Sắp hết hạn</div>
-                    <div class="fs-4 fw-bold text-dark">{{ $expiring }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card-modern d-flex align-items-center gap-3">
-                <div class="icon-box bg-red-soft">🔒</div>
-                <div>
-                    <div class="text-muted small fw-medium mb-1">Đã thanh lý</div>
-                    <div class="fs-4 fw-bold text-dark">{{ $terminated }}</div>
-                </div>
-            </div>
+
+    <div class="segmented-filter-wrapper mb-4">
+        <div class="segmented-filter-bar" role="tablist">
+            <button type="button" class="segmented-tab active" data-filter="all">
+                <span class="tab-label">Tất cả</span>
+                <span class="tab-count">{{ $total }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="active">
+                <span class="tab-label">Đang hiệu lực</span>
+                <span class="tab-count">{{ $active }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="expiring">
+                <span class="tab-label">Sắp hết hạn</span>
+                <span class="tab-count">{{ $expiring }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="terminated">
+                <span class="tab-label">Đã thanh lý</span>
+                <span class="tab-count">{{ $terminated }}</span>
+            </button>
         </div>
     </div>
 
     <!-- BẢNG DANH SÁCH HỢP ĐỒNG -->
     <div class="panel-modern">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
             <h4 class="fw-bold text-dark m-0 fs-5">Danh sách hợp đồng ({{ $total }})</h4>
+            <div class="search-input-custom">
+                <input type="text" id="ownerContractSearch" placeholder="Tìm kiếm theo mã HĐ, tên phòng, khách thuê...">
+            </div>
         </div>
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -90,7 +76,12 @@
                 </thead>
                 <tbody>
                     @forelse($contracts as $contract)
-                    <tr>
+                    @php
+                        $isExpiring = $contract->status === 'active' && $contract->end_date && \Carbon\Carbon::parse($contract->end_date)->diffInDays(now(), false) > -60;
+                    @endphp
+                    <tr class="owner-contract-row"
+                        data-status="{{ $contract->status }}"
+                        data-expiring="{{ $isExpiring ? '1' : '0' }}">
                         <td><strong class="text-primary">#{{ $contract->contract_code }}</strong></td>
                         <td>
                             <div class="fw-bold text-dark">{{ $contract->room->name ?? '—' }}</div>
@@ -122,10 +113,78 @@
                         <td colspan="6" class="text-center text-muted py-5">Chưa có hợp đồng nào.</td>
                     </tr>
                     @endforelse
+                    <tr id="ownerNoFilterResultRow" style="display: none;">
+                        <td colspan="6" class="text-center text-muted py-4">Không tìm thấy hợp đồng nào phù hợp bộ lọc.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
+</div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('ownerContractSearch');
+        const tabBtns = document.querySelectorAll('.segmented-tab');
+        const rows = document.querySelectorAll('.table-modern tbody tr.owner-contract-row');
+        const noFilterResultRow = document.getElementById('ownerNoFilterResultRow');
+
+        let currentFilter = 'all';
+        let currentQuery = '';
+
+        function applyFilter() {
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status') || '';
+                const isExpiring = row.getAttribute('data-expiring') === '1';
+                const text = row.textContent.toLowerCase();
+
+                let matchesStatus = false;
+                if (currentFilter === 'all') {
+                    matchesStatus = true;
+                } else if (currentFilter === 'active') {
+                    matchesStatus = (status === 'active');
+                } else if (currentFilter === 'expiring') {
+                    matchesStatus = isExpiring;
+                } else if (currentFilter === 'terminated') {
+                    matchesStatus = (status === 'terminated');
+                }
+
+                const matchesSearch = !currentQuery || text.includes(currentQuery);
+
+                if (matchesStatus && matchesSearch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noFilterResultRow) {
+                noFilterResultRow.style.display = (rows.length > 0 && visibleCount === 0) ? '' : 'none';
+            }
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.getAttribute('data-filter') || 'all';
+                applyFilter();
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                currentQuery = this.value.toLowerCase().trim();
+                applyFilter();
+            });
+        }
+    });
+</script>
+@endpush
 </div>
 
 

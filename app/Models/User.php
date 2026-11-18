@@ -26,7 +26,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'initial_password',
         'phone',
+        'identity_card',
         'avatar',
         'role',
         'status',
@@ -55,6 +57,38 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Booted & Auto Generate User Code
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->user_code)) {
+                $user->user_code = static::generateUserCode($user->role);
+            }
+        });
+    }
+
+    public static function generateUserCode(?string $role = 'tenant'): string
+    {
+        $prefix = match ($role) {
+            'admin' => 'ADM',
+            'owner' => 'OWN',
+            default => 'TEN',
+        };
+
+        $count = static::where('role', $role)->count() + 1;
+        do {
+            $code = sprintf('%s-%03d', $prefix, $count);
+            $count++;
+        } while (static::where('user_code', $code)->exists());
+
+        return $code;
     }
 
     /*

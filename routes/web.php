@@ -142,6 +142,25 @@ Route::middleware('auth')->group(function () {
         return view('admin.users');
     })->name('admin.users');
 
+    Route::patch('/admin/users/{user}/status', function (
+        \Illuminate\Http\Request $request,
+        \App\Models\User $user
+    ) {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'Bạn không thể khóa tài khoản của chính mình.');
+        }
+
+        $newStatus = $user->status === 'active' ? 'inactive' : 'active';
+        $user->update(['status' => $newStatus]);
+
+        $actionText = $newStatus === 'active' ? 'mở khóa' : 'khóa';
+        return back()->with('success', "Đã {$actionText} tài khoản {$user->name} ({$user->email}) thành công.");
+    })->name('admin.users.update-status');
+
 
     Route::get('/admin/rental-posts', function () {
 
@@ -621,6 +640,11 @@ Route::put(
     '/owner/payments/{payment}/reject',
     [OwnerPaymentController::class, 'reject']
 )->name('owner.payments.reject');
+
+Route::post(
+    '/owner/invoices/{invoice}/record-cash',
+    [OwnerPaymentController::class, 'recordCashPayment']
+)->name('owner.invoices.record-cash');
 
 
 /*

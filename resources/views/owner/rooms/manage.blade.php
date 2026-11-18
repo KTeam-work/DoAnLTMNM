@@ -57,7 +57,7 @@
             </div>
         @endif
 
-        @if ($errors->any())
+        @if (isset($errors) && $errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <strong>Dữ liệu chưa hợp lệ!</strong>
                 <ul class="mb-0 mt-2">
@@ -69,34 +69,25 @@
             </div>
         @endif
 
-        {{-- THỐNG KÊ --}}
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="stat-label">Tổng số phòng</div>
-                    <div class="stat-value">{{ $rooms->count() }}</div>
-                </div>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="stat-label">Còn trống</div>
-                    <div class="stat-value">{{ $rooms->where('status', 'available')->count() }}</div>
-                </div>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="stat-label">Đang cho thuê</div>
-                    <div class="stat-value">{{ $rooms->where('status', 'rented')->count() }}</div>
-                </div>
-            </div>
-
-            <div class="col-6 col-lg-3">
-                <div class="stat-card">
-                    <div class="stat-label">Bảo trì</div>
-                    <div class="stat-value">{{ $rooms->where('status', 'maintenance')->count() }}</div>
-                </div>
+        {{-- BỘ LỌC TRẠNG THÁI (NO ICONS) --}}
+        <div class="segmented-filter-wrapper mb-4">
+            <div class="segmented-filter-bar" role="tablist">
+                <button type="button" class="segmented-tab active" data-status="">
+                    <span class="tab-label">Tất cả</span>
+                    <span class="tab-count">{{ $rooms->count() }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="available">
+                    <span class="tab-label">Còn trống</span>
+                    <span class="tab-count">{{ $rooms->where('status', 'available')->count() }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="rented">
+                    <span class="tab-label">Đang cho thuê</span>
+                    <span class="tab-count">{{ $rooms->where('status', 'rented')->count() }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="maintenance">
+                    <span class="tab-label">Bảo trì</span>
+                    <span class="tab-count">{{ $rooms->where('status', 'maintenance')->count() }}</span>
+                </button>
             </div>
         </div>
 

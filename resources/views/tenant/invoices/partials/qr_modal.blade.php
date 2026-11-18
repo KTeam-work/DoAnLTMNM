@@ -8,12 +8,9 @@
       
       <!-- Modal Header -->
       <div class="modal-header text-white" style="background: #0c2340; padding: 18px 24px;">
-        <div class="d-flex align-items-center gap-2">
-          <span style="font-size: 22px;">📱</span>
-          <div>
-            <h5 class="modal-title fw-bold mb-0" id="sepayQrModalLabel" style="font-size: 17px;">Thanh Toán QR SePay</h5>
-            <small class="opacity-75" style="font-size: 12px;">Hóa đơn: <strong id="modalInvoiceCodeText">—</strong></small>
-          </div>
+        <div>
+          <h5 class="modal-title fw-bold mb-0" id="sepayQrModalLabel" style="font-size: 17px;">Thanh toán QR SePay</h5>
+          <small class="opacity-75" style="font-size: 12px;">Hóa đơn: <strong id="modalInvoiceCodeText">—</strong></small>
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
       </div>

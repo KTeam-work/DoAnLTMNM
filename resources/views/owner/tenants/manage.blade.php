@@ -62,128 +62,33 @@
             }, 0);
             $staying = $tenants->count();
         @endphp
-        <div class="row g-3 mb-4">
+        <!-- =====================================================
+             SEGMENTED FILTER TABS (NO ICONS)
+        ===================================================== -->
+        @php
+            $expiringCount = $tenants->filter(fn($t) => ($c = $t->rentedContracts->first()) && $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count();
+            $activeContractsCount = $tenants->flatMap->rentedContracts->where('status', 'active')->count();
+        @endphp
 
-
-            <!-- TỔNG NGƯỜI THUÊ -->
-
-            <div class="col-6 col-lg-3">
-
-                <div
-                    class="stat-card-modern d-flex align-items-center gap-3"
-                >
-
-                    <div class="icon-box bg-blue-soft">
-                        👥
-                    </div>
-
-
-                    <div>
-
-                        <div class="text-muted small fw-medium mb-1">
-                            Tổng người thuê
-                        </div>
-
-                        <div class="fs-4 fw-bold text-dark">
-                            {{ $totalTenants }}
-                        </div>
-
-                    </div>
-
-                </div>
-
+        <div class="segmented-filter-wrapper mb-4">
+            <div class="segmented-filter-bar" role="tablist">
+                <button type="button" class="segmented-tab active" data-filter="all">
+                    <span class="tab-label">Tất cả</span>
+                    <span class="tab-count">{{ $totalTenants }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-filter="staying">
+                    <span class="tab-label">Đang lưu trú</span>
+                    <span class="tab-count">{{ $staying }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-filter="expiring">
+                    <span class="tab-label">Sắp hết hạn HĐ</span>
+                    <span class="tab-count">{{ $expiringCount }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-filter="active_contract">
+                    <span class="tab-label">HĐ hiệu lực</span>
+                    <span class="tab-count">{{ $activeContractsCount }}</span>
+                </button>
             </div>
-
-
-            <!-- ĐANG LƯU TRÚ -->
-
-            <div class="col-6 col-lg-3">
-
-                <div
-                    class="stat-card-modern d-flex align-items-center gap-3"
-                >
-
-                    <div class="icon-box bg-green-soft">
-                        🏠
-                    </div>
-
-
-                    <div>
-
-                        <div class="text-muted small fw-medium mb-1">
-                            Đang lưu trú
-                        </div>
-
-                        <div class="fs-4 fw-bold text-dark">
-                            {{ $staying }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- SẮP HẾT HẠN -->
-
-            <div class="col-6 col-lg-3">
-
-                <div
-                    class="stat-card-modern d-flex align-items-center gap-3"
-                >
-
-                    <div class="icon-box bg-orange-soft">
-                        ⚠️
-                    </div>
-
-
-                    <div>
-
-                        <div class="text-muted small fw-medium mb-1">
-                            Sắp hết hạn HĐ
-                        </div>
-
-                        <div class="fs-4 fw-bold text-dark">
-                            {{ $tenants->filter(fn($t) => ($c = $t->rentedContracts->first()) && $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count() }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- MỚI CHUYỂN ĐẾN -->
-
-            <div class="col-6 col-lg-3">
-
-                <div
-                    class="stat-card-modern d-flex align-items-center gap-3"
-                >
-
-                    <div class="icon-box bg-purple-soft">
-                        👋
-                    </div>
-
-
-                    <div>
-
-                        <div class="text-muted small fw-medium mb-1">
-                            Hợp đồng hiệu lực
-                        </div>
-
-                        <div class="fs-4 fw-bold text-dark">
-                            {{ $tenants->flatMap->rentedContracts->where('status', 'active')->count() }}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
         </div>
 
 
@@ -238,17 +143,11 @@
                         style="width: 250px;"
                     >
 
-                        <span
-                            class="input-group-text bg-white border-end-0 text-muted border-light-subtle"
-                        >
-                            🔎
-                        </span>
-
-
                         <input
                             type="text"
-                            class="form-control border-start-0 border-light-subtle shadow-none"
-                            placeholder="Tìm tên, SĐT, CCCD..."
+                            id="tenantSearchInput"
+                            class="form-control border-light-subtle shadow-none"
+                            placeholder="Tìm tên, SĐT, CCCD, phòng..."
                         >
 
                     </div>
@@ -306,8 +205,12 @@
 
                     <tbody>
                         @forelse($tenants as $tenant)
-                            @php($contract = $tenant->rentedContracts->first())
-                            <tr>
+                            @php
+                                $contract = $tenant->rentedContracts->first();
+                                $isExp = $contract && $contract->status === 'active' && $contract->end_date && \Carbon\Carbon::parse($contract->end_date)->diffInDays(now(), false) > -60;
+                                $hasActive = $contract && $contract->status === 'active';
+                            @endphp
+                            <tr class="tenant-row" data-expiring="{{ $isExp ? '1' : '0' }}" data-active-contract="{{ $hasActive ? '1' : '0' }}">
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="avatar-circle bg-blue-soft">
@@ -338,7 +241,7 @@
                                 </td>
                             </tr>
                             @foreach($contract?->members ?? [] as $member)
-                            <tr>
+                            <tr class="tenant-row" data-expiring="{{ $isExp ? '1' : '0' }}" data-active-contract="{{ $hasActive ? '1' : '0' }}">
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="avatar-circle bg-purple-soft">
@@ -370,6 +273,9 @@
                         @empty
                             <tr><td colspan="7" class="text-center text-muted py-5">Chưa có người thuê nào.</td></tr>
                         @endforelse
+                        <tr id="noTenantFilterResult" style="display: none;">
+                            <td colspan="7" class="text-center text-muted py-4">Không tìm thấy người thuê nào phù hợp.</td>
+                        </tr>
                     </tbody>
 
                 </table>
@@ -380,6 +286,68 @@
 
     </div>
 
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('tenantSearchInput');
+        const tabBtns = document.querySelectorAll('.segmented-tab');
+        const rows = document.querySelectorAll('.table-modern tbody tr.tenant-row');
+        const noResults = document.getElementById('noTenantFilterResult');
+
+        let currentFilter = 'all';
+        let currentQuery = '';
+
+        function applyFilter() {
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const isExpiring = row.getAttribute('data-expiring') === '1';
+                const hasActive = row.getAttribute('data-active-contract') === '1';
+                const text = row.textContent.toLowerCase();
+
+                let matchesFilter = false;
+                if (currentFilter === 'all' || currentFilter === 'staying') {
+                    matchesFilter = true;
+                } else if (currentFilter === 'expiring') {
+                    matchesFilter = isExpiring;
+                } else if (currentFilter === 'active_contract') {
+                    matchesFilter = hasActive;
+                }
+
+                const matchesSearch = !currentQuery || text.includes(currentQuery);
+
+                if (matchesFilter && matchesSearch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noResults) {
+                noResults.style.display = (rows.length > 0 && visibleCount === 0) ? '' : 'none';
+            }
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.getAttribute('data-filter') || 'all';
+                applyFilter();
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                currentQuery = this.value.toLowerCase().trim();
+                applyFilter();
+            });
+        }
+    });
+</script>
+@endpush
 
 @endsection
  

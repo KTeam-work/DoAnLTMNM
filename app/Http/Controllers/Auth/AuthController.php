@@ -78,6 +78,17 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        // Kiểm tra tài khoản bị khóa
+        if ($user->status === 'inactive') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/login')->withErrors([
+                'email' => 'Tài khoản của bạn đã bị khóa bởi quản trị viên. Vui lòng liên hệ để được hỗ trợ.',
+            ]);
+        }
+
         // Admin
         if ($user->role === 'admin') {
             return redirect('/admin/dashboard')

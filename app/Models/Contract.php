@@ -49,4 +49,11 @@ class Contract extends Model
     {
         return $this->hasOne(ContractTermination::class);
     }
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'contract_services')
+            ->withPivot(['quantity', 'unit_price', 'status'])
+            ->withTimestamps();
+    }
 }
