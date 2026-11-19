@@ -32,6 +32,9 @@ class User extends Authenticatable
         'avatar',
         'role',
         'status',
+        'unlock_token',
+        'unlock_requested_at',
+        'unlock_reason',
     ];
 
     /*
@@ -56,6 +59,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'unlock_requested_at' => 'datetime',
         ];
     }
 

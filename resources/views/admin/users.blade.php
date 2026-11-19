@@ -23,10 +23,18 @@
             });
         })
         ->when($role !== '', fn ($builder) => $builder->where('role', $role))
-        ->when($status !== '', fn ($builder) => $builder->where('status', $status))
+        ->when($status !== '', function ($builder) use ($status) {
+            if ($status === 'unlock_requested') {
+                $builder->where('status', 'inactive')->whereNotNull('unlock_requested_at');
+            } else {
+                $builder->where('status', $status);
+            }
+        })
         ->latest()
         ->paginate(10)
         ->withQueryString();
+
+    $unlockRequestedCount = \App\Models\User::where('status', 'inactive')->whereNotNull('unlock_requested_at')->count();
 @endphp
 
 <div class="page-header">
@@ -68,6 +76,10 @@
             <span class="tab-label">Bị khóa</span>
             <span class="tab-count">{{ \App\Models\User::where('status', 'inactive')->count() }}</span>
         </a>
+        <a href="{{ route('admin.users', ['status' => 'unlock_requested']) }}" class="segmented-tab {{ $status === 'unlock_requested' ? 'active' : '' }}">
+            <span class="tab-label">Yêu cầu mở khóa</span>
+            <span class="tab-count">{{ $unlockRequestedCount }}</span>
+        </a>
     </div>
 </div>
 
@@ -92,6 +104,7 @@
             <option value="">Tất cả trạng thái</option>
             <option value="active" @selected($status === 'active')>Hoạt động</option>
             <option value="inactive" @selected($status === 'inactive')>Bị khóa</option>
+            <option value="unlock_requested" @selected($status === 'unlock_requested')>Yêu cầu mở khóa</option>
         </select>
 
         <button type="submit" class="tv1-btn-primary">Tìm kiếm</button>
@@ -135,9 +148,23 @@
                             @endswitch
                         </td>
                         <td>
-                            <span class="tv1-status {{ $user->status === 'active' ? 'is-active' : 'is-inactive' }}">
-                                {{ $user->status === 'active' ? 'Hoạt động' : ($user->status === 'inactive' ? 'Bị khóa' : ($user->status ?: 'Chưa xác định')) }}
-                            </span>
+                            @if ($user->status === 'active')
+                                <span class="tv1-status is-active">Hoạt động</span>
+                            @elseif ($user->unlock_requested_at)
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning py-1 px-2 fw-bold" style="font-size: 11px; color: #b45309 !important;">
+                                    Chờ mở khóa
+                                </span>
+                                <div class="text-muted mt-1" style="font-size: 10.5px;">
+                                    Yêu cầu: {{ $user->unlock_requested_at->format('H:i d/m') }}
+                                </div>
+                                @if ($user->unlock_reason)
+                                    <div class="text-secondary fst-italic mt-1" style="font-size: 10.5px; max-width: 170px; word-break: break-word;" title="{{ $user->unlock_reason }}">
+                                        "{{ Str::limit($user->unlock_reason, 35) }}"
+                                    </div>
+                                @endif
+                            @else
+                                <span class="tv1-status is-inactive">Bị khóa</span>
+                            @endif
                         </td>
                         <td>{{ $user->created_at?->format('d/m/Y') ?? '—' }}</td>
                         <td class="text-center">
@@ -148,11 +175,15 @@
                                     @csrf
                                     @method('PATCH')
                                     @if ($user->status === 'active')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận KHÓA tài khoản {{ $user->name }} ({{ $user->email }})?\nNgười dùng này sẽ không thể đăng nhập vào hệ thống.')" title="Khóa tài khoản này">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận KHÓA tài khoản {{ $user->name }} ({{ $user->email }})?\nHệ thống sẽ gửi email thông báo kèm liên kết xin mở khóa cho người dùng.')" title="Khóa tài khoản này">
                                             Khóa
                                         </button>
+                                    @elseif ($user->unlock_requested_at)
+                                        <button type="submit" class="btn btn-sm btn-success py-1 px-2 fw-bold" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận DUYỆT MỞ KHÓA cho tài khoản {{ $user->name }} ({{ $user->email }})?\nHệ thống sẽ kích hoạt lại tài khoản và gửi email thông báo cho người dùng.')" title="Duyệt mở khóa">
+                                            Duyệt mở khóa
+                                        </button>
                                     @else
-                                        <button type="submit" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận MỞ KHÓA cho tài khoản {{ $user->name }} ({{ $user->email }})?')" title="Mở khóa tài khoản này">
+                                        <button type="submit" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận MỞ KHÓA cho tài khoản {{ $user->name }} ({{ $user->email }})?\nHệ thống sẽ gửi email thông báo cho người dùng.')" title="Mở khóa tài khoản này">
                                             Mở khóa
                                         </button>
                                     @endif
