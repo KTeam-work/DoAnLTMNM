@@ -9,7 +9,8 @@ use App\Models\Room;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 
 class OwnerRoomController extends Controller
@@ -39,7 +40,18 @@ class OwnerRoomController extends Controller
     public function create(Request $request)
     {
         $owner = $this->actingOwner($request);
-        $properties = Property::query()->where('owner_id', $owner->id)->orderBy('name')->get(['id', 'name']);
+        $properties = Property::query()
+            ->where('owner_id', $owner->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'district']);
+
+        $existingCodes = Room::query()->whereNotNull('room_code')->pluck('room_code');
+        foreach ($properties as $property) {
+            $property->setAttribute(
+                'next_room_code',
+                $this->nextRoomCode($this->roomCodePrefix($property->district), $existingCodes)
+            );
+        }
 
         return view('owner.rooms.create', compact('properties'));
     }
@@ -50,7 +62,6 @@ class OwnerRoomController extends Controller
         $data = $request->validate([
             'property_id' => ['required', 'integer', 'exists:properties,id'],
             'name' => ['required', 'string', 'max:100'],
-            'room_code' => ['nullable', 'string', 'max:20', 'unique:rooms,room_code'],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
             'deposit' => ['required', 'numeric', 'min:0'],
@@ -60,10 +71,77 @@ class OwnerRoomController extends Controller
             'status' => ['nullable', 'in:available,pending,rented,maintenance,hidden'],
         ]);
 
-        abort_unless(Property::query()->whereKey($data['property_id'])->where('owner_id', $owner->id)->exists(), 404);
-        Room::query()->create([...$data, 'status' => $data['status'] ?? 'available']);
+        $property = Property::query()
+            ->whereKey($data['property_id'])
+            ->where('owner_id', $owner->id)
+            ->firstOrFail();
+
+        DB::transaction(function () use ($property, $data): void {
+            // Serialize generation for properties in the same district.
+            Property::query()
+                ->where('district', $property->district)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get(['id']);
+
+            $prefix = $this->roomCodePrefix($property->district);
+            // Continue numbering from existing codes that used either "_" or "-".
+            Room::query()->create([
+                ...$data,
+                'room_code' => $this->nextRoomCode(
+                    $prefix,
+                    Room::query()->whereNotNull('room_code')->pluck('room_code')
+                ),
+                'status' => $data['status'] ?? 'available',
+            ]);
+        });
 
         return redirect()->route('owner.rooms.index')->with('success', 'Tạo phòng thành công.');
+    }
+
+    private function roomCodePrefix(string $district): string
+    {
+        $normalized = Str::upper(Str::ascii($district));
+        $normalized = trim((string) preg_replace('/[^A-Z0-9]+/', ' ', $normalized));
+
+        $administrativePrefixes = [
+            '/^(?:QUAN|Q)\s*/' => 'Q',
+            '/^(?:HUYEN|H)\s*/' => 'H',
+            '/^(?:THANH PHO|TP)\s*/' => 'TP',
+            '/^(?:THI XA|TX)\s*/' => 'TX',
+            '/^(?:THI TRAN|TT)\s*/' => 'TT',
+        ];
+
+        $prefix = '';
+        foreach ($administrativePrefixes as $pattern => $candidatePrefix) {
+            if (preg_match($pattern, $normalized)) {
+                $normalized = trim((string) preg_replace($pattern, '', $normalized, 1));
+                $prefix = $candidatePrefix;
+                break;
+            }
+        }
+
+        $words = preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $districtCode = implode('', array_map(
+            static fn (string $word): string => ctype_digit($word) ? $word : substr($word, 0, 1),
+            $words
+        ));
+
+        return $prefix . ($districtCode !== '' ? $districtCode : 'P');
+    }
+
+    private function nextRoomCode(string $prefix, iterable $existingCodes): string
+    {
+        $pattern = '/^' . preg_quote($prefix, '/') . '[-_]([0-9]+)$/i';
+        $nextNumber = 1;
+
+        foreach ($existingCodes as $existingCode) {
+            if (preg_match($pattern, $existingCode, $matches)) {
+                $nextNumber = max($nextNumber, ((int) $matches[1]) + 1);
+            }
+        }
+
+        return sprintf('%s_%02d', $prefix, $nextNumber);
     }
     /**
      * Hiển thị form sửa phòng.
@@ -95,12 +173,6 @@ class OwnerRoomController extends Controller
         $data = $request->validate([
             'property_id' => ['required', 'integer', 'exists:properties,id'],
             'name' => ['required', 'string', 'max:100'],
-            'room_code' => [
-                'nullable',
-                'string',
-                'max:20',
-                Rule::unique('rooms', 'room_code')->ignore($room->id),
-            ],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
             'deposit' => ['required', 'numeric', 'min:0'],

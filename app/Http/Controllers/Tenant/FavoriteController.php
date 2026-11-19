@@ -17,6 +17,13 @@ class FavoriteController extends Controller
     public function index()
     {
         if (!Auth::check()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Vui lòng đăng nhập để lưu phòng yêu thích.',
+                    'login_url' => route('login'),
+                ], 401);
+            }
+
             return redirect()
                 ->route('login')
                 ->with('error', 'Vui lòng đăng nhập để xem phòng yêu thích.');
@@ -63,6 +70,13 @@ class FavoriteController extends Controller
     public function store(Request $request)
     {
         if (!Auth::check()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Vui lòng đăng nhập để cập nhật phòng yêu thích.',
+                    'login_url' => route('login'),
+                ], 401);
+            }
+
             return redirect()
                 ->route('login')
                 ->with('error', 'Vui lòng đăng nhập để lưu phòng yêu thích.');
@@ -76,6 +90,17 @@ class FavoriteController extends Controller
             'user_id' => Auth::id(),
             'room_id' => $validated['room_id'],
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'favorited' => true,
+                'favorite_id' => $favorite->id,
+                'room_id' => (int) $favorite->room_id,
+                'message' => $favorite->wasRecentlyCreated
+                    ? 'Đã thêm phòng vào danh sách yêu thích.'
+                    : 'Phòng này đã có trong danh sách yêu thích.',
+            ]);
+        }
 
         return redirect()
             ->back()
@@ -91,7 +116,7 @@ class FavoriteController extends Controller
      * DELETE /favorites/{id}
      * Bỏ một phòng khỏi danh sách yêu thích.
      */
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
         if (!Auth::check()) {
             return redirect()
@@ -102,7 +127,17 @@ class FavoriteController extends Controller
         $favorite = Favorite::where('user_id', Auth::id())
             ->findOrFail($id);
 
+        $roomId = (int) $favorite->room_id;
+
         $favorite->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'favorited' => false,
+                'room_id' => $roomId,
+                'message' => 'Đã bỏ phòng khỏi danh sách yêu thích.',
+            ]);
+        }
 
         return redirect()
             ->back()

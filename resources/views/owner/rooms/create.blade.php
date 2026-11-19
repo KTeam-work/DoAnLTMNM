@@ -24,11 +24,14 @@
           <ul class="mb-0">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
         </div>@endif
         <div class="row g-3">
-          <div class="col-md-6"><label class="form-label">Khu trọ</label><select name="property_id" class="form-select" required>
-              <option value="">Chọn khu trọ</option>@foreach ($properties as $property)<option value="{{ $property->id }}" @selected(old('property_id')==$property->id)>{{ $property->name }}</option>@endforeach
+          <div class="col-md-6"><label class="form-label" for="property_id">Khu trọ</label><select id="property_id" name="property_id" class="form-select" required>
+              <option value="">Chọn khu trọ</option>@foreach ($properties as $property)<option value="{{ $property->id }}" data-room-code="{{ $property->next_room_code }}" @selected(old('property_id')==$property->id)>{{ $property->name }}</option>@endforeach
             </select></div>
           <div class="col-md-6"><label class="form-label">Tên phòng</label><input name="name" value="{{ old('name') }}" class="form-control" required></div>
-          <div class="col-md-6"><label class="form-label">Mã phòng</label><input name="room_code" value="{{ old('room_code') }}" class="form-control"></div>
+          <div class="col-md-6">
+            <label for="room_code_preview" class="form-label">Mã phòng</label>
+            <input id="room_code_preview" class="form-control" value="" placeholder="Chọn khu trọ để xem mã" readonly>
+          </div>
           <div class="col-md-6"><label class="form-label">Trạng thái</label><select name="status" class="form-select">
               <option value="available">Còn trống</option>
               <option value="maintenance">Bảo trì</option>
@@ -38,7 +41,7 @@
           <div class="col-md-4"><label class="form-label">Giá thuê</label><input name="price" type="number" min="0" step="0.01" value="{{ old('price') }}" class="form-control" required></div>
           <div class="col-md-4"><label class="form-label">Tiền cọc</label><input name="deposit" type="number" min="0" step="0.01" value="{{ old('deposit') }}" class="form-control" required></div>
           <div class="col-md-6"><label class="form-label">Sức chứa</label><input name="max_people" type="number" min="1" value="{{ old('max_people', 1) }}" class="form-control" required></div>
-          <div class="col-md-6"><label class="form-label">Tầng</label><input name="floor" type="number" min="0" value="{{ old('floor') }}" class="form-control"></div>
+          <div class="col-md-6"><label class="form-label">Tầng</label><input name="floor" type="number" min="0" value="{{ old('floor') }}" class="form-control" placeholder="Để trống nếu không áp dụng"></div>
           <div class="col-12"><label class="form-label">Mô tả</label><textarea name="description" class="form-control" rows="3">{{ old('description') }}</textarea></div>
           <div class="col-12"><button class="btn-brand">Lưu phòng</button></div>
         </div>
@@ -46,5 +49,20 @@
     </div>
     @endif
   </main>
+
+  <script>
+    (() => {
+      const propertySelect = document.getElementById('property_id');
+      const roomCodeInput = document.getElementById('room_code_preview');
+
+      const updateRoomCodePreview = () => {
+        const selectedOption = propertySelect.options[propertySelect.selectedIndex];
+        roomCodeInput.value = selectedOption?.dataset.roomCode ?? '';
+      };
+
+      propertySelect.addEventListener('change', updateRoomCodePreview);
+      updateRoomCodePreview();
+    })();
+  </script>
 
 @endsection

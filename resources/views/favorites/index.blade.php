@@ -11,7 +11,7 @@
 
     <div class="page-wrap">
 
--->
+
 
         <div class="page-header">
 
@@ -63,7 +63,7 @@
                     </div>
 
 
-                    <div class="stat-value">
+                    <div class="stat-value favorite-count-value">
                         {{ $favoriteCount }}
                     </div>
 
@@ -237,22 +237,26 @@
     ====================================================== -->
 
 
-        <div class="row g-4">
+        <div class="row g-4" id="favorites-grid" data-rooms-url="{{ route('rooms.index') }}">
             @forelse ($favorites as $favorite)
             @php
             $room = $favorite->room;
             @endphp
 
             @if ($room)
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-lg-4 favorite-card-column">
                 <div class="room-card">
                     <form action="{{ route('favorites.destroy', $favorite->id) }}"
-                        method="POST" class="favorite-form">
+                        method="POST"
+                        class="favorite-form"
+                        data-store-url="{{ route('favorites.store') }}"
+                        data-destroy-url="{{ route('favorites.destroy', ['id' => '__FAVORITE_ID__']) }}"
+                        data-room-id="{{ $room->id }}"
+                        data-remove-on-unsave="true">
                         @csrf
                         @method('DELETE')
                         <button class="fav-btn" type="submit"
                             title="Bỏ yêu thích"
-                            onclick="return confirm('Bỏ phòng này khỏi yêu thích?')"
                             style="color: #e53935;">♥</button>
                     </form>
 
@@ -350,3 +354,7 @@
 
 
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/favorite-toggle.js') }}"></script>
+@endpush

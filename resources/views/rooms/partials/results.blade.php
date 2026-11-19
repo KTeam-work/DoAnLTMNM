@@ -14,6 +14,9 @@
                         : route('favorites.store') }}"
                     method="POST"
                     class="favorite-form"
+                    data-store-url="{{ route('favorites.store') }}"
+                    data-destroy-url="{{ route('favorites.destroy', ['id' => '__FAVORITE_ID__']) }}"
+                    data-room-id="{{ $room->id }}"
                 >
                     @csrf
 
