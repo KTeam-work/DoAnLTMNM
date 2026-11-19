@@ -4,18 +4,34 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 class ResendService
 {
     /**
-     * Gửi email chung qua Resend API, hỗ trợ tự động định tuyến chế độ Sandbox khi dùng tài khoản thử nghiệm.
+     * Gửi email chung qua SMTP hoặc Resend API.
+     * Tự động ưu tiên SMTP (nếu cấu hình Gmail SMTP để gửi tới bất kỳ email nào),
+     * hoặc dùng Resend API (có cơ chế sandbox khi chạy thử nghiệm).
      */
     public function sendEmail(
         string $to,
         string $subject,
         string $html
     ): void {
+        // 1. Nếu hệ thống đã cấu hình SMTP (như Gmail SMTP), ưu tiên gửi trực tiếp tới đúng người nhận:
+        if (config('mail.default') === 'smtp' && !empty(config('mail.mailers.smtp.username')) && !empty(config('mail.mailers.smtp.password'))) {
+            try {
+                Mail::html($html, function ($message) use ($to, $subject) {
+                    $message->to($to)->subject($subject);
+                });
+                return;
+            } catch (\Throwable $e) {
+                Log::warning('Gửi email qua SMTP thất bại, thử tiếp tục qua Resend API: ' . $e->getMessage());
+            }
+        }
+
+        // 2. Gửi qua Resend API
         $apiKey = config('services.resend.key');
         $fromEmail = config('services.resend.from_email');
         $fromName = config('services.resend.from_name');
