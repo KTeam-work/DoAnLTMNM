@@ -19,7 +19,7 @@
             justify-content: center;
             padding: 20px;
             font-family: "Be Vietnam Pro", sans-serif;
-            background: linear-gradient(135deg, #dfe5e1, #cdbb9b);
+            background: linear-gradient(135deg, #071526 0%, #0c2340 50%, #163b65 100%);
             color: #0c2340;
         }
 
@@ -27,9 +27,10 @@
             width: 100%;
             max-width: 450px;
             padding: 40px;
-            background: rgba(255,255,255,.97);
-            border-radius: 22px;
-            box-shadow: 0 25px 60px rgba(12,35,64,.15);
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,.3);
+            border-top: 5px solid #ef7d27;
         }
 
         .logo {
@@ -88,8 +89,9 @@
         }
 
         input:focus {
-            border-color: #0c2340;
-            box-shadow: 0 0 0 3px rgba(12,35,64,.1);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+            background: #ffffff;
         }
 
         /* Ẩn con mắt tự động của trình duyệt Edge/IE khi gõ mật khẩu */
@@ -152,12 +154,17 @@
             background: #0c2340;
             color: white;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 700;
             cursor: pointer;
+            transition: all .2s ease;
         }
 
-        button:hover { background: #071526; }
+        button:hover {
+            background: #163b65;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(12,35,64,.25);
+        }
 
         .back {
             display: block;
