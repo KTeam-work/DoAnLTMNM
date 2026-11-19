@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -65,7 +66,7 @@ class AuthController extends Controller
             $unlockToken = $user->unlock_token;
 
             if (empty($unlockToken)) {
-                $unlockToken = \Illuminate\Support\Str::random(48);
+                $unlockToken = Str::random(48);
 
                 User::query()
                     ->where('id', $user->id)
@@ -142,6 +143,7 @@ class AuthController extends Controller
                 'max:255',
             ],
 
+            // Chỉ chấp nhận Gmail và không được trùng
             'email' => [
                 'required',
                 'string',
@@ -151,15 +153,19 @@ class AuthController extends Controller
                 'unique:users,email',
             ],
 
+            // Số điện thoại đúng 10 chữ số và không được trùng
             'phone' => [
                 'required',
                 'regex:/\A[0-9]{10}\z/',
+                'unique:users,phone',
             ],
 
+            // Mật khẩu mạnh
             'password' => [
                 'required',
                 'string',
-                'min:6',
+                'min:8',
+                'regex:/\A(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).+\z/',
                 'confirmed',
             ],
 
@@ -168,21 +174,29 @@ class AuthController extends Controller
                 'in:tenant,owner',
             ],
         ], [
+            // Họ tên
             'name.required' => 'Vui lòng nhập họ và tên.',
             'name.max' => 'Họ và tên không được vượt quá 255 ký tự.',
 
+            // Email
             'email.required' => 'Vui lòng nhập email.',
             'email.email' => 'Email không đúng định dạng.',
-            'email.regex' => 'Chỉ được sử dụng địa chỉ Gmail có dạng example@gmail.com, không được chứa khoảng trắng.',
-            'email.unique' => 'Email này đã được sử dụng.',
+            'email.max' => 'Email không được vượt quá 255 ký tự.',
+            'email.regex' => 'Email phải là địa chỉ Gmail hợp lệ, ví dụ example@gmail.com.',
+            'email.unique' => 'Gmail này đã được đăng ký.',
 
+            // Số điện thoại
             'phone.required' => 'Vui lòng nhập số điện thoại.',
-            'phone.regex' => 'Số điện thoại phải gồm chính xác 10 chữ số và không chứa ký tự khác.',
+            'phone.regex' => 'Số điện thoại phải gồm chính xác 10 chữ số.',
+            'phone.unique' => 'Số điện thoại này đã được đăng ký.',
 
+            // Mật khẩu
             'password.required' => 'Vui lòng nhập mật khẩu.',
-            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.regex' => 'Mật khẩu phải có chữ hoa, chữ thường, chữ số và ít nhất một ký tự đặc biệt.',
             'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
 
+            // Vai trò
             'role.required' => 'Vui lòng chọn vai trò.',
             'role.in' => 'Vai trò không hợp lệ.',
         ]);
