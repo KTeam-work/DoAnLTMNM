@@ -76,17 +76,27 @@ class AuthController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        /** @var User $user */
         $user = Auth::user();
 
         // Kiểm tra tài khoản bị khóa
-        if ($user->status === 'inactive') {
+        if ($user && $user->status === 'inactive') {
+            $unlockToken = $user->unlock_token;
+            if (empty($unlockToken)) {
+                $unlockToken = \Illuminate\Support\Str::random(48);
+                User::query()->where('id', $user->id)->update(['unlock_token' => $unlockToken]);
+            }
+            $unlockUrl = route('account.unlock.show', $unlockToken);
+
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect('/login')->withErrors([
-                'email' => 'Tài khoản của bạn đã bị khóa bởi quản trị viên. Vui lòng liên hệ để được hỗ trợ.',
-            ]);
+            return redirect('/login')
+                ->with('locked_unlock_url', $unlockUrl)
+                ->withErrors([
+                    'email' => 'Tài khoản của bạn đã bị tạm khóa bởi quản trị viên. Vui lòng kiểm tra Gmail hoặc bấm vào đường dẫn bên dưới để gửi yêu cầu xin mở khóa.',
+                ]);
         }
 
         // Admin

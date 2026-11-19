@@ -872,6 +872,13 @@
                     @foreach ($errors->all() as $error)
                         <div>{{ $error }}</div>
                     @endforeach
+                    @if (session('locked_unlock_url'))
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(220, 38, 38, 0.3);">
+                            <a href="{{ session('locked_unlock_url') }}" style="color: #ef7d27; font-weight: 700; text-decoration: underline;">
+                                Bấm vào đây để gửi yêu cầu xin mở khóa tài khoản
+                            </a>
+                        </div>
+                    @endif
                 </div>
             @endif
 

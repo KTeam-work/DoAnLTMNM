@@ -51,6 +51,7 @@ class Notification extends Model
                 'maintenance' => $this->reference_id ? route('tenant.maintenance.show', $this->reference_id) : null,
                 'contract' => $this->reference_id ? route('tenant.contracts.show', $this->reference_id) : null,
                 'rental_post' => route('owner.rental-posts.index'),
+                'user' => route('admin.users', ['status' => 'unlock_requested']),
                 default => null,
             };
         } catch (\Throwable) {

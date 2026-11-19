@@ -154,12 +154,53 @@ Route::middleware('auth')->group(function () {
             return back()->with('error', 'Bạn không thể khóa tài khoản của chính mình.');
         }
 
-        $newStatus = $user->status === 'active' ? 'inactive' : 'active';
-        $user->update(['status' => $newStatus]);
+        /** @var \App\Services\ResendService $resendService */
+        $resendService = app(\App\Services\ResendService::class);
 
-        $actionText = $newStatus === 'active' ? 'mở khóa' : 'khóa';
-        return back()->with('success', "Đã {$actionText} tài khoản {$user->name} ({$user->email}) thành công.");
+        if ($user->status === 'active') {
+            // KHÓA TÀI KHOẢN: Tự động sinh token mở khóa và gửi Gmail cho người dùng
+            $unlockToken = \Illuminate\Support\Str::random(48);
+            $user->update([
+                'status' => 'inactive',
+                'unlock_token' => $unlockToken,
+                'unlock_requested_at' => null,
+                'unlock_reason' => null,
+            ]);
+
+            try {
+                if (!empty($user->email)) {
+                    $unlockUrl = route('account.unlock.show', ['token' => $unlockToken]);
+                    $resendService->sendAccountLockedEmail($user->email, $user->name, $unlockUrl);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email khóa tài khoản qua Resend: ' . $e->getMessage());
+            }
+
+            return back()->with('success', "Đã khóa tài khoản {$user->name}. Hệ thống đã gửi email thông báo kèm đường dẫn xin mở khóa tới {$user->email}.");
+        } else {
+            // MỞ KHÓA TÀI KHOẢN: Khôi phục trạng thái active và gửi Gmail kích hoạt
+            $user->update([
+                'status' => 'active',
+                'unlock_token' => null,
+                'unlock_requested_at' => null,
+                'unlock_reason' => null,
+            ]);
+
+            try {
+                if (!empty($user->email)) {
+                    $resendService->sendAccountUnlockedEmail($user->email, $user->name);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email mở khóa tài khoản qua Resend: ' . $e->getMessage());
+            }
+
+            return back()->with('success', "Đã mở khóa tài khoản {$user->name} thành công và gửi thông báo kích hoạt tới {$user->email}.");
+        }
     })->name('admin.users.update-status');
+
+    // Route mở khóa tài khoản từ liên kết trong Gmail
+    Route::get('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'show'])->name('account.unlock.show');
+    Route::post('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'submit'])->name('account.unlock.submit');
 
 
     Route::get('/admin/rental-posts', function () {

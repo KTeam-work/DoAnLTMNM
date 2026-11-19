@@ -215,4 +215,88 @@ class ResendService
 
         $this->sendEmail($toEmail, $subject, $html);
     }
+
+    /**
+     * Gửi email thông báo tài khoản bị khóa kèm liên kết xin mở khóa.
+     */
+    public function sendAccountLockedEmail(
+        string $toEmail,
+        string $userName,
+        string $unlockUrl
+    ): void {
+        $subject = "[Trọ Ơi] Thông báo: Tài khoản của bạn đã bị tạm khóa";
+
+        $html = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; color: #1e293b; background: #ffffff;'>
+                <div style='margin-bottom: 20px; border-bottom: 2px solid #ef7d27; padding-bottom: 12px;'>
+                    <h2 style='color: #0c2340; margin: 0;'>Trọ <span style='color: #ef7d27;'>Ơi</span></h2>
+                </div>
+                <h3 style='color: #dc2626;'>Tài khoản của bạn đã bị tạm khóa</h3>
+                <p>Chào bạn <b>{$userName}</b>,</p>
+                <p>Tài khoản liên kết với địa chỉ email <b>{$toEmail}</b> trên nền tảng Trọ Ơi hiện đã bị Ban quản trị tạm khóa vì lý do an toàn hoặc vi phạm chính sách nền tảng.</p>
+
+                <div style='background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px 18px; margin: 16px 0; color: #991b1b; font-size: 13.5px; line-height: 1.6;'>
+                    Trong thời gian tài khoản bị khóa, bạn sẽ tạm thời không thể đăng nhập hoặc thực hiện các thao tác trên hệ thống.
+                </div>
+
+                <p>Nếu bạn cho rằng đây là sự nhầm lẫn hoặc mong muốn Ban quản trị xem xét mở khóa tài khoản, vui lòng bấm vào nút dưới đây để gửi yêu cầu xem xét:</p>
+
+                <div style='margin: 24px 0; text-align: center;'>
+                    <a href='{$unlockUrl}' style='display: inline-block; padding: 12px 28px; background: #0c2340; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;'>
+                        Gửi yêu cầu mở khóa tài khoản
+                    </a>
+                </div>
+
+                <p style='color: #64748b; font-size: 12.5px; line-height: 1.5;'>
+                    <i>* Lưu ý: Đường dẫn này được tạo riêng cho tài khoản của bạn để gửi yêu cầu trực tiếp đến Admin.</i>
+                </p>
+
+                <hr style='margin-top: 30px; border: none; border-top: 1px solid #e2e8f0;'>
+                <p style='font-size: 12px; color: #94a3b8; text-align: center; margin: 0;'>
+                    Đây là email tự động từ hệ thống Quản Lý Phòng Trọ - Trọ Ơi. Vui lòng không trả lời thư này.
+                </p>
+            </div>
+        ";
+
+        $this->sendEmail($toEmail, $subject, $html);
+    }
+
+    /**
+     * Gửi email thông báo tài khoản đã được Admin duyệt mở khóa thành công.
+     */
+    public function sendAccountUnlockedEmail(
+        string $toEmail,
+        string $userName
+    ): void {
+        $loginUrl = route('login');
+        $subject = "[Trọ Ơi] Thông báo: Tài khoản của bạn đã được mở khóa thành công";
+
+        $html = "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; color: #1e293b; background: #ffffff;'>
+                <div style='margin-bottom: 20px; border-bottom: 2px solid #ef7d27; padding-bottom: 12px;'>
+                    <h2 style='color: #0c2340; margin: 0;'>Trọ <span style='color: #ef7d27;'>Ơi</span></h2>
+                </div>
+                <h3 style='color: #16a34a;'>Tài khoản của bạn đã được mở khóa</h3>
+                <p>Chào bạn <b>{$userName}</b>,</p>
+                <p>Ban quản trị Trọ Ơi đã xem xét yêu cầu và <b>chính thức mở khóa tài khoản</b> của bạn ({$toEmail}).</p>
+
+                <div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 18px; margin: 16px 0; color: #166534; font-size: 13.5px; line-height: 1.6;'>
+                    Hiện tại, tài khoản của bạn đã hoạt động trở lại bình thường. Bạn có thể đăng nhập và tiếp tục sử dụng các dịch vụ của Trọ Ơi ngay bây giờ.
+                </div>
+
+                <div style='margin: 24px 0; text-align: center;'>
+                    <a href='{$loginUrl}' style='display: inline-block; padding: 12px 28px; background: #0c2340; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;'>
+                        Đăng nhập ngay
+                    </a>
+                </div>
+
+                <hr style='margin-top: 30px; border: none; border-top: 1px solid #e2e8f0;'>
+                <p style='font-size: 12px; color: #94a3b8; text-align: center; margin: 0;'>
+                    Đây là email tự động từ hệ thống Quản Lý Phòng Trọ - Trọ Ơi. Vui lòng không trả lời thư này.
+                </p>
+            </div>
+        ";
+
+        $this->sendEmail($toEmail, $subject, $html);
+    }
 }
