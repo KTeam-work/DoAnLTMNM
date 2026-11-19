@@ -21,7 +21,6 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | LOGIN
@@ -35,7 +34,6 @@ class AuthController extends Controller
                 'required',
                 'email',
             ],
-
             'password' => [
                 'required',
                 'string',
@@ -48,12 +46,6 @@ class AuthController extends Controller
 
         $remember = $request->boolean('remember');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Kiểm tra đăng nhập
-        |--------------------------------------------------------------------------
-        */
-
         if (!Auth::attempt($credentials, $remember)) {
             return back()
                 ->withInput($request->only('email', 'remember'))
@@ -62,19 +54,8 @@ class AuthController extends Controller
                 ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Chống session fixation
-        |--------------------------------------------------------------------------
-        */
-
+        // Chống session fixation
         $request->session()->regenerate();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Redirect theo role
-        |--------------------------------------------------------------------------
-        */
 
         /** @var User $user */
         $user = Auth::user();
@@ -82,13 +63,19 @@ class AuthController extends Controller
         // Kiểm tra tài khoản bị khóa
         if ($user && $user->status === 'inactive') {
             $unlockToken = $user->unlock_token;
+
             if (empty($unlockToken)) {
                 $unlockToken = \Illuminate\Support\Str::random(48);
-                User::query()->where('id', $user->id)->update(['unlock_token' => $unlockToken]);
+
+                User::query()
+                    ->where('id', $user->id)
+                    ->update(['unlock_token' => $unlockToken]);
             }
+
             $unlockUrl = route('account.unlock.show', $unlockToken);
 
             Auth::logout();
+
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
@@ -129,7 +116,6 @@ class AuthController extends Controller
             ]);
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | REGISTER PAGE
@@ -140,7 +126,6 @@ class AuthController extends Controller
     {
         return view('auth.register');
     }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -159,15 +144,16 @@ class AuthController extends Controller
 
             'email' => [
                 'required',
-                'email',
+                'string',
+                'email:rfc',
                 'max:255',
+                'regex:/\A[A-Za-z0-9._%+-]+@gmail\.com\z/i',
                 'unique:users,email',
             ],
 
             'phone' => [
                 'required',
-                'string',
-                'max:20',
+                'regex:/\A[0-9]{10}\z/',
             ],
 
             'password' => [
@@ -183,12 +169,15 @@ class AuthController extends Controller
             ],
         ], [
             'name.required' => 'Vui lòng nhập họ và tên.',
+            'name.max' => 'Họ và tên không được vượt quá 255 ký tự.',
 
             'email.required' => 'Vui lòng nhập email.',
             'email.email' => 'Email không đúng định dạng.',
+            'email.regex' => 'Chỉ được sử dụng địa chỉ Gmail có dạng example@gmail.com, không được chứa khoảng trắng.',
             'email.unique' => 'Email này đã được sử dụng.',
 
             'phone.required' => 'Vui lòng nhập số điện thoại.',
+            'phone.regex' => 'Số điện thoại phải gồm chính xác 10 chữ số và không chứa ký tự khác.',
 
             'password.required' => 'Vui lòng nhập mật khẩu.',
             'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
@@ -200,7 +189,7 @@ class AuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Tạo tài khoản
+        | TẠO TÀI KHOẢN
         |--------------------------------------------------------------------------
         */
 
@@ -215,7 +204,7 @@ class AuthController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Chuyển về trang đăng nhập
+        | CHUYỂN VỀ TRANG ĐĂNG NHẬP
         |--------------------------------------------------------------------------
         */
 
@@ -223,7 +212,6 @@ class AuthController extends Controller
             ->route('login')
             ->with('success', 'Đăng ký thành công! Vui lòng đăng nhập.');
     }
-
 
     /*
     |--------------------------------------------------------------------------
