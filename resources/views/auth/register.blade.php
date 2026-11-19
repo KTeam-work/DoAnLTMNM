@@ -5,7 +5,6 @@
 <head>
     <meta charset="UTF-8">
 
-```
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Đăng ký - Trọ Ơi</title>
@@ -1166,7 +1165,6 @@ input::-ms-clear {
 
 <div class="page">
 
-```
 <!-- =====================================================
      BACKGROUND
 ===================================================== -->
@@ -1411,22 +1409,26 @@ input::-ms-clear {
                 </label>
 
                 <input
-                    type="email"
+                    type="text"
                     id="email"
                     name="email"
                     value="{{ old('email') }}"
-                    placeholder="example@email.com"
+                    placeholder="example@gmail.com"
                     autocomplete="email"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    inputmode="email"
                     class="@error('email') input-error @enderror"
                     required
+                    oninput="validateEmail(this)"
+                    onblur="validateEmail(this)"
+                    oninvalid="validateEmail(this)"
                 >
 
+                <div id="email-error" class="field-error" aria-live="polite"></div>
+
                 @error('email')
-
-                    <div class="field-error">
-                        {{ $message }}
-                    </div>
-
+                    <div class="field-error">{{ $message }}</div>
                 @enderror
 
             </div>
@@ -1449,18 +1451,21 @@ input::-ms-clear {
                 id="phone"
                 name="phone"
                 value="{{ old('phone') }}"
-                placeholder="Nhập số điện thoại"
+                placeholder="Nhập 10 chữ số"
                 autocomplete="tel"
+                inputmode="numeric"
+                maxlength="10"
                 class="@error('phone') input-error @enderror"
                 required
+                oninput="handlePhoneInput(this)"
+                onblur="validatePhone(this)"
+                oninvalid="validatePhone(this)"
             >
 
+            <div id="phone-error" class="field-error" aria-live="polite"></div>
+
             @error('phone')
-
-                <div class="field-error">
-                    {{ $message }}
-                </div>
-
+                <div class="field-error">{{ $message }}</div>
             @enderror
 
         </div>
@@ -1740,6 +1745,91 @@ input::-ms-clear {
 
 <script>
 
+    // =====================================================
+    // KIỂM TRA EMAIL GMAIL VÀ SỐ ĐIỆN THOẠI
+    // =====================================================
+
+    function showFieldError(input, errorId, message) {
+        const errorElement = document.getElementById(errorId);
+
+        if (errorElement) {
+            errorElement.textContent = message;
+        }
+
+        input.setCustomValidity(message);
+        input.classList.toggle("input-error", message !== "");
+    }
+
+    function validateEmail(input) {
+        if (!input) return false;
+
+        const email = input.value;
+        let message = "";
+
+        if (email.length === 0) {
+            message = "Vui lòng nhập địa chỉ email.";
+        } else if (/\s/.test(email)) {
+            message = "Email không được chứa khoảng trắng.";
+        } else if (!email.includes("@")) {
+            message = "Email chưa có ký tự @.";
+        } else if ((email.match(/@/g) || []).length > 1) {
+            message = "Email chỉ được chứa một ký tự @.";
+        } else {
+            const parts = email.split("@");
+            const username = parts[0];
+            const domain = parts[1];
+
+            if (!username) {
+                message = "Vui lòng nhập tên email trước ký tự @.";
+            } else if (!domain) {
+                message = "Vui lòng nhập tên miền sau ký tự @.";
+            } else if (!/^[A-Za-z0-9._%+-]+$/.test(username)) {
+                message = "Tên email chứa ký tự không hợp lệ.";
+            } else if (username.startsWith(".") || username.endsWith(".")) {
+                message = "Tên email không được bắt đầu hoặc kết thúc bằng dấu chấm.";
+            } else if (username.includes("..")) {
+                message = "Tên email không được chứa hai dấu chấm liên tiếp.";
+            } else if (domain.toLowerCase() !== "gmail.com") {
+                if (domain.toLowerCase() === "gmail") {
+                    message = "Tên miền chưa hoàn chỉnh. Vui lòng nhập gmail.com.";
+                } else if (!domain.includes(".")) {
+                    message = "Tên miền email chưa hoàn chỉnh.";
+                } else {
+                    message = "Email phải sử dụng tên miền @gmail.com.";
+                }
+            }
+        }
+
+        showFieldError(input, "email-error", message);
+        return message === "";
+    }
+
+    function handlePhoneInput(input) {
+        input.value = input.value.replace(/\D/g, "").slice(0, 10);
+        validatePhone(input);
+    }
+
+    function validatePhone(input) {
+        if (!input) return false;
+
+        const phone = input.value;
+        let message = "";
+
+        if (phone.length === 0) {
+            message = "Vui lòng nhập số điện thoại.";
+        } else if (!/^\d+$/.test(phone)) {
+            message = "Số điện thoại chỉ được chứa chữ số.";
+        } else if (phone.length < 10) {
+            message = "Số điện thoại chưa đủ 10 chữ số. Hiện có " + phone.length + " chữ số.";
+        } else if (phone.length > 10) {
+            message = "Số điện thoại chỉ được phép có đúng 10 chữ số.";
+        }
+
+        showFieldError(input, "phone-error", message);
+        return message === "";
+    }
+
+
     /*
     |--------------------------------------------------------------------------
     | Đổi background theo role
@@ -1782,12 +1872,25 @@ input::-ms-clear {
 
     if (registerForm && registerButton) {
 
-        registerForm.addEventListener("submit", function () {
+        registerForm.addEventListener("submit", function (event) {
+
+            const emailInput = document.getElementById("email");
+            const phoneInput = document.getElementById("phone");
+
+            const emailValid = validateEmail(emailInput);
+            const phoneValid = validatePhone(phoneInput);
+
+            if (!emailValid || !phoneValid) {
+                event.preventDefault();
+
+                if (!emailValid) emailInput.focus();
+                else phoneInput.focus();
+
+                return;
+            }
 
             registerButton.disabled = true;
-
             registerButton.innerText = "Đang tạo tài khoản...";
-
         });
 
     }
