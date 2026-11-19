@@ -743,6 +743,54 @@
     }
 
 
+
+    /* =====================================================
+       PASSWORD STRENGTH
+    ===================================================== */
+
+    .password-strength {
+        margin-top: 8px;
+    }
+
+    .strength-track {
+        display: flex;
+        gap: 4px;
+        height: 5px;
+        margin-bottom: 6px;
+    }
+
+    .strength-segment {
+        flex: 1;
+        border-radius: 99px;
+        background: #e7ece9;
+        transition: background .2s ease;
+    }
+
+    .strength-segment.active.weak { background: #dc5555; }
+    .strength-segment.active.medium { background: #e5a33b; }
+    .strength-segment.active.strong { background: #299764; }
+
+    .strength-label {
+        font-size: 9px;
+        color: #8a9490;
+    }
+
+    .password-rules {
+        margin: 6px 0 0;
+        padding-left: 15px;
+        font-size: 9px;
+        line-height: 1.6;
+        color: #8a9490;
+    }
+
+    .password-rules li.valid {
+        color: #217a48;
+    }
+
+    .password-rules li.valid::marker {
+        color: #299764;
+    }
+
     /* =====================================================
        HỌ VÀ TÊN
     ===================================================== */
@@ -1596,7 +1644,9 @@ input::-ms-clear {
                 placeholder="Nhập mật khẩu"
                 autocomplete="new-password"
                 class="@error('password') input-error @enderror"
+                minlength="8"
                 required
+                oninput="checkPasswordStrength(this)"
             >
 
             <button
@@ -1616,6 +1666,22 @@ input::-ms-clear {
                 </svg>
             </button>
 
+        </div>
+
+        <div class="password-strength" aria-live="polite">
+            <div class="strength-track">
+                <span class="strength-segment" id="strength-1"></span>
+                <span class="strength-segment" id="strength-2"></span>
+                <span class="strength-segment" id="strength-3"></span>
+            </div>
+            <div class="strength-label" id="strength-label">Độ mạnh mật khẩu: Chưa nhập</div>
+            <ul class="password-rules">
+                <li id="rule-length">Ít nhất 8 ký tự</li>
+                <li id="rule-lower">Có chữ thường (a-z)</li>
+                <li id="rule-upper">Có chữ hoa (A-Z)</li>
+                <li id="rule-number">Có chữ số (0-9)</li>
+                <li id="rule-special">Có ký tự đặc biệt (!@#$...)</li>
+            </ul>
         </div>
 
         @error('password')
@@ -1666,6 +1732,8 @@ input::-ms-clear {
             </button>
 
         </div>
+
+        <div id="confirm-password-error" class="field-error" aria-live="polite"></div>
 
     </div>
 
@@ -1830,6 +1898,104 @@ input::-ms-clear {
     }
 
 
+
+    // =====================================================
+    // KIỂM TRA ĐỘ MẠNH MẬT KHẨU
+    // =====================================================
+
+    function checkPasswordStrength(input) {
+        if (!input) return false;
+
+        const password = input.value;
+        const checks = {
+            length: password.length >= 8,
+            lower: /[a-z]/.test(password),
+            upper: /[A-Z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[^A-Za-z0-9\s]/.test(password)
+        };
+
+        const rules = {
+            length: "rule-length",
+            lower: "rule-lower",
+            upper: "rule-upper",
+            number: "rule-number",
+            special: "rule-special"
+        };
+
+        Object.keys(checks).forEach(function (key) {
+            const element = document.getElementById(rules[key]);
+            if (element) element.classList.toggle("valid", checks[key]);
+        });
+
+        const score = Object.values(checks).filter(Boolean).length;
+        const segments = [
+            document.getElementById("strength-1"),
+            document.getElementById("strength-2"),
+            document.getElementById("strength-3")
+        ];
+
+        let level = 0;
+        let label = "Chưa nhập";
+        let className = "";
+
+        if (password.length > 0) {
+            if (score <= 2) {
+                level = 1;
+                label = "Yếu";
+                className = "weak";
+            } else if (score <= 4) {
+                level = 2;
+                label = "Trung bình";
+                className = "medium";
+            } else {
+                level = 3;
+                label = "Mạnh";
+                className = "strong";
+            }
+        }
+
+        segments.forEach(function (segment, index) {
+            if (!segment) return;
+            segment.className = "strength-segment";
+            if (index < level) {
+                segment.classList.add("active", className);
+            }
+        });
+
+        const labelElement = document.getElementById("strength-label");
+        if (labelElement) {
+            labelElement.textContent = "Độ mạnh mật khẩu: " + label;
+        }
+
+        const isValid = Object.values(checks).every(Boolean);
+        input.classList.toggle("input-error", password.length > 0 && !isValid);
+
+        validatePasswordConfirmation();
+
+        return isValid;
+    }
+
+    function validatePasswordConfirmation() {
+        const password = document.getElementById("password");
+        const confirmation = document.getElementById("password_confirmation");
+        const errorElement = document.getElementById("confirm-password-error");
+
+        if (!password || !confirmation || !errorElement) return false;
+
+        let message = "";
+
+        if (confirmation.value.length > 0 && confirmation.value !== password.value) {
+            message = "Mật khẩu xác nhận không khớp.";
+        }
+
+        errorElement.textContent = message;
+        confirmation.setCustomValidity(message);
+        confirmation.classList.toggle("input-error", message !== "");
+
+        return message === "";
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Đổi background theo role
@@ -1876,15 +2042,21 @@ input::-ms-clear {
 
             const emailInput = document.getElementById("email");
             const phoneInput = document.getElementById("phone");
+            const passwordInput = document.getElementById("password");
+            const confirmationInput = document.getElementById("password_confirmation");
 
             const emailValid = validateEmail(emailInput);
             const phoneValid = validatePhone(phoneInput);
+            const passwordValid = checkPasswordStrength(passwordInput);
+            const confirmationValid = validatePasswordConfirmation();
 
-            if (!emailValid || !phoneValid) {
+            if (!emailValid || !phoneValid || !passwordValid || !confirmationValid) {
                 event.preventDefault();
 
                 if (!emailValid) emailInput.focus();
-                else phoneInput.focus();
+                else if (!phoneValid) phoneInput.focus();
+                else if (!passwordValid) passwordInput.focus();
+                else confirmationInput.focus();
 
                 return;
             }
@@ -1893,6 +2065,24 @@ input::-ms-clear {
             registerButton.innerText = "Đang tạo tài khoản...";
         });
 
+    }
+
+    const passwordInput = document.getElementById("password");
+    const confirmationInput = document.getElementById("password_confirmation");
+
+    if (passwordInput) {
+        passwordInput.addEventListener("input", function () {
+            checkPasswordStrength(passwordInput);
+        });
+    }
+
+    if (confirmationInput) {
+        confirmationInput.addEventListener("input", validatePasswordConfirmation);
+        confirmationInput.addEventListener("blur", validatePasswordConfirmation);
+    }
+
+    if (passwordInput && passwordInput.value.length > 0) {
+        checkPasswordStrength(passwordInput);
     }
 
     /*
