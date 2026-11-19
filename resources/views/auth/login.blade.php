@@ -21,7 +21,7 @@
         body {
             min-height: 100vh;
             font-family: "Be Vietnam Pro", sans-serif;
-            background: #dfe5e1;
+            background: #071526;
             color: #071526;
         }
 
@@ -38,7 +38,7 @@
             inset: 24px;
             overflow: hidden;
             border-radius: 28px;
-            background: linear-gradient(110deg, #d8c9ac, #cdbb9b 48%, #eee5d4);
+            background: linear-gradient(135deg, #071526 0%, #0c2340 50%, #163b65 100%);
         }
 
         .wall {
@@ -46,7 +46,7 @@
             inset: 0 auto auto 0;
             width: 68%;
             height: 72%;
-            background: linear-gradient(135deg, #eee4d1, #d9c9aa);
+            background: linear-gradient(135deg, #0c2340, #14355a);
         }
 
         .warm-light {
@@ -56,8 +56,8 @@
             left: 19%;
             top: 12%;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,224,160,.6), rgba(255,224,160,.15) 45%, transparent 70%);
-            filter: blur(10px);
+            background: radial-gradient(circle, rgba(56,189,248,.3), rgba(37,99,235,.1) 45%, transparent 70%);
+            filter: blur(15px);
         }
 
         .window {
@@ -66,11 +66,11 @@
             top: 10%;
             width: 220px;
             height: 220px;
-            border: 10px solid #f1e8d7;
+            border: 10px solid #1e3a5f;
             border-radius: 12px;
-            background: linear-gradient(135deg, #7ca49c, #b6c9bd);
-            box-shadow: 0 20px 45px rgba(68,71,61,.14);
-            opacity: .65;
+            background: linear-gradient(135deg, #091e36, #164e63);
+            box-shadow: 0 20px 45px rgba(0,0,0,.35);
+            opacity: .85;
             z-index: 2;
         }
 
@@ -78,7 +78,7 @@
         .window::after {
             content: "";
             position: absolute;
-            background: #f1e8d7;
+            background: #1e3a5f;
         }
 
         .window::before {
@@ -104,8 +104,8 @@
             right: 22px;
             top: 24px;
             border-radius: 50%;
-            background: #f4d99f;
-            box-shadow: 0 0 35px rgba(244,217,159,.6);
+            background: #38bdf8;
+            box-shadow: 0 0 35px rgba(56,189,248,.6);
         }
 
         .curtain {
@@ -114,16 +114,16 @@
             left: 5%;
             width: 50px;
             height: 220px;
-            background: linear-gradient(90deg, #7e8170, #a9a88d, #777866);
+            background: linear-gradient(90deg, #163b65, #2563eb, #163b65);
             border-radius: 0 0 16px 16px;
-            opacity: .28;
+            opacity: .35;
             z-index: 2;
         }
 
         .curtain-right {
             left: 23%;
             width: 40px;
-            opacity: .2;
+            opacity: .25;
         }
 
         .picture {
@@ -153,7 +153,7 @@
             bottom: 0;
             width: 100%;
             height: 31%;
-            background: linear-gradient(160deg, #9c8064, #765d4a);
+            background: linear-gradient(160deg, #081220, #0c1c30);
             clip-path: polygon(0 15%, 68% 0, 100% 12%, 100% 100%, 0 100%);
             z-index: 2;
         }
@@ -165,10 +165,10 @@
             width: 380px;
             height: 145px;
             border-radius: 50%;
-            background: radial-gradient(ellipse, #d7c5a4, #b29a76);
+            background: radial-gradient(ellipse, #163b65, #0c2340);
             transform: rotate(-4deg);
             z-index: 4;
-            box-shadow: 0 15px 25px rgba(50,40,30,.14);
+            box-shadow: 0 15px 25px rgba(0,0,0,.3);
         }
 
         .bed {
@@ -187,7 +187,7 @@
             width: 28px;
             height: 190px;
             border-radius: 10px;
-            background: #6f5746;
+            background: #112845;
         }
 
         .bed-frame {
@@ -197,8 +197,8 @@
             width: 365px;
             height: 105px;
             border-radius: 10px;
-            background: #765b49;
-            box-shadow: 0 20px 30px rgba(50,40,30,.22);
+            background: #163b65;
+            box-shadow: 0 20px 30px rgba(0,0,0,.35);
         }
 
         .mattress {
@@ -208,7 +208,7 @@
             width: 350px;
             height: 62px;
             border-radius: 10px 10px 5px 5px;
-            background: linear-gradient(180deg, #f1eadc, #ded2bd);
+            background: linear-gradient(180deg, #f8fafc, #cbd5e1);
         }
 
         .blanket {
@@ -218,7 +218,7 @@
             width: 205px;
             height: 55px;
             border-radius: 7px;
-            background: linear-gradient(135deg, #78958a, #4f756c);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
         }
 
         .pillow {
@@ -385,7 +385,7 @@
             position: absolute;
             top: 28px;
             left: 4.5%;
-            color: #0c2340;
+            color: #ffffff;
             font-size: 26px;
             font-weight: 800;
             letter-spacing: -.8px;
@@ -394,6 +394,11 @@
             z-index: 40;
             display: inline-flex;
             align-items: center;
+            background: rgba(12, 35, 64, 0.75);
+            backdrop-filter: blur(12px);
+            padding: 8px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .logo span { color: #ef7d27; }
