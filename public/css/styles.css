@@ -714,6 +714,30 @@ a {
     transform: scale(1.08);
 }
 
+/* Keep favorite controls stationary and above room images while hovering. */
+.room-card > form.favorite-form {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 5;
+    width: 36px;
+    height: 36px;
+}
+
+.room-card > form.favorite-form .fav-btn {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: auto;
+    width: 36px;
+    height: 36px;
+}
+
+#room-results .room-card:hover,
+#favorites-grid .room-card:hover {
+    transform: none;
+}
+
 .room-body {
     padding: 18px;
 }

@@ -208,21 +208,34 @@
                             : asset('storage/' . ltrim($room->post_image, '/'));
                     }
 
-                    $isFavorite = in_array(
-                        (int) $room->id,
-                        $favoriteRoomIds,
-                        true
-                    );
+                    $favoriteId = $favoriteIdsByRoom[(int) $room->id] ?? null;
+                    $isFavorite = $favoriteId !== null;
                 @endphp
 
                 <div class="col-md-6 col-lg-4">
                     <div class="room-card">
-                        <a href="{{ route('favorites.index') }}"
-                            class="fav-btn d-flex align-items-center justify-content-center"
-                            title="{{ $isFavorite ? 'Đã yêu thích' : 'Xem danh sách yêu thích' }}"
-                            style="{{ $isFavorite ? 'color:#b45454;' : 'color:#ccc;' }}">
-                            {{ $isFavorite ? '♥' : '♡' }}
-                        </a>
+                        <form
+                            method="POST"
+                            action="{{ $isFavorite ? route('favorites.destroy', $favoriteId) : route('favorites.store') }}"
+                            data-store-url="{{ route('favorites.store') }}"
+                            data-destroy-url="{{ route('favorites.destroy', ['id' => '__FAVORITE_ID__']) }}"
+                            data-room-id="{{ $room->id }}"
+                            class="favorite-form">
+                            @csrf
+                            @if ($isFavorite)
+                                @method('DELETE')
+                            @else
+                                <input type="hidden" name="room_id" value="{{ $room->id }}">
+                            @endif
+                            <button type="submit"
+                                class="fav-btn d-flex align-items-center justify-content-center {{ $isFavorite ? 'is-favorite' : '' }}"
+                                title="{{ $isFavorite ? 'Bỏ yêu thích' : 'Lưu phòng yêu thích' }}"
+                                aria-label="{{ $isFavorite ? 'Bỏ yêu thích' : 'Lưu phòng yêu thích' }}"
+                                aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"
+                                style="color:{{ $isFavorite ? '#b45454' : '#ccc' }};">
+                                @if ($isFavorite) &#9829; @else &#9825; @endif
+                            </button>
+                        </form>
 
                         @if ($roomImage)
                             <img class="room-img"
@@ -415,3 +428,7 @@
     </main>
 
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/favorite-toggle.js') }}"></script>
+@endpush
