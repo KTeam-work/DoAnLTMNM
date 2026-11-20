@@ -22,65 +22,72 @@
 </div>
 
 {{-- THỐNG KÊ --}}
-<div class="row g-3 mb-3">
+@php
+    $totalUsers = \App\Models\User::count();
+    $totalPosts = \App\Models\RentalPost::count();
+    $pendingPosts = \App\Models\RentalPost::where('status', 'pending')->count();
+    $pendingReports = \App\Models\PostReport::where('status', 'pending')->count();
+    $inactiveUsers = \App\Models\User::where('status', 'inactive')->count();
+@endphp
 
+<div class="row g-3 mb-4">
+
+    {{-- TỔNG NGƯỜI DÙNG --}}
     <div class="col-6 col-lg">
         <div class="stat-card">
             <div class="stat-top">
-                <div class="stat-icon blue">👥</div>
-                <span class="stat-trend">Người dùng</span>
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người dùng</span>
+                <span class="badge-status new">Hệ thống</span>
             </div>
-            <div class="stat-value">{{ \App\Models\User::count() }}</div>
+            <div class="stat-value">{{ number_format($totalUsers) }}</div>
             <div class="stat-label">Tổng người dùng</div>
         </div>
     </div>
 
+    {{-- TỔNG TIN ĐĂNG --}}
     <div class="col-6 col-lg">
         <div class="stat-card">
             <div class="stat-top">
-                <div class="stat-icon">🏠</div>
-                <span class="stat-trend">Tin đăng</span>
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tin đăng</span>
+                <span class="badge-status new">Toàn sàn</span>
             </div>
-            <div class="stat-value">{{ \App\Models\RentalPost::count() }}</div>
+            <div class="stat-value">{{ number_format($totalPosts) }}</div>
             <div class="stat-label">Tổng tin đăng</div>
         </div>
     </div>
 
+    {{-- TIN CHỜ DUYỆT --}}
     <div class="col-6 col-lg">
         <div class="stat-card">
             <div class="stat-top">
-                <div class="stat-icon green">📋</div>
-                <span class="stat-trend down">Cần xử lý</span>
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chờ duyệt</span>
+                <span class="badge-status new">Kiểm duyệt</span>
             </div>
-            <div class="stat-value">
-                {{ \App\Models\RentalPost::where('status', 'pending')->count() }}
-            </div>
+            <div class="stat-value">{{ number_format($pendingPosts) }}</div>
             <div class="stat-label">Tin chờ duyệt</div>
         </div>
     </div>
 
+    {{-- BÁO CÁO VI PHẠM --}}
     <div class="col-6 col-lg">
-        <div class="stat-card" style="border-left: 3px solid #dc3545;">
+        <div class="stat-card">
             <div class="stat-top">
-                <div class="stat-icon" style="background: #fee2e2; color: #dc3545;">🚩</div>
-                <span class="stat-trend" style="color: #dc3545;">Vi phạm</span>
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Vi phạm</span>
+                <span class="badge-status new">Báo cáo</span>
             </div>
-            <div class="stat-value" style="color: #dc3545;">
-                {{ \App\Models\PostReport::where('status', 'pending')->count() }}
-            </div>
+            <div class="stat-value">{{ number_format($pendingReports) }}</div>
             <div class="stat-label">Báo cáo chờ xử lý</div>
         </div>
     </div>
 
+    {{-- TÀI KHOẢN KHÓA --}}
     <div class="col-6 col-lg">
         <div class="stat-card">
             <div class="stat-top">
-                <div class="stat-icon red">🔒</div>
-                <span class="stat-trend down">Tài khoản</span>
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tài khoản</span>
+                <span class="badge-status new">Bị khóa</span>
             </div>
-            <div class="stat-value">
-                {{ \App\Models\User::where('status', 'inactive')->count() }}
-            </div>
+            <div class="stat-value">{{ number_format($inactiveUsers) }}</div>
             <div class="stat-label">Tài khoản bị khóa</div>
         </div>
     </div>
@@ -161,7 +168,7 @@
 @endphp
 <div class="panel mt-4">
     <div class="panel-head">
-        <h3 class="panel-title">🚩 Báo cáo vi phạm cần xử lý</h3>
+        <h3 class="panel-title">Báo cáo vi phạm cần xử lý</h3>
 
         <a class="panel-link" href="{{ route('admin.reports.index') }}">
             Xem tất cả ({{ \App\Models\PostReport::where('status', 'pending')->count() }})
@@ -197,14 +204,14 @@
                         <td>{{ $report->created_at->format('d/m/Y H:i') }}</td>
                         <td class="text-end">
                             <a href="{{ route('admin.reports.index', ['status' => 'pending', 'q' => $report->report_code]) }}" class="btn btn-sm btn-outline-danger" style="font-size: 12px; padding: 4px 10px;">
-                                ⚖️ Xử lý
+                                Xử lý
                             </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="6" class="text-center py-4 text-muted">
-                            🎉 Hiện không có báo cáo vi phạm nào đang chờ xử lý.
+                            Hiện không có báo cáo vi phạm nào đang chờ xử lý.
                         </td>
                     </tr>
                 @endforelse

@@ -32,7 +32,6 @@
     <div class="contract-header-card animate-up delay-1">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span style="font-size: 20px;">📄</span>
                 <h2 class="contract-header-title">
                     Hợp đồng <span style="color: #0c2340;">#{{ $contract->contract_code }}</span>
                 </h2>
@@ -50,7 +49,7 @@
                 ＋ Yêu cầu sửa chữa
             </a>
             <button type="button" class="btn btn-outline-brand d-inline-flex align-items-center gap-1" onclick="window.print()">
-                🖨️ In hợp đồng
+                In hợp đồng
             </button>
         </div>
     </div>
@@ -64,7 +63,7 @@
             <!-- THÔNG TIN PHÒNG & GIÁ THUÊ -->
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h3 class="panel-card-title">🏠 Thông tin phòng &amp; Chi phí</h3>
+                    <h3 class="panel-card-title">Thông tin phòng &amp; Chi phí</h3>
                 </div>
 
                 <div class="info-grid-custom">
@@ -134,10 +133,10 @@
                 </div>
             </div>
 
-            <!-- BẢNG GIÁ DỊCH VỤ & ĐIỆN NƯỚC -->
+            <!-- BẢNG GIÁ DỊCH VỤ & TIỆN ÍCH -->
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h3 class="panel-card-title">💡 Bảng giá dịch vụ &amp; Tiện ích</h3>
+                    <h3 class="panel-card-title">Bảng giá dịch vụ &amp; Tiện ích</h3>
                 </div>
 
                 <div class="service-table-wrap">
@@ -152,44 +151,45 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 18px;">⚡</span>
-                                        <strong>Điện sinh hoạt</strong>
-                                    </div>
+                                    <strong>Điện sinh hoạt</strong>
                                 </td>
                                 <td>Theo chỉ số đồng hồ thực tế</td>
-                                <td class="text-end fw-bold" style="color: #0c2340;">3.500 đ / kWh</td>
+                                <td class="text-end fw-bold" style="color: #0c2340;">
+                                    {{ number_format((float)($electricPrice ?? 3500)) }} đ / kWh
+                                </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 18px;">💧</span>
-                                        <strong>Nước sinh hoạt</strong>
-                                    </div>
+                                    <strong>Nước sinh hoạt</strong>
                                 </td>
-                                <td>Theo số người ở / tháng</td>
-                                <td class="text-end fw-bold" style="color: #0c2340;">100.000 đ / người</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 18px;">🌐</span>
-                                        <strong>Internet / Wi-Fi</strong>
-                                    </div>
+                                <td>Theo chỉ số đồng hồ thực tế</td>
+                                <td class="text-end fw-bold" style="color: #0c2340;">
+                                    {{ number_format((float)($waterPrice ?? 20000)) }} đ / m³
                                 </td>
-                                <td>Trọn gói theo phòng</td>
-                                <td class="text-end fw-bold" style="color: #0c2340;">50.000 đ / phòng</td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 18px;">🧹</span>
-                                        <strong>Vệ sinh &amp; Rác</strong>
-                                    </div>
-                                </td>
-                                <td>Theo số người ở / tháng</td>
-                                <td class="text-end fw-bold" style="color: #0c2340;">30.000 đ / người</td>
-                            </tr>
+                            @if($contract->services && $contract->services->isNotEmpty())
+                                @foreach($contract->services as $svc)
+                                    @php
+                                        $qty = (float)($svc->pivot->quantity ?? 1);
+                                        $unitPrice = (float)($svc->pivot->unit_price ?? $svc->price);
+                                        $lineTotal = $qty * $unitPrice;
+                                    @endphp
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $svc->name }}</strong>
+                                        </td>
+                                        <td>
+                                            Cố định hàng tháng ({{ $qty }} {{ $svc->unit }})
+                                        </td>
+                                        <td class="text-end fw-bold" style="color: #0c2340;">
+                                            {{ number_format($lineTotal) }} đ / tháng
+                                            @if($qty > 1)
+                                                <div class="small text-muted fw-normal">({{ number_format($unitPrice) }} đ/{{ $svc->unit }})</div>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
                         </tbody>
                     </table>
                 </div>
@@ -203,7 +203,7 @@
             <!-- THÔNG TIN CHỦ TRỌ -->
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h3 class="panel-card-title">👤 Thông tin Chủ trọ</h3>
+                    <h3 class="panel-card-title">Thông tin Chủ trọ</h3>
                 </div>
 
                 <div class="owner-box-content">
@@ -217,19 +217,13 @@
                             <div class="text-muted" style="font-size: 12px;">Email: {{ $contract->owner->email ?? '—' }}</div>
                         </div>
                     </div>
-
-                    @if(!empty($contract->owner->phone))
-                    <a href="tel:{{ $contract->owner->phone }}" class="btn-call-owner">
-                        📞 Gọi cho chủ trọ
-                    </a>
-                    @endif
                 </div>
             </div>
 
             <!-- THÀNH VIÊN PHÒNG -->
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h3 class="panel-card-title">👥 Thành viên phòng</h3>
+                    <h3 class="panel-card-title">Thành viên phòng</h3>
                     <span class="badge bg-light text-dark border fw-bold px-2 py-1" style="border-radius: 8px; font-size: 11px;">
                         {{ 1 + $contract->members->count() }} người
                     </span>

@@ -60,7 +60,6 @@
         <div class="summary-card">
             <div class="summary-card-top">
                 <span>Tổng lịch</span>
-                <div class="summary-icon">📅</div>
             </div>
             <strong>{{ $counts['total'] }}</strong>
             <small>Tất cả lịch xem phòng</small>
@@ -69,7 +68,6 @@
         <div class="summary-card">
             <div class="summary-card-top">
                 <span>Chờ xác nhận</span>
-                <div class="summary-icon">⏳</div>
             </div>
             <strong>{{ $counts['pending'] }}</strong>
             <small>Cần xử lý</small>
@@ -78,7 +76,6 @@
         <div class="summary-card">
             <div class="summary-card-top">
                 <span>Đã xác nhận</span>
-                <div class="summary-icon">✓</div>
             </div>
             <strong>{{ $counts['confirmed'] }}</strong>
             <small>Lịch đã được chấp nhận</small>
@@ -87,7 +84,6 @@
         <div class="summary-card">
             <div class="summary-card-top">
                 <span>Hoàn thành</span>
-                <div class="summary-icon">★</div>
             </div>
             <strong>{{ $counts['completed'] }}</strong>
             <small>Đã xem phòng</small>
@@ -104,7 +100,6 @@
 
         @if ($appointments->isEmpty())
             <div class="empty-state">
-                <span class="emoji">📅</span>
                 <p class="mb-0">Chưa có lịch hẹn ở trạng thái này.</p>
             </div>
         @endif
@@ -193,13 +188,13 @@
                     <form id="confirmForm" method="POST" action="">
                         @csrf
                         @method('PUT')
-                        <button type="submit" class="btn-owner">✓ Xác nhận lịch</button>
+                        <button type="submit" class="btn-owner">Xác nhận lịch</button>
                     </form>
 
                     <form id="rejectForm" method="POST" action="">
                         @csrf
                         @method('PUT')
-                        <button type="submit" class="btn-reject">✕ Từ chối lịch</button>
+                        <button type="submit" class="btn-reject">Từ chối lịch</button>
                     </form>
                 </div>
 

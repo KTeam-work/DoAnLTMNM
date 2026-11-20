@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
 use App\Models\Room;
+use App\Models\Service;
 use App\Models\User;
 use App\Models\UtilityReading;
 use App\Services\GeminiService;
 use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OwnerUtilitiesController extends Controller
 {
@@ -93,10 +95,15 @@ class OwnerUtilitiesController extends Controller
                 ? User::query()->where('role', 'owner')->orderBy('id')->first()
                 : $this->owner($request));
 
+        // Chỉ lấy những phòng ĐANG CÓ HỢP ĐỒNG HIỆU LỰC (đang được thuê)
         $rooms = $owner
             ? Room::query()
                 ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id))
-                ->with('property:id,name')
+                ->whereHas('contracts', fn ($query) => $query->where('status', 'active'))
+                ->with([
+                    'property:id,name,owner_id',
+                    'contracts' => fn ($query) => $query->where('status', 'active')->with('tenant:id,name'),
+                ])
                 ->orderBy('name')
                 ->get()
             : collect();
@@ -106,8 +113,16 @@ class OwnerUtilitiesController extends Controller
         if ($request->filled('id') && $owner) {
             $reading = UtilityReading::query()
                 ->whereHas('room.property', fn ($query) => $query->where('owner_id', $owner->id))
-                ->with('room:id,name,room_code')
+                ->with([
+                    'room.property:id,name,owner_id',
+                    'room.contracts' => fn ($query) => $query->where('status', 'active')->with('tenant:id,name'),
+                ])
                 ->find($request->input('id'));
+
+            // Nếu đang sửa bản ghi của phòng mà hợp đồng đã kết thúc sau đó, vẫn giữ phòng vào danh sách
+            if ($reading && $reading->room && ! $rooms->contains('id', $reading->room_id)) {
+                $rooms->push($reading->room);
+            }
         }
 
         $prefillRoomId = $request->input('room_id', $reading?->room_id ?? $rooms->first()?->id);
@@ -184,6 +199,21 @@ class OwnerUtilitiesController extends Controller
         $owner = $this->actingOwner($request);
         $data = $this->validatedReading($request);
         $room = $this->ownedRoom($owner, $data['room_id']);
+
+        // Ràng buộc: Phòng phải có hợp đồng đang hoạt động (đang được thuê)
+        $hasActiveContract = Contract::query()
+            ->where('room_id', $room->id)
+            ->where('status', 'active')
+            ->exists();
+
+        if (! $hasActiveContract) {
+            $message = 'Phòng ' . $room->name . ' hiện chưa có người thuê (chưa có hợp đồng hiệu lực). Bạn không thể ghi chỉ số điện nước cho phòng trống.';
+            if (! $request->expectsJson()) {
+                return back()->withErrors(['room_id' => $message])->withInput();
+            }
+            abort(422, $message);
+        }
+
         $data['month'] = Carbon::parse($data['month'])->startOfMonth()->toDateString();
         if (UtilityReading::query()->where('room_id', $room->id)->whereDate('month', $data['month'])->exists()) {
             $message = 'Phòng này đã có chỉ số cho tháng ' . Carbon::parse($data['month'])->format('m/Y') . '.';
@@ -310,13 +340,78 @@ class OwnerUtilitiesController extends Controller
     {
         $targetMonth = Carbon::parse($month)->startOfMonth()->toDateString();
 
+        if (! $room->relationLoaded('property')) {
+            $room->load('property');
+        }
+
         // Kiểm tra xem tháng này phòng đã chốt chỉ số chưa
         $existing = UtilityReading::query()
             ->where('room_id', $room->id)
             ->whereDate('month', $targetMonth)
             ->first();
 
-        // 1. Tìm kỳ trước gần nhất
+        // 1. Xác định đơn giá điện & nước cấu hình riêng cho nhà trọ / chủ trọ
+        $ownerId = $room->property?->owner_id;
+        $defaultElectricPrice = 3500.0;
+        $defaultWaterPrice = 20000.0;
+
+        if ($ownerId) {
+            // Giá điện từ dịch vụ áp dụng cho nhà trọ này nếu có
+            $propElectric = DB::table('property_services')
+                ->join('services', 'property_services.service_id', '=', 'services.id')
+                ->where('property_services.property_id', $room->property_id)
+                ->where('property_services.status', 'active')
+                ->where(function ($q) {
+                    $q->where('services.unit', 'kWh')
+                      ->orWhere('services.name', 'like', '%điện%');
+                })
+                ->value('property_services.price');
+
+            if ($propElectric && (float) $propElectric > 0) {
+                $defaultElectricPrice = (float) $propElectric;
+            } else {
+                $eService = Service::query()
+                    ->where('owner_id', $ownerId)
+                    ->where('status', 'active')
+                    ->where(function ($q) {
+                        $q->where('unit', 'kWh')
+                          ->orWhere('name', 'like', '%điện%');
+                    })
+                    ->first();
+                if ($eService && (float) $eService->price > 0) {
+                    $defaultElectricPrice = (float) $eService->price;
+                }
+            }
+
+            // Giá nước từ dịch vụ áp dụng cho nhà trọ này nếu có
+            $propWater = DB::table('property_services')
+                ->join('services', 'property_services.service_id', '=', 'services.id')
+                ->where('property_services.property_id', $room->property_id)
+                ->where('property_services.status', 'active')
+                ->where(function ($q) {
+                    $q->where('services.unit', 'm³')
+                      ->orWhere('services.name', 'like', '%nước%');
+                })
+                ->value('property_services.price');
+
+            if ($propWater && (float) $propWater > 0) {
+                $defaultWaterPrice = (float) $propWater;
+            } else {
+                $wService = Service::query()
+                    ->where('owner_id', $ownerId)
+                    ->where('status', 'active')
+                    ->where(function ($q) {
+                        $q->where('unit', 'm³')
+                          ->orWhere('name', 'like', '%nước%');
+                    })
+                    ->first();
+                if ($wService && (float) $wService->price > 0) {
+                    $defaultWaterPrice = (float) $wService->price;
+                }
+            }
+        }
+
+        // 2. Tìm kỳ trước gần nhất của chính phòng này
         $previous = $room->utilityReadings()
             ->whereDate('month', '<', $targetMonth)
             ->latest('month')
@@ -326,8 +421,8 @@ class OwnerUtilitiesController extends Controller
             return [
                 'electricity_old' => (float) $previous->electricity_new,
                 'water_old' => (float) $previous->water_new,
-                'electricity_price' => (float) $previous->electricity_price,
-                'water_price' => (float) $previous->water_price,
+                'electricity_price' => (float) ($previous->electricity_price ?: $defaultElectricPrice),
+                'water_price' => (float) ($previous->water_price ?: $defaultWaterPrice),
                 'source' => 'Bản ghi kỳ ' . Carbon::parse($previous->month)->format('m/Y'),
                 'source_type' => 'previous_reading',
                 'already_exists' => (bool) $existing,
@@ -336,7 +431,7 @@ class OwnerUtilitiesController extends Controller
             ];
         }
 
-        // 2. Tìm từ hợp đồng thuê hiệu lực
+        // 3. Tìm từ hợp đồng thuê hiệu lực
         $contract = Contract::query()
             ->where('room_id', $room->id)
             ->whereIn('status', ['active', 'expired', 'terminated'])
@@ -348,8 +443,8 @@ class OwnerUtilitiesController extends Controller
             return [
                 'electricity_old' => (float) $contract->initial_electricity_reading,
                 'water_old' => (float) $contract->initial_water_reading,
-                'electricity_price' => 3500.0,
-                'water_price' => 20000.0,
+                'electricity_price' => $defaultElectricPrice,
+                'water_price' => $defaultWaterPrice,
                 'source' => 'Chỉ số đầu hợp đồng (' . Carbon::parse($contract->start_date)->format('d/m/Y') . ')',
                 'source_type' => 'contract',
                 'already_exists' => (bool) $existing,
@@ -358,13 +453,13 @@ class OwnerUtilitiesController extends Controller
             ];
         }
 
-        // 3. Mặc định
+        // 4. Mặc định
         return [
             'electricity_old' => 0.0,
             'water_old' => 0.0,
-            'electricity_price' => 3500.0,
-            'water_price' => 20000.0,
-            'source' => 'Mặc định (chưa có dữ liệu trước)',
+            'electricity_price' => $defaultElectricPrice,
+            'water_price' => $defaultWaterPrice,
+            'source' => 'Đơn giá cấu hình theo nhà trọ',
             'source_type' => 'default',
             'already_exists' => (bool) $existing,
             'existing_id' => $existing?->id,

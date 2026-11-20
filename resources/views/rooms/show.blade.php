@@ -584,31 +584,7 @@
 
 
                         <div class="booking-secure-note">
-
-                            🔒 Thông tin của bạn được bảo mật
-
-                        </div>
-
-
-
-                        <!-- LIÊN HỆ NHANH -->
-
-                        <div class="contact-buttons">
-
-                            <a
-                                href="tel:{{ $room['phone'] }}"
-                                class="btn-contact"
-                            >
-                                📞 Gọi chủ trọ
-                            </a>
-
-                            <a
-                                href="#"
-                                class="btn-contact"
-                            >
-                                💬 Zalo
-                            </a>
-
+                            Thông tin của bạn được bảo mật
                         </div>
 
                         @if(isset($activePost) && $activePost)

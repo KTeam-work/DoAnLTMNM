@@ -205,25 +205,24 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                        <input type="date" name="start_date" value="{{ old('start_date') }}" class="form-control" required>
+                        <input type="date" name="start_date" id="startDateInput" value="{{ old('start_date') }}" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
-                        <input type="date" name="end_date" value="{{ old('end_date') }}" class="form-control" required>
+                        <input type="date" name="end_date" id="endDateInput" value="{{ old('end_date') }}" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Tiền thuê (đ/tháng) <span class="text-danger">*</span></label>
-                        <input type="number" id="rentInput" name="rent" min="0" step="0.01" value="{{ old('rent') }}" class="form-control" required>
+                        <input type="number" id="rentInput" name="rent" min="0" step="1" value="{{ old('rent') !== null ? (int) old('rent') : '' }}" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Tiền cọc (đ) <span class="text-danger">*</span></label>
-                        <input type="number" id="depositInput" name="deposit" min="0" step="0.01" value="{{ old('deposit') }}" class="form-control" required>
+                        <input type="number" id="depositInput" name="deposit" min="0" step="1" value="{{ old('deposit') !== null ? (int) old('deposit') : '' }}" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Chu kỳ thanh toán</label>
                         <select name="payment_cycle" class="form-select">
-                            <option value="monthly">Hàng tháng</option>
-                            <option value="quarterly">Hàng quý</option>
+                            <option value="monthly" selected>Hàng tháng</option>
                         </select>
                     </div>
                     <div class="col-md-6">
@@ -237,9 +236,18 @@
                         <label class="form-label">Dịch vụ áp dụng cho hợp đồng</label>
                         <div class="form-text mb-2">Chỉ hiển thị dịch vụ đang hoạt động của bạn. Điện, nước sẽ được tính theo chỉ số hàng tháng.</div>
                         @forelse($services as $service)
+                            @php
+                                $unitLower = mb_strtolower(trim($service->unit));
+                                $nameLower = mb_strtolower(trim($service->name));
+                                // Chỉ dịch vụ gửi xe / phương tiện mới cần tăng số lượng chiếc
+                                $needsQuantity = in_array($unitLower, ['chiếc', 'chiec', 'xe', 'phương tiện']) 
+                                    || str_contains($nameLower, 'xe') 
+                                    || str_contains($nameLower, 'gửi xe') 
+                                    || str_contains($nameLower, 'đỗ xe');
+                            @endphp
                             <div class="border rounded-3 p-3 mb-2 bg-light">
                                 <div class="row align-items-center g-2">
-                                    <div class="col-md-7">
+                                    <div class="{{ $needsQuantity ? 'col-md-7' : 'col-12' }}">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="service_ids[]" value="{{ $service->id }}" id="service-{{ $service->id }}" @checked(in_array((string) $service->id, array_map('strval', old('service_ids', [])), true))>
                                             <label class="form-check-label fw-semibold" for="service-{{ $service->id }}">
@@ -247,13 +255,17 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="col-md-5">
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text">Số lượng</span>
-                                            <input type="number" name="service_quantities[{{ $service->id }}]" min="0.01" step="0.01" class="form-control" value="{{ old('service_quantities.' . $service->id, 1) }}" aria-label="Số lượng {{ $service->name }}">
-                                            <span class="input-group-text">{{ $service->unit }}</span>
+                                    @if($needsQuantity)
+                                        <div class="col-md-5">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Số lượng</span>
+                                                <input type="number" name="service_quantities[{{ $service->id }}]" min="1" step="1" class="form-control text-center" value="{{ max(1, (int) old('service_quantities.' . $service->id, 1)) }}" aria-label="Số lượng {{ $service->name }}">
+                                                <span class="input-group-text">{{ $service->unit }}</span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @else
+                                        <input type="hidden" name="service_quantities[{{ $service->id }}]" value="1">
+                                    @endif
                                 </div>
                             </div>
                         @empty
@@ -283,8 +295,8 @@
             function updatePrice() {
                 var opt = roomSelect.options[roomSelect.selectedIndex];
                 if (!opt || !opt.value) { priceBox.classList.add('d-none'); return; }
-                var price = opt.getAttribute('data-price') || 0;
-                var deposit = opt.getAttribute('data-deposit') || 0;
+                var price = Math.round(parseFloat(opt.getAttribute('data-price') || 0));
+                var deposit = Math.round(parseFloat(opt.getAttribute('data-deposit') || 0));
                 if (!rentInput.value) rentInput.value = price;
                 if (!depositInput.value) depositInput.value = deposit;
                 priceBox.textContent = 'Giá phòng: ' + fmt(price) + ' đ/tháng · Cọc gợi ý: ' + fmt(deposit) + ' đ';
@@ -293,6 +305,25 @@
             if (roomSelect) {
                 roomSelect.addEventListener('change', updatePrice);
                 updatePrice();
+            }
+
+            // Tự động tính Ngày kết thúc là 1 năm sau Ngày bắt đầu
+            var startDateInput = document.getElementById('startDateInput');
+            var endDateInput = document.getElementById('endDateInput');
+            if (startDateInput && endDateInput) {
+                startDateInput.addEventListener('change', function () {
+                    if (!this.value) return;
+                    var parts = this.value.split('-');
+                    if (parts.length === 3) {
+                        var y = parseInt(parts[0], 10) + 1;
+                        var m = parts[1];
+                        var d = parts[2];
+                        if (m === '02' && d === '29') {
+                            d = '28';
+                        }
+                        endDateInput.value = y + '-' + m + '-' + d;
+                    }
+                });
             }
 
             // Chuyển đổi 2 chế độ Người thuê

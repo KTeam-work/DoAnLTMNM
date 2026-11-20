@@ -44,19 +44,89 @@
     </div>
 </div>
 
-<div class="rp-summary">
-    @foreach ([
-        'pending' => 'Chờ duyệt',
-        'published' => 'Đã đăng',
-        'rejected' => 'Bị từ chối',
-        'hidden' => 'Đang ẩn',
-    ] as $key => $label)
-        <a class="rp-summary-card {{ $status === $key ? 'selected' : '' }}"
-           href="{{ route('admin.rental-posts', ['status' => $key]) }}">
-            <span>{{ $label }}</span>
-            <strong>{{ \App\Models\RentalPost::where('status', $key)->count() }}</strong>
+{{-- CARDS THỐNG KÊ & BỘ LỌC --}}
+@php
+    $totalPosts = \App\Models\RentalPost::count();
+    $pendingPosts = \App\Models\RentalPost::where('status', 'pending')->count();
+    $publishedPosts = \App\Models\RentalPost::where('status', 'published')->count();
+    $rejectedPosts = \App\Models\RentalPost::where('status', 'rejected')->count();
+    $hiddenPosts = \App\Models\RentalPost::where('status', 'hidden')->count();
+@endphp
+
+<div class="row g-3 mb-4">
+    {{-- TẤT CẢ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.rental-posts') }}"
+           class="stat-card text-decoration-none {{ $status === '' ? 'border-primary shadow-sm' : '' }}"
+           style="{{ $status === '' ? 'border-width: 2px; background: #f8fafc;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tất cả</span>
+                <span class="badge-status new">Toàn sàn</span>
+            </div>
+            <div class="stat-value text-dark">{{ number_format($totalPosts) }}</div>
+            <div class="stat-label">Tổng bài đăng phòng</div>
         </a>
-    @endforeach
+    </div>
+
+    {{-- CHỜ DUYỆT --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.rental-posts', ['status' => 'pending']) }}"
+           class="stat-card text-decoration-none {{ $status === 'pending' ? 'border-warning shadow-sm' : '' }}"
+           style="{{ $status === 'pending' ? 'border-width: 2px; background: #fffdf5;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chờ duyệt</span>
+                <span class="{{ $pendingPosts > 0 ? 'badge-status pending' : 'badge-status hidden' }}">
+                    {{ $pendingPosts > 0 ? 'Cần xử lý' : 'Đã duyệt' }}
+                </span>
+            </div>
+            <div class="stat-value {{ $pendingPosts > 0 ? 'text-warning' : 'text-dark' }}">{{ number_format($pendingPosts) }}</div>
+            <div class="stat-label">Tin đăng chờ duyệt</div>
+        </a>
+    </div>
+
+    {{-- ĐÃ ĐĂNG --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.rental-posts', ['status' => 'published']) }}"
+           class="stat-card text-decoration-none {{ $status === 'published' ? 'border-primary shadow-sm' : '' }}"
+           style="{{ $status === 'published' ? 'border-width: 2px; background: #f8fafc;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Đã đăng</span>
+                <span class="badge-status approved">Hoạt động</span>
+            </div>
+            <div class="stat-value text-dark">{{ number_format($publishedPosts) }}</div>
+            <div class="stat-label">Tin đang hiển thị</div>
+        </a>
+    </div>
+
+    {{-- BỊ TỪ CHỐI --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.rental-posts', ['status' => 'rejected']) }}"
+           class="stat-card text-decoration-none {{ $status === 'rejected' ? 'border-danger shadow-sm' : '' }}"
+           style="{{ $status === 'rejected' ? 'border-width: 2px; background: #fff5f5;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Từ chối</span>
+                <span class="{{ $rejectedPosts > 0 ? 'badge-status overdue' : 'badge-status hidden' }}">
+                    {{ $rejectedPosts > 0 ? 'Không đạt' : 'Không có' }}
+                </span>
+            </div>
+            <div class="stat-value {{ $rejectedPosts > 0 ? 'text-danger' : 'text-dark' }}">{{ number_format($rejectedPosts) }}</div>
+            <div class="stat-label">Tin không đạt chuẩn</div>
+        </a>
+    </div>
+
+    {{-- ĐANG ẨN --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.rental-posts', ['status' => 'hidden']) }}"
+           class="stat-card text-decoration-none {{ $status === 'hidden' ? 'border-secondary shadow-sm' : '' }}"
+           style="{{ $status === 'hidden' ? 'border-width: 2px; background: #f8fafc;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Đang ẩn</span>
+                <span class="badge-status hidden">Tạm ẩn</span>
+            </div>
+            <div class="stat-value text-dark">{{ number_format($hiddenPosts) }}</div>
+            <div class="stat-label">Chủ nhà hoặc admin ẩn</div>
+        </a>
+    </div>
 </div>
 
 <div class="rp-panel">

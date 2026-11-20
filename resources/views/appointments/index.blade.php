@@ -100,7 +100,7 @@
                 <div
                     class="badge-status pending mb-2"
                     style="display:inline-block;">
-                    📅 LỊCH XEM CỦA BẠN
+                    LỊCH HẸN CỦA BẠN
                 </div>
 
                 <h1 class="page-title">
@@ -193,16 +193,13 @@
                 <div class="col-lg-8">
                     <div class="d-flex gap-3 align-items-start">
 
-                        <div class="stat-icon green">📅</div>
-
                         <div>
-                            <div class="cell-title">
+                            <div class="cell-title fw-bold" style="font-size: 18px;">
                                 {{ $nextAppointment->room?->name
                                 ?? 'Phòng đã cập nhật' }}
                             </div>
 
-                            <div class="cell-sub mb-2">
-                                📍
+                            <div class="cell-sub mb-2 text-muted">
                                 {{ $nextAppointment->room?->property?->address
                                 ?? 'Chưa có địa chỉ' }}
                             </div>
@@ -210,14 +207,12 @@
                             <div class="d-flex flex-wrap gap-2">
 
                                 <span class="badge-status occupied">
-                                    📅
-                                    {{ $nextAppointment->appointment_date
+                                    Ngày: {{ $nextAppointment->appointment_date
                                     ->format('d/m/Y') }}
                                 </span>
 
                                 <span class="badge-status pending">
-                                    🕒
-                                    {{ substr(
+                                    Giờ: {{ substr(
                                     (string) $nextAppointment->appointment_time,
                                     0,
                                     5
@@ -225,13 +220,13 @@
                                 </span>
 
                                 <span class="badge-status new">
-                                    ☎️ {{ $nextAppointment->phone }}
+                                    SĐT: {{ $nextAppointment->phone }}
                                 </span>
 
                             </div>
 
                             @if ($nextAppointment->message)
-                            <div class="cell-sub mt-2">
+                            <div class="cell-sub mt-2 text-muted">
                                 Ghi chú: {{ $nextAppointment->message }}
                             </div>
                             @endif
@@ -252,9 +247,7 @@
             @else
 
             <div class="text-center py-4">
-                <div class="stat-icon mx-auto mb-3">📅</div>
-
-                <div class="cell-title">
+                <div class="cell-title fw-bold">
                     Bạn chưa có lịch xem phòng sắp tới
                 </div>
 
@@ -447,10 +440,6 @@
                         @empty
                         <tr>
                             <td colspan="6" class="text-center py-5">
-                                <div class="mb-3" style="font-size: 40px;">
-                                    📅
-                                </div>
-
                                 <div class="cell-title mb-2">
                                     Chưa có lịch xem phòng nào
                                 </div>

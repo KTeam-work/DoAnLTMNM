@@ -14,7 +14,7 @@ class FavoriteController extends Controller
      * GET /favorites
      * Xem danh sách phòng yêu thích của người đang đăng nhập.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::check()) {
             if ($request->expectsJson()) {
@@ -119,6 +119,13 @@ class FavoriteController extends Controller
     public function destroy(Request $request, int $id)
     {
         if (!Auth::check()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Vui lòng đăng nhập để thực hiện thao tác.',
+                    'login_url' => route('login'),
+                ], 401);
+            }
+
             return redirect()
                 ->route('login')
                 ->with('error', 'Vui lòng đăng nhập để thực hiện thao tác.');

@@ -38,28 +38,79 @@
     </div>
 </div>
 
-{{-- CARDS THỐNG KÊ --}}
-<div class="rp-summary" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
-    <a class="rp-summary-card {{ $status === '' ? 'selected' : '' }}" href="{{ route('admin.reports.index') }}">
-        <span>Tất cả báo cáo</span>
-        <strong>{{ $counts['all'] }}</strong>
-    </a>
-    <a class="rp-summary-card {{ $status === 'pending' ? 'selected' : '' }}" href="{{ route('admin.reports.index', ['status' => 'pending']) }}" style="border-left: 4px solid #ffc107;">
-        <span>Chờ xử lý</span>
-        <strong style="color: #d39e00;">{{ $counts['pending'] }}</strong>
-    </a>
-    <a class="rp-summary-card {{ $status === 'investigating' ? 'selected' : '' }}" href="{{ route('admin.reports.index', ['status' => 'investigating']) }}" style="border-left: 4px solid #0dcaf0;">
-        <span>Đang xác minh</span>
-        <strong style="color: #0aa2c0;">{{ $counts['investigating'] }}</strong>
-    </a>
-    <a class="rp-summary-card {{ $status === 'resolved' ? 'selected' : '' }}" href="{{ route('admin.reports.index', ['status' => 'resolved']) }}" style="border-left: 4px solid #198754;">
-        <span>Đã xử lý</span>
-        <strong style="color: #198754;">{{ $counts['resolved'] }}</strong>
-    </a>
-    <a class="rp-summary-card {{ $status === 'dismissed' ? 'selected' : '' }}" href="{{ route('admin.reports.index', ['status' => 'dismissed']) }}" style="border-left: 4px solid #6c757d;">
-        <span>Đã bác bỏ</span>
-        <strong style="color: #6c757d;">{{ $counts['dismissed'] }}</strong>
-    </a>
+{{-- CARDS THỐNG KÊ & BỘ LỌC --}}
+<div class="row g-3 mb-4">
+    {{-- TẤT CẢ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.reports.index') }}"
+           class="stat-card text-decoration-none {{ $status === '' ? 'border-primary shadow-sm' : '' }}"
+           style="{{ $status === '' ? 'border-width: 2px; background: #f8fafc;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tất cả</span>
+                <span class="badge-status new">Hệ thống</span>
+            </div>
+            <div class="stat-value text-dark">{{ number_format($counts['all']) }}</div>
+            <div class="stat-label">Tổng báo cáo nhận được</div>
+        </a>
+    </div>
+
+    {{-- CHỜ XỬ LÝ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.reports.index', ['status' => 'pending']) }}"
+           class="stat-card text-decoration-none {{ $status === 'pending' ? 'border-warning shadow-sm' : '' }}"
+           style="{{ $status === 'pending' ? 'border-width: 2px; background: #fffdf5;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chờ xử lý</span>
+                <span class="{{ $counts['pending'] > 0 ? 'badge-status pending' : 'badge-status hidden' }}">
+                    {{ $counts['pending'] > 0 ? 'Cần duyệt' : 'Đã duyệt' }}
+                </span>
+            </div>
+            <div class="stat-value {{ $counts['pending'] > 0 ? 'text-warning' : 'text-dark' }}">{{ number_format($counts['pending']) }}</div>
+            <div class="stat-label">Báo cáo mới chờ xử lý</div>
+        </a>
+    </div>
+
+    {{-- ĐANG XÁC MINH --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.reports.index', ['status' => 'investigating']) }}"
+           class="stat-card text-decoration-none {{ $status === 'investigating' ? 'border-info shadow-sm' : '' }}"
+           style="{{ $status === 'investigating' ? 'border-width: 2px; background: #f0f9ff;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Xác minh</span>
+                <span class="badge-status vacant">Đang kiểm tra</span>
+            </div>
+            <div class="stat-value text-dark">{{ number_format($counts['investigating']) }}</div>
+            <div class="stat-label">Đang điều tra vi phạm</div>
+        </a>
+    </div>
+
+    {{-- ĐÃ XỬ LÝ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.reports.index', ['status' => 'resolved']) }}"
+           class="stat-card text-decoration-none {{ $status === 'resolved' ? 'border-success shadow-sm' : '' }}"
+           style="{{ $status === 'resolved' ? 'border-width: 2px; background: #f8fafc;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Đã xử lý</span>
+                <span class="badge-status approved">Có vi phạm</span>
+            </div>
+            <div class="stat-value text-dark">{{ number_format($counts['resolved']) }}</div>
+            <div class="stat-label">Đã chế tài & cảnh cáo</div>
+        </a>
+    </div>
+
+    {{-- ĐÃ BÁC BỎ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.reports.index', ['status' => 'dismissed']) }}"
+           class="stat-card text-decoration-none {{ $status === 'dismissed' ? 'border-secondary shadow-sm' : '' }}"
+           style="{{ $status === 'dismissed' ? 'border-width: 2px; background: #f8fafc;' : '' }}">
+            <div class="stat-top">
+                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Bác bỏ</span>
+                <span class="badge-status hidden">Sai sự thật</span>
+            </div>
+            <div class="stat-value text-dark">{{ number_format($counts['dismissed']) }}</div>
+            <div class="stat-label">Báo cáo không chính xác</div>
+        </a>
+    </div>
 </div>
 
 <div class="rp-panel">
@@ -178,7 +229,7 @@
                             </span>
                             @if($report->action_taken !== 'none')
                                 <div class="small text-success mt-1 fw-bold" style="font-size: 11px;">
-                                    ✓ {{ $report->action_taken_label }}
+                                    {{ $report->action_taken_label }}
                                 </div>
                             @endif
                             @if($report->handler)
@@ -193,7 +244,7 @@
                                 data-bs-toggle="modal"
                                 data-bs-target="#modalReport{{ $report->id }}"
                             >
-                                🔍 Xem &amp; Xử lý
+                                Xem &amp; Xử lý
                             </button>
                         </td>
                     </tr>
@@ -204,7 +255,7 @@
                             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
                                 <div class="modal-header bg-light" style="border-top-left-radius: 16px; border-top-right-radius: 16px;">
                                     <h5 class="modal-title fw-bold fs-6">
-                                        ⚖️ Xử lý báo cáo vi phạm #{{ $report->report_code }}
+                                        Xử lý báo cáo vi phạm #{{ $report->report_code }}
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                                 </div>
@@ -241,7 +292,7 @@
                                                     <p class="mb-2 small"><strong>Trạng thái tin hiện tại:</strong> <span class="badge bg-secondary">{{ $post->status }}</span></p>
                                                     <div class="mt-2">
                                                         <a href="{{ route('rooms.show', $post->room_id) }}" target="_blank" class="btn btn-sm btn-outline-info">
-                                                            🔗 Xem trang tin đăng thực tế
+                                                            Xem trang tin đăng thực tế
                                                         </a>
                                                     </div>
                                                 @else
@@ -284,7 +335,7 @@
 
                                     <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
                                         <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-                                        <button type="submit" class="btn btn-sm btn-primary px-3">💾 Lưu kết quả xử lý</button>
+                                        <button type="submit" class="btn btn-sm btn-primary px-3">Lưu kết quả xử lý</button>
                                     </div>
                                 </form>
                             </div>

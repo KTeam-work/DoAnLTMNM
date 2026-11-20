@@ -109,7 +109,7 @@
                             class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
                             href="{{ route('chatbot.index') }}"
                         >
-                            💬 Trợ lý hỗ trợ
+                            Trợ lý hỗ trợ
                         </a>
                     </li>
 
@@ -117,29 +117,65 @@
 
                 <div class="navbar-actions">
 
-                    <div class="user-chip">
-                        <span class="user-avatar">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
-                        </span>
+                    {{-- DROPDOWN TÀI KHOẢN --}}
+                    <div class="dropdown user-dropdown">
 
-                        <span class="user-meta">
-                            <span class="user-name d-block">
-                                {{ auth()->user()->name ?? 'Admin hệ thống' }}
+                        <button
+                            class="user-chip"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="true"
+                            aria-expanded="false">
+
+                            <span class="user-avatar">
+                                {{ strtoupper(mb_substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                             </span>
 
-                            <span class="user-role">
-                                Quản trị viên
+                            <span class="user-meta text-start">
+                                <span class="user-name">
+                                    {{ auth()->user()->name ?? 'Admin hệ thống' }}
+                                </span>
+
+                                <span class="user-role">Quản trị viên</span>
                             </span>
-                        </span>
-                    </div>
 
-                    <form method="POST" action="{{ route('logout') }}" class="ms-2">
-                        @csrf
-
-                        <button type="submit" class="btn-outline-brand">
-                            Đăng xuất
+                            <span class="caret">▾</span>
                         </button>
-                    </form>
+
+                        <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu">
+
+                            <li class="dropdown-user-info">
+                                <div class="dropdown-user-name">
+                                    {{ auth()->user()->name ?? 'Admin hệ thống' }}
+                                </div>
+
+                                <div class="dropdown-user-email">
+                                    {{ auth()->user()->email ?? '' }}
+                                </div>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <form
+                                    method="POST"
+                                    action="{{ route('logout') }}"
+                                    class="m-0">
+
+                                    @csrf
+
+                                    <button
+                                        type="submit"
+                                        class="dropdown-item dropdown-logout">
+                                        ↪ Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+
+                        </ul>
+                    </div>
 
                 </div>
             </div>

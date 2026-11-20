@@ -86,15 +86,19 @@ body {
 .stat-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 22px;
-    padding: 22px;
-    box-shadow: 0 8px 28px rgba(12, 35, 64, .05);
+    border-radius: 20px;
+    padding: 22px 24px;
+    box-shadow: 0 10px 25px -5px rgba(12, 35, 64, .05);
     transition: transform .2s ease, box-shadow .2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(12, 35, 64, .08);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -5px rgba(12, 35, 64, .1);
 }
 
 .stat-top {
@@ -103,18 +107,12 @@ body {
     align-items: center;
 }
 
-.stat-top span {
-    font-size: 14px;
-    font-weight: 600;
-    color: #64748b;
-}
-
 .stat-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 15px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     background: #eff6ff;
-    color: #0c2340;
+    color: #2563eb;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -123,34 +121,61 @@ body {
 }
 
 .stat-icon.green {
-    background: #eaf8f1;
-    color: #1b8a5a;
+    background: #f0fdf4;
+    color: #10b981;
 }
 
 .stat-icon.blue {
-    background: #e9f4ff;
-    color: #1d72b8;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.stat-icon.yellow {
+    background: #fefce8;
+    color: #ca8a04;
 }
 
 .stat-icon.gold {
-    background: #fdf6e7;
-    color: #b78103;
+    background: #eafaf1;
+    color: #16834b;
 }
 
+.stat-trend {
+    font-size: 12px;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.stat-trend.down {
+    color: #dc3545;
+}
+
+.stat-trend.warning {
+    color: #d97706;
+}
+
+.stat-trend.muted {
+    color: #64748b;
+}
+
+.stat-value,
 .stat-card strong {
     display: block;
     font-size: 28px;
     font-weight: 800;
     color: #0c2340;
-    margin-top: 14px;
+    letter-spacing: -0.6px;
     line-height: 1.2;
+    margin: 0;
 }
 
+.stat-label,
 .stat-card span.stat-sub {
     display: block;
     color: #64748b;
     font-size: 13px;
-    margin-top: 5px;
+    font-weight: 600;
+    margin: 0;
 }
 
 /* ================= CONTENT CARD ================= */

@@ -29,41 +29,41 @@
             {{-- Tổng số phòng --}}
             <div class="stat-card">
                 <div class="stat-top">
-                    <span>Tổng số phòng</span>
-                    <div class="stat-icon">🏠</div>
+                    <div class="stat-icon blue">🏠</div>
+                    <span class="stat-trend">Phòng trọ</span>
                 </div>
-                <strong>{{ $totalRooms }}</strong>
-                <span class="stat-sub">Tất cả phòng đang quản lý</span>
+                <div class="stat-value">{{ $totalRooms }}</div>
+                <div class="stat-label">Tổng số phòng quản lý</div>
             </div>
 
             {{-- Phòng đang thuê --}}
             <div class="stat-card">
                 <div class="stat-top">
-                    <span>Phòng đang thuê</span>
                     <div class="stat-icon green">👥</div>
+                    <span class="stat-trend">Đang thuê</span>
                 </div>
-                <strong>{{ $rentedRooms }}</strong>
-                <span class="stat-sub">Phòng có khách đang ở</span>
+                <div class="stat-value">{{ $rentedRooms }}</div>
+                <div class="stat-label">Phòng có khách đang ở</div>
             </div>
 
             {{-- Phòng còn trống --}}
             <div class="stat-card">
                 <div class="stat-top">
-                    <span>Phòng còn trống</span>
-                    <div class="stat-icon blue">🔑</div>
+                    <div class="stat-icon yellow">🔑</div>
+                    <span class="stat-trend {{ $availableRooms > 0 ? 'warning' : 'muted' }}">Còn trống</span>
                 </div>
-                <strong>{{ $availableRooms }}</strong>
-                <span class="stat-sub">Phòng sẵn sàng đón khách</span>
+                <div class="stat-value">{{ $availableRooms }}</div>
+                <div class="stat-label">Phòng sẵn sàng đón khách</div>
             </div>
 
             {{-- Doanh thu tháng này --}}
-            <div class="stat-card">
+            <div class="stat-card" style="border-left: 3px solid #16834b;">
                 <div class="stat-top">
-                    <span>Doanh thu tháng này</span>
                     <div class="stat-icon gold">💰</div>
+                    <span class="stat-trend" style="color: #16834b;">Doanh thu</span>
                 </div>
-                <strong>{{ number_format((float) $monthlyRevenue, 0, ',', '.') }}đ</strong>
-                <span class="stat-sub">Tiền phòng đã thu trong tháng</span>
+                <div class="stat-value" style="color: #16834b;">{{ number_format((float) $monthlyRevenue, 0, ',', '.') }}đ</div>
+                <div class="stat-label">Tiền phòng đã thu trong tháng</div>
             </div>
         </div>
 

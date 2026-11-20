@@ -42,10 +42,10 @@
     <div class="col-12 col-md-4">
       <div class="stat-card">
         <div class="stat-top">
-          <div class="stat-icon"><i class="bi bi-receipt"></i></div>
-          <span class="text-muted small fw-bold">Dự kiến {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</span>
+          <div class="stat-icon blue">🧾</div>
+          <span class="stat-trend">Kỳ {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</span>
         </div>
-        <div class="stat-value">{{ number_format((float) $stats['expected']) }} ₫</div>
+        <div class="stat-value">{{ number_format((float) $stats['expected'], 0, ',', '.') }}đ</div>
         <div class="stat-label">Tổng doanh thu chờ thu</div>
       </div>
     </div>
@@ -53,21 +53,21 @@
     <div class="col-12 col-md-4">
       <div class="stat-card">
         <div class="stat-top">
-          <div class="stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
-          <span class="fw-bold text-success">Đã thu</span>
+          <div class="stat-icon green">💰</div>
+          <span class="stat-trend">Đã thu</span>
         </div>
-        <div class="stat-value" style="color: var(--green);">{{ number_format((float) $stats['collected']) }} ₫</div>
+        <div class="stat-value" style="color: #16834b;">{{ number_format((float) $stats['collected'], 0, ',', '.') }}đ</div>
         <div class="stat-label">Đã thu trong kỳ</div>
       </div>
     </div>
 
     <div class="col-12 col-md-4">
-      <div class="stat-card" style="border-color: var(--red-soft);">
+      <div class="stat-card" style="border-left: 3px solid #dc3545;">
         <div class="stat-top">
-          <div class="stat-icon red"><i class="bi bi-exclamation-triangle-fill"></i></div>
-          <span class="text-danger fw-bold small">{{ $stats['outstanding_count'] }} hóa đơn cần xử lý</span>
+          <div class="stat-icon red">🚩</div>
+          <span class="stat-trend down">{{ $stats['outstanding_count'] }} cần xử lý</span>
         </div>
-        <div class="stat-value" style="color: var(--red);">{{ number_format((float) $stats['outstanding']) }} ₫</div>
+        <div class="stat-value" style="color: #dc3545;">{{ number_format((float) $stats['outstanding'], 0, ',', '.') }}đ</div>
         <div class="stat-label">Còn nợ &amp; Quá hạn</div>
       </div>
     </div>

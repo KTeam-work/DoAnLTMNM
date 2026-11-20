@@ -71,10 +71,10 @@
 
         <div class="header-actions d-flex gap-2">
             <a href="{{ route('owner.utilities.index', array_filter(['month' => $prefillMonth])) }}" class="btn-outline-brand">
-                ← Quay lại
+                Quay lại
             </a>
             <button type="submit" form="readingForm" class="btn-brand">
-                💾 {{ $reading ? 'Cập nhật' : 'Lưu chỉ số' }}
+                {{ $reading ? 'Cập nhật' : 'Lưu chỉ số' }}
             </button>
         </div>
     </div>
@@ -95,9 +95,6 @@
     @if(session('success'))
         <div class="alert alert-success mb-3">{{ session('success') }}</div>
     @endif
-    @if($rooms->isEmpty())
-        <div class="alert alert-warning">Chưa có phòng nào thuộc khu trọ của bạn. Hãy tạo phòng trước.</div>
-    @endif
     <form id="readingForm" method="POST" action="{{ $reading ? route('owner.utilities.update', $reading) : route('owner.utilities.store') }}">
         @csrf
         @if($reading)
@@ -111,19 +108,25 @@
                 <!-- PHONG + THANG -->
                 <div class="card">
                     <div class="card-header">
-                        <span>🏠</span> Phòng &amp; kỳ ghi
+                        Phòng &amp; kỳ ghi
                     </div>
 
                     <div class="row-2">
                         <div class="form-group">
-                            <label>Phòng <span>*</span></label>
+                            <label>Phòng đang thuê <span>*</span></label>
                             @if($reading)
                                 <input type="text" class="custom-input" value="{{ $reading->room->name ?? '' }} ({{ $reading->room->room_code ?? '' }})" disabled>
                             @else
                                 <select name="room_id" id="select-room" class="custom-input" required>
-                                    <option value="">-- Chọn phòng --</option>
+                                    <option value="">-- Chọn phòng đang thuê --</option>
                                     @foreach($rooms as $room)
-                                        <option value="{{ $room->id }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>{{ $room->name }} · {{ $room->property->name ?? '' }}</option>
+                                        @php
+                                            $activeContract = $room->contracts->first();
+                                            $tenantName = $activeContract?->tenant?->name ?? 'Đang thuê';
+                                        @endphp
+                                        <option value="{{ $room->id }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>
+                                            {{ $room->name }} · {{ $room->property->name ?? '' }} (Khách: {{ $tenantName }})
+                                        </option>
                                     @endforeach
                                 </select>
                             @endif
@@ -136,16 +139,16 @@
 
                     <!-- CANH BAO TRUNG KY -->
                     <div id="duplicate-warning" class="alert alert-warning align-items-center justify-content-between mt-2 mb-0" style="display: {{ $alreadyExists ? 'flex' : 'none' }}; background: #fff8e6; border: 1px solid #ffd591; color: #873800; border-radius: 12px; padding: 12px 16px;">
-                        <div>⚠️ Phòng này đã có chỉ số tháng <strong id="duplicate-month">{{ $existingMonth ?? '' }}</strong> rồi!</div>
-                        <a id="duplicate-edit-link" href="{{ $existingId ? route('owner.utilities.create', ['id' => $existingId]) : '#' }}" class="btn-brand" style="padding: 6px 14px; font-size: 12px; text-decoration: none;">✏️ Sửa bản ghi đó</a>
+                        <div>Phòng này đã có chỉ số tháng <strong id="duplicate-month">{{ $existingMonth ?? '' }}</strong> rồi!</div>
+                        <a id="duplicate-edit-link" href="{{ $existingId ? route('owner.utilities.create', ['id' => $existingId]) : '#' }}" class="btn-brand" style="padding: 6px 14px; font-size: 12px; text-decoration: none;">Sửa bản ghi đó</a>
                     </div>
                 </div>
 
                 <!-- DIEN -->
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <div><span>⚡</span> Chỉ số điện</div>
-                        <span class="source-hint" id="e-source-text">🗄️ Nguồn: {{ $sourceVal }}</span>
+                        <div>Chỉ số điện</div>
+                        <span class="source-hint" id="e-source-text">Nguồn: {{ $sourceVal }}</span>
                     </div>
 
                     <div class="row-3">
@@ -156,7 +159,7 @@
                         <div class="form-group">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="mb-0">Chỉ số mới <span>*</span></label>
-                                <button type="button" class="btn btn-sm btn-outline-success border-0 p-0 text-decoration-none" style="font-size: 11.5px; font-weight: 600;" onclick="triggerScanFor('electricity')">📷 Quét từ ảnh</button>
+                                <button type="button" class="btn btn-sm btn-outline-success border-0 p-0 text-decoration-none" style="font-size: 11.5px; font-weight: 600;" onclick="triggerScanFor('electricity')">Quét từ ảnh</button>
                             </div>
                             <input type="number" step="0.01" min="0" name="electricity_new" id="electricity_new" class="custom-input" value="{{ old('electricity_new', $reading?->electricity_new) }}" placeholder="Nhập số mới..." required autofocus>
                             <div id="e-calc-feedback" class="calc-feedback"></div>
@@ -171,8 +174,8 @@
                 <!-- NUOC -->
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <div><span>💧</span> Chỉ số nước</div>
-                        <span class="source-hint" id="w-source-text">🗄️ Nguồn: {{ $sourceVal }}</span>
+                        <div>Chỉ số nước</div>
+                        <span class="source-hint" id="w-source-text">Nguồn: {{ $sourceVal }}</span>
                     </div>
 
                     <div class="row-3">
@@ -183,7 +186,7 @@
                         <div class="form-group">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="mb-0">Chỉ số mới <span>*</span></label>
-                                <button type="button" class="btn btn-sm btn-outline-success border-0 p-0 text-decoration-none" style="font-size: 11.5px; font-weight: 600;" onclick="triggerScanFor('water')">📷 Quét từ ảnh</button>
+                                <button type="button" class="btn btn-sm btn-outline-success border-0 p-0 text-decoration-none" style="font-size: 11.5px; font-weight: 600;" onclick="triggerScanFor('water')">Quét từ ảnh</button>
                             </div>
                             <input type="number" step="0.01" min="0" name="water_new" id="water_new" class="custom-input" value="{{ old('water_new', $reading?->water_new) }}" placeholder="Nhập số mới..." required>
                             <div id="w-calc-feedback" class="calc-feedback"></div>
@@ -203,11 +206,11 @@
                 <!-- BANG TAM TINH CHI PHI -->
                 <div class="card" style="border-top: 4px solid var(--green);">
                     <div class="card-header">
-                        <span>🧾</span> Tạm tính hóa đơn
+                        Tạm tính hóa đơn
                     </div>
                     <div style="font-size: 13.5px;">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>⚡ Điện tiêu thụ:</span>
+                            <span>Điện tiêu thụ:</span>
                             <span id="summary-e-diff" style="font-weight: 700;">0 kWh</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center text-muted small mb-2 ps-3">
@@ -222,7 +225,7 @@
                         <hr style="border: 0; border-top: 1px dashed var(--border); margin: 12px 0;">
 
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>💧 Nước tiêu thụ:</span>
+                            <span>Nước tiêu thụ:</span>
                             <span id="summary-w-diff" style="font-weight: 700;">0 m³</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center text-muted small mb-2 ps-3">
@@ -247,7 +250,6 @@
                 <div class="card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;">
                     <div class="card-header d-flex justify-content-between align-items-center" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; border-radius: 14px 14px 0 0; padding: 12px 18px;">
                         <div class="d-flex align-items-center gap-2">
-                            <span style="font-size: 18px;">📷</span>
                             <strong style="color: #1e293b; font-size: 14px;">Quét chỉ số từ ảnh chụp</strong>
                         </div>
                         <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 11px;">Tự động nhận diện</span>
@@ -264,11 +266,11 @@
                             <div class="d-flex gap-2">
                                 <label class="meter-type-btn flex-fill text-center p-2 rounded-2 border active" id="type-opt-e" onclick="setScanType('electricity')">
                                     <input type="radio" name="scan_type" value="electricity" checked class="d-none">
-                                    ⚡ Điện (kWh)
+                                    Điện (kWh)
                                 </label>
                                 <label class="meter-type-btn flex-fill text-center p-2 rounded-2 border" id="type-opt-w" onclick="setScanType('water')">
                                     <input type="radio" name="scan_type" value="water" class="d-none">
-                                    💧 Nước (m³)
+                                    Nước (m³)
                                 </label>
                             </div>
                         </div>
@@ -278,7 +280,6 @@
 
                         <div id="scan-dropzone" class="p-3 text-center rounded-3 border border-2 border-dashed" style="background: #f8fafc; border-color: #cbd5e1; cursor: pointer; transition: all 0.2s ease;">
                             <div id="dropzone-empty-state">
-                                <div style="font-size: 30px; line-height: 1;" class="mb-1">📸</div>
                                 <div style="font-weight: 600; color: #1e293b; font-size: 13px;">Bấm để chọn hoặc chụp ảnh</div>
                                 <div class="text-muted" style="font-size: 11px; margin-top: 2px;">Hỗ trợ JPG, PNG, WEBP (tối đa 10MB)</div>
                             </div>
@@ -288,7 +289,7 @@
                                 <div id="scan-file-name" class="fw-semibold text-truncate small" style="max-width: 200px; margin: 0 auto; color: #1e293b;"></div>
                                 <div class="mt-2 d-flex justify-content-center gap-2">
                                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="resetScanZone(event)" style="font-size: 11px;">Đổi ảnh</button>
-                                    <button type="button" class="btn btn-sm btn-success" id="btn-start-scan" onclick="startMeterScan(event)" style="font-size: 11px; font-weight: 600;">🔍 Bắt đầu quét</button>
+                                    <button type="button" class="btn btn-sm btn-success" id="btn-start-scan" onclick="startMeterScan(event)" style="font-size: 11px; font-weight: 600;">Bắt đầu quét</button>
                                 </div>
                             </div>
                         </div>
@@ -303,20 +304,6 @@
                         <!-- KẾT QUẢ QUÉT -->
                         <div id="scan-result-alert" class="mt-3 p-2 rounded-2 d-none" style="font-size: 12px;"></div>
 
-                    </div>
-                </div>
-
-                <!-- LUU Y -->
-                <div class="card">
-                    <div class="card-header">
-                        <span>📌</span> Lưu ý
-                    </div>
-                    <div class="form-group mb-0">
-                        <label class="text-muted" style="font-weight:500; line-height:1.7; font-size: 12px;">
-                            • Chỉ số cũ được lấy tự động từ kỳ trước trong CSDL.<br>
-                            • Chỉ số mới không được thấp hơn chỉ số cũ.<br>
-                            • Mỗi phòng mỗi tháng chỉ ghi 1 lần.
-                        </label>
                     </div>
                 </div>
             </div>
@@ -376,10 +363,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (eNew !== null && !isNaN(eNew)) {
             eDiff = eNew - eOld;
             if (eDiff < 0) {
-                if (eCalcFeedback) eCalcFeedback.innerHTML = `<span style="color: #dc3545;">⚠️ Chỉ số mới (${eNew}) nhỏ hơn chỉ số cũ (${eOld})!</span>`;
+                if (eCalcFeedback) eCalcFeedback.innerHTML = `<span style="color: #dc3545;">Chỉ số mới (${eNew}) nhỏ hơn chỉ số cũ (${eOld})!</span>`;
             } else {
                 eMoney = eDiff * ePrice;
-                if (eCalcFeedback) eCalcFeedback.innerHTML = `<span style="color: var(--green);">✓ Tiêu thụ: ${formatNumber(eDiff)} kWh (${formatNumber(eMoney)}đ)</span>`;
+                if (eCalcFeedback) eCalcFeedback.innerHTML = `<span style="color: var(--green);">Tiêu thụ: ${formatNumber(eDiff)} kWh (${formatNumber(eMoney)}đ)</span>`;
             }
         } else {
             if (eCalcFeedback) eCalcFeedback.innerHTML = '';
@@ -390,10 +377,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (wNew !== null && !isNaN(wNew)) {
             wDiff = wNew - wOld;
             if (wDiff < 0) {
-                if (wCalcFeedback) wCalcFeedback.innerHTML = `<span style="color: #dc3545;">⚠️ Chỉ số mới (${wNew}) nhỏ hơn chỉ số cũ (${wOld})!</span>`;
+                if (wCalcFeedback) wCalcFeedback.innerHTML = `<span style="color: #dc3545;">Chỉ số mới (${wNew}) nhỏ hơn chỉ số cũ (${wOld})!</span>`;
             } else {
                 wMoney = wDiff * wPrice;
-                if (wCalcFeedback) wCalcFeedback.innerHTML = `<span style="color: var(--green);">✓ Tiêu thụ: ${formatNumber(wDiff)} m³ (${formatNumber(wMoney)}đ)</span>`;
+                if (wCalcFeedback) wCalcFeedback.innerHTML = `<span style="color: var(--green);">Tiêu thụ: ${formatNumber(wDiff)} m³ (${formatNumber(wMoney)}đ)</span>`;
             }
         } else {
             if (wCalcFeedback) wCalcFeedback.innerHTML = '';
@@ -422,13 +409,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.electricity_old !== undefined) {
                     if (inputEOld) inputEOld.value = data.electricity_old;
                     if (inputWOld) inputWOld.value = data.water_old;
-                    if (eSourceText) eSourceText.textContent = `🗄️ Nguồn: ${data.source}`;
-                    if (wSourceText) wSourceText.textContent = `🗄️ Nguồn: ${data.source}`;
+                    if (eSourceText) eSourceText.textContent = `Nguồn: ${data.source}`;
+                    if (wSourceText) wSourceText.textContent = `Nguồn: ${data.source}`;
 
-                    if (data.electricity_price && inputEPrice && (!inputEPrice.value || inputEPrice.value == 3500)) {
+                    if (data.electricity_price !== undefined && inputEPrice) {
                         inputEPrice.value = data.electricity_price;
                     }
-                    if (data.water_price && inputWPrice && (!inputWPrice.value || inputWPrice.value == 20000)) {
+                    if (data.water_price !== undefined && inputWPrice) {
                         inputWPrice.value = data.water_price;
                     }
                 }

@@ -26,6 +26,7 @@
     @php
         $total = $contracts->count();
         $active = $contracts->where('status', 'active')->count();
+        $draft = $contracts->where('status', 'draft')->count();
         $expiring = $contracts->filter(fn($c) => $c->status === 'active' && $c->end_date && \Carbon\Carbon::parse($c->end_date)->diffInDays(now(), false) > -60)->count();
         $terminated = $contracts->where('status', 'terminated')->count();
     @endphp
@@ -39,6 +40,10 @@
             <button type="button" class="segmented-tab" data-filter="active">
                 <span class="tab-label">Đang hiệu lực</span>
                 <span class="tab-count">{{ $active }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="draft">
+                <span class="tab-label">Bản nháp</span>
+                <span class="tab-count">{{ $draft }}</span>
             </button>
             <button type="button" class="segmented-tab" data-filter="expiring">
                 <span class="tab-label">Sắp hết hạn</span>
@@ -98,14 +103,22 @@
                         <td>
                             @if($contract->status === 'active')
                             <span class="badge-soft-success">Đang hiệu lực</span>
+                            @elseif($contract->status === 'draft')
+                            <span class="badge-soft-secondary">Bản nháp</span>
                             @elseif($contract->status === 'terminated')
                             <span class="badge-soft-warning">Đã thanh lý</span>
                             @else
                             <span class="badge-soft-warning">{{ $contract->status }}</span>
                             @endif
                         </td>
-                        <td class="text-end">
+                        <td class="text-end text-nowrap">
                             <a href="{{ route('owner.contracts.show', $contract) }}" class="btn-action">Xem</a>
+                            @if($contract->status === 'draft')
+                                <form method="POST" action="{{ route('owner.contracts.activate', $contract) }}" class="d-inline" onsubmit="return confirm('Xác nhận kích hoạt hợp đồng #{{ $contract->contract_code }}? Phòng sẽ chuyển sang Đang thuê.')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-success ms-1 py-1 px-2" style="font-size: 13px;">Kích hoạt</button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -146,6 +159,8 @@
                     matchesStatus = true;
                 } else if (currentFilter === 'active') {
                     matchesStatus = (status === 'active');
+                } else if (currentFilter === 'draft') {
+                    matchesStatus = (status === 'draft');
                 } else if (currentFilter === 'expiring') {
                     matchesStatus = isExpiring;
                 } else if (currentFilter === 'terminated') {
