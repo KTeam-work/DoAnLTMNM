@@ -20,7 +20,9 @@
     >
 
     {{-- CSS dùng chung --}}
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}?v={{ file_exists(public_path('css/styles.css')) ? filemtime(public_path('css/styles.css')) : time() }}">
+    <link rel="stylesheet" href="{{ asset('css/tv1/rental-posts.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv1/users.css') }}?v={{ file_exists(public_path('css/tv1/users.css')) ? filemtime(public_path('css/tv1/users.css')) : time() }}">
 
     {{-- CSS riêng của từng trang --}}
     @stack('styles')
@@ -189,6 +191,9 @@
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{-- Chuyển tab & phân trang mượt mà không reload trang --}}
+    <script src="{{ asset('js/app-ajax-nav.js') }}"></script>
 
     {{-- JS riêng của từng trang --}}
     @stack('scripts')

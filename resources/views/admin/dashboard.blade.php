@@ -21,7 +21,7 @@
     </button>
 </div>
 
-{{-- THỐNG KÊ --}}
+{{-- THỐNG KÊ DẠNG TAB PHÂN ĐOẠN --}}
 @php
     $totalUsers = \App\Models\User::count();
     $totalPosts = \App\Models\RentalPost::count();
@@ -30,80 +30,29 @@
     $inactiveUsers = \App\Models\User::where('status', 'inactive')->count();
 @endphp
 
-<div class="row g-3 mb-4">
-
-    {{-- TỔNG NGƯỜI DÙNG --}}
-    <div class="col-6 col-lg">
-        <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div class="stat-top d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người dùng</span>
-                <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Hệ thống</span>
-            </div>
-            <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($totalUsers) }}</div>
-            <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng người dùng</div>
-        </div>
+<div class="segmented-filter-wrapper mb-4">
+    <div class="segmented-filter-bar" role="tablist">
+        <a href="{{ route('admin.users') }}" class="segmented-tab">
+            <span class="tab-label">Tổng người dùng</span>
+            <span class="tab-count">{{ number_format($totalUsers) }}</span>
+        </a>
+        <a href="{{ route('admin.rental-posts') }}" class="segmented-tab">
+            <span class="tab-label">Tổng tin đăng</span>
+            <span class="tab-count">{{ number_format($totalPosts) }}</span>
+        </a>
+        <a href="{{ route('admin.rental-posts', ['status' => 'pending']) }}" class="segmented-tab {{ $pendingPosts > 0 ? 'active' : '' }}">
+            <span class="tab-label">Tin chờ duyệt</span>
+            <span class="tab-count">{{ number_format($pendingPosts) }}</span>
+        </a>
+        <a href="{{ route('admin.reports.index', ['status' => 'pending']) }}" class="segmented-tab {{ $pendingReports > 0 ? 'active' : '' }}">
+            <span class="tab-label">Báo cáo vi phạm</span>
+            <span class="tab-count">{{ number_format($pendingReports) }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="segmented-tab {{ $inactiveUsers > 0 ? 'active' : '' }}">
+            <span class="tab-label">Tài khoản bị khóa</span>
+            <span class="tab-count">{{ number_format($inactiveUsers) }}</span>
+        </a>
     </div>
-
-    {{-- TỔNG TIN ĐĂNG --}}
-    <div class="col-6 col-lg">
-        <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div class="stat-top d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tin đăng</span>
-                <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Toàn sàn</span>
-            </div>
-            <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($totalPosts) }}</div>
-            <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng tin đăng</div>
-        </div>
-    </div>
-
-    {{-- TIN CHỜ DUYỆT --}}
-    <div class="col-6 col-lg">
-        <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div class="stat-top d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chờ duyệt</span>
-                @if($pendingPosts > 0)
-                    <span style="background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $pendingPosts }} mới</span>
-                @else
-                    <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Đã duyệt</span>
-                @endif
-            </div>
-            <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($pendingPosts) }}</div>
-            <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tin chờ duyệt</div>
-        </div>
-    </div>
-
-    {{-- BÁO CÁO VI PHẠM --}}
-    <div class="col-6 col-lg">
-        <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div class="stat-top d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Vi phạm</span>
-                @if($pendingReports > 0)
-                    <span style="background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $pendingReports }} chờ xử lý</span>
-                @else
-                    <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">An toàn</span>
-                @endif
-            </div>
-            <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($pendingReports) }}</div>
-            <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Báo cáo chờ xử lý</div>
-        </div>
-    </div>
-
-    {{-- TÀI KHOẢN KHÓA --}}
-    <div class="col-6 col-lg">
-        <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-            <div class="stat-top d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tài khoản</span>
-                @if($inactiveUsers > 0)
-                    <span style="background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $inactiveUsers }} bị khóa</span>
-                @else
-                    <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Không có</span>
-                @endif
-            </div>
-            <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($inactiveUsers) }}</div>
-            <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản bị khóa</div>
-        </div>
-    </div>
-
 </div>
 
 {{-- TIN ĐĂNG CHỜ DUYỆT --}}

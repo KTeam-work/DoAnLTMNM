@@ -66,87 +66,30 @@
     $unlockRequestedCount = \App\Models\User::where('status', 'inactive')->whereNotNull('unlock_requested_at')->count();
 @endphp
 
-{{-- CARDS THỐNG KÊ & BỘ LỌC --}}
-<div class="row g-3 mb-4">
-
-    {{-- TẤT CẢ NGƯỜI DÙNG --}}
-    <div class="col-6 col-lg">
-        <a href="{{ route('admin.users') }}" class="text-decoration-none">
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người dùng</span>
-                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Hệ thống</span>
-                </div>
-                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($allUsersCount) }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Toàn bộ tài khoản</div>
-            </div>
+{{-- BỘ LỌC DẠNG TAB PHÂN ĐOẠN --}}
+<div class="segmented-filter-wrapper mb-4">
+    <div class="segmented-filter-bar" role="tablist">
+        <a href="{{ route('admin.users') }}" class="segmented-tab {{ ($role === '' && $status === '') ? 'active' : '' }}">
+            <span class="tab-label">Tất cả</span>
+            <span class="tab-count">{{ $allUsersCount }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['role' => 'owner']) }}" class="segmented-tab {{ $role === 'owner' ? 'active' : '' }}">
+            <span class="tab-label">Chủ trọ</span>
+            <span class="tab-count">{{ $ownerCount }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['role' => 'tenant']) }}" class="segmented-tab {{ $role === 'tenant' ? 'active' : '' }}">
+            <span class="tab-label">Người thuê</span>
+            <span class="tab-count">{{ $tenantCount }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="segmented-tab {{ $status === 'inactive' ? 'active' : '' }}">
+            <span class="tab-label">Bị khóa</span>
+            <span class="tab-count">{{ $inactiveCount }}</span>
+        </a>
+        <a href="{{ route('admin.users', ['status' => 'unlock_requested']) }}" class="segmented-tab {{ $status === 'unlock_requested' ? 'active' : '' }}">
+            <span class="tab-label">Xin mở khóa</span>
+            <span class="tab-count">{{ $unlockRequestedCount }}</span>
         </a>
     </div>
-
-    {{-- CHỦ TRỌ --}}
-    <div class="col-6 col-lg">
-        <a href="{{ route('admin.users', ['role' => 'owner']) }}" class="text-decoration-none">
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chủ trọ</span>
-                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Đối tác</span>
-                </div>
-                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($ownerCount) }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản chủ trọ</div>
-            </div>
-        </a>
-    </div>
-
-    {{-- NGƯỜI THUÊ --}}
-    <div class="col-6 col-lg">
-        <a href="{{ route('admin.users', ['role' => 'tenant']) }}" class="text-decoration-none">
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người thuê</span>
-                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Khách thuê</span>
-                </div>
-                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($tenantCount) }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản khách thuê</div>
-            </div>
-        </a>
-    </div>
-
-    {{-- BỊ KHÓA --}}
-    <div class="col-6 col-lg">
-        <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="text-decoration-none">
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tài khoản</span>
-                    @if($inactiveCount > 0)
-                        <span style="background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $inactiveCount }} bị khóa</span>
-                    @else
-                        <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Không có</span>
-                    @endif
-                </div>
-                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($inactiveCount) }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản bị khóa</div>
-            </div>
-        </a>
-    </div>
-
-    {{-- YÊU CẦU MỞ KHÓA --}}
-    <div class="col-6 col-lg">
-        <a href="{{ route('admin.users', ['status' => 'unlock_requested']) }}" class="text-decoration-none">
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Mở khóa</span>
-                    @if($unlockRequestedCount > 0)
-                        <span style="background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $unlockRequestedCount }} yêu cầu</span>
-                    @else
-                        <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Không có</span>
-                    @endif
-                </div>
-                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($unlockRequestedCount) }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Đơn xin mở khóa</div>
-            </div>
-        </a>
-    </div>
-
 </div>
 
 <div class="tv1-panel">

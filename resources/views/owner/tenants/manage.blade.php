@@ -4,7 +4,7 @@
 @section('title', 'Quản lý người thuê | Trọ Ơi')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/tv3/tenants.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/tenants.css') }}?v={{ file_exists(public_path('css/tv3/tenants.css')) ? filemtime(public_path('css/tv3/tenants.css')) : time() }}">
 @endpush
 
 @section('content')

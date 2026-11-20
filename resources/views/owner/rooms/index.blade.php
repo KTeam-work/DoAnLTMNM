@@ -23,34 +23,38 @@
         </div>
 
         <!-- STATS CARDS -->
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-icon">🏠</div>
-                <div>
-                    <div class="stat-label">Tổng số phòng</div>
-                    <div class="stat-number" id="totalRooms">00</div>
+        <div class="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tổng phòng</span>
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Tất cả</span>
                 </div>
+                <div class="stat-number" id="totalRooms" style="font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 4px 0;">00</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng số phòng quản lý</div>
             </div>
-            <div class="stat">
-                <div class="stat-icon">✓</div>
-                <div>
-                    <div class="stat-label">Còn trống</div>
-                    <div class="stat-number" id="availableRooms">00</div>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Còn trống</span>
+                    <span style="background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Sẵn sàng</span>
                 </div>
+                <div class="stat-number" id="availableRooms" style="font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 4px 0;">00</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Phòng sẵn sàng đón khách</div>
             </div>
-            <div class="stat">
-                <div class="stat-icon">👤</div>
-                <div>
-                    <div class="stat-label">Đang thuê</div>
-                    <div class="stat-number" id="rentedRooms">00</div>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Đang thuê</span>
+                    <span style="background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Có khách</span>
                 </div>
+                <div class="stat-number" id="rentedRooms" style="font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 4px 0;">00</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Phòng có khách đang ở</div>
             </div>
-            <div class="stat">
-                <div class="stat-icon">🔧</div>
-                <div>
-                    <div class="stat-label">Bảo trì</div>
-                    <div class="stat-number" id="maintenanceRooms">00</div>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Bảo trì</span>
+                    <span style="background: #fef2f2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Cần sửa</span>
                 </div>
+                <div class="stat-number" id="maintenanceRooms" style="font-size: 28px; font-weight: 800; color: #dc3545; line-height: 1.2; margin: 12px 0 4px 0;">00</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Đang bảo trì / sửa chữa</div>
             </div>
         </div>
 
@@ -287,12 +291,12 @@
                         <div class="form-group full">
                             <label class="form-label">Tiện ích</label>
                             <div class="amenity-checks">
-                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="❄ Máy lạnh"> ❄ Máy lạnh</label>
-                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="📶 Wifi"> 📶 Wifi</label>
-                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🛏 Nội thất"> 🛏 Nội thất</label>
-                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🌅 Ban công"> 🌅 Ban công</label>
-                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🧺 Máy giặt"> 🧺 Máy giặt</label>
-                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🅿️ Chỗ để xe"> 🅿️ Chỗ để xe</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="❄ Máy lạnh"> Máy lạnh</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="📶 Wifi"> Wifi</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🛏 Nội thất"> Nội thất</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🌅 Ban công"> Ban công</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🧺 Máy giặt"> Máy giặt</label>
+                                <label class="amenity-check"><input type="checkbox" name="editAmenities" value="🅿️ Chỗ để xe"> Chỗ để xe</label>
                             </div>
                         </div>
                     </div>
@@ -312,7 +316,6 @@
         <div class="modal-box add-modal-box">
             <div class="modal-header">
                 <div class="modal-title-area">
-                    <div class="modal-title-icon">➕</div>
                     <div>
                         <h2 class="modal-title">Thêm phòng mới</h2>
                         <p class="modal-subtitle">Tạo phòng trọ mới vào danh sách quản lý</p>
@@ -366,12 +369,12 @@
                         <div class="form-group full">
                             <label class="form-label">Tiện ích chọn sẵn</label>
                             <div class="amenity-checks">
-                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="❄ Máy lạnh" checked> ❄ Máy lạnh</label>
-                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="📶 Wifi" checked> 📶 Wifi</label>
-                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🛏 Nội thất"> 🛏 Nội thất</label>
-                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🌅 Ban công"> 🌅 Ban công</label>
-                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🧺 Máy giặt"> 🧺 Máy giặt</label>
-                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🅿️ Chỗ để xe"> 🅿️ Chỗ để xe</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="❄ Máy lạnh" checked> Máy lạnh</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="📶 Wifi" checked> Wifi</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🛏 Nội thất"> Nội thất</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🌅 Ban công"> Ban công</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🧺 Máy giặt"> Máy giặt</label>
+                                <label class="amenity-check"><input type="checkbox" name="addAmenities" value="🅿️ Chỗ để xe"> Chỗ để xe</label>
                             </div>
                         </div>
                     </div>

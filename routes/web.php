@@ -786,8 +786,8 @@ Route::middleware('auth')->group(function () {
         ->name('owner.notifications.read');
 });
 
-// Chat box
-Route::middleware(['auth', 'throttle:20,1'])->group(function () {
+// Chat box AI Trợ Ơi (Hỗ trợ cả khách chưa đăng nhập, người thuê, chủ trọ và admin)
+Route::middleware(['throttle:30,1'])->group(function () {
 
     Route::get('/chatbot', [
         ChatbotController::class,

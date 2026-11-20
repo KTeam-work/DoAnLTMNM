@@ -1471,3 +1471,74 @@ a {
 .text-slate-300 { color: #cbd5e1 !important; }
 .text-slate-400 { color: #94a3b8 !important; }
 .text-slate-600 { color: #475569 !important; }
+
+/* ========================================
+   SEGMENTED FILTER TABS (FULL CHIỀU NGANG, HIỆN ĐẠI)
+======================================== */
+.segmented-filter-wrapper {
+    display: flex !important;
+    width: 100% !important;
+    margin-bottom: 1.5rem !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+}
+.segmented-filter-bar {
+    display: flex !important;
+    width: 100% !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px !important;
+    background: #f1ede6 !important;
+    border: 1px solid #e2ddd4 !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+.segmented-tab {
+    flex: 1 1 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 10px 16px !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 8px !important;
+    color: #555c58 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.18s ease !important;
+    text-decoration: none !important;
+    user-select: none !important;
+    text-align: center !important;
+}
+.segmented-tab:hover {
+    background: rgba(255, 255, 255, 0.65) !important;
+    color: #1a221e !important;
+}
+.segmented-tab.active {
+    background: #ffffff !important;
+    color: #162c21 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+}
+.segmented-tab .tab-count {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 22px !important;
+    height: 22px !important;
+    padding: 0 7px !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    background: #ded7cb !important;
+    color: #525955 !important;
+    line-height: 1 !important;
+    transition: all 0.18s ease !important;
+}
+.segmented-tab.active .tab-count {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+}
