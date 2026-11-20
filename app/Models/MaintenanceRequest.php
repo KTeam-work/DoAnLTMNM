@@ -28,4 +28,9 @@ class MaintenanceRequest extends Model
     {
         return $this->belongsTo(Contract::class);
     }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
 }

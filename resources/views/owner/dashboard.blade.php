@@ -20,50 +20,52 @@
             </div>
 
             <a class="btn-owner" href="{{ route('owner.rooms.index') }}">
-                ＋ Quản lý phòng
+                + Quản lý phòng
             </a>
         </div>
 
         {{-- THỐNG KÊ --}}
         <div class="stats-grid">
             {{-- Tổng số phòng --}}
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-icon blue">🏠</div>
-                    <span class="stat-trend">Phòng trọ</span>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Phòng trọ</span>
+                    <span class="stat-trend" style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Quản lý</span>
                 </div>
-                <div class="stat-value">{{ $totalRooms }}</div>
-                <div class="stat-label">Tổng số phòng quản lý</div>
+                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ $totalRooms }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng số phòng quản lý</div>
             </div>
 
             {{-- Phòng đang thuê --}}
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-icon green">👥</div>
-                    <span class="stat-trend">Đang thuê</span>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Đang thuê</span>
+                    <span class="stat-trend" style="background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Có khách</span>
                 </div>
-                <div class="stat-value">{{ $rentedRooms }}</div>
-                <div class="stat-label">Phòng có khách đang ở</div>
+                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ $rentedRooms }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Phòng có khách đang ở</div>
             </div>
 
             {{-- Phòng còn trống --}}
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-icon yellow">🔑</div>
-                    <span class="stat-trend {{ $availableRooms > 0 ? 'warning' : 'muted' }}">Còn trống</span>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Còn trống</span>
+                    <span class="stat-trend" style="background: {{ $availableRooms > 0 ? '#fef3c7' : '#f1f5f9' }}; color: {{ $availableRooms > 0 ? '#b45309' : '#64748b' }}; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">
+                        {{ $availableRooms > 0 ? $availableRooms . ' phòng' : 'Hết phòng' }}
+                    </span>
                 </div>
-                <div class="stat-value">{{ $availableRooms }}</div>
-                <div class="stat-label">Phòng sẵn sàng đón khách</div>
+                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ $availableRooms }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Phòng sẵn sàng đón khách</div>
             </div>
 
             {{-- Doanh thu tháng này --}}
-            <div class="stat-card" style="border-left: 3px solid #16834b;">
-                <div class="stat-top">
-                    <div class="stat-icon gold">💰</div>
-                    <span class="stat-trend" style="color: #16834b;">Doanh thu</span>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border-left: 3px solid #16834b;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Doanh thu</span>
+                    <span class="stat-trend" style="background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Tháng này</span>
                 </div>
-                <div class="stat-value" style="color: #16834b;">{{ number_format((float) $monthlyRevenue, 0, ',', '.') }}đ</div>
-                <div class="stat-label">Tiền phòng đã thu trong tháng</div>
+                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #16834b; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format((float) $monthlyRevenue, 0, ',', '.') }}đ</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tiền phòng đã thu trong tháng</div>
             </div>
         </div>
 
@@ -151,7 +153,6 @@
                                     <tr>
                                         <td colspan="4">
                                             <div class="empty-state">
-                                                <div class="empty-state-icon">🚪</div>
                                                 <div class="cell-title">Chưa có phòng nào</div>
                                                 <div class="cell-sub">Hãy thêm phòng để dữ liệu hiển thị tại đây.</div>
                                             </div>
@@ -249,7 +250,6 @@
                                     <tr>
                                         <td colspan="3">
                                             <div class="empty-state">
-                                                <div class="empty-state-icon">📅</div>
                                                 <div class="cell-title">Chưa có lịch xem phòng</div>
                                                 <div class="cell-sub">Lịch hẹn mới sẽ hiển thị tại đây.</div>
                                             </div>

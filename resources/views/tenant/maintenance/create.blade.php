@@ -53,7 +53,7 @@
         <div class="col-md-6">
           <label class="form-label">Phòng tiếp nhận sự cố</label>
           <div class="form-control fw-bold text-dark d-flex align-items-center" style="background: #f0f0f0; opacity: 0.8;">
-            <span style="margin-right: 10px;">🏠</span> <span id="roomName">—</span>
+            <i class="bi bi-house me-2 text-muted"></i> <span id="roomName">—</span>
           </div>
         </div>
 
@@ -78,6 +78,14 @@
           </select>
         </div>
 
+        <div class="col-md-6">
+          <label class="form-label">Nguyên nhân sơ bộ <span class="text-muted fw-normal small">(Tự khai báo)</span></label>
+          <select name="damage_type" class="form-select fw-bold text-dark">
+            <option value="landlord" @selected(old('damage_type', 'landlord') === 'landlord')>Hao mòn tự nhiên / Thiết bị cũ tự hỏng</option>
+            <option value="tenant" @selected(old('damage_type') === 'tenant')>Do người thuê vô ý làm rơi/hỏng (Sẽ chịu chi phí)</option>
+          </select>
+        </div>
+
         <div class="col-12">
           <label class="form-label">Tiêu đề sự cố <span class="text-danger">*</span></label>
           <input type="text" name="title" class="form-control fw-bold" value="{{ old('title') }}" placeholder="VD: Điều hòa không mát, vòi nước bị rò rỉ..." required maxlength="200">
@@ -92,7 +100,7 @@
         <div class="col-12">
           <label class="form-label">Tài liệu đính kèm / Hình ảnh hiện trường (Tùy chọn)</label>
           <div class="upload-zone" id="uploadZone">
-            <div class="upload-icon">📁</div>
+            <div class="upload-icon"><i class="bi bi-cloud-arrow-up text-muted" style="font-size: 32px;"></i></div>
             <div>
               <div class="fw-bold text-dark" style="font-size: 15px;">Kéo thả file hoặc nhấn để tải lên</div>
               <div class="text-muted mt-1" style="font-size: 13px;" id="uploadHint">Hỗ trợ định dạng: JPG, PNG (Tối đa 10MB)</div>

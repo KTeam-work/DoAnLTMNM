@@ -72,13 +72,13 @@
     {{-- TẤT CẢ NGƯỜI DÙNG --}}
     <div class="col-6 col-lg">
         <a href="{{ route('admin.users') }}" class="text-decoration-none">
-            <div class="stat-card">
-                <div class="stat-top">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tất cả</span>
-                    <span class="badge-status new">Hệ thống</span>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người dùng</span>
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Hệ thống</span>
                 </div>
-                <div class="stat-value text-dark">{{ number_format($allUsersCount) }}</div>
-                <div class="stat-label">Toàn bộ tài khoản</div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($allUsersCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Toàn bộ tài khoản</div>
             </div>
         </a>
     </div>
@@ -86,13 +86,13 @@
     {{-- CHỦ TRỌ --}}
     <div class="col-6 col-lg">
         <a href="{{ route('admin.users', ['role' => 'owner']) }}" class="text-decoration-none">
-            <div class="stat-card">
-                <div class="stat-top">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
                     <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chủ trọ</span>
-                    <span class="badge-status approved">Đối tác</span>
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Đối tác</span>
                 </div>
-                <div class="stat-value text-dark">{{ number_format($ownerCount) }}</div>
-                <div class="stat-label">Tài khoản chủ trọ</div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($ownerCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản chủ trọ</div>
             </div>
         </a>
     </div>
@@ -100,13 +100,13 @@
     {{-- NGƯỜI THUÊ --}}
     <div class="col-6 col-lg">
         <a href="{{ route('admin.users', ['role' => 'tenant']) }}" class="text-decoration-none">
-            <div class="stat-card">
-                <div class="stat-top">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
                     <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người thuê</span>
-                    <span class="badge-status vacant">Khách thuê</span>
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Khách thuê</span>
                 </div>
-                <div class="stat-value text-dark">{{ number_format($tenantCount) }}</div>
-                <div class="stat-label">Tài khoản khách thuê</div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($tenantCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản khách thuê</div>
             </div>
         </a>
     </div>
@@ -114,13 +114,17 @@
     {{-- BỊ KHÓA --}}
     <div class="col-6 col-lg">
         <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="text-decoration-none">
-            <div class="stat-card">
-                <div class="stat-top">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Bị khóa</span>
-                    <span class="badge-status new">Tài khoản</span>
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tài khoản</span>
+                    @if($inactiveCount > 0)
+                        <span style="background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $inactiveCount }} bị khóa</span>
+                    @else
+                        <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Không có</span>
+                    @endif
                 </div>
-                <div class="stat-value text-dark">{{ number_format($inactiveCount) }}</div>
-                <div class="stat-label">Tài khoản bị khóa</div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($inactiveCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản bị khóa</div>
             </div>
         </a>
     </div>
@@ -128,13 +132,17 @@
     {{-- YÊU CẦU MỞ KHÓA --}}
     <div class="col-6 col-lg">
         <a href="{{ route('admin.users', ['status' => 'unlock_requested']) }}" class="text-decoration-none">
-            <div class="stat-card">
-                <div class="stat-top">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
                     <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Mở khóa</span>
-                    <span class="badge-status new">Yêu cầu</span>
+                    @if($unlockRequestedCount > 0)
+                        <span style="background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $unlockRequestedCount }} yêu cầu</span>
+                    @else
+                        <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Không có</span>
+                    @endif
                 </div>
-                <div class="stat-value text-dark">{{ number_format($unlockRequestedCount) }}</div>
-                <div class="stat-label">Đơn xin mở khóa</div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($unlockRequestedCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Đơn xin mở khóa</div>
             </div>
         </a>
     </div>

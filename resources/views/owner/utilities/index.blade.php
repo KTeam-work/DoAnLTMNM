@@ -18,7 +18,7 @@
     </div>
     <div class="d-flex gap-2">
       <button class="btn-outline-brand">Xuất Excel</button>
-      <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" >+ Ghi chỉ số mới</a>
+      <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" >Ghi chỉ số mới</a>
     </div>
   </div>
 
@@ -36,46 +36,52 @@
   @endphp
   <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-icon">🏠</div>
-          <span class="stat-trend">Phòng trọ</span>
+      <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div class="stat-top d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Phòng trọ</span>
+          <span class="stat-trend" style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Hệ thống</span>
         </div>
-        <div class="stat-value">{{ $totalRooms }}</div>
-        <div class="stat-label">Tổng số phòng</div>
+        <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ $totalRooms }}</div>
+        <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng số phòng</div>
       </div>
     </div>
     
     <div class="col-6 col-lg-3">
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-icon green">⚡</div>
-          <span class="stat-trend {{ $currentMonth && ($totalRooms - $doneCount > 0) ? 'down' : '' }}">{{ $currentMonth ? 'Còn ' . max(0, $totalRooms - $doneCount) . ' phòng' : 'Đã chốt' }}</span>
+      <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div class="stat-top d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chốt chỉ số</span>
+          <span class="stat-trend" style="background: {{ $currentMonth && ($totalRooms - $doneCount > 0) ? '#fef3c7' : '#f0fdf4' }}; color: {{ $currentMonth && ($totalRooms - $doneCount > 0) ? '#b45309' : '#16a34a' }}; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">
+            {{ $currentMonth ? 'Còn ' . max(0, $totalRooms - $doneCount) . ' phòng' : 'Đã chốt' }}
+          </span>
         </div>
-        <div class="stat-value">{{ $doneCount }} @if($currentMonth)<small>/ {{ $totalRooms }}</small>@endif</div>
-        <div class="stat-label">{{ $currentMonth ? 'Phòng đã chốt chỉ số' : 'Tổng bản ghi điện nước' }}</div>
+        <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">
+          {{ $doneCount }} @if($currentMonth)<small style="font-size: 16px; color: #64748b; font-weight: 600;">/ {{ $totalRooms }}</small>@endif
+        </div>
+        <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">{{ $currentMonth ? 'Phòng đã chốt chỉ số' : 'Tổng bản ghi điện nước' }}</div>
       </div>
     </div>
 
     <div class="col-6 col-lg-3">
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-icon blue">💧</div>
-          <span class="stat-trend">Kỳ {{ $currentMonth ? $currentMonth->format('m/Y') : 'Toàn bộ' }}</span>
+      <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div class="stat-top d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tiêu thụ</span>
+          <span class="stat-trend" style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">
+            Kỳ {{ $currentMonth ? $currentMonth->format('m/Y') : 'Toàn bộ' }}
+          </span>
         </div>
-        <div class="stat-value">{{ number_format($totalKwh + $totalM3) }}</div>
-        <div class="stat-label">Tổng tiêu thụ (kWh + m³)</div>
+        <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($totalKwh + $totalM3) }}</div>
+        <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng tiêu thụ (kWh + m³)</div>
       </div>
     </div>
 
     <div class="col-6 col-lg-3">
-      <div class="stat-card" style="border-left: 3px solid #16834b;">
-        <div class="stat-top">
-          <div class="stat-icon" style="background: #eafaf1; color: #16834b;">💰</div>
-          <span class="stat-trend" style="color: #16834b;">Dự kiến</span>
+      <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border-left: 3px solid #16834b;">
+        <div class="stat-top d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tiền điện nước</span>
+          <span class="stat-trend" style="background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Dự kiến</span>
         </div>
-        <div class="stat-value" style="color: #16834b;">{{ number_format($totalMoney) }}đ</div>
-        <div class="stat-label">Tổng tiền điện nước</div>
+        <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #16834b; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($totalMoney) }}đ</div>
+        <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng tiền điện nước</div>
       </div>
     </div>
   </div>
@@ -172,8 +178,8 @@
               <div class="mt-1">Mới: <strong>{{ number_format((float)$reading->water_new) }}</strong></div>
             </td>
             <td>
-              <div style="font-weight: 700; color: var(--green-dark);">⚡ {{ number_format($eUse) }} kWh</div>
-              <div class="mt-1" style="font-weight: 700; color: var(--green-dark);">💧 {{ number_format($wUse) }} m³</div>
+              <div>Điện: <strong>{{ number_format($eUse) }}</strong> kWh</div>
+              <div class="mt-1">Nước: <strong>{{ number_format($wUse) }}</strong> m³</div>
             </td>
             <td>
               <div>Điện: {{ number_format($eMoney) }}đ</div>
@@ -204,7 +210,7 @@
                 </div>
               @else
                 <div class="mt-2">
-                  <a href="{{ route('owner.utilities.create') }}" class="btn-brand text-decoration-none" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">+ Ghi chỉ số mới ngay</a>
+                  <a href="{{ route('owner.utilities.create') }}" class="btn-brand text-decoration-none" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">Ghi chỉ số mới ngay</a>
                 </div>
               @endif
             </td>
