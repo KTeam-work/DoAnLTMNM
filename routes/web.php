@@ -173,10 +173,10 @@ Route::middleware('auth')->group(function () {
                     $resendService->sendAccountLockedEmail($user->email, $user->name, $unlockUrl);
                 }
             } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('Lỗi gửi email khóa tài khoản qua Resend: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email khóa tài khoản: ' . $e->getMessage());
             }
 
-            return back()->with('success', "Đã khóa tài khoản {$user->name}. Hệ thống đã gửi email thông báo kèm đường dẫn xin mở khóa tới {$user->email}.");
+            return back()->with('success', "Đã khóa tài khoản {$user->name} thành công.");
         } else {
             // MỞ KHÓA TÀI KHOẢN: Khôi phục trạng thái active và gửi Gmail kích hoạt
             $user->update([
@@ -191,10 +191,10 @@ Route::middleware('auth')->group(function () {
                     $resendService->sendAccountUnlockedEmail($user->email, $user->name);
                 }
             } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('Lỗi gửi email mở khóa tài khoản qua Resend: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email mở khóa tài khoản: ' . $e->getMessage());
             }
 
-            return back()->with('success', "Đã mở khóa tài khoản {$user->name} thành công và gửi thông báo kích hoạt tới {$user->email}.");
+            return back()->with('success', "Đã mở khóa tài khoản {$user->name} thành công.");
         }
     })->name('admin.users.update-status');
 
@@ -508,6 +508,11 @@ Route::post(
     '/owner/contracts/{contract}/members',
     [OwnerContractController::class, 'manageMembers']
 )->name('owner.contracts.members');
+
+Route::post(
+    '/owner/contracts/{contract}/activate',
+    [OwnerContractController::class, 'activate']
+)->name('owner.contracts.activate');
 
 Route::put(
     '/owner/contracts/{contract}/initial-utilities',

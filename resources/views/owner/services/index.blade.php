@@ -17,7 +17,7 @@
                 <h1 class="page-title">Quản lý dịch vụ</h1>
                 <div class="page-desc">Quản lý các dịch vụ và đơn giá áp dụng cho nhà trọ</div>
             </div>
-            <a href="{{ route('owner.services.create') }}" class="btn-brand">
+            <a href="{{ route('owner.services.create', ['property_id' => $selectedProperty?->id]) }}" class="btn-brand">
                 <span>＋</span> Thêm dịch vụ
             </a>
         </div>
@@ -27,15 +27,24 @@
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <div class="property-label">Nhà trọ đang xem</div>
-                    <div class="property-name">Nhà trọ Q.7</div>
-                    <div class="property-address">123 Nguyễn Thị Thập, Quận 7, TP. Hồ Chí Minh</div>
+                    @if($selectedProperty)
+                        <div class="property-name">{{ $selectedProperty->name }}</div>
+                        <div class="property-address">{{ $selectedProperty->address }}</div>
+                    @else
+                        <div class="property-name">Chưa có nhà trọ nào</div>
+                        <div class="property-address">Vui lòng thêm bất động sản / nhà trọ trước khi cấu hình dịch vụ</div>
+                    @endif
                 </div>
-                <div class="col-md-5">
-                    <select class="property-select">
-                        <option>Nhà trọ Q.7</option>
-                        <option>Chung cư mini Thủ Đức</option>
-                        <option>Nhà trọ Bình Thạnh</option>
-                    </select>
+                <div class="col-md-5 text-md-end">
+                    @if($properties->isNotEmpty())
+                        <select class="property-select" onchange="if(this.value) window.location.href='{{ route('owner.services.index') }}?property_id=' + this.value">
+                            @foreach($properties as $prop)
+                                <option value="{{ $prop->id }}" @selected($selectedProperty && $selectedProperty->id === $prop->id)>
+                                    {{ $prop->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
                 </div>
             </div>
         </div>

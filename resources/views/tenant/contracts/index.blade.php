@@ -69,7 +69,6 @@
             
             <!-- SEARCH INPUT -->
             <div class="search-box-custom">
-                <span>🔎</span>
                 <input type="text" id="contractSearchInput" placeholder="Tìm mã HĐ, tên phòng, địa chỉ...">
             </div>
         </div>

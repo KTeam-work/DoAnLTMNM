@@ -183,7 +183,6 @@
     <div class="contract-header-card">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span style="font-size: 24px;">📄</span>
                 <h1 class="contract-header-title">
                     Hợp đồng <span style="color: #0e5b42;">#{{ $contract->contract_code }}</span>
                 </h1>
@@ -196,9 +195,17 @@
             </div>
         </div>
 
-        <div class="action-buttons-group">
+        <div class="action-buttons-group d-flex align-items-center gap-2">
+            @if($contract->status === 'draft')
+                <form method="POST" action="{{ route('owner.contracts.activate', $contract) }}" class="d-inline" onsubmit="return confirm('Xác nhận kích hoạt hợp đồng #{{ $contract->contract_code }}? Phòng sẽ được chuyển sang trạng thái đang thuê.')">
+                    @csrf
+                    <button type="submit" class="btn btn-success fw-medium px-3 py-2 shadow-sm rounded-pill">
+                        Kích hoạt hợp đồng
+                    </button>
+                </form>
+            @endif
             <button type="button" class="btn-outline-brand d-inline-flex align-items-center gap-1" onclick="window.print()">
-                🖨️ In hợp đồng
+                In hợp đồng
             </button>
         </div>
     </div>
@@ -210,7 +217,7 @@
             {{-- 1. THÔNG TIN PHÒNG & GIÁ THUÊ --}}
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h2 class="panel-card-title">🏠 Thông tin phòng & Chi phí thuê</h2>
+                    <h2 class="panel-card-title">Thông tin phòng & Chi phí thuê</h2>
                 </div>
                 <div class="info-grid-custom">
                     <div>
@@ -254,13 +261,13 @@
             {{-- 2. CHỐT SỐ ĐIỆN NƯỚC BAN ĐẦU --}}
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h2 class="panel-card-title">⚡ Chỉ số điện, nước lúc bàn giao</h2>
+                    <h2 class="panel-card-title">Chỉ số điện, nước lúc bàn giao</h2>
                 </div>
                 <div class="p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="meter-box">
-                                <div class="meter-icon elec">⚡</div>
+                                <div class="meter-icon elec">Đ</div>
                                 <div>
                                     <div class="meter-lbl">Số điện ban đầu</div>
                                     <div class="meter-val">{{ number_format((float)$contract->initial_electricity_reading) }} <span class="fs-6 fw-normal text-muted">kWh</span></div>
@@ -269,7 +276,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="meter-box">
-                                <div class="meter-icon water">💧</div>
+                                <div class="meter-icon water">N</div>
                                 <div>
                                     <div class="meter-lbl">Số nước ban đầu</div>
                                     <div class="meter-val">{{ number_format((float)$contract->initial_water_reading) }} <span class="fs-6 fw-normal text-muted">m³</span></div>
@@ -283,7 +290,7 @@
             {{-- 3. DỊCH VỤ CỐ ĐỊNH KÈM HỢP ĐỒNG --}}
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h2 class="panel-card-title">📦 Dịch vụ sử dụng cố định</h2>
+                    <h2 class="panel-card-title">Dịch vụ sử dụng cố định</h2>
                 </div>
                 <div class="service-table-wrap">
                     @if($contract->services && $contract->services->isNotEmpty())
@@ -333,7 +340,7 @@
             {{-- 4. ĐIỀU KHOẢN HỢP ĐỒNG --}}
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h2 class="panel-card-title">📜 Điều khoản hợp đồng</h2>
+                    <h2 class="panel-card-title">Điều khoản hợp đồng</h2>
                 </div>
                 <div class="p-4">
                     @if(!empty($contract->terms))
@@ -382,7 +389,7 @@
             {{-- THÔNG TIN NGƯỜI THUÊ (CHỦ HỢP ĐỒNG) --}}
             <div class="panel-card">
                 <div class="panel-card-head">
-                    <h2 class="panel-card-title">👤 Đại diện thuê (Chủ HĐ)</h2>
+                    <h2 class="panel-card-title">Đại diện thuê (Chủ HĐ)</h2>
                 </div>
                 <div class="owner-box-content">
                     <div class="person-item mb-3">
@@ -405,7 +412,7 @@
 
                     @if(!empty($contract->tenant->phone))
                         <a href="tel:{{ $contract->tenant->phone }}" class="btn-call-owner">
-                            📞 Gọi điện cho người thuê
+                            Gọi điện cho người thuê
                         </a>
                     @endif
                 </div>
@@ -414,7 +421,7 @@
             {{-- DANH SÁCH NGƯỜI Ở CÙNG --}}
             <div class="panel-card">
                 <div class="panel-card-head d-flex justify-content-between align-items-center">
-                    <h2 class="panel-card-title">👥 Người ở cùng</h2>
+                    <h2 class="panel-card-title">Người ở cùng</h2>
                     <span class="badge bg-light text-dark border">
                         {{ 1 + $contract->members->count() }}/{{ $contract->room->max_people ?? '?' }} người
                     </span>
@@ -445,8 +452,8 @@
                                     @csrf
                                     <input type="hidden" name="action" value="remove">
                                     <input type="hidden" name="member_id" value="{{ $member->id }}">
-                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Xóa người ở cùng" onclick="return confirm('Xác nhận xóa người ở cùng này?')">
-                                        🗑️
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 12px;" title="Xóa người ở cùng" onclick="return confirm('Xác nhận xóa người ở cùng này?')">
+                                        Xóa
                                     </button>
                                 </form>
                             @endif

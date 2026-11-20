@@ -84,7 +84,6 @@
 
     <div class="stats-summary">
         <article class="stats-card stats-card-users">
-            <div class="stats-card-icon" aria-hidden="true">👥</div>
             <div class="stats-card-info">
                 <p>Tổng người dùng</p>
                 <h2>{{ number_format($totalUsers) }}</h2>
@@ -93,7 +92,6 @@
         </article>
 
         <article class="stats-card stats-card-posts">
-            <div class="stats-card-icon" aria-hidden="true">📋</div>
             <div class="stats-card-info">
                 <p>Tổng tin đăng</p>
                 <h2>{{ number_format($totalPosts) }}</h2>
@@ -102,7 +100,6 @@
         </article>
 
         <article class="stats-card stats-card-rooms">
-            <div class="stats-card-icon" aria-hidden="true">🏠</div>
             <div class="stats-card-info">
                 <p>Tổng phòng</p>
                 <h2>{{ number_format($totalRooms) }}</h2>
@@ -111,7 +108,6 @@
         </article>
 
         <article class="stats-card stats-card-inactive">
-            <div class="stats-card-icon" aria-hidden="true">⏸</div>
             <div class="stats-card-info">
                 <p>Tài khoản không hoạt động</p>
                 <h2>{{ number_format($inactiveUsers) }}</h2>

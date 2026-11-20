@@ -58,29 +58,87 @@
     </div>
 @endif
 
-<div class="segmented-filter-wrapper mb-4">
-    <div class="segmented-filter-bar" role="tablist">
-        <a href="{{ route('admin.users') }}" class="segmented-tab {{ empty($role) && empty($status) ? 'active' : '' }}">
-            <span class="tab-label">Tất cả</span>
-            <span class="tab-count">{{ \App\Models\User::count() }}</span>
-        </a>
-        <a href="{{ route('admin.users', ['role' => 'owner']) }}" class="segmented-tab {{ $role === 'owner' ? 'active' : '' }}">
-            <span class="tab-label">Chủ trọ</span>
-            <span class="tab-count">{{ \App\Models\User::where('role', 'owner')->count() }}</span>
-        </a>
-        <a href="{{ route('admin.users', ['role' => 'tenant']) }}" class="segmented-tab {{ $role === 'tenant' ? 'active' : '' }}">
-            <span class="tab-label">Người thuê</span>
-            <span class="tab-count">{{ \App\Models\User::where('role', 'tenant')->count() }}</span>
-        </a>
-        <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="segmented-tab {{ $status === 'inactive' ? 'active' : '' }}">
-            <span class="tab-label">Bị khóa</span>
-            <span class="tab-count">{{ \App\Models\User::where('status', 'inactive')->count() }}</span>
-        </a>
-        <a href="{{ route('admin.users', ['status' => 'unlock_requested']) }}" class="segmented-tab {{ $status === 'unlock_requested' ? 'active' : '' }}">
-            <span class="tab-label">Yêu cầu mở khóa</span>
-            <span class="tab-count">{{ $unlockRequestedCount }}</span>
+@php
+    $allUsersCount = \App\Models\User::count();
+    $ownerCount = \App\Models\User::where('role', 'owner')->count();
+    $tenantCount = \App\Models\User::where('role', 'tenant')->count();
+    $inactiveCount = \App\Models\User::where('status', 'inactive')->count();
+    $unlockRequestedCount = \App\Models\User::where('status', 'inactive')->whereNotNull('unlock_requested_at')->count();
+@endphp
+
+{{-- CARDS THỐNG KÊ & BỘ LỌC --}}
+<div class="row g-3 mb-4">
+
+    {{-- TẤT CẢ NGƯỜI DÙNG --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users') }}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tất cả</span>
+                    <span class="badge-status new">Hệ thống</span>
+                </div>
+                <div class="stat-value text-dark">{{ number_format($allUsersCount) }}</div>
+                <div class="stat-label">Toàn bộ tài khoản</div>
+            </div>
         </a>
     </div>
+
+    {{-- CHỦ TRỌ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['role' => 'owner']) }}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chủ trọ</span>
+                    <span class="badge-status approved">Đối tác</span>
+                </div>
+                <div class="stat-value text-dark">{{ number_format($ownerCount) }}</div>
+                <div class="stat-label">Tài khoản chủ trọ</div>
+            </div>
+        </a>
+    </div>
+
+    {{-- NGƯỜI THUÊ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['role' => 'tenant']) }}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người thuê</span>
+                    <span class="badge-status vacant">Khách thuê</span>
+                </div>
+                <div class="stat-value text-dark">{{ number_format($tenantCount) }}</div>
+                <div class="stat-label">Tài khoản khách thuê</div>
+            </div>
+        </a>
+    </div>
+
+    {{-- BỊ KHÓA --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Bị khóa</span>
+                    <span class="badge-status new">Tài khoản</span>
+                </div>
+                <div class="stat-value text-dark">{{ number_format($inactiveCount) }}</div>
+                <div class="stat-label">Tài khoản bị khóa</div>
+            </div>
+        </a>
+    </div>
+
+    {{-- YÊU CẦU MỞ KHÓA --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['status' => 'unlock_requested']) }}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Mở khóa</span>
+                    <span class="badge-status new">Yêu cầu</span>
+                </div>
+                <div class="stat-value text-dark">{{ number_format($unlockRequestedCount) }}</div>
+                <div class="stat-label">Đơn xin mở khóa</div>
+            </div>
+        </a>
+    </div>
+
 </div>
 
 <div class="tv1-panel">
@@ -149,9 +207,11 @@
                         </td>
                         <td>
                             @if ($user->status === 'active')
-                                <span class="tv1-status is-active">Hoạt động</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 fw-semibold" style="font-size: 11.5px; border-radius: 6px;">
+                                    Hoạt động
+                                </span>
                             @elseif ($user->unlock_requested_at)
-                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning py-1 px-2 fw-bold" style="font-size: 11px; color: #b45309 !important;">
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2 fw-bold" style="font-size: 11px; border-radius: 6px;">
                                     Chờ mở khóa
                                 </span>
                                 <div class="text-muted mt-1" style="font-size: 10.5px;">
@@ -163,7 +223,9 @@
                                     </div>
                                 @endif
                             @else
-                                <span class="tv1-status is-inactive">Bị khóa</span>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2 fw-semibold" style="font-size: 11.5px; border-radius: 6px;">
+                                    Đã khóa
+                                </span>
                             @endif
                         </td>
                         <td>{{ $user->created_at?->format('d/m/Y') ?? '—' }}</td>
@@ -175,16 +237,28 @@
                                     @csrf
                                     @method('PATCH')
                                     @if ($user->status === 'active')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận KHÓA tài khoản {{ $user->name }} ({{ $user->email }})?\nHệ thống sẽ gửi email thông báo kèm liên kết xin mở khóa cho người dùng.')" title="Khóa tài khoản này">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger py-1 px-3"
+                                                style="font-size: 11.5px; border-radius: 8px;"
+                                                onclick="return confirm('Xác nhận KHÓA tài khoản {{ $user->name }}?')"
+                                                title="Tài khoản đang hoạt động. Nhấn để khóa">
                                             Khóa
                                         </button>
                                     @elseif ($user->unlock_requested_at)
-                                        <button type="submit" class="btn btn-sm btn-success py-1 px-2 fw-bold" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận DUYỆT MỞ KHÓA cho tài khoản {{ $user->name }} ({{ $user->email }})?\nHệ thống sẽ kích hoạt lại tài khoản và gửi email thông báo cho người dùng.')" title="Duyệt mở khóa">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-warning text-dark py-1 px-3 fw-bold"
+                                                style="font-size: 11.5px; border-radius: 8px;"
+                                                onclick="return confirm('Xác nhận DUYỆT MỞ KHÓA cho tài khoản {{ $user->name }}?')"
+                                                title="Người dùng có đơn xin mở khóa. Nhấn để duyệt mở khóa">
                                             Duyệt mở khóa
                                         </button>
                                     @else
-                                        <button type="submit" class="btn btn-sm btn-outline-success py-1 px-2" style="font-size: 11.5px; border-radius: 8px;" onclick="return confirm('Xác nhận MỞ KHÓA cho tài khoản {{ $user->name }} ({{ $user->email }})?\nHệ thống sẽ gửi email thông báo cho người dùng.')" title="Mở khóa tài khoản này">
-                                            Mở khóa
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger py-1 px-3 fw-semibold"
+                                                style="font-size: 11.5px; border-radius: 8px;"
+                                                onclick="return confirm('Tài khoản {{ $user->name }} đang bị khóa. Bạn có chắc muốn MỞ KHÓA lại?')"
+                                                title="Tài khoản đang bị khóa. Nhấn vào để mở khóa">
+                                            Đã khóa
                                         </button>
                                     @endif
                                 </form>

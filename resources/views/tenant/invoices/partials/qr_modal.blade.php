@@ -69,7 +69,7 @@
                     <strong class="font-monospace fs-5 text-primary" id="modalAccountNumText">0000000001</strong>
                   </div>
                   <button type="button" class="btn btn-sm btn-light border px-2 py-1 fw-bold text-muted" onclick="copyModalField('modalAccountNumText', 'Đã chép số tài khoản!')" title="Sao chép">
-                    📋 Chép
+                    Sao chép
                   </button>
                 </div>
 
@@ -79,7 +79,7 @@
                     <strong class="fs-5" style="color: #0c2340;" id="modalAmountText">0 đ</strong>
                   </div>
                   <button type="button" class="btn btn-sm btn-light border px-2 py-1 fw-bold text-muted" id="btnCopyAmount" onclick="copyRawAmount()" title="Sao chép">
-                    📋 Chép
+                    Sao chép
                   </button>
                 </div>
 
@@ -89,12 +89,12 @@
                     <strong class="font-monospace fs-5 text-danger" id="modalPaymentCodeText">TROOI...</strong>
                   </div>
                   <button type="button" class="btn btn-sm btn-warning fw-bold text-dark px-3 py-1" onclick="copyModalField('modalPaymentCodeText', 'Đã chép nội dung!')">
-                    📋 Chép
+                    Sao chép
                   </button>
                 </div>
 
                 <div class="mt-2 text-danger" style="font-size: 11px; line-height: 1.4;">
-                  ⚠️ <strong>Quan trọng:</strong> Vui lòng giữ <strong>chính xác nội dung chuyển khoản</strong> ở trên để hệ thống tự động gạch nợ trong 3-10 giây.
+                  <strong>Lưu ý quan trọng:</strong> Vui lòng giữ <strong>chính xác nội dung chuyển khoản</strong> ở trên để hệ thống tự động gạch nợ trong 3-10 giây.
                 </div>
 
               </div>
@@ -110,7 +110,6 @@
 
           <!-- Trạng thái Thanh toán thành công -->
           <div id="modalPollingSuccess" class="mt-3 p-4 rounded-4 bg-success text-white text-center d-none shadow">
-            <div style="font-size: 38px; line-height: 1;">🎉</div>
             <h5 class="fw-bold mt-2 mb-1">THANH TOÁN THÀNH CÔNG!</h5>
             <div style="font-size: 13px;" class="opacity-90">Hóa đơn đã được ghi nhận thanh toán thành công qua SePay QR. Trang sẽ tự tải lại...</div>
           </div>
@@ -123,13 +122,13 @@
       <div class="modal-footer d-flex justify-content-between align-items-center" style="background: #f1ede3; border-top: 1px solid #e6dcc2; padding: 14px 24px;">
         <div class="d-flex align-items-center gap-2">
           <button type="button" class="btn btn-warning btn-sm px-3 fw-bold shadow-sm" id="btnSimulateTest" onclick="simulateTestPayment()" title="Mô phỏng SePay bắn webhook tiền vào">
-            ⚡ Giả lập thanh toán ngay (Demo)
+            Giả lập thanh toán (Demo)
           </button>
         </div>
         <div class="d-flex gap-2">
           <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Đóng</button>
           <button type="button" class="btn btn-success btn-sm px-3 fw-bold" id="btnManualCheckStatus" onclick="manualCheckStatus()">
-            🔄 Kiểm tra lại
+            Kiểm tra lại
           </button>
         </div>
       </div>

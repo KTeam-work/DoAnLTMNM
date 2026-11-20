@@ -28,6 +28,14 @@ class OwnerContractController extends Controller{
                 ? User::query()->where('role', 'owner')->orderBy('id')->first()
                 : $this->owner($request));
 
+        if ($owner) {
+            // Tự động đồng bộ phòng đã có hợp đồng (active hoặc draft) sang trạng thái đã thuê
+            \App\Models\Room::query()
+                ->whereIn('id', Contract::where('owner_id', $owner->id)->whereIn('status', ['active', 'draft'])->pluck('room_id'))
+                ->where('status', 'available')
+                ->update(['status' => 'rented']);
+        }
+
         $contracts = $owner
             ? Contract::query()
                 ->where('owner_id', $owner->id)
@@ -256,9 +264,8 @@ class OwnerContractController extends Controller{
                 ]);
             }
 
-            if ($status === 'active') {
-                $room->update(['status' => 'rented']);
-            }
+            // Khi tạo hợp đồng (kể cả bản nháp), phòng đều chuyển sang trạng thái đã thuê để ẩn khỏi web
+            $room->update(['status' => 'rented']);
 
             return $contract;
         });
@@ -361,6 +368,28 @@ class OwnerContractController extends Controller{
         $contract->update($data);
 
         return response()->json(['message' => 'Initial utility readings updated.', 'data' => $contract->fresh()]);
+    }
+
+    public function activate(Request $request, Contract $contract)
+    {
+        $this->ownedContract($request, $contract);
+        abort_unless($contract->status === 'draft', 422, 'Hợp đồng này không ở trạng thái nháp.');
+
+        DB::transaction(function () use ($contract) {
+            $contract->update([
+                'status' => 'active',
+                'signed_at' => now(),
+            ]);
+            $contract->room->update(['status' => 'rented']);
+        });
+
+        if (! $request->expectsJson()) {
+            return redirect()
+                ->route('owner.contracts.show', $contract)
+                ->with('success', 'Đã kích hoạt hợp đồng thành công! Phòng đã chuyển sang trạng thái đang thuê.');
+        }
+
+        return response()->json(['message' => 'Hợp đồng đã được kích hoạt thành công.', 'data' => $contract->fresh()]);
     }
 
     public function terminate(Request $request, Contract $contract)

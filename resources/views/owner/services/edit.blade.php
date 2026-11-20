@@ -29,11 +29,18 @@
 
             {{-- PROPERTY --}}
             <div class="service-property">
-                <div class="service-property-icon">🏠</div>
                 <div>
                     <div class="service-property-label">Dịch vụ thuộc nhà trọ</div>
-                    <div class="service-property-name">Nhà trọ Q.7</div>
-                    <div class="service-property-address">123 Nguyễn Thị Thập, Quận 7, TP. Hồ Chí Minh</div>
+                    @if($selectedProperty)
+                        <div class="service-property-name">{{ $selectedProperty->name }}</div>
+                        <div class="service-property-address">{{ $selectedProperty->address }}</div>
+                    @elseif(isset($properties) && $properties->isNotEmpty())
+                        <div class="service-property-name">{{ $properties->first()->name }}</div>
+                        <div class="service-property-address">{{ $properties->first()->address }}</div>
+                    @else
+                        <div class="service-property-name">Tất cả nhà trọ của bạn</div>
+                        <div class="service-property-address">Áp dụng cho các phòng thuộc tài khoản của bạn</div>
+                    @endif
                 </div>
             </div>
 
@@ -137,7 +144,7 @@
                   
                     <div class="service-card-footer">
                         <a href="{{ route('owner.services.index') }}" class="service-btn-cancel">Hủy</a>
-                        <button type="submit" class="service-btn-save">{{ ($mode ?? 'edit') === 'create' ? '+ &nbsp; Thêm dịch vụ' : '✓ &nbsp; Lưu thay đổi' }}</button>
+                        <button type="submit" class="service-btn-save">{{ ($mode ?? 'edit') === 'create' ? 'Thêm dịch vụ' : 'Lưu thay đổi' }}</button>
                     </div>
                 </form>
             </div>

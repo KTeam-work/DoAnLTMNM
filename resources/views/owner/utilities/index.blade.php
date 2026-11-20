@@ -17,7 +17,7 @@
       <div class="page-desc">Theo dõi mức tiêu thụ và chốt chỉ số cho các phòng trong tháng.</div>
     </div>
     <div class="d-flex gap-2">
-      <button class="btn-outline-brand">📥 Xuất Excel</button>
+      <button class="btn-outline-brand">Xuất Excel</button>
       <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" >+ Ghi chỉ số mới</a>
     </div>
   </div>
@@ -39,10 +39,10 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon">🏠</div>
-          <span class="stat-trend muted">{{ $currentMonth ? $currentMonth->format('m/Y') : 'Tất cả các kỳ' }}</span>
+          <span class="stat-trend">Phòng trọ</span>
         </div>
         <div class="stat-value">{{ $totalRooms }}</div>
-        <div class="stat-label">Tổng số phòng quản lý</div>
+        <div class="stat-label">Tổng số phòng</div>
       </div>
     </div>
     
@@ -50,10 +50,10 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon green">⚡</div>
-          <span class="stat-trend">{{ $currentMonth ? 'Còn ' . max(0, $totalRooms - $doneCount) . ' phòng' : 'Tổng lượt ghi' }}</span>
+          <span class="stat-trend {{ $currentMonth && ($totalRooms - $doneCount > 0) ? 'down' : '' }}">{{ $currentMonth ? 'Còn ' . max(0, $totalRooms - $doneCount) . ' phòng' : 'Đã chốt' }}</span>
         </div>
         <div class="stat-value">{{ $doneCount }} @if($currentMonth)<small>/ {{ $totalRooms }}</small>@endif</div>
-        <div class="stat-label">{{ $currentMonth ? 'Đã chốt chỉ số' : 'Bản ghi điện nước' }}</div>
+        <div class="stat-label">{{ $currentMonth ? 'Phòng đã chốt chỉ số' : 'Tổng bản ghi điện nước' }}</div>
       </div>
     </div>
 
@@ -61,7 +61,7 @@
       <div class="stat-card">
         <div class="stat-top">
           <div class="stat-icon blue">💧</div>
-          <span class="stat-trend">{{ $currentMonth ? 'Kỳ ' . $currentMonth->format('m/Y') : 'Toàn bộ kỳ' }}</span>
+          <span class="stat-trend">Kỳ {{ $currentMonth ? $currentMonth->format('m/Y') : 'Toàn bộ' }}</span>
         </div>
         <div class="stat-value">{{ number_format($totalKwh + $totalM3) }}</div>
         <div class="stat-label">Tổng tiêu thụ (kWh + m³)</div>
@@ -69,13 +69,13 @@
     </div>
 
     <div class="col-6 col-lg-3">
-      <div class="stat-card">
+      <div class="stat-card" style="border-left: 3px solid #16834b;">
         <div class="stat-top">
-          <div class="stat-icon red">💰</div>
-          <span class="stat-trend">Tạm tính</span>
+          <div class="stat-icon" style="background: #eafaf1; color: #16834b;">💰</div>
+          <span class="stat-trend" style="color: #16834b;">Dự kiến</span>
         </div>
-        <div class="stat-value">{{ number_format($totalMoney) }}đ</div>
-        <div class="stat-label">Tổng tiền dự kiến</div>
+        <div class="stat-value" style="color: #16834b;">{{ number_format($totalMoney) }}đ</div>
+        <div class="stat-label">Tổng tiền điện nước</div>
       </div>
     </div>
   </div>
@@ -176,18 +176,18 @@
               <div class="mt-1" style="font-weight: 700; color: var(--green-dark);">💧 {{ number_format($wUse) }} m³</div>
             </td>
             <td>
-              <div>⚡ {{ number_format($eMoney) }}đ</div>
-              <div class="mt-1 border-bottom pb-1" style="border-color: #f0eadc!important;">💧 {{ number_format($wMoney) }}đ</div>
-              <div class="text-highlight mt-1">Σ {{ number_format($eMoney + $wMoney) }}đ</div>
+              <div>Điện: {{ number_format($eMoney) }}đ</div>
+              <div class="mt-1 border-bottom pb-1" style="border-color: #f0eadc!important;">Nước: {{ number_format($wMoney) }}đ</div>
+              <div class="text-highlight mt-1">Tổng: {{ number_format($eMoney + $wMoney) }}đ</div>
             </td>
             <td><span class="badge-status occupied">Đã ghi</span></td>
             <td class="text-end">
               <div class="d-flex justify-content-end gap-1">
-                <a class="btn-brand" style="padding: 6px 12px;" href="{{ route('owner.utilities.create', ['id' => $reading->id]) }}">✏️ Sửa</a>
+                <a class="btn-brand" style="padding: 6px 12px;" href="{{ route('owner.utilities.create', ['id' => $reading->id]) }}">Sửa</a>
                 <form method="POST" action="{{ route('owner.utilities.destroy', $reading) }}" onsubmit="return confirm('Bạn có chắc muốn xóa bản ghi chỉ số tháng {{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }} của phòng {{ $reading->room->name ?? '' }}?');" style="display:inline;">
                   @csrf
                   @method('DELETE')
-                  <button type="submit" class="btn-outline-brand" style="padding: 6px 10px; color: #dc3545; border-color: #f5c6cb;" title="Xóa bản ghi">🗑️</button>
+                  <button type="submit" class="btn-outline-brand" style="padding: 6px 10px; color: #dc3545; border-color: #f5c6cb;" title="Xóa bản ghi">Xóa</button>
                 </form>
               </div>
             </td>

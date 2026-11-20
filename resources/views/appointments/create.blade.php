@@ -54,7 +54,7 @@
         <div class="page-header">
             <div>
                 <div class="badge-status pending mb-2">
-                    📅 ĐẶT LỊCH XEM PHÒNG
+                    ĐẶT LỊCH XEM PHÒNG
                 </div>
 
                 <h1 class="page-title">
@@ -70,8 +70,6 @@
         @if ($rooms->isEmpty())
 
             <div class="panel text-center py-5">
-                <div class="stat-icon mx-auto mb-3">🏠</div>
-
                 <h2 class="panel-title mb-2">
                     Hiện chưa có phòng phù hợp
                 </h2>
@@ -115,12 +113,12 @@
                                 </div>
 
                                 <div class="room-address">
-                                    📍 {{ $roomAddress }}
+                                    {{ $roomAddress }}
                                 </div>
 
                                 <div class="room-stats mt-3">
                                     @if ($roomArea !== null)
-                                        <span>📐 {{ $roomArea }} m²</span>
+                                        <span>Diện tích: {{ $roomArea }} m²</span>
                                     @endif
                                 </div>
 
@@ -316,19 +314,15 @@
 
                             {{-- GHI CHÚ --}}
                             <div class="panel mt-4">
-                                <div class="d-flex gap-3">
-                                    <div class="stat-icon">💡</div>
+                                <div>
+                                    <div class="cell-title">
+                                        Lưu ý trước khi gửi lịch
+                                    </div>
 
-                                    <div>
-                                        <div class="cell-title">
-                                            Lưu ý trước khi gửi lịch
-                                        </div>
-
-                                        <div class="cell-sub mt-1">
-                                            Lịch hẹn sẽ ở trạng thái
-                                            <strong>Chờ xác nhận</strong> sau khi gửi.
-                                            Chủ nhà sẽ xác nhận hoặc phản hồi lịch hẹn.
-                                        </div>
+                                    <div class="cell-sub mt-1">
+                                        Lịch hẹn sẽ ở trạng thái
+                                        <strong>Chờ xác nhận</strong> sau khi gửi.
+                                        Chủ nhà sẽ xác nhận hoặc phản hồi lịch hẹn.
                                     </div>
                                 </div>
                             </div>
@@ -345,7 +339,7 @@
                                 </a>
 
                                 <button type="submit" class="btn-brand">
-                                    📅 Gửi lịch hẹn
+                                    Gửi lịch hẹn
                                 </button>
 
                             </div>
