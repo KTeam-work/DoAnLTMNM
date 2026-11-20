@@ -21,9 +21,9 @@
   @endif
 
   @php
-    $categoryLabels = ['dien_nuoc' => '💧 Hệ thống Điện / Nước', 'dien_lanh' => '❄️ Thiết bị điện lạnh', 'noi_that' => '🚪 Nội thất', 'khac' => '🔧 Vấn đề khác'];
+    $categoryLabels = ['dien_nuoc' => 'Hệ thống Điện / Nước', 'dien_lanh' => 'Thiết bị điện lạnh', 'noi_that' => 'Nội thất', 'khac' => 'Vấn đề khác'];
     $priorityLabels = ['low' => 'Thấp', 'medium' => 'Bình thường', 'high' => 'Cao', 'urgent' => 'Khẩn cấp'];
-    $statusLabels = ['pending' => '⏳ Chờ xử lý', 'processing' => '🔧 Đang xử lý', 'completed' => '✅ Hoàn thành', 'rejected' => '✖ Đã từ chối'];
+    $statusLabels = ['pending' => 'Chờ xử lý', 'processing' => 'Đang xử lý', 'completed' => 'Hoàn thành', 'rejected' => 'Đã từ chối'];
   @endphp
 
   <!-- Breadcrumb & Header -->
@@ -89,7 +89,7 @@
     <!-- Cột Phải: Tiến độ xử lý (Timeline) -->
     <div class="col-lg-5">
       <div class="detail-panel">
-        <h4 class="fw-bold mb-4" style="color: var(--green-dark); font-size: 18px;">📍 Tiến độ xử lý</h4>
+        <h4 class="fw-bold mb-4" style="color: var(--green-dark); font-size: 18px;">Tiến độ xử lý</h4>
 
         <ul class="timeline">
           <li class="timeline-item done">
@@ -122,6 +122,31 @@
             <div class="timeline-content">
               <div class="timeline-date">{{ ($maintenance->completed_at ?? $maintenance->updated_at)->format('H:i - d/m/Y') }}</div>
               <div class="fw-bold text-dark" style="font-size: 14px;">Nghiệm thu &amp; Hoàn thành</div>
+
+              @if($maintenance->damage_type === 'tenant')
+                <div class="mt-3 p-3 rounded-3" style="background: #fff1f2; border: 1px solid #fecdd3;">
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                      <span class="badge bg-danger text-white px-2 py-1 mb-1" style="font-size: 11px;">Khách thuê chi trả</span>
+                      <div class="fw-bold text-danger" style="font-size: 15px;">Chi phí sửa chữa: {{ number_format($maintenance->cost) }} đ</div>
+                      <div class="text-muted small">Hóa đơn phát sinh đã được tạo kèm mã QR thanh toán trực tuyến.</div>
+                    </div>
+                    @if($maintenance->invoice_id)
+                    <a href="{{ route('tenant.invoices.show', $maintenance->invoice_id) }}" class="btn btn-sm btn-danger fw-semibold px-3 py-2 text-decoration-none shadow-sm" style="border-radius: 8px;">
+                      <i class="bi bi-credit-card me-1"></i> Thanh toán hóa đơn ngay
+                    </a>
+                    @endif
+                  </div>
+                </div>
+              @elseif($maintenance->damage_type === 'landlord')
+                <div class="mt-3 p-3 rounded-3" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success text-white px-2 py-1" style="font-size: 11px;">Chủ trọ chi trả</span>
+                    <strong class="text-success" style="font-size: 13.5px;">Chi phí: 0 đ (Hao mòn tự nhiên)</strong>
+                  </div>
+                  <div class="text-muted small mt-1">Sự cố do thiết bị hao mòn theo thời gian, bạn không phải trả bất kỳ khoản phí nào.</div>
+                </div>
+              @endif
             </div>
           </li>
           @elseif($maintenance->status === 'rejected')

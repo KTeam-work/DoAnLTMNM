@@ -30,5 +30,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     searchInput.addEventListener('input', filterPosts);
-    statusSelect.addEventListener('change', filterPosts);
+    statusSelect.addEventListener('change', function () {
+        const val = this.value;
+        document.querySelectorAll('.segmented-tab').forEach(function (t) {
+            t.classList.toggle('active', (t.dataset.filter || '') === val);
+        });
+        filterPosts();
+    });
+
+    document.querySelectorAll('.segmented-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.segmented-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const filterVal = this.dataset.filter || '';
+            if (statusSelect) {
+                statusSelect.value = filterVal;
+            }
+            filterPosts();
+        });
+    });
 });

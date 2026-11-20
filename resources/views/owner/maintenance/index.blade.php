@@ -74,10 +74,34 @@
           </div>
           <div class="ticket-title">{{ $ticket->title }}</div>
           <div class="ticket-room">{{ $ticket->room->name ?? '' }} · {{ $ticket->tenant->name ?? '' }}</div>
-          <div class="ticket-bottom">
+          
+          @if($ticket->status === 'completed')
+            <div class="mt-2 pt-2 border-top d-flex align-items-center justify-content-between flex-wrap gap-1">
+              @if($ticket->damage_type === 'tenant')
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 11px;">
+                  Khách chịu: {{ number_format($ticket->cost) }}đ
+                </span>
+                @if($ticket->invoice_id)
+                  <a href="{{ route('owner.invoices.show', $ticket->invoice_id) }}" class="badge bg-light text-primary border text-decoration-none" style="font-size: 10.5px;">
+                    <i class="bi bi-receipt"></i> Hóa đơn #{{ $ticket->invoice_id }}
+                  </a>
+                @endif
+              @elseif($ticket->damage_type === 'landlord')
+                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 11px;">
+                  Chủ trọ chi trả (0đ)
+                </span>
+              @else
+                <a href="{{ route('owner.maintenance.show', $ticket->id) }}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle text-decoration-none" style="font-size: 11px;" title="Bấm vào để phân loại và tạo hóa đơn">
+                  Chưa phân loại chi phí
+                </a>
+              @endif
+            </div>
+          @endif
+
+          <div class="ticket-bottom mt-2">
             <span class="ticket-date">{{ $ticket->created_at->format('d/m') }}</span>
             <div class="ticket-actions">
-              <a href="{{ route('owner.maintenance.show', $ticket->id) }}" class="btn-icon" data-bs-toggle="tooltip" title="Xem chi tiết"><i class="bi bi-eye-fill"></i></a>
+              <a href="{{ route('owner.maintenance.show', $ticket->id) }}" class="btn-icon" data-bs-toggle="tooltip" title="Xem chi tiết & Cập nhật"><i class="bi bi-eye-fill"></i></a>
               @if($ticket->status === 'pending')
                 <form action="{{ route('owner.maintenance.status', $ticket->id) }}" method="POST" class="d-inline">
                   @csrf
@@ -86,12 +110,7 @@
                   <button type="submit" class="btn-icon success" data-bs-toggle="tooltip" title="Bắt đầu sửa" onclick="return confirm('Bắt đầu sửa yêu cầu này?')"><i class="bi bi-tools"></i></button>
                 </form>
               @elseif($ticket->status === 'processing')
-                <form action="{{ route('owner.maintenance.status', $ticket->id) }}" method="POST" class="d-inline">
-                  @csrf
-                  @method('PUT')
-                  <input type="hidden" name="status" value="completed">
-                  <button type="submit" class="btn-icon success" data-bs-toggle="tooltip" title="Hoàn thành" onclick="return confirm('Xác nhận hoàn thành?')"><i class="bi bi-check-lg"></i></button>
-                </form>
+                <a href="{{ route('owner.maintenance.show', $ticket->id) }}" class="btn-icon success" data-bs-toggle="tooltip" title="Hoàn thành & Phân loại chi phí"><i class="bi bi-check-lg"></i></a>
               @endif
               @if(in_array($ticket->status, ['pending', 'processing']))
                 <form action="{{ route('owner.maintenance.status', $ticket->id) }}" method="POST" class="d-inline">

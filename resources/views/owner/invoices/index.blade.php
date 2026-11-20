@@ -20,12 +20,12 @@
     <div class="d-flex gap-2">
       <form action="{{ route('owner.invoices.process-due-now') }}" method="POST" class="m-0" onsubmit="return confirm('Hệ thống sẽ quét ngày hết hạn của các hóa đơn, gửi thông báo nhắc nợ và cập nhật trạng thái Quá hạn. Tiếp tục?')">
         @csrf
-        <button type="submit" class="btn btn-outline-success fw-bold d-flex align-items-center gap-1" style="border-radius: 8px; padding: 8px 14px; font-size: 13px;" title="Kích hoạt kiểm tra hạn hóa đơn tự động">
-          ⚡ Quét nợ &amp; Cập nhật quá hạn
+        <button type="submit" class="btn btn-outline-success fw-bold" style="border-radius: 8px; padding: 8px 14px; font-size: 13px;" title="Kích hoạt kiểm tra hạn hóa đơn tự động">
+          Quét nợ &amp; Cập nhật quá hạn
         </button>
       </form>
       <button class="btn-brand" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
-        <i class="bi bi-magic me-1"></i> Tạo hóa đơn tháng
+        Tạo hóa đơn tháng
       </button>
     </div>
   </div>
@@ -40,35 +40,35 @@
   <!-- STAT CARDS -->
   <div class="row g-3 mb-4">
     <div class="col-12 col-md-4">
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-icon blue">🧾</div>
-          <span class="stat-trend">Kỳ {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</span>
+      <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div class="stat-top d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Doanh thu</span>
+          <span class="stat-trend" style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Kỳ {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</span>
         </div>
-        <div class="stat-value">{{ number_format((float) $stats['expected'], 0, ',', '.') }}đ</div>
-        <div class="stat-label">Tổng doanh thu chờ thu</div>
+        <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format((float) $stats['expected'], 0, ',', '.') }}đ</div>
+        <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng doanh thu chờ thu</div>
       </div>
     </div>
 
     <div class="col-12 col-md-4">
-      <div class="stat-card">
-        <div class="stat-top">
-          <div class="stat-icon green">💰</div>
-          <span class="stat-trend">Đã thu</span>
+      <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+        <div class="stat-top d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Thực thu</span>
+          <span class="stat-trend" style="background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Đã thu</span>
         </div>
-        <div class="stat-value" style="color: #16834b;">{{ number_format((float) $stats['collected'], 0, ',', '.') }}đ</div>
-        <div class="stat-label">Đã thu trong kỳ</div>
+        <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #16834b; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format((float) $stats['collected'], 0, ',', '.') }}đ</div>
+        <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Đã thu trong kỳ</div>
       </div>
     </div>
 
     <div class="col-12 col-md-4">
-      <div class="stat-card" style="border-left: 3px solid #dc3545;">
-        <div class="stat-top">
-          <div class="stat-icon red">🚩</div>
-          <span class="stat-trend down">{{ $stats['outstanding_count'] }} cần xử lý</span>
+      <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border-left: 3px solid #dc3545;">
+        <div class="stat-top d-flex justify-content-between align-items-center">
+          <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chưa thu</span>
+          <span class="stat-trend down" style="background: #fef2f2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">{{ $stats['outstanding_count'] }} cần xử lý</span>
         </div>
-        <div class="stat-value" style="color: #dc3545;">{{ number_format((float) $stats['outstanding'], 0, ',', '.') }}đ</div>
-        <div class="stat-label">Còn nợ &amp; Quá hạn</div>
+        <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #dc3545; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format((float) $stats['outstanding'], 0, ',', '.') }}đ</div>
+        <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Còn nợ &amp; Quá hạn</div>
       </div>
     </div>
   </div>
@@ -123,8 +123,8 @@
             <td><strong>{{ number_format((float) $invoice->total) }} ₫</strong></td>
             <td><span class="badge-status {{ $displayStatus }}">{{ $statusLabels[$displayStatus] ?? $displayStatus }}</span></td>
             <td class="text-end">
-              <a href="{{ route('owner.invoices.show', $invoice->id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye-fill"></i> Xem</a>
-              <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-sm btn-outline-success ms-1" title="In / Xuất PDF">🖨️ In</a>
+              <a href="{{ route('owner.invoices.show', $invoice->id) }}" class="btn btn-sm btn-outline-secondary">Xem</a>
+              <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-sm btn-outline-success ms-1" title="In / Xuất PDF">In</a>
             </td>
           </tr>
           @empty
@@ -150,7 +150,7 @@
       @csrf
       <div class="modal-header bg-light">
         <div>
-          <h5 class="modal-title fw-bold" style="color: var(--green);"><i class="bi bi-magic me-2"></i>Tạo hóa đơn tháng</h5>
+          <h5 class="modal-title fw-bold" style="color: var(--green);">Tạo hóa đơn tháng</h5>
           <div class="text-muted" style="font-size: 13px;">Tự động tính tiền phòng, điện nước và dịch vụ cho các hợp đồng hiệu lực.</div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -188,7 +188,7 @@
               Test quá hạn (-2 ngày)
             </button>
           </div>
-          <div class="form-text" style="font-size: 11px;">💡 Bấm <strong>"Test quá hạn"</strong> để tạo ngay hóa đơn quá hạn cho giáo viên xem demo!</div>
+          <div class="form-text" style="font-size: 11px;">Bấm <strong>"Test quá hạn"</strong> để tạo ngay hóa đơn quá hạn cho giáo viên xem demo.</div>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-bold">Giảm giá chung (đ, tùy chọn)</label>
@@ -198,7 +198,7 @@
       </div>
       <div class="modal-footer bg-light border-0">
         <button type="button" class="btn btn-light border fw-bold px-4" data-bs-dismiss="modal">Hủy</button>
-        <button type="submit" class="btn btn-brand fw-bold px-4"><i class="bi bi-send-check me-1"></i> Phát hành Hóa đơn</button>
+        <button type="submit" class="btn btn-brand fw-bold px-4">Phát hành Hóa đơn</button>
       </div>
     </form>
   </div>
