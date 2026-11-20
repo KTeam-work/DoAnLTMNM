@@ -20,9 +20,10 @@ class GeminiService
         // Danh sách các model thử nghiệm (tự động fallback nếu model chính bị 404 không khả dụng hoặc 503 quá tải)
         $modelsToTry = array_values(array_unique(array_filter([
             $configuredModel,
+            'gemini-2.0-flash',
             'gemini-flash-lite-latest',
-            'gemini-2.5-flash',
-            'gemini-1.5-flash',
+            'gemini-2.0-flash-lite',
+            'gemini-1.5-pro',
         ])));
 
         $lastError = null;
@@ -67,6 +68,10 @@ class GeminiService
                 $errorBody = $response->body();
                 $lastError = "Model [{$model}] lỗi (HTTP {$response->status()}): {$errorBody}";
                 Log::warning("GeminiService: {$lastError}. Đang tự động chuyển sang model dự phòng tiếp theo...");
+
+                if ($response->status() === 503 || $response->status() === 429) {
+                    usleep(400000);
+                }
 
             } catch (Exception $e) {
                 $lastError = "Model [{$model}] gặp ngoại lệ: " . $e->getMessage();
@@ -123,9 +128,10 @@ class GeminiService
 
         $modelsToTry = array_values(array_unique(array_filter([
             $configuredModel,
+            'gemini-2.0-flash',
             'gemini-flash-lite-latest',
-            'gemini-2.5-flash',
-            'gemini-1.5-flash',
+            'gemini-2.0-flash-lite',
+            'gemini-1.5-pro',
         ])));
 
         $lastError = null;

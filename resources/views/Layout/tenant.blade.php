@@ -19,7 +19,7 @@
         href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/styles.css') }}?v={{ file_exists(public_path('css/styles.css')) ? filemtime(public_path('css/styles.css')) : time() }}">
 
     @stack('styles')
 </head>
@@ -33,6 +33,7 @@
     @include('Layout.partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/app-ajax-nav.js') }}"></script>
 
     @stack('scripts')
 </body>

@@ -210,7 +210,7 @@
 
                 {{-- Khung nhập tin nhắn --}}
                 <div class="chat-input-area">
-                    <form id="chatForm" class="chat-input-form" onsubmit="handleFormSubmit(event)">
+                    <form id="chatForm" class="chat-input-form" data-no-ajax="true" action="javascript:void(0)" onsubmit="handleFormSubmit(event)">
                         <textarea
                             id="messageInput"
                             class="chat-textarea"
@@ -386,23 +386,35 @@
 
     // Gửi câu hỏi nhanh từ chip hoặc sidebar
     function sendQuickPrompt(promptText) {
-        messageInput.value = promptText;
-        document.getElementById('chatForm').dispatchEvent(new Event('submit', { cancelable: true }));
+        if (!promptText) return;
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendMessageToServer(promptText);
     }
 
-    // Xử lý gửi tin nhắn
-    async function handleFormSubmit(e) {
-        e.preventDefault();
+    // Xử lý gửi tin nhắn từ Form
+    function handleFormSubmit(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
         const message = messageInput.value.trim();
         if (!message) return;
 
-        // Hiển thị tin nhắn của User
-        appendMessage('user', message);
-
         // Reset input
         messageInput.value = '';
         messageInput.style.height = 'auto';
+
+        sendMessageToServer(message);
+    }
+
+    // Gửi tin nhắn đến Server
+    async function sendMessageToServer(message) {
+        if (!message) return;
+
+        // Hiển thị tin nhắn của User
+        appendMessage('user', message);
 
         // Khóa input và bật typing indicator
         messageInput.disabled = true;
