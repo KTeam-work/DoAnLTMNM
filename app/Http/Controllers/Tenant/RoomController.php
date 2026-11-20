@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Models\Favorite;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Amenity;
+use App\Models\Property;
 
 class RoomController extends Controller
 {
@@ -19,9 +21,11 @@ class RoomController extends Controller
         $query = Room::query()
             ->with([
                 'property.owner',
+                'property.images',
                 'amenities',
                 'rentalPosts' => function ($query) {
-                    $query->where('status', 'published');
+                    $query->where('status', 'published')
+                        ->with('images');
                 },
             ])
             ->where('status', 'available')
@@ -35,7 +39,7 @@ class RoomController extends Controller
 
         // Tìm theo tên phòng, mã phòng, khu trọ và địa chỉ.
         if ($request->filled('keyword')) {
-            $keyword = trim($request->string('keyword')->toString());
+            $keyword = trim($request->input('keyword'));
 
             $query->where(function (Builder $query) use ($keyword) {
                 $query->where('name', 'like', "%{$keyword}%")
@@ -49,7 +53,7 @@ class RoomController extends Controller
             });
         }
 
-        // Lọc khoảng giá.
+        // Lọc giá thuê.
         if ($request->filled('min_price')) {
             $query->where('price', '>=', $request->input('min_price'));
         }
@@ -58,7 +62,7 @@ class RoomController extends Controller
             $query->where('price', '<=', $request->input('max_price'));
         }
 
-        // Lọc khoảng diện tích.
+        // Lọc diện tích.
         if ($request->filled('min_area')) {
             $query->where('area', '>=', $request->input('min_area'));
         }
@@ -67,7 +71,7 @@ class RoomController extends Controller
             $query->where('area', '<=', $request->input('max_area'));
         }
 
-        // Lọc theo quận/huyện.
+        // Lọc quận/huyện.
         if ($request->filled('district')) {
             $district = $request->input('district');
 
@@ -76,11 +80,11 @@ class RoomController extends Controller
             });
         }
 
-        // Lọc theo tiện ích: amenities[]=1&amenities[]=2.
+        // Lọc theo tất cả tiện ích đã chọn.
         if ($request->filled('amenities')) {
             $amenityIds = collect((array) $request->input('amenities'))
-                ->filter(fn ($id) => filter_var($id, FILTER_VALIDATE_INT) !== false)
-                ->map(fn ($id) => (int) $id)
+                ->filter(fn($id) => filter_var($id, FILTER_VALIDATE_INT) !== false)
+                ->map(fn($id) => (int) $id)
                 ->unique()
                 ->values();
 
@@ -96,14 +100,48 @@ class RoomController extends Controller
             ->orderByDesc('created_at')
             ->paginate(12)
             ->withQueryString();
-            $favoriteRoomIds = Auth::check()
-    ? Favorite::where('user_id', Auth::id())
-        ->pluck('room_id')
-        ->map(fn ($id) => (int) $id)
-        ->all()
-    : [];
 
-        return view('rooms.index', compact('rooms', 'favoriteRoomIds'));
+        // Lấy ID bản ghi yêu thích theo ID phòng.
+        // Kết quả: [room_id => favorite_id].
+        $favoriteIdsByRoom = Auth::check()
+            ? Favorite::where('user_id', Auth::id())
+            ->pluck('id', 'room_id')
+            ->mapWithKeys(fn($favoriteId, $roomId) => [
+                (int) $roomId => (int) $favoriteId,
+            ])
+            ->all()
+            : [];
+
+        // Dữ liệu để tạo các lựa chọn lọc.
+        $districts = Property::query()
+            ->whereNotNull('district')
+            ->where('district', '!=', '')
+            ->distinct()
+            ->orderBy('district')
+            ->pluck('district');
+
+        $amenities = Amenity::query()
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+
+        // AJAX chỉ trả phần kết quả, không trả lại toàn bộ trang.
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('rooms.partials.results', compact(
+                    'rooms',
+                    'favoriteIdsByRoom'
+                ))->render(),
+                'total' => $rooms->total(),
+            ]);
+        }
+
+        return view('rooms.index', compact(
+            'rooms',
+            'favoriteIdsByRoom',
+            'districts',
+            'amenities'
+        ));
     }
 
     /**
@@ -114,13 +152,15 @@ class RoomController extends Controller
         $room = Room::query()
             ->with([
                 'property.owner',
+                'property.images',
                 'amenities',
                 'rentalPosts' => function ($query) {
                     $query->where('status', 'published')
                         ->where(function ($query) {
                             $query->whereNull('expired_at')
                                 ->orWhere('expired_at', '>', now());
-                        });
+                        })
+                        ->with('images');
                 },
             ])
             ->where('status', 'available')

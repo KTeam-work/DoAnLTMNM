@@ -10,6 +10,10 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+
 
 use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
 use App\Http\Controllers\Owner\PaymentController as OwnerPaymentController;
@@ -32,11 +36,15 @@ use App\Http\Controllers\Owner\OwnerRoomController;
 use App\Http\Controllers\Owner\OwnerRentalPostController;
 
 
+
+
 /*
 |--------------------------------------------------------------------------
 | TRANG CHỦ
 |--------------------------------------------------------------------------
 */
+
+Route::view('/map-test', 'tenant.map-test');
 
 Route::get('/', function () {
 
@@ -134,6 +142,66 @@ Route::middleware('auth')->group(function () {
         return view('admin.users');
     })->name('admin.users');
 
+    Route::patch('/admin/users/{user}/status', function (
+        \Illuminate\Http\Request $request,
+        \App\Models\User $user
+    ) {
+        if (Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'Bạn không thể khóa tài khoản của chính mình.');
+        }
+
+        /** @var \App\Services\ResendService $resendService */
+        $resendService = app(\App\Services\ResendService::class);
+
+        if ($user->status === 'active') {
+            // KHÓA TÀI KHOẢN: Tự động sinh token mở khóa và gửi Gmail cho người dùng
+            $unlockToken = \Illuminate\Support\Str::random(48);
+            $user->update([
+                'status' => 'inactive',
+                'unlock_token' => $unlockToken,
+                'unlock_requested_at' => null,
+                'unlock_reason' => null,
+            ]);
+
+            try {
+                if (!empty($user->email)) {
+                    $unlockUrl = route('account.unlock.show', ['token' => $unlockToken]);
+                    $resendService->sendAccountLockedEmail($user->email, $user->name, $unlockUrl);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email khóa tài khoản: ' . $e->getMessage());
+            }
+
+            return back()->with('success', "Đã khóa tài khoản {$user->name} thành công.");
+        } else {
+            // MỞ KHÓA TÀI KHOẢN: Khôi phục trạng thái active và gửi Gmail kích hoạt
+            $user->update([
+                'status' => 'active',
+                'unlock_token' => null,
+                'unlock_requested_at' => null,
+                'unlock_reason' => null,
+            ]);
+
+            try {
+                if (!empty($user->email)) {
+                    $resendService->sendAccountUnlockedEmail($user->email, $user->name);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email mở khóa tài khoản: ' . $e->getMessage());
+            }
+
+            return back()->with('success', "Đã mở khóa tài khoản {$user->name} thành công.");
+        }
+    })->name('admin.users.update-status');
+
+    // Route mở khóa tài khoản từ liên kết trong Gmail
+    Route::get('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'show'])->name('account.unlock.show');
+    Route::post('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'submit'])->name('account.unlock.submit');
+
 
     Route::get('/admin/rental-posts', function () {
 
@@ -191,6 +259,11 @@ Route::patch('/admin/rental-posts/{post}/status', function (
         return view('admin.statistics');
     })->name('admin.statistics');
 
+    Route::get('/admin/reports', [\App\Http\Controllers\Admin\PostReportController::class, 'index'])
+        ->name('admin.reports.index');
+    Route::put('/admin/reports/{id}', [\App\Http\Controllers\Admin\PostReportController::class, 'update'])
+        ->name('admin.reports.update');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -237,6 +310,9 @@ Route::get('/rooms', [RoomController::class, 'index'])
 Route::get('/rooms/{id}', [RoomController::class, 'show'])
     ->name('rooms.show');
 
+Route::post('/rental-posts/{post}/report', [\App\Http\Controllers\Tenant\PostReportController::class, 'store'])
+    ->name('tenant.reports.store');
+
 
 Route::get('/favorites', [FavoriteController::class, 'index'])
     ->name('favorites.index');
@@ -275,6 +351,11 @@ Route::get(
     '/tenant/invoices/{id}',
     [InvoiceController::class, 'show']
 )->name('tenant.invoices.show');
+
+Route::get(
+    '/tenant/invoices/{id}/print',
+    [InvoiceController::class, 'print']
+)->name('tenant.invoices.print');
 
 
 /*
@@ -377,6 +458,21 @@ Route::post(
 )->name('tenant.payment.store');
 
 Route::post(
+    '/tenant/invoices/{id}/pay-qr',
+    [\App\Http\Controllers\Tenant\PaymentController::class, 'createOrGetQrPayment']
+)->name('tenant.invoices.pay_qr');
+
+Route::get(
+    '/tenant/invoices/{id}/payment-status',
+    [\App\Http\Controllers\Tenant\PaymentController::class, 'checkPaymentStatus']
+)->name('tenant.invoices.payment_status');
+
+Route::post(
+    '/tenant/invoices/{id}/simulate-sepay',
+    [\App\Http\Controllers\Tenant\PaymentController::class, 'simulateSepayWebhook']
+)->name('tenant.invoices.simulate_sepay');
+
+Route::post(
     '/tenant/payment/callback',
     [\App\Http\Controllers\Tenant\PaymentController::class, 'callback']
 )->name('tenant.payment.callback');
@@ -412,6 +508,11 @@ Route::post(
     '/owner/contracts/{contract}/members',
     [OwnerContractController::class, 'manageMembers']
 )->name('owner.contracts.members');
+
+Route::post(
+    '/owner/contracts/{contract}/activate',
+    [OwnerContractController::class, 'activate']
+)->name('owner.contracts.activate');
 
 Route::put(
     '/owner/contracts/{contract}/initial-utilities',
@@ -467,6 +568,16 @@ Route::get(
 )->name('owner.utilities.index');
 
 Route::get(
+    '/owner/utilities/previous-reading',
+    [OwnerUtilitiesController::class, 'getPreviousReading']
+)->name('owner.utilities.previous-reading');
+
+Route::post(
+    '/owner/utilities/scan-meter',
+    [OwnerUtilitiesController::class, 'scanMeter']
+)->name('owner.utilities.scan-meter');
+
+Route::get(
     '/owner/utilities/create',
     [OwnerUtilitiesController::class, 'create']
 )->name('owner.utilities.create');
@@ -480,6 +591,11 @@ Route::put(
     '/owner/utilities/{utilityReading?}',
     [OwnerUtilitiesController::class, 'update']
 )->name('owner.utilities.update');
+
+Route::delete(
+    '/owner/utilities/{utilityReading}',
+    [OwnerUtilitiesController::class, 'destroy']
+)->name('owner.utilities.destroy');
 
 
 /*
@@ -534,10 +650,20 @@ Route::get(
     [OwnerInvoiceController::class, 'show']
 )->name('owner.invoices.show');
 
+Route::get(
+    '/owner/invoices/{invoice}/print',
+    [OwnerInvoiceController::class, 'print']
+)->name('owner.invoices.print');
+
 Route::post(
     '/owner/invoices',
     [OwnerInvoiceController::class, 'store']
 )->name('owner.invoices.store');
+
+Route::post(
+    '/owner/invoices/process-due-now',
+    [OwnerInvoiceController::class, 'processDueNow']
+)->name('owner.invoices.process-due-now');
 
 
 /*
@@ -560,6 +686,11 @@ Route::put(
     '/owner/payments/{payment}/reject',
     [OwnerPaymentController::class, 'reject']
 )->name('owner.payments.reject');
+
+Route::post(
+    '/owner/invoices/{invoice}/record-cash',
+    [OwnerPaymentController::class, 'recordCashPayment']
+)->name('owner.invoices.record-cash');
 
 
 /*
@@ -640,3 +771,60 @@ Route::resource(
     'owner/rental-posts',
     OwnerRentalPostController::class
 )->names('owner.rental-posts');
+
+/*
+|--------------------------------------------------------------------------
+| CHỦ TRỌ - THÔNG BÁO
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/owner/notifications', [NotificationController::class, 'ownerIndex'])
+        ->name('owner.notifications.index');
+    Route::post('/owner/notifications/mark-read', [NotificationController::class, 'markAllAsRead'])
+        ->name('owner.notifications.mark_read');
+    Route::match(['post', 'put'], '/owner/notifications/{id}/read', [NotificationController::class, 'markAsRead'])
+        ->name('owner.notifications.read');
+});
+
+// Chat box
+Route::middleware(['auth', 'throttle:20,1'])->group(function () {
+
+    Route::get('/chatbot', [
+        ChatbotController::class,
+        'index'
+    ])->name('chatbot.index');
+
+    Route::post('/chatbot/send', [
+        ChatbotController::class,
+        'sendMessage'
+    ])->name('chatbot.send');
+
+});
+
+// QR 
+Route::post('/sepay/webhook', [PaymentController::class, 'webhook']);
+
+
+// Quên mật khẩu
+Route::get('/forgot-password', [
+    ForgotPasswordController::class,
+    'showForgotForm'
+])->middleware('guest')->name('password.request');
+
+// Gửi link đặt lại mật khẩu
+Route::post('/forgot-password', [
+    ForgotPasswordController::class,
+    'sendResetLink'
+])->middleware('guest')->name('password.email');
+
+// Hiển thị form đặt lại mật khẩu
+Route::get('/reset-password/{token}', [
+    ForgotPasswordController::class,
+    'showResetForm'
+])->middleware('guest')->name('password.reset');
+
+// Cập nhật mật khẩu mới
+Route::post('/reset-password', [
+    ForgotPasswordController::class,
+    'resetPassword'
+])->middleware('guest')->name('password.update');

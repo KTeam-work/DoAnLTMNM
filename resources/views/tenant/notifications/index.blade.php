@@ -45,7 +45,17 @@
       </div>
 
       @php
-        $typeIcons = ['invoice' => ['icon-invoice', '💰'], 'maintenance' => ['icon-maintenance', '🔧'], 'contract' => ['icon-contract', '📜'], 'payment' => ['icon-invoice', '💳'], 'review' => ['icon-contract', '⭐']];
+        $typeIcons = [
+            'invoice' => ['icon-invoice', '💰'],
+            'maintenance' => ['icon-maintenance', '🔧'],
+            'contract' => ['icon-contract', '📜'],
+            'payment' => ['icon-invoice', '💳'],
+            'review' => ['icon-contract', '⭐'],
+            'warning' => ['icon-appointment', '⚠️'],
+            'danger' => ['icon-appointment', '🚫'],
+            'success' => ['icon-contract', '✅'],
+            'info' => ['icon-maintenance', 'ℹ️'],
+        ];
       @endphp
       @forelse($notifications as $notification)
         @php

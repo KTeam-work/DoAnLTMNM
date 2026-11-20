@@ -23,10 +23,18 @@
             });
         })
         ->when($role !== '', fn ($builder) => $builder->where('role', $role))
-        ->when($status !== '', fn ($builder) => $builder->where('status', $status))
+        ->when($status !== '', function ($builder) use ($status) {
+            if ($status === 'unlock_requested') {
+                $builder->where('status', 'inactive')->whereNotNull('unlock_requested_at');
+            } else {
+                $builder->where('status', $status);
+            }
+        })
         ->latest()
         ->paginate(10)
         ->withQueryString();
+
+    $unlockRequestedCount = \App\Models\User::where('status', 'inactive')->whereNotNull('unlock_requested_at')->count();
 @endphp
 
 <div class="page-header">
@@ -36,23 +44,109 @@
     </div>
 </div>
 
-<div class="tv1-stats-row">
-    <div class="tv1-stat-card">
-        <span>Tổng tài khoản</span>
-        <strong>{{ \App\Models\User::count() }}</strong>
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
     </div>
-    <div class="tv1-stat-card">
-        <span>Chủ trọ</span>
-        <strong>{{ \App\Models\User::where('role', 'owner')->count() }}</strong>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-3" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
     </div>
-    <div class="tv1-stat-card">
-        <span>Người thuê</span>
-        <strong>{{ \App\Models\User::where('role', 'tenant')->count() }}</strong>
+@endif
+
+@php
+    $allUsersCount = \App\Models\User::count();
+    $ownerCount = \App\Models\User::where('role', 'owner')->count();
+    $tenantCount = \App\Models\User::where('role', 'tenant')->count();
+    $inactiveCount = \App\Models\User::where('status', 'inactive')->count();
+    $unlockRequestedCount = \App\Models\User::where('status', 'inactive')->whereNotNull('unlock_requested_at')->count();
+@endphp
+
+{{-- CARDS THỐNG KÊ & BỘ LỌC --}}
+<div class="row g-3 mb-4">
+
+    {{-- TẤT CẢ NGƯỜI DÙNG --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users') }}" class="text-decoration-none">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người dùng</span>
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Hệ thống</span>
+                </div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($allUsersCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Toàn bộ tài khoản</div>
+            </div>
+        </a>
     </div>
-    <div class="tv1-stat-card">
-        <span>Tài khoản bị khóa</span>
-        <strong>{{ \App\Models\User::where('status', 'inactive')->count() }}</strong>
+
+    {{-- CHỦ TRỌ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['role' => 'owner']) }}" class="text-decoration-none">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Chủ trọ</span>
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Đối tác</span>
+                </div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($ownerCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản chủ trọ</div>
+            </div>
+        </a>
     </div>
+
+    {{-- NGƯỜI THUÊ --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['role' => 'tenant']) }}" class="text-decoration-none">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Người thuê</span>
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Khách thuê</span>
+                </div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($tenantCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản khách thuê</div>
+            </div>
+        </a>
+    </div>
+
+    {{-- BỊ KHÓA --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['status' => 'inactive']) }}" class="text-decoration-none">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Tài khoản</span>
+                    @if($inactiveCount > 0)
+                        <span style="background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $inactiveCount }} bị khóa</span>
+                    @else
+                        <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Không có</span>
+                    @endif
+                </div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($inactiveCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tài khoản bị khóa</div>
+            </div>
+        </a>
+    </div>
+
+    {{-- YÊU CẦU MỞ KHÓA --}}
+    <div class="col-6 col-lg">
+        <a href="{{ route('admin.users', ['status' => 'unlock_requested']) }}" class="text-decoration-none">
+            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: transform 0.2s;">
+                <div class="stat-top d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Mở khóa</span>
+                    @if($unlockRequestedCount > 0)
+                        <span style="background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">{{ $unlockRequestedCount }} yêu cầu</span>
+                    @else
+                        <span style="background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px; display: inline-block;">Không có</span>
+                    @endif
+                </div>
+                <div class="stat-value text-dark" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format($unlockRequestedCount) }}</div>
+                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Đơn xin mở khóa</div>
+            </div>
+        </a>
+    </div>
+
 </div>
 
 <div class="tv1-panel">
@@ -76,6 +170,7 @@
             <option value="">Tất cả trạng thái</option>
             <option value="active" @selected($status === 'active')>Hoạt động</option>
             <option value="inactive" @selected($status === 'inactive')>Bị khóa</option>
+            <option value="unlock_requested" @selected($status === 'unlock_requested')>Yêu cầu mở khóa</option>
         </select>
 
         <button type="submit" class="tv1-btn-primary">Tìm kiếm</button>
@@ -92,12 +187,19 @@
                     <th>Vai trò</th>
                     <th>Trạng thái</th>
                     <th>Ngày tạo</th>
+                    <th class="text-center" style="width: 140px;">Hành động</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($users as $user)
                     <tr>
-                        <td>{{ $user->user_code ?: '—' }}</td>
+                        <td>
+                            @if($user->user_code)
+                                <code class="px-2 py-1 rounded bg-light border fw-bold text-dark" style="font-size: 11.5px;">{{ $user->user_code }}</code>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>
                             <div class="tv1-user-name">{{ $user->name }}</div>
                             <div class="tv1-subtext">{{ $user->email }}</div>
@@ -112,15 +214,68 @@
                             @endswitch
                         </td>
                         <td>
-                            <span class="tv1-status {{ $user->status === 'active' ? 'is-active' : 'is-inactive' }}">
-                                {{ $user->status === 'active' ? 'Hoạt động' : ($user->status === 'inactive' ? 'Bị khóa' : ($user->status ?: 'Chưa xác định')) }}
-                            </span>
+                            @if ($user->status === 'active')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 fw-semibold" style="font-size: 11.5px; border-radius: 6px;">
+                                    Hoạt động
+                                </span>
+                            @elseif ($user->unlock_requested_at)
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle py-1 px-2 fw-bold" style="font-size: 11px; border-radius: 6px;">
+                                    Chờ mở khóa
+                                </span>
+                                <div class="text-muted mt-1" style="font-size: 10.5px;">
+                                    Yêu cầu: {{ $user->unlock_requested_at->format('H:i d/m') }}
+                                </div>
+                                @if ($user->unlock_reason)
+                                    <div class="text-secondary fst-italic mt-1" style="font-size: 10.5px; max-width: 170px; word-break: break-word;" title="{{ $user->unlock_reason }}">
+                                        "{{ Str::limit($user->unlock_reason, 35) }}"
+                                    </div>
+                                @endif
+                            @else
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1 px-2 fw-semibold" style="font-size: 11.5px; border-radius: 6px;">
+                                    Đã khóa
+                                </span>
+                            @endif
                         </td>
                         <td>{{ $user->created_at?->format('d/m/Y') ?? '—' }}</td>
+                        <td class="text-center">
+                            @if ($user->id === auth()->id())
+                                <span class="badge bg-light text-muted border py-1 px-2" style="font-size: 11px;">Tài khoản của bạn</span>
+                            @else
+                                <form method="POST" action="{{ route('admin.users.update-status', $user) }}" class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    @if ($user->status === 'active')
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger py-1 px-3"
+                                                style="font-size: 11.5px; border-radius: 8px;"
+                                                onclick="return confirm('Xác nhận KHÓA tài khoản {{ $user->name }}?')"
+                                                title="Tài khoản đang hoạt động. Nhấn để khóa">
+                                            Khóa
+                                        </button>
+                                    @elseif ($user->unlock_requested_at)
+                                        <button type="submit"
+                                                class="btn btn-sm btn-warning text-dark py-1 px-3 fw-bold"
+                                                style="font-size: 11.5px; border-radius: 8px;"
+                                                onclick="return confirm('Xác nhận DUYỆT MỞ KHÓA cho tài khoản {{ $user->name }}?')"
+                                                title="Người dùng có đơn xin mở khóa. Nhấn để duyệt mở khóa">
+                                            Duyệt mở khóa
+                                        </button>
+                                    @else
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger py-1 px-3 fw-semibold"
+                                                style="font-size: 11.5px; border-radius: 8px;"
+                                                onclick="return confirm('Tài khoản {{ $user->name }} đang bị khóa. Bạn có chắc muốn MỞ KHÓA lại?')"
+                                                title="Tài khoản đang bị khóa. Nhấn vào để mở khóa">
+                                            Đã khóa
+                                        </button>
+                                    @endif
+                                </form>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="tv1-empty">Không tìm thấy người dùng phù hợp.</td>
+                        <td colspan="7" class="tv1-empty">Không tìm thấy người dùng phù hợp.</td>
                     </tr>
                 @endforelse
             </tbody>

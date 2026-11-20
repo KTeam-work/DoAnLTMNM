@@ -7,10 +7,15 @@ use App\Models\Contract;
 use App\Models\ContractMember;
 use App\Models\ContractTermination;
 use App\Models\Room;
+use App\Models\Service;
 use App\Models\User;
+use App\Services\ResendService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 class OwnerContractController extends Controller{
@@ -23,10 +28,18 @@ class OwnerContractController extends Controller{
                 ? User::query()->where('role', 'owner')->orderBy('id')->first()
                 : $this->owner($request));
 
+        if ($owner) {
+            // Tự động đồng bộ phòng đã có hợp đồng (active hoặc draft) sang trạng thái đã thuê
+            \App\Models\Room::query()
+                ->whereIn('id', Contract::where('owner_id', $owner->id)->whereIn('status', ['active', 'draft'])->pluck('room_id'))
+                ->where('status', 'available')
+                ->update(['status' => 'rented']);
+        }
+
         $contracts = $owner
             ? Contract::query()
                 ->where('owner_id', $owner->id)
-                ->with(['room.property', 'tenant:id,name,email,phone', 'members', 'termination'])
+                ->with(['room.property', 'tenant:id,name,email,phone,identity_card', 'members', 'termination'])
                 ->latest('start_date')
                 ->get()
             : collect();
@@ -64,7 +77,14 @@ class OwnerContractController extends Controller{
             ->with('property:id,name')
             ->orderBy('name')
             ->get();
-        $tenants = User::query()->where('role', 'tenant')->where('status', 'active')->orderBy('name')->get(['id', 'name', 'email', 'phone']);
+        $tenants = User::query()->where('role', 'tenant')->where('status', 'active')->orderBy('name')->get(['id', 'name', 'email', 'phone', 'identity_card']);
+        $services = Service::query()
+            ->where('owner_id', $owner->id)
+            ->where('status', 'active')
+            // Điện và nước đã được tính theo chỉ số, không phải dịch vụ cố định của hợp đồng.
+            ->whereNotIn('unit', ['kWh', 'm³'])
+            ->orderBy('name')
+            ->get(['id', 'name', 'unit', 'price']);
 
         // Yêu cầu thuê (lịch xem phòng) mà người thuê gửi tới các phòng của chủ trọ.
         // Dùng để chọn nhanh người thuê + phòng khi tạo hợp đồng.
@@ -84,7 +104,7 @@ class OwnerContractController extends Controller{
             ->limit(20)
             ->get();
 
-        return view('owner.contracts.create-form', compact('rooms', 'tenants', 'requests'));
+        return view('owner.contracts.create-form', compact('rooms', 'tenants', 'services', 'requests'));
     }
 
     public function show(Request $request, Contract $contract)
@@ -94,13 +114,13 @@ class OwnerContractController extends Controller{
         }
 
         if (! $request->user()) {
-            $contract->load(['room.property', 'tenant:id,name,email,phone', 'members', 'termination']);
+            $contract->load(['room.property', 'tenant:id,name,email,phone,identity_card', 'members', 'termination', 'services']);
 
             return view('owner.contracts.detail', compact('contract'));
         }
 
         $this->ownedContract($request, $contract);
-        $contract->load(['room.property', 'tenant:id,name,email,phone', 'members', 'termination']);
+        $contract->load(['room.property', 'tenant:id,name,email,phone,identity_card', 'members', 'termination', 'services']);
 
         return view('owner.contracts.detail', compact('contract'));
     }
@@ -108,9 +128,11 @@ class OwnerContractController extends Controller{
     public function store(Request $request)
     {
         $owner = $this->actingOwner($request);
-        $data = $request->validate([
+        $tenantMode = $request->input('tenant_mode', 'existing');
+
+        $rules = [
+            'tenant_mode' => ['nullable', 'in:existing,walkin'],
             'room_id' => ['required', 'integer', 'exists:rooms,id'],
-            'tenant_id' => ['required', 'integer', 'exists:users,id'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after:start_date'],
             'rent' => ['required', 'numeric', 'min:0'],
@@ -118,19 +140,110 @@ class OwnerContractController extends Controller{
             'payment_cycle' => ['nullable', 'in:monthly,quarterly'],
             'terms' => ['nullable', 'string'],
             'status' => ['nullable', 'in:draft,active'],
+            'service_ids' => ['nullable', 'array'],
+            'service_ids.*' => ['integer', 'distinct'],
+            'service_quantities' => ['nullable', 'array'],
+            'service_quantities.*' => ['nullable', 'numeric', 'min:0.01'],
+        ];
+
+        if ($tenantMode === 'walkin') {
+            $rules['walkin_name'] = ['required', 'string', 'max:100'];
+            $rules['walkin_phone'] = ['required', 'string', 'max:20'];
+            $rules['walkin_email'] = ['required', 'email', 'max:150'];
+            $rules['walkin_identity_card'] = ['nullable', 'string', 'max:25'];
+        } else {
+            $rules['tenant_id'] = ['required', 'integer', 'exists:users,id'];
+        }
+
+        $data = $request->validate($rules, [
+            'walkin_name.required' => 'Vui lòng nhập họ và tên khách thuê.',
+            'walkin_phone.required' => 'Vui lòng nhập số điện thoại khách thuê.',
+            'walkin_email.required' => 'Vui lòng nhập email để gửi thông tin tài khoản và hợp đồng cho khách.',
+            'walkin_email.email' => 'Địa chỉ email của khách thuê không đúng định dạng.',
+            'tenant_id.required' => 'Vui lòng chọn người thuê trong danh sách.',
         ]);
 
         $room = Room::query()->with('property')->findOrFail($data['room_id']);
         abort_unless($room->property->owner_id === $owner->id, 403, 'The room is not managed by you.');
 
-        $tenant = User::query()->findOrFail($data['tenant_id']);
-        abort_unless($tenant->role === 'tenant' && $tenant->status === 'active', 422, 'The selected user is not an active tenant.');
-        abort_if(Contract::query()->where('room_id', $room->id)->where('status', 'active')->exists(), 422, 'The room already has an active contract.');
+        $isNewAccount = false;
+        $defaultPassword = '';
+
+        if ($tenantMode === 'walkin') {
+            $email = trim(strtolower($data['walkin_email']));
+            $phone = trim($data['walkin_phone']);
+            $name = trim($data['walkin_name']);
+            $idCard = !empty($data['walkin_identity_card']) ? trim($data['walkin_identity_card']) : null;
+
+            // Kiểm tra: Tìm tài khoản dựa CHÍNH XÁC theo Email khách thuê nhập vào
+            $tenant = User::query()
+                ->where('email', $email)
+                ->first();
+
+            if ($tenant) {
+                // Đã có tài khoản mang email này: cập nhật thêm phone hoặc CCCD nếu chưa có
+                $updates = [];
+                if (empty($tenant->phone) && !empty($phone)) {
+                    $updates['phone'] = $phone;
+                }
+                if (empty($tenant->identity_card) && !empty($idCard)) {
+                    $updates['identity_card'] = $idCard;
+                }
+                if (!empty($updates)) {
+                    $tenant->update($updates);
+                }
+                $isNewAccount = false;
+                $defaultPassword = $tenant->initial_password ?? 'Mật khẩu tài khoản đã đăng ký của khách';
+            } else {
+                // Hệ thống tự động tạo mật khẩu ngẫu nhiên cho khách vãng lai (ví dụ: TroOi@4829)
+                $generatedPassword = 'TroOi@' . random_int(1000, 9999);
+                $defaultPassword = $generatedPassword;
+
+                $tenant = User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'identity_card' => $idCard,
+                    'role' => 'tenant',
+                    'status' => 'active',
+                    'password' => Hash::make($generatedPassword),
+                    'initial_password' => $generatedPassword,
+                ]);
+                $isNewAccount = true;
+            }
+
+            $data['tenant_id'] = $tenant->id;
+        } else {
+            $tenant = User::query()->findOrFail($data['tenant_id']);
+            $defaultPassword = $tenant->initial_password ?? 'Mật khẩu tài khoản đã đăng ký của khách';
+        }
+
+        abort_unless($tenant->role === 'tenant' && $tenant->status === 'active', 422, 'Tài khoản người thuê không hợp lệ hoặc đang bị khóa.');
+        abort_if(Contract::query()->where('room_id', $room->id)->where('status', 'active')->exists(), 422, 'Phòng này hiện đã có hợp đồng đang hoạt động.');
+
+        $selectedServiceIds = collect($data['service_ids'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
+        $services = Service::query()
+            ->where('owner_id', $owner->id)
+            ->where('status', 'active')
+            ->whereNotIn('unit', ['kWh', 'm³'])
+            ->whereIn('id', $selectedServiceIds)
+            ->get(['id', 'price']);
+        abort_unless($services->count() === $selectedServiceIds->count(), 422, 'Một hoặc nhiều dịch vụ không hợp lệ.');
 
         $status = $data['status'] ?? 'draft';
-        $contract = DB::transaction(function () use ($data, $owner, $room, $status) {
+        $contractData = Arr::except($data, [
+            'tenant_mode',
+            'walkin_name',
+            'walkin_phone',
+            'walkin_email',
+            'walkin_identity_card',
+            'service_ids',
+            'service_quantities',
+        ]);
+
+        $contract = DB::transaction(function () use ($contractData, $data, $owner, $room, $services, $status) {
             $contract = Contract::query()->create([
-                ...$data,
+                ...$contractData,
                 'contract_code' => $this->contractCode(),
                 'owner_id' => $owner->id,
                 'payment_cycle' => $data['payment_cycle'] ?? 'monthly',
@@ -138,20 +251,58 @@ class OwnerContractController extends Controller{
                 'signed_at' => $status === 'active' ? now() : null,
             ]);
 
-            if ($status === 'active') {
-                $room->update(['status' => 'rented']);
+            $quantities = $data['service_quantities'] ?? [];
+            foreach ($services as $service) {
+                DB::table('contract_services')->insert([
+                    'contract_id' => $contract->id,
+                    'service_id' => $service->id,
+                    'quantity' => $quantities[$service->id] ?? 1,
+                    'unit_price' => $service->price,
+                    'status' => 'active',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
+
+            // Khi tạo hợp đồng (kể cả bản nháp), phòng đều chuyển sang trạng thái đã thuê để ẩn khỏi web
+            $room->update(['status' => 'rented']);
 
             return $contract;
         });
 
-        $contract->load(['room.property', 'tenant:id,name,email,phone']);
+        $contract->load(['room.property', 'tenant:id,name,email,phone,identity_card']);
 
-        if (! $request->expectsJson()) {
-            return redirect()->route('owner.contracts.index')->with('success', 'Tạo hợp đồng thành công.');
+        // Gửi email tự động qua Resend API (bọc try-catch an toàn tuyệt đối)
+        try {
+            if (!empty($tenant->email)) {
+                /** @var ResendService $resendService */
+                $resendService = app(ResendService::class);
+                $resendService->sendWalkInContractEmail(
+                    toEmail: $tenant->email,
+                    tenantName: $tenant->name,
+                    roomName: $room->name,
+                    propertyName: $room->property->name ?? 'Khu trọ',
+                    contractCode: $contract->contract_code,
+                    defaultPassword: $defaultPassword,
+                    isNewAccount: $isNewAccount
+                );
+            }
+        } catch (\Throwable $e) {
+            Log::error('Lỗi gửi email hợp đồng qua Resend API: ' . $e->getMessage(), [
+                'contract_id' => $contract->id,
+                'email' => $tenant->email ?? null,
+            ]);
         }
 
-        return response()->json(['message' => 'Contract created.', 'data' => $contract], 201);
+        $successMsg = $isNewAccount
+            ? "Tạo hợp đồng thành công! Đã tự động tạo tài khoản người thuê và gửi mật khẩu đăng nhập ({$defaultPassword}) tới Gmail: {$tenant->email}."
+            : "Tạo hợp đồng thành công! Đã gán hợp đồng và gửi email thông báo tới {$tenant->email}.";
+
+        if (! $request->expectsJson()) {
+            return redirect()->route('owner.contracts.index')->with('success', $successMsg);
+        }
+
+        return response()->json(['message' => $successMsg, 'data' => $contract], 201);
     }
 
     public function manageMembers(Request $request, Contract $contract)
@@ -217,6 +368,28 @@ class OwnerContractController extends Controller{
         $contract->update($data);
 
         return response()->json(['message' => 'Initial utility readings updated.', 'data' => $contract->fresh()]);
+    }
+
+    public function activate(Request $request, Contract $contract)
+    {
+        $this->ownedContract($request, $contract);
+        abort_unless($contract->status === 'draft', 422, 'Hợp đồng này không ở trạng thái nháp.');
+
+        DB::transaction(function () use ($contract) {
+            $contract->update([
+                'status' => 'active',
+                'signed_at' => now(),
+            ]);
+            $contract->room->update(['status' => 'rented']);
+        });
+
+        if (! $request->expectsJson()) {
+            return redirect()
+                ->route('owner.contracts.show', $contract)
+                ->with('success', 'Đã kích hoạt hợp đồng thành công! Phòng đã chuyển sang trạng thái đang thuê.');
+        }
+
+        return response()->json(['message' => 'Hợp đồng đã được kích hoạt thành công.', 'data' => $contract->fresh()]);
     }
 
     public function terminate(Request $request, Contract $contract)

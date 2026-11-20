@@ -110,15 +110,11 @@
                         <label for="room_code" class="form-label">Mã phòng</label>
                         <input
                             id="room_code"
-                            name="room_code"
                             type="text"
-                            maxlength="20"
-                            class="form-control @error('room_code') is-invalid @enderror"
-                            value="{{ old('room_code', $room->room_code) }}"
-                            placeholder="Ví dụ: P101">
-                        @error('room_code')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                            class="form-control"
+                            value="{{ $room->room_code }}"
+                            readonly>
+                        <div class="form-text">Mã phòng được tạo tự động và không thể chỉnh sửa.</div>
                     </div>
 
                     <div class="col-md-6">

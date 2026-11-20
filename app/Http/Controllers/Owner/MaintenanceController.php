@@ -72,11 +72,14 @@ class MaintenanceController extends Controller
         $data = $request->validate([
             'status' => ['required', 'in:processing,completed,rejected'],
             'owner_note' => ['nullable', 'string'],
+            'damage_type' => ['nullable', 'in:landlord,tenant'],
+            'cost' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $allowed = [
-            'pending' => ['processing', 'rejected'],
+            'pending' => ['processing', 'completed', 'rejected'],
             'processing' => ['completed', 'rejected'],
+            'completed' => ['completed', 'processing'],
         ];
         if (! in_array($data['status'], $allowed[$maintenance->status] ?? [], true)) {
             $message = 'Không thể chuyển trạng thái từ ' . $maintenance->status . ' sang ' . $data['status'] . '.';
@@ -86,21 +89,92 @@ class MaintenanceController extends Controller
             abort(422, $message);
         }
 
-        $maintenance->update([
+        $updateData = [
             'status' => $data['status'],
             'owner_note' => $data['owner_note'] ?? $maintenance->owner_note,
             'completed_at' => $data['status'] === 'completed' ? now() : null,
-        ]);
+        ];
 
-        $statusLabels = ['processing' => 'đang xử lý', 'completed' => 'hoàn thành', 'rejected' => 'từ chối'];
-        Notification::notify(
-            $maintenance->tenant_id,
-            'Yêu cầu sửa chữa ' . ($statusLabels[$data['status']] ?? $data['status']),
-            "Yêu cầu #TCK-{$maintenance->id} ({$maintenance->title}) đã được chủ nhà cập nhật.",
-            'maintenance',
-            'maintenance',
-            $maintenance->id
-        );
+        if ($data['status'] === 'completed') {
+            $damageType = $data['damage_type'] ?? 'landlord';
+            $updateData['damage_type'] = $damageType;
+
+            if ($damageType === 'tenant') {
+                $cost = floatval($data['cost'] ?? 0);
+                $updateData['cost'] = $cost;
+
+                // Tự động tạo hóa đơn riêng nếu có hợp đồng và chi phí > 0
+                if ($cost > 0) {
+                    $contract = $maintenance->contract ?? \App\Models\Contract::where('room_id', $maintenance->room_id)
+                        ->where('tenant_id', $maintenance->tenant_id)
+                        ->where('status', 'active')
+                        ->first();
+
+                    if ($contract) {
+                        $invoiceCode = 'INV-SC-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(4));
+                        $invoice = \App\Models\Invoice::create([
+                            'invoice_code' => $invoiceCode,
+                            'contract_id' => $contract->id,
+                            'billing_month' => now()->startOfMonth(),
+                            'issue_date' => now()->toDateString(),
+                            'due_date' => now()->addDays(5)->toDateString(),
+                            'subtotal' => $cost,
+                            'discount' => 0,
+                            'total' => $cost,
+                            'status' => 'unpaid',
+                        ]);
+
+                        \App\Models\InvoiceItem::create([
+                            'invoice_id' => $invoice->id,
+                            'type' => 'other',
+                            'description' => "Chi phí sửa chữa sự cố #TCK-{$maintenance->id} ({$maintenance->title})",
+                            'quantity' => 1,
+                            'unit_price' => $cost,
+                            'amount' => $cost,
+                        ]);
+
+                        $updateData['invoice_id'] = $invoice->id;
+
+                        // Thông báo kèm link hóa đơn cho người thuê
+                        Notification::notify(
+                            $maintenance->tenant_id,
+                            'Hóa đơn sửa chữa sự cố #TCK-' . $maintenance->id,
+                            "Sự cố đã hoàn thành. Chi phí do người thuê chịu là " . number_format($cost) . " đ. Hóa đơn #{$invoice->invoice_code} đã được tạo, vui lòng thanh toán.",
+                            'invoice',
+                            'invoice',
+                            $invoice->id
+                        );
+                    }
+                }
+            } else {
+                // Hao mòn tự nhiên do chủ trọ chịu
+                $updateData['cost'] = 0;
+                $updateData['invoice_id'] = null;
+
+                Notification::notify(
+                    $maintenance->tenant_id,
+                    'Sự cố #TCK-' . $maintenance->id . ' đã sửa xong (Miễn phí)',
+                    "Sự cố '{$maintenance->title}' do hao mòn thiết bị đã được xử lý hoàn tất. Bạn không phải thanh toán chi phí nào.",
+                    'maintenance',
+                    'maintenance',
+                    $maintenance->id
+                );
+            }
+        }
+
+        $maintenance->update($updateData);
+
+        if ($data['status'] !== 'completed') {
+            $statusLabels = ['processing' => 'đang xử lý', 'rejected' => 'từ chối'];
+            Notification::notify(
+                $maintenance->tenant_id,
+                'Yêu cầu sửa chữa ' . ($statusLabels[$data['status']] ?? $data['status']),
+                "Yêu cầu #TCK-{$maintenance->id} ({$maintenance->title}) đã được chủ nhà cập nhật.",
+                'maintenance',
+                'maintenance',
+                $maintenance->id
+            );
+        }
 
         if (! $request->expectsJson()) {
             return back()->with('success', 'Đã cập nhật trạng thái yêu cầu.');

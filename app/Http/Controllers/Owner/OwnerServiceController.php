@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OwnerServiceController extends Controller
 {
@@ -23,8 +24,14 @@ class OwnerServiceController extends Controller
             ? Service::query()->where('owner_id', $owner->id)->orderBy('name')->get()
             : collect();
 
+        $properties = $owner ? $owner->properties()->orderBy('id')->get() : collect();
+        $selectedPropertyId = $request->input('property_id');
+        $selectedProperty = $selectedPropertyId
+            ? $properties->firstWhere('id', $selectedPropertyId)
+            : $properties->first();
+
         if (! $request->expectsJson()) {
-            return view('owner.services.index', compact('services'));
+            return view('owner.services.index', compact('services', 'properties', 'selectedProperty'));
         }
 
         $this->owner($request);
@@ -34,6 +41,18 @@ class OwnerServiceController extends Controller
 
     public function create(Request $request)
     {
+        $owner = $request->user() && $request->user()->role === 'owner'
+            ? $request->user()
+            : (config('app.demo_guest')
+                ? User::query()->where('role', 'owner')->orderBy('id')->first()
+                : $this->owner($request));
+
+        $properties = $owner ? $owner->properties()->orderBy('id')->get() : collect();
+        $selectedPropertyId = $request->input('property_id');
+        $selectedProperty = $selectedPropertyId
+            ? $properties->firstWhere('id', $selectedPropertyId)
+            : $properties->first();
+
         $service = new Service([
             'name' => '',
             'description' => '',
@@ -41,7 +60,12 @@ class OwnerServiceController extends Controller
             'status' => 'active',
         ]);
 
-        return view('owner.services.edit', ['service' => $service, 'mode' => 'create']);
+        return view('owner.services.edit', [
+            'service' => $service,
+            'mode' => 'create',
+            'properties' => $properties,
+            'selectedProperty' => $selectedProperty,
+        ]);
     }
 
     public function edit(Request $request, int $id)
@@ -56,6 +80,12 @@ class OwnerServiceController extends Controller
             ? Service::query()->where('owner_id', $owner->id)->find($id)
             : null;
 
+        $properties = $owner ? $owner->properties()->orderBy('id')->get() : collect();
+        $selectedPropertyId = $request->input('property_id');
+        $selectedProperty = $selectedPropertyId
+            ? $properties->firstWhere('id', $selectedPropertyId)
+            : $properties->first();
+
         // Fallback để trang không 500 khi demo/id lạ: dựng object tạm để form vẫn render.
         $service ??= new Service([
             'id' => $id,
@@ -67,7 +97,12 @@ class OwnerServiceController extends Controller
         ]);
         $service->id = $id;
 
-        return view('owner.services.edit', ['service' => $service, 'mode' => 'edit']);
+        return view('owner.services.edit', [
+            'service' => $service,
+            'mode' => 'edit',
+            'properties' => $properties,
+            'selectedProperty' => $selectedProperty,
+        ]);
     }
 
     public function store(Request $request)
@@ -105,6 +140,22 @@ class OwnerServiceController extends Controller
     public function destroy(Request $request, ?Service $service = null)
     {
         $service = $this->ownedService($request, $service);
+
+        // Chống xóa dịch vụ đang được sử dụng trong hợp đồng còn hiệu lực
+        $inUse = DB::table('contract_services')
+            ->join('contracts', 'contract_services.contract_id', '=', 'contracts.id')
+            ->where('contract_services.service_id', $service->id)
+            ->where('contracts.status', 'active')
+            ->exists();
+
+        if ($inUse) {
+            $msg = 'Không thể xóa dịch vụ đang được sử dụng trong hợp đồng thuê còn hiệu lực. Vui lòng chuyển trạng thái dịch vụ sang "Ngưng hoạt động".';
+            if (! $request->expectsJson()) {
+                return redirect()->route('owner.services.index')->with('error', $msg);
+            }
+            abort(422, $msg);
+        }
+
         $service->delete();
 
         if (! $request->expectsJson()) {

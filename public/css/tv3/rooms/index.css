@@ -1,18 +1,18 @@
 
 :root {
-    --primary: #20584f;
-    --primary-dark: #17463e;
-    --primary-light: #eaf3ef;
-    --background: #f8f5eb;
-    --text: #213430;
-    --muted: #78837e;
-    --border: #e6dcc2;
+    --primary: #0c2340;
+    --primary-dark: #071526;
+    --primary-light: #eff6ff;
+    --background: #f8fafc;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
     --yellow: #f5c84b;
 
-    --green: #20584f;
-    --green-dark: #17463e;
-    --green-light: #eaf3ef;
-    --cream: #f8f5eb;
+    --green: #0c2340;
+    --green-dark: #071526;
+    --green-light: #eff6ff;
+    --cream: #f8fafc;
 }
 
 /* NỀN TRANG */
@@ -299,7 +299,7 @@ textarea {
     background-color: #fff;
     color: var(--text);
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(32, 88, 79, 0.12);
+    box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.12);
 }
 
 /* BẢNG DỮ LIỆU */
@@ -342,7 +342,7 @@ textarea {
 }
 
 .pagination .page-link:focus {
-    box-shadow: 0 0 0 3px rgba(32, 88, 79, 0.12);
+    box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.12);
 }
 
 /* THÔNG BÁO */

@@ -5,6 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/properties/edit.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <style>
         .property-images-section {
@@ -69,7 +70,7 @@
             padding: 4px 8px;
             border-radius: 20px;
             background: #e6f3eb;
-            color: #20584f;
+            color: #0c2340;
             font-size: 11px;
             font-weight: 600;
         }
@@ -128,7 +129,7 @@
                 </div>
             @endif
 
-            @if ($errors->any())
+            @if (isset($errors) && $errors->any())
                 <div class="alert alert-danger">
                     <strong>Vui lòng kiểm tra lại thông tin:</strong>
                     <ul class="mb-0 mt-2">
@@ -406,6 +407,24 @@
                             </div>
                         </div>
 
+                        {{-- BẢN ĐỒ CHỌN VỊ TRÍ --}}
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                📍 Vị trí nhà trọ trên bản đồ (OpenStreetMap)
+                            </label>
+                            <p class="text-muted small mb-2">
+                                Bấm vào vị trí trên bản đồ để chọn tọa độ, hoặc tự gõ tọa độ bên trên để bản đồ tự động di chuyển đến.
+                            </p>
+                            <div id="propertyMap" style="width: 100%; height: 320px; border-radius: 12px; overflow: hidden; background: #f1f5f9; border: 1px solid #cbd5e1;"></div>
+                            <div id="mapStatus" class="form-text mt-2 text-success fw-medium">
+                                @if($property->latitude && $property->longitude)
+                                    📍 Tọa độ hiện tại: <strong>{{ $property->latitude }}, {{ $property->longitude }}</strong>
+                                @else
+                                    Hãy chọn vị trí nhà trọ trên bản đồ.
+                                @endif
+                            </div>
+                        </div>
+
                         {{-- TRẠNG THÁI --}}
                         <div class="mb-4">
                             <label for="status" class="form-label">
@@ -472,5 +491,6 @@
 @endsection
 
 @push('scripts')
-       <script src="{{ asset('js/tv3/properties/edit.js') }}"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="{{ asset('js/tv3/properties/edit.js') }}"></script>
 @endpush

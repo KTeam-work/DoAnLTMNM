@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\MaintenanceRequest;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
@@ -59,19 +60,20 @@ class MaintenanceController extends Controller
         $data = $request->validate([
             'contract_id' => ['required', 'integer', 'exists:contracts,id'],
             'category' => ['nullable', 'string', 'max:50'],
+            'damage_type' => ['nullable', 'in:landlord,tenant'],
             'title' => ['required', 'string', 'max:200'],
             'description' => ['required', 'string'],
             'priority' => ['required', 'in:low,medium,high,urgent'],
             'image' => ['nullable', 'image', 'max:10240'],
         ]);
 
-        // Chống gửi yêu cầu cho hợp đồng không thuộc tenant.
-        $contract = Contract::query()->where('tenant_id', $tenant->id)->find($data['contract_id']);
+        // Chống gửi yêu cầu cho hợp đồng không thuộc tenant hoặc đã hết hiệu lực.
+        $contract = Contract::query()->where('tenant_id', $tenant->id)->where('status', 'active')->find($data['contract_id']);
         if (! $contract) {
             if (! $request->expectsJson()) {
-                return back()->withErrors(['contract_id' => 'Hợp đồng không thuộc tài khoản của bạn.'])->withInput();
+                return back()->withErrors(['contract_id' => 'Hợp đồng không thuộc tài khoản của bạn hoặc đã kết thúc.'])->withInput();
             }
-            abort(422, 'The contract does not belong to you.');
+            abort(422, 'The contract does not belong to you or is no longer active.');
         }
 
         $imagePath = null;
@@ -84,12 +86,27 @@ class MaintenanceController extends Controller
             'room_id' => $contract->room_id,
             'tenant_id' => $tenant->id,
             'category' => $data['category'] ?? null,
+            'damage_type' => $data['damage_type'] ?? null,
             'title' => $data['title'],
             'description' => $data['description'],
             'priority' => $data['priority'],
             'status' => 'pending',
             'image' => $imagePath,
         ]);
+
+        // Gửi thông báo trực tiếp đến Chủ trọ quản lý phòng
+        $ownerId = $contract->owner_id ?? $contract->room?->property?->owner_id;
+        if ($ownerId) {
+            $roomName = $contract->room?->name ?? 'phòng trọ';
+            Notification::notify(
+                $ownerId,
+                'Yêu cầu sửa chữa mới #TCK-' . $maintenance->id,
+                "Khách thuê {$tenant->name} ({$roomName}) vừa báo cáo sự cố: '{$maintenance->title}'.",
+                'maintenance',
+                'maintenance',
+                $maintenance->id
+            );
+        }
 
         if (! $request->expectsJson()) {
             return redirect()->route('tenant.maintenance.show', $maintenance->id)

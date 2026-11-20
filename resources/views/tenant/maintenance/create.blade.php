@@ -14,9 +14,9 @@
 <div class="page-wrap" style="padding-top: 40px; max-width: 900px;">
   
   <div class="mb-4">
-    <a href="{{ route('tenant.maintenance.index') }}" class="text-decoration-none text-muted fw-bold" style="font-size: 13px;">← QUAY LẠI TRUNG TÂM HỖ TRỢ</a>
-    <h2 class="page-title mt-2" style="font-size: 32px;">Tạo Ticket Sự Cố Mới</h2>
-    <p class="text-muted mt-2" style="font-size: 14px;">Mô tả chi tiết tình trạng để Ban quản lý có thể chuẩn bị vật tư và khắc phục nhanh nhất.</p>
+    <a href="{{ route('tenant.maintenance.index') }}" class="text-decoration-none text-muted fw-bold" style="font-size: 13px;">← Quay lại danh sách yêu cầu</a>
+    <h2 class="page-title mt-2 fw-bold text-dark" style="font-size: 28px;">Gửi yêu cầu sửa chữa</h2>
+    <p class="text-muted mt-2" style="font-size: 14px;">Mô tả tình trạng sự cố để chủ nhà chuẩn bị vật tư và hỗ trợ bạn sớm nhất.</p>
   </div>
 
   <div class="form-panel">
@@ -53,7 +53,7 @@
         <div class="col-md-6">
           <label class="form-label">Phòng tiếp nhận sự cố</label>
           <div class="form-control fw-bold text-dark d-flex align-items-center" style="background: #f0f0f0; opacity: 0.8;">
-            <span style="margin-right: 10px;">🏠</span> <span id="roomName">—</span>
+            <i class="bi bi-house me-2 text-muted"></i> <span id="roomName">—</span>
           </div>
         </div>
 
@@ -61,71 +61,34 @@
           <label class="form-label">Phân loại sự cố <span class="text-danger">*</span></label>
           <select name="category" class="form-select fw-bold text-dark" required>
             <option value="" disabled @selected(!old('category'))>-- Vui lòng chọn hệ thống --</option>
-            <option value="dien_nuoc" @selected(old('category') === 'dien_nuoc')>💧 Hệ thống Điện / Nước</option>
-            <option value="dien_lanh" @selected(old('category') === 'dien_lanh')>❄️ Thiết bị Điện lạnh (Điều hòa, Tủ lạnh)</option>
-            <option value="noi_that" @selected(old('category') === 'noi_that')>🚪 Nội thất (Giường, Tủ, Cửa, Khóa)</option>
-            <option value="khac" @selected(old('category') === 'khac')>🔧 Vấn đề khác</option>
+            <option value="dien_nuoc" @selected(old('category') === 'dien_nuoc')>Hệ thống Điện / Nước</option>
+            <option value="dien_lanh" @selected(old('category') === 'dien_lanh')>Thiết bị Điện lạnh (Điều hòa, Tủ lạnh)</option>
+            <option value="noi_that" @selected(old('category') === 'noi_that')>Nội thất (Giường, Tủ, Cửa, Khóa)</option>
+            <option value="khac" @selected(old('category') === 'khac')>Vấn đề khác</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Mức độ khẩn cấp</label>
+          <select name="priority" class="form-select fw-bold text-dark">
+            <option value="low" @selected(old('priority') === 'low')>Thấp (Không gấp)</option>
+            <option value="medium" @selected(old('priority', 'medium') === 'medium')>Bình thường (Xử lý trong 24-48h)</option>
+            <option value="high" @selected(old('priority') === 'high')>Cao (Cần xử lý sớm trong ngày)</option>
+            <option value="urgent" @selected(old('priority') === 'urgent')>Khẩn cấp (Mất điện, vỡ nước...)</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nguyên nhân sơ bộ <span class="text-muted fw-normal small">(Tự khai báo)</span></label>
+          <select name="damage_type" class="form-select fw-bold text-dark">
+            <option value="landlord" @selected(old('damage_type', 'landlord') === 'landlord')>Hao mòn tự nhiên / Thiết bị cũ tự hỏng</option>
+            <option value="tenant" @selected(old('damage_type') === 'tenant')>Do người thuê vô ý làm rơi/hỏng (Sẽ chịu chi phí)</option>
           </select>
         </div>
 
         <div class="col-12">
-          <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
-          <input type="text" name="title" class="form-control fw-bold" value="{{ old('title') }}" placeholder="VD: Điều hòa không mát" required maxlength="200">
-        </div>
-
-        <!-- Section 2: Enterprise Priority Cards -->
-        <div class="col-12 mt-5">
-          <label class="form-label">Đánh giá mức độ nghiêm trọng</label>
-          <div class="row g-3 mt-1">
-            <div class="col-md-6">
-              <label class="w-100 h-100 m-0">
-                <input type="radio" name="priority" value="low" class="radio-card-input" @checked(old('priority') === 'low')>
-                <div class="radio-card normal">
-                  <div class="d-flex align-items-center gap-3 mb-2">
-                    <span style="font-size: 20px;">🐢</span>
-                    <h6 class="fw-bold mb-0 text-dark">Thấp</h6>
-                  </div>
-                  <p class="text-muted mb-0" style="font-size: 13px;">Việc nhỏ, lúc nào rảnh làm cũng được.</p>
-                </div>
-              </label>
-            </div>
-            <div class="col-md-6">
-              <label class="w-100 h-100 m-0">
-                <input type="radio" name="priority" value="medium" class="radio-card-input" @checked(old('priority', 'medium') === 'medium')>
-                <div class="radio-card normal">
-                  <div class="d-flex align-items-center gap-3 mb-2">
-                    <span style="font-size: 20px;">🛡️</span>
-                    <h6 class="fw-bold mb-0 text-dark">Bình thường</h6>
-                  </div>
-                  <p class="text-muted mb-0" style="font-size: 13px;">Sự cố nhỏ, không ảnh hưởng trực tiếp đến sinh hoạt. Xử lý trong 24-48h.</p>
-                </div>
-              </label>
-            </div>
-            <div class="col-md-6">
-              <label class="w-100 h-100 m-0">
-                <input type="radio" name="priority" value="high" class="radio-card-input" @checked(old('priority') === 'high')>
-                <div class="radio-card urgent">
-                  <div class="d-flex align-items-center gap-3 mb-2">
-                    <span style="font-size: 20px;">⚠️</span>
-                    <h6 class="fw-bold mb-0 text-danger">Cao</h6>
-                  </div>
-                  <p class="text-muted mb-0" style="font-size: 13px;">Ảnh hưởng sinh hoạt, cần xử lý sớm trong ngày.</p>
-                </div>
-              </label>
-            </div>
-            <div class="col-md-6">
-              <label class="w-100 h-100 m-0">
-                <input type="radio" name="priority" value="urgent" class="radio-card-input" @checked(old('priority') === 'urgent')>
-                <div class="radio-card urgent">
-                  <div class="d-flex align-items-center gap-3 mb-2">
-                    <span style="font-size: 20px;">🚨</span>
-                    <h6 class="fw-bold mb-0 text-danger">Khẩn cấp</h6>
-                  </div>
-                  <p class="text-muted mb-0" style="font-size: 13px;">Không thể sinh hoạt (mất điện, vỡ ống nước...). Xử lý ngay lập tức.</p>
-                </div>
-              </label>
-            </div>
-          </div>
+          <label class="form-label">Tiêu đề sự cố <span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control fw-bold" value="{{ old('title') }}" placeholder="VD: Điều hòa không mát, vòi nước bị rò rỉ..." required maxlength="200">
         </div>
 
         <!-- Section 3: Chi tiết & Đính kèm -->
@@ -137,7 +100,7 @@
         <div class="col-12">
           <label class="form-label">Tài liệu đính kèm / Hình ảnh hiện trường (Tùy chọn)</label>
           <div class="upload-zone" id="uploadZone">
-            <div class="upload-icon">📁</div>
+            <div class="upload-icon"><i class="bi bi-cloud-arrow-up text-muted" style="font-size: 32px;"></i></div>
             <div>
               <div class="fw-bold text-dark" style="font-size: 15px;">Kéo thả file hoặc nhấn để tải lên</div>
               <div class="text-muted mt-1" style="font-size: 13px;" id="uploadHint">Hỗ trợ định dạng: JPG, PNG (Tối đa 10MB)</div>
@@ -158,7 +121,7 @@
         </div>
         <div>
           <a href="{{ route('tenant.maintenance.index') }}" class="btn btn-light fw-bold px-4 py-3 me-2" style="border-radius: 12px; font-size: 14px;">Hủy bỏ</a>
-          <button type="submit" class="btn btn-brand px-5 py-3" style="font-size: 14px; box-shadow: 0 4px 15px rgba(245,200,75,0.4);">🚀 Gửi Ticket</button>
+          <button type="submit" class="btn btn-brand px-5 py-3" style="font-size: 14px; box-shadow: 0 4px 15px rgba(245,200,75,0.4);">Gửi yêu cầu</button>
         </div>
       </div>
     </form>

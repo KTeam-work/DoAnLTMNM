@@ -17,7 +17,7 @@
                 <h1 class="page-title">Quản lý dịch vụ</h1>
                 <div class="page-desc">Quản lý các dịch vụ và đơn giá áp dụng cho nhà trọ</div>
             </div>
-            <a href="{{ route('owner.services.create') }}" class="btn-brand">
+            <a href="{{ route('owner.services.create', ['property_id' => $selectedProperty?->id]) }}" class="btn-brand">
                 <span>＋</span> Thêm dịch vụ
             </a>
         </div>
@@ -27,58 +27,48 @@
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <div class="property-label">Nhà trọ đang xem</div>
-                    <div class="property-name">Nhà trọ Q.7</div>
-                    <div class="property-address">123 Nguyễn Thị Thập, Quận 7, TP. Hồ Chí Minh</div>
+                    @if($selectedProperty)
+                        <div class="property-name">{{ $selectedProperty->name }}</div>
+                        <div class="property-address">{{ $selectedProperty->address }}</div>
+                    @else
+                        <div class="property-name">Chưa có nhà trọ nào</div>
+                        <div class="property-address">Vui lòng thêm bất động sản / nhà trọ trước khi cấu hình dịch vụ</div>
+                    @endif
                 </div>
-                <div class="col-md-5">
-                    <select class="property-select">
-                        <option>Nhà trọ Q.7</option>
-                        <option>Chung cư mini Thủ Đức</option>
-                        <option>Nhà trọ Bình Thạnh</option>
-                    </select>
+                <div class="col-md-5 text-md-end">
+                    @if($properties->isNotEmpty())
+                        <select class="property-select" onchange="if(this.value) window.location.href='{{ route('owner.services.index') }}?property_id=' + this.value">
+                            @foreach($properties as $prop)
+                                <option value="{{ $prop->id }}" @selected($selectedProperty && $selectedProperty->id === $prop->id)>
+                                    {{ $prop->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
                 </div>
             </div>
         </div>
 
-        {{-- STATS --}}
+        {{-- BỘ LỌC TRẠNG THÁI (NO ICONS) --}}
         @php
             $totalServices = $services->count();
             $activeServices = $services->where('status', 'active')->count();
             $inactiveServices = $services->where('status', 'inactive')->count();
         @endphp
-        <div class="row g-3">
-            <div class="col-lg-4 col-md-6">
-                <div class="service-stat-card">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="service-stat-icon">☷</div>
-                        <div>
-                            <div class="service-stat-title">Tổng dịch vụ</div>
-                            <div class="service-stat-number">{{ $totalServices }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="service-stat-card">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="service-stat-icon">✓</div>
-                        <div>
-                            <div class="service-stat-title">Đang hoạt động</div>
-                            <div class="service-stat-number">{{ $activeServices }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="service-stat-card">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="service-stat-icon" style="background:var(--red-soft); color:var(--red);">◷</div>
-                        <div>
-                            <div class="service-stat-title">Tạm ngưng</div>
-                            <div class="service-stat-number">{{ $inactiveServices }}</div>
-                        </div>
-                    </div>
-                </div>
+        <div class="segmented-filter-wrapper mb-4">
+            <div class="segmented-filter-bar" role="tablist">
+                <button type="button" class="segmented-tab active" data-status="">
+                    <span class="tab-label">Tất cả</span>
+                    <span class="tab-count">{{ $totalServices }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="active">
+                    <span class="tab-label">Đang hoạt động</span>
+                    <span class="tab-count">{{ $activeServices }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="inactive">
+                    <span class="tab-label">Tạm ngưng</span>
+                    <span class="tab-count">{{ $inactiveServices }}</span>
+                </button>
             </div>
         </div>
 
@@ -111,11 +101,10 @@
                     </thead>
                     <tbody>
                         @forelse($services as $service)
-                        <tr>
+                        <tr class="service-row" data-status="{{ $service->status }}">
                             <td><span class="service-id">#{{ $service->id }}</span></td>
                             <td>
                                 <div class="service-wrapper">
-                                    <div class="service-icon">✨</div>
                                     <div class="service-name">{{ $service->name }}</div>
                                 </div>
                             </td>
@@ -131,7 +120,7 @@
                             </td>
                             <td>
                                 <div class="action-group">
-                                    <a href="{{ route('owner.services.edit', ['id' => $service->id]) }}" class="btn-action btn-edit">✎ Sửa</a>
+                                    <a href="{{ route('owner.services.edit', ['id' => $service->id]) }}" class="btn-action btn-edit">Sửa</a>
                                 </div>
                             </td>
                         </tr>
@@ -140,10 +129,46 @@
                             <td colspan="7" class="text-center text-muted py-5">Chưa có dịch vụ nào. Hãy thêm dịch vụ mới.</td>
                         </tr>
                         @endforelse
+                        <tr id="noServicesFilter" style="display: none;">
+                            <td colspan="7" class="text-center text-muted py-4">Không tìm thấy dịch vụ nào phù hợp trạng thái này.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabBtns = document.querySelectorAll('.segmented-tab');
+        const rows = document.querySelectorAll('.service-table tbody tr.service-row');
+        const noResults = document.getElementById('noServicesFilter');
+
+        function filterServices(targetStatus) {
+            let visibleCount = 0;
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status') || '';
+                const match = !targetStatus || status === targetStatus;
+                row.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+
+            if (noResults) {
+                noResults.style.display = (rows.length > 0 && visibleCount === 0) ? '' : 'none';
+            }
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const status = this.getAttribute('data-status') || '';
+                filterServices(status);
+            });
+        });
+    });
+</script>
+@endpush
 
 @endsection

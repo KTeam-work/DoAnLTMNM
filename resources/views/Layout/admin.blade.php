@@ -82,6 +82,21 @@
 
                     <li class="nav-item">
                         <a
+                            class="app-nav-link text-decoration-none {{ request()->routeIs('admin.reports*') ? 'active' : '' }}"
+                            href="{{ route('admin.reports.index') }}"
+                        >
+                            Báo cáo vi phạm
+                            @php
+                                $pendingReportsCount = \Illuminate\Support\Facades\Schema::hasTable('post_reports') ? \App\Models\PostReport::where('status', 'pending')->count() : 0;
+                            @endphp
+                            @if($pendingReportsCount > 0)
+                                <span class="badge bg-danger rounded-pill ms-1" style="font-size: 10px;">{{ $pendingReportsCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a
                             class="app-nav-link text-decoration-none {{ request()->routeIs('admin.statistics') ? 'active' : '' }}"
                             href="{{ route('admin.statistics') }}"
                         >
@@ -89,33 +104,78 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a
+                            class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
+                            href="{{ route('chatbot.index') }}"
+                        >
+                            Trợ lý hỗ trợ
+                        </a>
+                    </li>
+
                 </ul>
 
                 <div class="navbar-actions">
 
-                    <div class="user-chip">
-                        <span class="user-avatar">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
-                        </span>
+                    {{-- DROPDOWN TÀI KHOẢN --}}
+                    <div class="dropdown user-dropdown">
 
-                        <span class="user-meta">
-                            <span class="user-name d-block">
-                                {{ auth()->user()->name ?? 'Admin hệ thống' }}
+                        <button
+                            class="user-chip"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="true"
+                            aria-expanded="false">
+
+                            <span class="user-avatar">
+                                {{ strtoupper(mb_substr(auth()->user()->name ?? 'AD', 0, 2)) }}
                             </span>
 
-                            <span class="user-role">
-                                Quản trị viên
+                            <span class="user-meta text-start">
+                                <span class="user-name">
+                                    {{ auth()->user()->name ?? 'Admin hệ thống' }}
+                                </span>
+
+                                <span class="user-role">Quản trị viên</span>
                             </span>
-                        </span>
-                    </div>
 
-                    <form method="POST" action="{{ route('logout') }}" class="ms-2">
-                        @csrf
-
-                        <button type="submit" class="btn-outline-brand">
-                            Đăng xuất
+                            <span class="caret">▾</span>
                         </button>
-                    </form>
+
+                        <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu">
+
+                            <li class="dropdown-user-info">
+                                <div class="dropdown-user-name">
+                                    {{ auth()->user()->name ?? 'Admin hệ thống' }}
+                                </div>
+
+                                <div class="dropdown-user-email">
+                                    {{ auth()->user()->email ?? '' }}
+                                </div>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <form
+                                    method="POST"
+                                    action="{{ route('logout') }}"
+                                    class="m-0">
+
+                                    @csrf
+
+                                    <button
+                                        type="submit"
+                                        class="dropdown-item dropdown-logout">
+                                        ↪ Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+
+                        </ul>
+                    </div>
 
                 </div>
             </div>

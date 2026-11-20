@@ -6,7 +6,78 @@
 @section('title', 'Tổng quan | Trọ Ơi')
 
 @push('styles')
-     
+<style>
+/* Segmented Filter Bar (Modern Pill Filter - No Icons) */
+.segmented-filter-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.segmented-filter-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    background: #f2efe9;
+    border: 1px solid #e5e0d5;
+    border-radius: 12px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.segmented-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    color: #555c58;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    text-decoration: none !important;
+    user-select: none;
+}
+
+.segmented-tab:hover {
+    background: rgba(255, 255, 255, 0.6);
+    color: #1a221e;
+}
+
+.segmented-tab.active {
+    background: #ffffff;
+    color: #162c21;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    background: #ded7cb;
+    color: #525955;
+    line-height: 1;
+    transition: all 0.18s ease;
+}
+
+.segmented-tab.active .tab-count {
+    background: #e4efe7;
+    color: #134e2c;
+}
+</style>
 @endpush
 
 @section('content')
@@ -29,7 +100,7 @@
                 <div
                     class="badge-status pending mb-2"
                     style="display:inline-block;">
-                    📅 LỊCH XEM CỦA BẠN
+                    LỊCH HẸN CỦA BẠN
                 </div>
 
                 <h1 class="page-title">
@@ -59,136 +130,28 @@
          STATISTICS
     ====================================================== -->
 
-        <div class="row g-3 mb-4">
-
-
-            <!-- TỔNG -->
-            <div class="col-sm-6 col-xl-3">
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-icon blue">
-                            📅
-                        </div>
-
-                        <span class="stat-trend">
-                            Tổng lịch
-                        </span>
-
-                    </div>
-
-
-                    <div class="stat-value">
-                        {{ $totalAppointments }}
-                    </div>
-
-
-                    <div class="stat-label">
-                        Lịch xem phòng
-                    </div>
-
-                </div>
-
+        <!-- =====================================================
+             SEGMENTED FILTER TABS (NO ICONS)
+        ====================================================== -->
+        <div class="segmented-filter-wrapper mb-4">
+            <div class="segmented-filter-bar" role="tablist">
+                <button type="button" class="segmented-tab active" data-status="">
+                    <span class="tab-label">Tất cả</span>
+                    <span class="tab-count">{{ $totalAppointments }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="pending">
+                    <span class="tab-label">Chờ xác nhận</span>
+                    <span class="tab-count">{{ $pendingCount }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="confirmed">
+                    <span class="tab-label">Đã xác nhận</span>
+                    <span class="tab-count">{{ $confirmedCount }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-status="completed">
+                    <span class="tab-label">Đã xem phòng</span>
+                    <span class="tab-count">{{ $completedCount }}</span>
+                </button>
             </div>
-
-
-            <!-- CHỜ XÁC NHẬN -->
-            <div class="col-sm-6 col-xl-3">
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-icon">
-                            ⏳
-                        </div>
-
-                        <span class="stat-trend">
-                            Đang chờ
-                        </span>
-
-                    </div>
-
-
-                    <div class="stat-value">
-                        {{ $pendingCount }}
-                    </div>
-
-
-                    <div class="stat-label">
-                        Chờ chủ nhà xác nhận
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ĐÃ XÁC NHẬN -->
-            <div class="col-sm-6 col-xl-3">
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-icon green">
-                            ✓
-                        </div>
-
-                        <span class="stat-trend">
-                            Thành công
-                        </span>
-
-                    </div>
-
-
-                    <div class="stat-value">
-                        {{ $confirmedCount }}
-                    </div>
-
-
-                    <div class="stat-label">
-                        Lịch đã xác nhận
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ĐÃ XEM -->
-            <div class="col-sm-6 col-xl-3">
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-icon red">
-                            🏠
-                        </div>
-
-                        <span class="stat-trend">
-                            Hoàn thành
-                        </span>
-
-                    </div>
-
-
-                    <div class="stat-value">
-                        {{ $completedCount }}
-                    </div>
-
-
-                    <div class="stat-label">
-                        Đã xem phòng
-                    </div>
-
-                </div>
-
-            </div>
-
         </div>
 
 
@@ -230,16 +193,13 @@
                 <div class="col-lg-8">
                     <div class="d-flex gap-3 align-items-start">
 
-                        <div class="stat-icon green">📅</div>
-
                         <div>
-                            <div class="cell-title">
+                            <div class="cell-title fw-bold" style="font-size: 18px;">
                                 {{ $nextAppointment->room?->name
                                 ?? 'Phòng đã cập nhật' }}
                             </div>
 
-                            <div class="cell-sub mb-2">
-                                📍
+                            <div class="cell-sub mb-2 text-muted">
                                 {{ $nextAppointment->room?->property?->address
                                 ?? 'Chưa có địa chỉ' }}
                             </div>
@@ -247,14 +207,12 @@
                             <div class="d-flex flex-wrap gap-2">
 
                                 <span class="badge-status occupied">
-                                    📅
-                                    {{ $nextAppointment->appointment_date
+                                    Ngày: {{ $nextAppointment->appointment_date
                                     ->format('d/m/Y') }}
                                 </span>
 
                                 <span class="badge-status pending">
-                                    🕒
-                                    {{ substr(
+                                    Giờ: {{ substr(
                                     (string) $nextAppointment->appointment_time,
                                     0,
                                     5
@@ -262,13 +220,13 @@
                                 </span>
 
                                 <span class="badge-status new">
-                                    ☎️ {{ $nextAppointment->phone }}
+                                    SĐT: {{ $nextAppointment->phone }}
                                 </span>
 
                             </div>
 
                             @if ($nextAppointment->message)
-                            <div class="cell-sub mt-2">
+                            <div class="cell-sub mt-2 text-muted">
                                 Ghi chú: {{ $nextAppointment->message }}
                             </div>
                             @endif
@@ -289,9 +247,7 @@
             @else
 
             <div class="text-center py-4">
-                <div class="stat-icon mx-auto mb-3">📅</div>
-
-                <div class="cell-title">
+                <div class="cell-title fw-bold">
                     Bạn chưa có lịch xem phòng sắp tới
                 </div>
 
@@ -421,7 +377,7 @@
 
                     <tbody>
                         @forelse ($appointments as $appointment)
-                        <tr>
+                        <tr class="appointment-row" data-status="{{ $appointment->status }}">
                             <td>
                                 <div class="cell-title">
                                     {{ $appointment->room?->name ?? 'Phòng đã cập nhật' }}
@@ -484,10 +440,6 @@
                         @empty
                         <tr>
                             <td colspan="6" class="text-center py-5">
-                                <div class="mb-3" style="font-size: 40px;">
-                                    📅
-                                </div>
-
                                 <div class="cell-title mb-2">
                                     Chưa có lịch xem phòng nào
                                 </div>
@@ -504,6 +456,11 @@
                             </td>
                         </tr>
                         @endforelse
+                        <tr id="noAppointmentsFilter" style="display: none;">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Không tìm thấy lịch hẹn phù hợp trạng thái này.
+                            </td>
+                        </tr>
                     </tbody>
 
 
@@ -617,6 +574,40 @@
 
     </div>
 
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabBtns = document.querySelectorAll('.segmented-tab');
+        const rows = document.querySelectorAll('.data-table tbody tr.appointment-row');
+        const noResults = document.getElementById('noAppointmentsFilter');
+        const statusSelect = document.querySelector('.panel .panel-head select.form-select');
+
+        function filterAppointments(targetStatus) {
+            let visibleCount = 0;
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status') || '';
+                const match = !targetStatus || status === targetStatus;
+                row.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+
+            if (noResults) {
+                noResults.style.display = (rows.length > 0 && visibleCount === 0) ? '' : 'none';
+            }
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const status = this.getAttribute('data-status') || '';
+                filterAppointments(status);
+            });
+        });
+    });
+</script>
+@endpush
 
 @endsection
   

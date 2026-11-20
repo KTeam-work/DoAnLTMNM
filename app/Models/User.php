@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Property;
 
+use App\Services\ResendService;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -24,10 +26,15 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'initial_password',
         'phone',
+        'identity_card',
         'avatar',
         'role',
         'status',
+        'unlock_token',
+        'unlock_requested_at',
+        'unlock_reason',
     ];
 
     /*
@@ -52,7 +59,40 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'unlock_requested_at' => 'datetime',
         ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Booted & Auto Generate User Code
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->user_code)) {
+                $user->user_code = static::generateUserCode($user->role);
+            }
+        });
+    }
+
+    public static function generateUserCode(?string $role = 'tenant'): string
+    {
+        $prefix = match ($role) {
+            'admin' => 'ADM',
+            'owner' => 'OWN',
+            default => 'TEN',
+        };
+
+        $count = static::where('role', $role)->count() + 1;
+        do {
+            $code = sprintf('%s-%03d', $prefix, $count);
+            $count++;
+        } while (static::where('user_code', $code)->exists());
+
+        return $code;
     }
 
     /*
@@ -102,9 +142,57 @@ class User extends Authenticatable
 
     
     public function favorites()
-{
-    return $this->hasMany(Favorite::class);
-}
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function postReports()
+    {
+        return $this->hasMany(PostReport::class, 'reporter_id');
+    }
 
 
+    // sendPasswordResetNotification
+      public function sendPasswordResetNotification($token): void
+    {
+        $url = route('password.reset', [
+            'token' => $token,
+            'email' => $this->email,
+        ]);
+
+        $html = '
+            <div style="font-family:Arial,sans-serif;
+                        max-width:600px;margin:auto;padding:25px;
+                        border:1px solid #ddd;border-radius:10px;">
+
+                <h2>Yêu cầu đặt lại mật khẩu</h2>
+
+                <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu
+                   cho tài khoản của bạn.</p>
+
+                <p>Nhấn vào nút bên dưới để tạo mật khẩu mới:</p>
+
+                <a href="' . e($url) . '"
+                   style="display:inline-block;
+                          padding:12px 22px;
+                          background:#2563eb;
+                          color:white;
+                          text-decoration:none;
+                          border-radius:6px;">
+                    Đặt lại mật khẩu
+                </a>
+
+                <p>Liên kết có hiệu lực trong 60 phút.</p>
+
+                <p>Nếu bạn không yêu cầu thao tác này,
+                   hãy bỏ qua email.</p>
+            </div>
+        ';
+
+        app(ResendService::class)->sendEmail(
+            $this->email,
+            'Yêu cầu đặt lại mật khẩu',
+            $html
+        );
+    }
 }

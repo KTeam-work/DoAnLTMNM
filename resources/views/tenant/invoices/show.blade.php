@@ -30,7 +30,8 @@
     $statusLabels = ['unpaid' => 'Chưa Thanh Toán', 'pending' => 'Chờ Xác Nhận', 'paid' => 'Đã Thanh Toán', 'overdue' => 'Quá Hạn', 'cancelled' => 'Đã Hủy'];
     $isOverdue = in_array($invoice->status, ['unpaid', 'pending']) && $invoice->due_date < now()->toDateString();
     $displayStatus = $isOverdue ? 'overdue' : $invoice->status;
-    $canPay = in_array($invoice->status, ['unpaid', 'pending', 'overdue']) && ! $invoice->payments->whereIn('status', ['pending', 'success'])->count();
+    $canPayQr = in_array($invoice->status, ['unpaid', 'pending', 'overdue']);
+    $canPay = $canPayQr && ! $invoice->payments->whereIn('status', ['pending', 'success'])->count();
   @endphp
 
   @if(session('success'))
@@ -162,57 +163,102 @@
 
           <hr style="border-top: 1px dashed #ddd; margin: 20px 0;">
 
-          <!-- Form thanh toán -->
+          <!-- 2 Phương thức thanh toán -->
           <div id="pay">
-            @if($canPay)
-              <form id="payForm" action="{{ route('tenant.payment.store') }}" method="POST" class="print-hide">
-                @csrf
-                <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
+            @if($canPayQr)
+              @if($invoice->status === 'pending' || $invoice->payments->where('status', 'pending')->count())
+                <div class="alert alert-warning p-2 mb-3 text-center" style="font-size: 12px; border-radius: 8px;">
+                  Đang có yêu cầu thanh toán chờ chủ nhà xác nhận. Bạn vẫn có thể quét mã VietQR để gạch nợ tự động ngay.
+                </div>
+              @endif
 
-                <label class="fw-bold" style="font-size: 13px;">Phương thức thanh toán</label>
-                <select name="method" id="payMethod" class="form-select mb-3" required>
-                  <option value="bank_transfer">🏦 Chuyển khoản</option>
-                  <option value="cash">💵 Tiền mặt (chủ nhà xác nhận)</option>
-                  <option value="qr">📱 QR</option>
-                  <option value="online">🌐 Online</option>
-                </select>
+              <div class="fw-bold mb-2 text-dark" style="font-size: 13px;">Chọn phương thức thanh toán:</div>
 
-                <div class="text-center mb-3 p-3 rounded-4" style="background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0;">
-                  <h6 class="fw-bold mb-2" style="color: var(--muted); font-size: 12px;">THÔNG TIN NHẬN THANH TOÁN</h6>
-                  <div class="fw-bold mb-1" style="color: var(--green-dark); font-size: 15px;">{{ $invoice->contract->owner->name ?? 'Chủ nhà' }}</div>
-                  <div class="text-muted mb-1" style="font-size: 13px;">SĐT: {{ $invoice->contract->owner->phone ?? '—' }}</div>
-                  <div class="mt-2" style="font-size: 22px; font-weight: 800; color: var(--green-dark);">{{ number_format((float) $invoice->total) }} đ</div>
-                  <div class="text-muted" style="font-size: 12px;">Nội dung CK: {{ $invoice->invoice_code }} {{ $invoice->contract->room->name ?? '' }}</div>
-                  <button type="button" onclick="copyPayInfo()" class="btn btn-light w-100 shadow-none border fw-bold text-muted py-2 mt-3 d-flex justify-content-center align-items-center gap-2" style="border-radius: 10px; font-size: 13px;">
-                    📋 Sao chép số tiền &amp; nội dung
+              <!-- 2 Tabs chuyển đổi phương thức (không dùng icon) -->
+              <ul class="nav nav-pills payment-segmented-tabs mb-3 p-1 rounded-3 bg-light border" id="paymentTabs" role="tablist">
+                <li class="nav-item flex-fill text-center" role="presentation">
+                  <button class="nav-link active w-100 fw-bold py-2" id="pay-qr-tab" data-bs-toggle="pill" data-bs-target="#tab-method-qr" type="button" role="tab" aria-controls="tab-method-qr" aria-selected="true" style="font-size: 12px;">
+                    Thanh toán bằng QR
                   </button>
+                </li>
+                <li class="nav-item flex-fill text-center" role="presentation">
+                  <button class="nav-link w-100 fw-bold py-2" id="pay-confirm-tab" data-bs-toggle="pill" data-bs-target="#tab-method-confirm" type="button" role="tab" aria-controls="tab-method-confirm" aria-selected="false" style="font-size: 12px;">
+                    Thanh toán bằng xác nhận
+                  </button>
+                </li>
+              </ul>
+
+              <div class="tab-content" id="paymentTabsContent">
+                <!-- CÁCH 1: THANH TOÁN BẰNG QR -->
+                <div class="tab-pane fade show active" id="tab-method-qr" role="tabpanel" aria-labelledby="pay-qr-tab">
+                  <div class="p-3 rounded-3 border" style="background: #f8fafc;">
+                    <div class="fw-bold mb-1 text-dark" style="font-size: 13px;">Quét mã VietQR tự động 24/7</div>
+                    <div class="text-muted mb-3" style="font-size: 12px; line-height: 1.5;">Quét qua ứng dụng ngân hàng, hệ thống tự động nhận diện và gạch nợ sau 3 - 5 giây.</div>
+                    <button type="button" class="btn w-100 py-3 btn-pay-qr border-0 shadow-sm"
+                            data-invoice-id="{{ $invoice->id }}"
+                            data-invoice-code="{{ $invoice->invoice_code }}"
+                            style="background: #0c2340; color: white; border-radius: 10px; font-weight: 700; font-size: 14px;">
+                      Mở mã QR thanh toán
+                    </button>
+                  </div>
                 </div>
 
-                <input type="text" name="transaction_code" class="form-control mb-3" placeholder="Mã giao dịch sau khi chuyển (nếu có)" maxlength="100">
+                <!-- CÁCH 2: THANH TOÁN BẰNG XÁC NHẬN -->
+                <div class="tab-pane fade" id="tab-method-confirm" role="tabpanel" aria-labelledby="pay-confirm-tab">
+                  <div class="p-3 rounded-3 border bg-light">
+                    <div class="fw-bold mb-1 text-dark" style="font-size: 13px;">Báo xác nhận với chủ nhà</div>
+                    <div class="text-muted mb-3" style="font-size: 12px; line-height: 1.5;">Dành cho trường hợp nộp tiền mặt hoặc chuyển khoản thủ công. Chủ nhà sẽ kiểm tra và xác nhận hóa đơn.</div>
 
-                <button type="submit" class="btn-brand w-100 py-3 mb-2" style="font-size: 15px; border-radius: 12px; background: var(--yellow); color: var(--green-dark); font-weight: 800;">✅ Tôi đã chuyển khoản</button>
-                <div class="text-muted text-center" style="font-size: 12px;">Bấm để lưu thanh toán và gửi cho chủ nhà xác nhận.</div>
-              </form>
+                    @if($canPay)
+                      <form id="payForm" action="{{ route('tenant.payment.store') }}" method="POST" class="print-hide">
+                        @csrf
+                        <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
+
+                        <div class="mb-2">
+                          <label class="fw-bold mb-1 text-secondary" style="font-size: 12px;">Hình thức nộp tiền</label>
+                          <select name="method" id="payMethod" class="form-select form-select-sm" required>
+                            <option value="bank_transfer">Chuyển khoản trực tiếp</option>
+                            <option value="cash">Nộp tiền mặt cho chủ trọ</option>
+                          </select>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="fw-bold mb-1 text-secondary" style="font-size: 12px;">Mã tham chiếu / Ghi chú (nếu có)</label>
+                          <input type="text" name="transaction_code" class="form-control form-control-sm" placeholder="Mã giao dịch hoặc ghi chú..." maxlength="100">
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 py-2 fw-bold" style="border-radius: 8px; font-size: 13px;">
+                          Gửi yêu cầu xác nhận
+                        </button>
+                      </form>
+                    @else
+                      <div class="alert alert-info mb-0 text-center py-2" style="font-size: 12px;">
+                        Bạn đã gửi yêu cầu xác nhận cho hóa đơn này, vui lòng chờ chủ trọ duyệt.
+                      </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
             @elseif($invoice->status === 'paid')
-              <div class="alert alert-success mb-0">Hóa đơn đã được thanh toán. Cảm ơn bạn!</div>
+              <div class="alert alert-success mb-0 text-center fw-bold">Hóa đơn đã được thanh toán thành công. Cảm ơn bạn!</div>
             @elseif($invoice->status === 'cancelled')
-              <div class="alert alert-secondary mb-0">Hóa đơn đã bị hủy.</div>
+              <div class="alert alert-secondary mb-0 text-center">Hóa đơn này đã bị hủy.</div>
             @else
-              <div class="alert alert-info mb-0">Bạn đã gửi thanh toán, đang chờ chủ nhà xác nhận.</div>
+              <div class="alert alert-info mb-0 text-center">Hóa đơn đang được xử lý.</div>
             @endif
           </div>
 
           <div class="d-flex flex-column gap-2 print-hide mt-3">
             <div class="row g-2 mt-1">
               <div class="col-6">
-                <button onclick="window.print()" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center gap-2" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
-                  🖨️ In Hóa Đơn
-                </button>
+                <a href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center text-decoration-none" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
+                  In hóa đơn
+                </a>
               </div>
               <div class="col-6">
-                <button onclick="window.print()" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center gap-2" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
-                  📥 Lưu PDF
-                </button>
+                <a href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center text-decoration-none" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
+                  Lưu PDF
+                </a>
               </div>
             </div>
           </div>
@@ -237,8 +283,11 @@
   </div>
 </div>
 
+@include('tenant.invoices.partials.qr_modal')
+
 @push('scripts')
     <script src="{{ asset('js/tv3/tenant/invoices/show.js') }}"></script>
+    <script src="{{ asset('js/tv3/tenant/invoices/sepay_qr.js') }}"></script>
 @endpush
 
 

@@ -9,6 +9,7 @@ use App\Models\Notification;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\UtilityReading;
+use App\Services\ResendService;
 use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
@@ -36,6 +37,12 @@ class InvoiceController extends Controller
         $invoices = $query->paginate(15)->withQueryString();
         $filters = $request->only(['month', 'status']);
         $currentMonth = $request->input('month', now()->format('Y-m'));
+        $activeContracts = Contract::query()
+            ->where('owner_id', $owner->id)
+            ->where('status', 'active')
+            ->with(['room:id,name', 'tenant:id,name'])
+            ->orderBy('room_id')
+            ->get();
 
         $base = Invoice::query()->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id));
         $monthBase = (clone $base)->whereDate('billing_month', Carbon::parse($currentMonth)->startOfMonth());
@@ -47,7 +54,7 @@ class InvoiceController extends Controller
         ];
 
         if (! $request->expectsJson()) {
-            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth'));
+            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth', 'activeContracts'));
         }
 
         return response()->json(['data' => $invoices]);
@@ -70,6 +77,49 @@ class InvoiceController extends Controller
     }
 
     /**
+     * Mẫu in hóa đơn và xuất PDF chuẩn A4.
+     */
+    public function print(Request $request, int $id)
+    {
+        $owner = $this->actingOwner($request);
+
+        $invoice = Invoice::query()
+            ->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id))
+            ->with([
+                'items.service:id,name',
+                'contract.room.property',
+                'contract.tenant:id,name,phone',
+                'contract.owner:id,name,phone',
+                'utilityReading',
+                'payments'
+            ])
+            ->findOrFail($id);
+
+        return view('invoices.print', [
+            'invoice' => $invoice,
+            'backUrl' => route('owner.invoices.show', $invoice->id),
+            'role' => 'owner',
+        ]);
+    }
+
+    /**
+     * Kích hoạt quét nợ và cập nhật quá hạn thủ công từ Web UI (phục vụ Demo & Vận hành).
+     */
+    public function processDueNow(Request $request)
+    {
+        $owner = $this->actingOwner($request);
+
+        $stats = \App\Console\Commands\ProcessDueInvoicesCommand::processDueInvoices(false, $owner->id);
+
+        $summary = "Đã quét {$stats['total_scanned']} hóa đơn: "
+            . "Đã gửi {$stats['upcoming_reminders']} nhắc nợ sắp hạn, "
+            . "{$stats['due_today_reminders']} nhắc nợ hôm nay, "
+            . "đã cập nhật {$stats['marked_overdue']} hóa đơn quá hạn.";
+
+        return back()->with('success', $summary);
+    }
+
+    /**
      * Tạo hóa đơn tháng: 1 hợp đồng (contract_id) hoặc hàng loạt.
      */
     public function store(Request $request)
@@ -80,15 +130,17 @@ class InvoiceController extends Controller
             'month' => ['required', 'date'],
             'contract_id' => ['nullable', 'integer', 'exists:contracts,id'],
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'due_date' => ['nullable', 'date'],
         ]);
         $billingMonth = Carbon::parse($data['month'])->startOfMonth();
+        $dueDate = !empty($data['due_date']) ? Carbon::parse($data['due_date'])->toDateString() : null;
 
         $contracts = Contract::query()
             ->where('owner_id', $owner->id)
             ->where('status', 'active')
             ->whereDate('start_date', '<=', $billingMonth->copy()->endOfMonth())
             ->when($data['contract_id'] ?? null, fn ($q, $id) => $q->where('id', $id))
-            ->with('room')
+            ->with(['room.property', 'tenant'])
             ->get();
 
         if ($contracts->isEmpty()) {
@@ -114,7 +166,7 @@ class InvoiceController extends Controller
                 $skipped[] = $contract->room->name . ' (thiếu chỉ số điện nước)';
                 continue;
             }
-            $created[] = $this->buildInvoice($contract, $reading, $billingMonth, (float) ($data['discount'] ?? 0));
+            $created[] = $this->buildInvoice($contract, $reading, $billingMonth, (float) ($data['discount'] ?? 0), $dueDate);
         }
 
         if ($created === []) {
@@ -139,9 +191,9 @@ class InvoiceController extends Controller
         ], 201);
     }
 
-    private function buildInvoice(Contract $contract, UtilityReading $reading, Carbon $billingMonth, float $discount): int
+    private function buildInvoice(Contract $contract, UtilityReading $reading, Carbon $billingMonth, float $discount, ?string $dueDate = null): int
     {
-        return DB::transaction(function () use ($contract, $reading, $billingMonth, $discount) {
+        return DB::transaction(function () use ($contract, $reading, $billingMonth, $discount, $dueDate) {
             $eUse = (float) $reading->electricity_new - (float) $reading->electricity_old;
             $wUse = (float) $reading->water_new - (float) $reading->water_old;
 
@@ -151,14 +203,9 @@ class InvoiceController extends Controller
                 ['type' => 'water', 'description' => "Nước: {$reading->water_old} → {$reading->water_new} ({$wUse} m³)", 'quantity' => $wUse, 'unit_price' => (float) $reading->water_price, 'amount' => $wUse * (float) $reading->water_price, 'service_id' => null],
             ];
 
-            // Dịch vụ gắn với hợp đồng; nếu chưa gắn thì dùng dịch vụ đang hoạt động của chủ trọ.
+            // Chỉ tính các dịch vụ đã được gắn trực tiếp vào hợp đồng.
             $contractServices = DB::table('contract_services')
                 ->where('contract_id', $contract->id)->where('status', 'active')->get();
-            if ($contractServices->isEmpty()) {
-                $contractServices = Service::query()->where('owner_id', $contract->owner_id)
-                    ->where('status', 'active')->whereNotIn('unit', ['kWh', 'm³'])
-                    ->get()->map(fn ($s) => (object) ['service_id' => $s->id, 'quantity' => 1, 'unit_price' => (float) $s->price]);
-            }
             foreach ($contractServices as $cs) {
                 $service = Service::query()->find($cs->service_id);
                 if (! $service || $service->status !== 'active') {
@@ -171,6 +218,7 @@ class InvoiceController extends Controller
 
             $subtotal = array_sum(array_column($items, 'amount'));
             $discount = min($discount, $subtotal);
+            $invoiceDueDate = $dueDate ?: now()->addDays(7)->toDateString();
 
             $invoice = Invoice::query()->create([
                 'invoice_code' => $this->invoiceCode($billingMonth),
@@ -178,7 +226,7 @@ class InvoiceController extends Controller
                 'utility_reading_id' => $reading->id,
                 'billing_month' => $billingMonth->toDateString(),
                 'issue_date' => now()->toDateString(),
-                'due_date' => now()->addDays(10)->toDateString(),
+                'due_date' => $invoiceDueDate,
                 'subtotal' => $subtotal,
                 'discount' => $discount,
                 'total' => $subtotal - $discount,
@@ -194,6 +242,32 @@ class InvoiceController extends Controller
                 'invoice',
                 $invoice->id
             );
+
+            // Bắn email thông báo hóa đơn kèm thông tin đăng nhập và 2 cách thanh toán qua Gmail cho khách
+            try {
+                $tenant = $contract->tenant;
+                if ($tenant && !empty($tenant->email)) {
+                    /** @var ResendService $resendService */
+                    $resendService = app(ResendService::class);
+                    $resendService->sendInvoiceEmail(
+                        toEmail: $tenant->email,
+                        tenantName: $tenant->name,
+                        roomName: $contract->room->name ?? 'Phòng trọ',
+                        propertyName: $contract->room->property->name ?? 'Khu trọ',
+                        invoiceCode: $invoice->invoice_code,
+                        billingMonth: $billingMonth->format('m/Y'),
+                        totalAmount: $invoice->total,
+                        dueDate: Carbon::parse($invoice->due_date)->format('d/m/Y'),
+                        invoiceId: $invoice->id,
+                        initialPassword: $tenant->initial_password ?? null
+                    );
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email hóa đơn qua Resend: ' . $e->getMessage(), [
+                    'invoice_id' => $invoice->id,
+                    'tenant_email' => $contract->tenant->email ?? null,
+                ]);
+            }
 
             return $invoice->id;
         });

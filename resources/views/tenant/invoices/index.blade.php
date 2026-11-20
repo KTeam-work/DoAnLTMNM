@@ -26,7 +26,7 @@
     </div>
     <div class="skeleton-box rounded">
       <button class="btn-outline-brand d-flex align-items-center gap-2 hide-on-skeleton">
-        ⬇ Tải sao kê năm
+        Tải sao kê năm
       </button>
     </div>
   </div>
@@ -35,41 +35,32 @@
   <div class="row g-3 mb-4 animate-up delay-2">
     <!-- Card 1 -->
     <div class="col-md-4">
-      <div class="stat-card p-3 rounded-4">
-        <div class="stat-top mb-3 skeleton-box">
-          <div class="stat-icon red hide-on-skeleton">⚠️</div>
-          <div class="stat-trend down fw-bold hide-on-skeleton">Cần xử lý ngay</div>
+      <div class="stat-card p-3 rounded-4" style="border-left: 3px solid var(--red);">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="stat-label hide-on-skeleton mb-0">Tổng nợ quá hạn</div>
+          <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1" style="font-size: 11px; font-weight: 700;">Cần xử lý ngay</span>
         </div>
-        <div class="skeleton-box mt-2">
-          <div class="stat-label hide-on-skeleton">Tổng nợ quá hạn</div>
-          <div class="stat-value hide-on-skeleton" style="color: var(--red);">{{ number_format((float) $stats['overdue']) }} đ</div>
-        </div>
+        <div class="stat-value hide-on-skeleton" style="color: var(--red); font-size: 26px;">{{ number_format((float) $stats['overdue']) }} đ</div>
       </div>
     </div>
     <!-- Card 2 -->
     <div class="col-md-4">
       <div class="stat-card p-3 rounded-4">
-        <div class="stat-top mb-3 skeleton-box">
-          <div class="stat-icon hide-on-skeleton" style="background: var(--yellow-light); color: #9b6a00;">⏳</div>
-          <div class="stat-trend hide-on-skeleton" style="color: #9b6a00;">Chưa thanh toán</div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="stat-label hide-on-skeleton mb-0">Chưa thanh toán</div>
+          <span class="badge rounded-pill px-2 py-1" style="background: #fff8e8; color: #9b6a00; font-size: 11px; font-weight: 700;">Chờ thanh toán</span>
         </div>
-        <div class="skeleton-box mt-2">
-          <div class="stat-label hide-on-skeleton">Chưa thanh toán</div>
-          <div class="stat-value hide-on-skeleton">{{ number_format((float) $stats['unpaid']) }} đ</div>
-        </div>
+        <div class="stat-value hide-on-skeleton" style="font-size: 26px; color: #0c2340;">{{ number_format((float) $stats['unpaid']) }} đ</div>
       </div>
     </div>
     <!-- Card 3 -->
     <div class="col-md-4">
       <div class="stat-card p-3 rounded-4">
-        <div class="stat-top mb-3 skeleton-box">
-          <div class="stat-icon green hide-on-skeleton">✅</div>
-          <div class="stat-trend fw-bold hide-on-skeleton">Tốt</div>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="stat-label hide-on-skeleton mb-0">Đã thanh toán (Năm nay)</div>
+          <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1" style="font-size: 11px; font-weight: 700;">Đã hoàn tất</span>
         </div>
-        <div class="skeleton-box mt-2">
-          <div class="stat-label hide-on-skeleton">Đã thanh toán (Năm nay)</div>
-          <div class="stat-value hide-on-skeleton" style="color: var(--green);">{{ number_format((float) $stats['paid_year']) }} đ</div>
-        </div>
+        <div class="stat-value hide-on-skeleton" style="color: var(--green); font-size: 26px;">{{ number_format((float) $stats['paid_year']) }} đ</div>
       </div>
     </div>
   </div>
@@ -137,14 +128,25 @@
             <td class="text-end" style="padding-right: 20px;">
               <div class="d-flex justify-content-end align-items-center gap-2 skeleton-box rounded">
                 @if(in_array($invoice->status, ['unpaid', 'pending', 'overdue']))
-                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}#pay" class="btn-brand hide-on-skeleton text-decoration-none" style="padding: 6px 16px; font-size: 12px;{{ $isOverdue ? ' background: var(--red); color: white;' : '' }}">Thanh toán</a>
+                  <button type="button" class="btn-brand hide-on-skeleton btn-pay-qr border-0"
+                          data-invoice-id="{{ $invoice->id }}"
+                          data-invoice-code="{{ $invoice->invoice_code }}"
+                          style="padding: 6px 14px; font-size: 12px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;{{ $isOverdue ? ' background: var(--red); color: white;' : '' }}">
+                    Thanh toán QR
+                  </button>
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
+                @elseif($invoice->status === 'paid')
+                  <span class="hide-on-skeleton badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 12px; padding: 6px 10px; border-radius: 6px;">Đã thanh toán</span>
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
                 @else
-                  <span class="hide-on-skeleton" style="font-size: 12px; color: var(--muted); padding-right: 8px; font-weight: 600;">✓ Hoàn tất</span>
+                  <span class="hide-on-skeleton" style="font-size: 12px; color: var(--muted); padding-right: 8px; font-weight: 600;">{{ $statusLabels[$invoice->status] ?? $invoice->status }}</span>
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
                 @endif
                 <div class="dropdown action-dropdown hide-on-skeleton">
                   <button class="btn dropdown-toggle border-0 shadow-none text-muted" type="button" data-bs-toggle="dropdown">⋮</button>
                   <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px;">
-                    <li><a class="dropdown-item py-2" href="{{ route('tenant.invoices.show', $invoice->id) }}">👁️ Xem chi tiết</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('tenant.invoices.show', $invoice->id) }}">Xem chi tiết</a></li>
+                    <li><a class="dropdown-item py-2" href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank">In hóa đơn / Lưu PDF</a></li>
                   </ul>
                 </div>
               </div>
@@ -163,8 +165,11 @@
 </div>
 
 
+@include('tenant.invoices.partials.qr_modal')
+
 @push('scripts')
     <script src="{{ asset('js/tv3/tenant/invoices/index.js') }}"></script>
+    <script src="{{ asset('js/tv3/tenant/invoices/sepay_qr.js') }}"></script>
 @endpush
 
 

@@ -24,7 +24,8 @@ class TenantDashboardController extends Controller
             )
             ->select(
                 'rooms.*',
-                'properties.address as property_address'
+                'properties.address as property_address',
+                DB::raw('(SELECT rpi.image_path FROM rental_posts rp JOIN rental_post_images rpi ON rpi.rental_post_id = rp.id WHERE rp.room_id = rooms.id AND rp.status = "published" ORDER BY rpi.is_thumbnail DESC, rpi.id ASC LIMIT 1) as post_image')
             )
             ->where('rooms.status', 'available')
             ->whereExists(function ($query) {
@@ -93,10 +94,12 @@ class TenantDashboardController extends Controller
             ->get();
 
         // Danh sách phòng đã yêu thích của người đang đăng nhập.
-        $favoriteRoomIds = DB::table('favorites')
+        $favoritesByRoom = DB::table('favorites')
             ->where('user_id', $user->id)
-            ->pluck('room_id')
-            ->map(fn ($id) => (int) $id)
+            ->get(['id', 'room_id'])
+            ->mapWithKeys(fn ($favorite) => [
+                (int) $favorite->room_id => (int) $favorite->id,
+            ])
             ->all();
 
         // Lịch xem phòng của chính người thuê hiện tại.
@@ -129,7 +132,7 @@ class TenantDashboardController extends Controller
         'user' => $user,
         'lastName' => $user->last_name ?? $user->name,
         'rooms' => $rooms,
-        'favoriteRoomIds' => $favoriteRoomIds,
+        'favoriteIdsByRoom' => $favoritesByRoom,
         'appointments' => $appointments,
     ]);
     }

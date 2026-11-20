@@ -5,6 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/properties/index.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 @endpush
 
 @section('content')
@@ -46,7 +47,7 @@
             </div>
         @endif
 
-        @if ($errors->any())
+        @if (isset($errors) && $errors->any())
             <div class="alert alert-danger" role="alert">
                 <strong>Dữ liệu chưa hợp lệ:</strong>
                 <ul class="mb-0 mt-2">
@@ -57,42 +58,32 @@
             </div>
         @endif
 
-        {{-- THỐNG KÊ --}}
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-top">
-                    <span>Nhà trọ</span>
-                    <div class="stat-icon">🏠</div>
-                </div>
-                <strong>{{ $properties->count() }}</strong>
-                <span>Nhà trọ đang quản lý</span>
-            </div>
+        {{-- BỘ LỌC TRẠNG THÁI NHÀ TRỌ (NO ICONS) --}}
+        @php
+            $totalProperties = $properties->count();
+            $activeProperties = $properties->where('status', 'active')->count();
+            $inactiveProperties = $properties->where('status', '!=', 'active')->count();
+            $hasAvailableRooms = $properties->filter(fn($p) => $p->rooms->where('status', 'available')->count() > 0)->count();
+        @endphp
 
-            <div class="stat-card">
-                <div class="stat-top">
-                    <span>Tổng phòng</span>
-                    <div class="stat-icon">🚪</div>
-                </div>
-                <strong>{{ $properties->sum('rooms_count') }}</strong>
-                <span>Tổng số phòng thuộc các nhà</span>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-top">
-                    <span>Phòng trống</span>
-                    <div class="stat-icon">🔑</div>
-                </div>
-                <strong>—</strong>
-                <span>Cần đối chiếu trạng thái bảng rooms</span>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-top">
-                    <span>Đang thuê</span>
-                    <div class="stat-icon">👥</div>
-                </div>
-                <strong>—</strong>
-                <span>Cần đối chiếu trạng thái bảng rooms</span>
+        <div class="segmented-filter-wrapper mb-4">
+            <div class="segmented-filter-bar" role="tablist">
+                <button type="button" class="segmented-tab active" data-filter="all">
+                    <span class="tab-label">Tất cả</span>
+                    <span class="tab-count">{{ $totalProperties }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-filter="active">
+                    <span class="tab-label">Đang hoạt động</span>
+                    <span class="tab-count">{{ $activeProperties }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-filter="inactive">
+                    <span class="tab-label">Tạm ngưng</span>
+                    <span class="tab-count">{{ $inactiveProperties }}</span>
+                </button>
+                <button type="button" class="segmented-tab" data-filter="has_available">
+                    <span class="tab-label">Có phòng trống</span>
+                    <span class="tab-count">{{ $hasAvailableRooms }}</span>
+                </button>
             </div>
         </div>
 
@@ -111,12 +102,20 @@
 
             <div class="property-grid">
                 @forelse ($properties as $property)
-                    <article class="property-card">
+                    @php
+                        $hasEmptyRooms = $property->rooms->where('status', 'available')->count() > 0;
+                    @endphp
+                    <article class="property-card"
+                        data-status="{{ $property->status }}"
+                        data-has-available="{{ $hasEmptyRooms ? '1' : '0' }}">
 
                         <div class="property-image">
-                            @if ($property->thumbnail && $property->thumbnail->image_path)
+                            @php
+                                $thumbPath = $property->thumbnail?->image_path ?? $property->images?->first()?->image_path;
+                            @endphp
+                            @if ($thumbPath)
                                 <img
-                                    src="{{ asset('storage/' . ltrim($property->thumbnail->image_path, '/')) }}"
+                                    src="{{ asset('storage/' . ltrim($thumbPath, '/')) }}"
                                     alt="{{ $property->name }}"
                                     loading="lazy">
                             @else
@@ -207,6 +206,9 @@
                         </div>
                     </div>
                 @endforelse
+                <div id="noPropertyFilter" class="empty-property" style="display: none; grid-column: 1 / -1;">
+                    <div class="fw-bold">Không tìm thấy nhà trọ nào phù hợp trạng thái này.</div>
+                </div>
             </div>
         </section>
     </main>
@@ -372,6 +374,28 @@
                                 placeholder="VD: 106.721">
                         </div>
                     </div>
+                    
+                    {{-- BẢN ĐỒ CHỌN VỊ TRÍ --}}
+                    <div class="mt-4">
+                        <label class="form-label fw-semibold">
+                            📍 Chọn vị trí nhà trọ trên bản đồ
+                        </label>
+
+                        <p class="text-muted small">
+                            Bấm vào vị trí trên bản đồ để tự động lấy tọa độ.
+                        </p>
+
+                        <div
+                            id="propertyMap"
+                            style="width: 100%; height: 350px; border-radius: 12px;
+                                overflow: hidden; background: #f1f5f9;">
+                        </div>
+
+                        <div id="mapStatus" class="form-text mt-2">
+                            Hãy chọn vị trí nhà trọ trên bản đồ.
+                        </div>
+                    </div>
+
 
                     {{-- TRẠNG THÁI --}}
                     <div class="mb-3 mt-3">
@@ -405,24 +429,29 @@
                             placeholder="Mô tả về nhà trọ...">{{ old('description') }}</textarea>
                     </div>
 
-                    {{-- HÌNH ẢNH NHÀ TRỌ --}}
+                    {{-- HÌNH ẢNH NHÀ TRỌ (CHỌN NHIỀU ẢNH) --}}
                     <div class="mb-3">
-                        <label for="property_images" class="form-label fw-semibold">
-                            Hình ảnh nhà trọ
-                        </label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-semibold mb-0">
+                                Hình ảnh nhà trọ (Tối đa 10 ảnh)
+                            </label>
+                            <span class="badge bg-light text-dark border" id="imageCountBadge">0/10 ảnh</span>
+                        </div>
+
+                        <!-- Vùng chọn ảnh kéo thả hoặc click -->
+                        <div class="p-3 border border-2 border-dashed rounded-3 text-center bg-light" id="dropzoneBox" style="cursor: pointer; border-color: #cbd5e1 !important; transition: all 0.2s;">
+                            <div style="font-size: 28px;">📸</div>
+                            <div class="fw-bold text-dark mt-1" style="font-size: 13.5px;">Bấm vào đây để chọn ảnh hoặc kéo thả ảnh vào</div>
+                            <div class="small text-muted mt-1">Hỗ trợ JPG, PNG, WEBP (tối đa 5MB/ảnh). Bạn có thể chọn nhiều lần để gom nhiều ảnh!</div>
+                        </div>
 
                         <input
                             type="file"
                             name="images[]"
                             id="property_images"
-                            class="form-control"
+                            class="d-none"
                             accept="image/jpeg,image/png,image/webp"
                             multiple>
-
-                        <div class="form-text">
-                            Chọn một hoặc nhiều ảnh JPG, PNG hoặc WEBP.
-                            Ảnh đầu tiên sẽ được chọn làm ảnh đại diện khi lưu.
-                        </div>
 
                         <div
                             id="imagePreview"
@@ -452,10 +481,52 @@
     </div>
 </div>
 
-{{-- XEM TRƯỚC ẢNH --}}
+{{-- SCRIPT BẢN ĐỒ OPENSTREETMAP (LEAFLET) VÀ QUẢN LÝ ẢNH --}}
 @push('scripts')
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="{{ asset('js/tv3/properties/index.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabBtns = document.querySelectorAll('.segmented-tab');
+            const cards = document.querySelectorAll('.property-card');
+            const noResults = document.getElementById('noPropertyFilter');
 
+            function filterProperties(filter) {
+                let visibleCount = 0;
+                cards.forEach(card => {
+                    const status = card.getAttribute('data-status') || '';
+                    const hasAvail = card.getAttribute('data-has-available') === '1';
+
+                    let match = false;
+                    if (filter === 'all') {
+                        match = true;
+                    } else if (filter === 'active') {
+                        match = (status === 'active');
+                    } else if (filter === 'inactive') {
+                        match = (status !== 'active');
+                    } else if (filter === 'has_available') {
+                        match = hasAvail;
+                    }
+
+                    card.style.display = match ? '' : 'none';
+                    if (match) visibleCount++;
+                });
+
+                if (noResults) {
+                    noResults.style.display = (cards.length > 0 && visibleCount === 0) ? '' : 'none';
+                }
+            }
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const filter = this.getAttribute('data-filter') || 'all';
+                    filterProperties(filter);
+                });
+            });
+        });
+    </script>
 @endpush
 
 @endsection

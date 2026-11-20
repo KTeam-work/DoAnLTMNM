@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
@@ -54,6 +55,45 @@ class PaymentController extends Controller
     public function confirm(Request $request, int $id)
     {
         return $this->settle($request, $id, 'success');
+    }
+
+    /**
+     * Chủ trọ trực tiếp ghi nhận thu tiền mặt (ví dụ khách vãng lai thanh toán trực tiếp).
+     */
+    public function recordCashPayment(Request $request, Invoice $invoice)
+    {
+        $owner = $this->actingOwner($request);
+
+        abort_unless((int) $invoice->contract?->owner_id === (int) $owner->id, 403);
+
+        if ($invoice->status === 'paid') {
+            return back()->with('error', 'Hóa đơn này đã được thanh toán trước đó.');
+        }
+
+        DB::transaction(function () use ($invoice) {
+            Payment::create([
+                'payment_code' => 'PAY-' . strtoupper(Str::random(8)),
+                'invoice_id' => $invoice->id,
+                'payer_id' => $invoice->contract->tenant_id,
+                'amount' => $invoice->total,
+                'method' => 'cash',
+                'status' => 'success',
+                'paid_at' => now(),
+            ]);
+
+            $invoice->update(['status' => 'paid']);
+
+            Notification::notify(
+                $invoice->contract->tenant_id,
+                'Hóa đơn đã được thanh toán',
+                "Hóa đơn {$invoice->invoice_code} đã được chủ nhà ghi nhận thanh toán tiền mặt thành công.",
+                'payment',
+                'invoice',
+                $invoice->id
+            );
+        });
+
+        return back()->with('success', 'Đã ghi nhận thanh toán tiền mặt thành công cho hóa đơn #' . $invoice->invoice_code);
     }
 
     /**

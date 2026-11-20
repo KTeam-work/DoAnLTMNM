@@ -4,6 +4,71 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/rental_protal/index.css') }}">
+    <style>
+        .segmented-filter-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .segmented-filter-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px;
+            background: #f2efe9;
+            border: 1px solid #e5e0d5;
+            border-radius: 12px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .segmented-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            color: #555c58;
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.18s ease;
+            text-decoration: none !important;
+            user-select: none;
+        }
+        .segmented-tab:hover {
+            background: rgba(255, 255, 255, 0.6);
+            color: #1a221e;
+        }
+        .segmented-tab.active {
+            background: #ffffff;
+            color: #162c21;
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+        .tab-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 700;
+            background: #ded7cb;
+            color: #525955;
+            line-height: 1;
+            transition: all 0.18s ease;
+        }
+        .segmented-tab.active .tab-count {
+            background: #e4efe7;
+            color: #134e2c;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -35,47 +100,37 @@
         </div>
 
         <a href="{{ route('owner.rental-posts.create') }}" class="btn-owner">
-            <span>＋</span> Tạo tin đăng
+            + Tạo tin đăng
         </a>
     </div>
 
-    <section class="post-stats">
-        <div class="post-stat">
-            <div class="stat-top">
-                <span class="stat-label">TỔNG TIN ĐĂNG</span>
-                <div class="post-stat-icon">📢</div>
-            </div>
-            <strong class="stat-number">{{ $posts->count() }}</strong>
-            <span class="stat-label">Tin đăng thuộc các phòng của em</span>
-        </div>
+    @php
+        $totalPostsCount = $posts->count();
+        $publishedCount = $posts->where('status', 'published')->count();
+        $pendingCount = $posts->where('status', 'pending')->count();
+        $draftCount = $posts->where('status', 'draft')->count();
+    @endphp
 
-        <div class="post-stat">
-            <div class="stat-top">
-                <span class="stat-label">ĐANG HIỂN THỊ</span>
-                <div class="post-stat-icon">🟢</div>
-            </div>
-            <strong class="stat-number">{{ $posts->where('status', 'published')->count() }}</strong>
-            <span class="stat-label">Tin đã được đăng</span>
+    <div class="segmented-filter-wrapper mb-4">
+        <div class="segmented-filter-bar" role="tablist">
+            <button type="button" class="segmented-tab active" data-filter="">
+                <span class="tab-label">Tất cả</span>
+                <span class="tab-count">{{ $totalPostsCount }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="published">
+                <span class="tab-label">Đang hiển thị</span>
+                <span class="tab-count">{{ $publishedCount }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="pending">
+                <span class="tab-label">Chờ duyệt</span>
+                <span class="tab-count">{{ $pendingCount }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="draft">
+                <span class="tab-label">Bản nháp</span>
+                <span class="tab-count">{{ $draftCount }}</span>
+            </button>
         </div>
-
-        <div class="post-stat">
-            <div class="stat-top">
-                <span class="stat-label">CHỜ DUYỆT</span>
-                <div class="post-stat-icon">⏳</div>
-            </div>
-            <strong class="stat-number">{{ $posts->where('status', 'pending')->count() }}</strong>
-            <span class="stat-label">Tin đang chờ xử lý</span>
-        </div>
-
-        <div class="post-stat">
-            <div class="stat-top">
-                <span class="stat-label">BẢN NHÁP</span>
-                <div class="post-stat-icon">📝</div>
-            </div>
-            <strong class="stat-number">{{ $posts->where('status', 'draft')->count() }}</strong>
-            <span class="stat-label">Tin chưa gửi duyệt</span>
-        </div>
-    </section>
+    </div>
 
     <section class="posts-container">
         <div class="list-heading">
@@ -85,7 +140,6 @@
 
         <div class="toolbar">
             <div class="search-wrap">
-                <span>🔎</span>
                 <input class="search" id="postSearch" type="search"
                        placeholder="Tìm theo tiêu đề hoặc phòng..."
                        aria-label="Tìm tin đăng">
@@ -218,11 +272,10 @@
                 </article>
             @empty
                 <div class="empty-state">
-                    <div class="empty-icon">📢</div>
                     <h3>Chưa có tin đăng nào</h3>
                     <p>Tạo tin đăng cho phòng trọ để bắt đầu quản lý tại đây.</p>
                     <a href="{{ route('owner.rental-posts.create') }}" class="btn-owner">
-                        ＋ Tạo tin đăng đầu tiên
+                        + Tạo tin đăng đầu tiên
                     </a>
                 </div>
             @endforelse

@@ -1,12 +1,12 @@
 
         :root {
-            --green: #20584f;
-            --green-dark: #17463e;
-            --green-light: #eaf3ef;
-            --cream: #f8f5eb;
-            --border: #e6dcc2;
-            --text: #213430;
-            --muted: #78837e;
+            --green: #0c2340;
+            --green-dark: #071526;
+            --green-light: #eff6ff;
+            --cream: #f8fafc;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
             --yellow: #f5c84b;
         }
 
@@ -25,7 +25,7 @@
         .app-navbar {
             background: var(--green);
             min-height: 74px;
-            box-shadow: 0 3px 14px rgba(20,55,47,.12);
+            box-shadow: 0 3px 14px rgba(12, 35, 64,.12);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -67,7 +67,7 @@
             border: 0;
             border-radius: 14px;
             padding: 8px;
-            box-shadow: 0 12px 32px rgba(20,55,47,.14);
+            box-shadow: 0 12px 32px rgba(12, 35, 64,.14);
             min-width: 210px;
         }
 
@@ -196,7 +196,7 @@
             background: #fff;
             border: 1px solid var(--border);
             border-radius: 19px;
-            box-shadow: 0 5px 20px rgba(32,88,79,.025);
+            box-shadow: 0 5px 20px rgba(12, 35, 64,.025);
         }
 
         .stat-top {
@@ -238,7 +238,7 @@
             background: #fff;
             border: 1px solid var(--border);
             border-radius: 22px;
-            box-shadow: 0 10px 30px rgba(32,88,79,.045);
+            box-shadow: 0 10px 30px rgba(12, 35, 64,.045);
         }
 
         .list-heading {
@@ -262,7 +262,7 @@
             flex-wrap: wrap;
             gap: 11px;
             padding: 19px 24px;
-            border-bottom: 1px solid #eee7d8;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .search-wrap {
@@ -304,7 +304,7 @@
         .search:focus,
         .filter:focus {
             border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(32,88,79,.08);
+            box-shadow: 0 0 0 3px rgba(12, 35, 64,.08);
         }
 
         .posts-list {
@@ -326,7 +326,7 @@
 
         .post-card:hover {
             border-color: #c7d8ce;
-            box-shadow: 0 8px 22px rgba(32,88,79,.065);
+            box-shadow: 0 8px 22px rgba(12, 35, 64,.065);
         }
 
         .post-image {
@@ -401,10 +401,10 @@
             white-space: nowrap;
         }
 
-        .status-approved { background: #eaf3ef; color: #20584f; }
+        .status-approved { background: #eff6ff; color: #0c2340; }
         .status-pending { background: #fff7d7; color: #8b6a00; }
         .status-rejected { background: #fff0ed; color: #c65b4a; }
-        .status-hidden { background: #f1f1ef; color: #78837e; }
+        .status-hidden { background: #f1f1ef; color: #64748b; }
 
         .post-actions {
             display: flex;
@@ -428,7 +428,7 @@
         }
 
         .btn-view { background: var(--green-light); color: var(--green); }
-        .btn-edit { background: #f8f5eb; color: #53635e; }
+        .btn-edit { background: #f8fafc; color: #53635e; }
         .btn-delete { background: #fff0ed; color: #c65b4a; }
         .post-actions form { margin: 0; }
 
@@ -528,7 +528,7 @@
     padding: 4px 8px;
     border-radius: 6px;
     background: #e6f0eb;
-    color: #20584f;
+    color: #0c2340;
     font-size: 12px;
     font-weight: 600;
 }
