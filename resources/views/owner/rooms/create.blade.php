@@ -38,8 +38,12 @@
               <option value="hidden">Ẩn</option>
             </select></div>
           <div class="col-md-4"><label class="form-label">Diện tích (m²)</label><input name="area" type="number" min="0.01" step="0.01" value="{{ old('area') }}" class="form-control" required></div>
-          <div class="col-md-4"><label class="form-label">Giá thuê</label><input name="price" type="number" min="0" step="0.01" value="{{ old('price') }}" class="form-control" required></div>
-          <div class="col-md-4"><label class="form-label">Tiền cọc</label><input name="deposit" type="number" min="0" step="0.01" value="{{ old('deposit') }}" class="form-control" required></div>
+          <div class="col-md-4"><label class="form-label">Giá thuê (VNĐ)</label><input id="price" name="price" type="number" min="0" step="0.01" value="{{ old('price') }}" class="form-control" required></div>
+          <div class="col-md-4">
+            <label class="form-label">Tiền cọc (VNĐ)</label>
+            <input id="deposit" name="deposit" type="number" min="0" step="0.01" value="{{ old('deposit') }}" class="form-control" required>
+            <div id="depositError" class="text-danger small mt-1" style="display: none;">Tiền cọc không được lớn hơn tiền thuê phòng.</div>
+          </div>
           <div class="col-md-6"><label class="form-label">Sức chứa</label><input name="max_people" type="number" min="1" value="{{ old('max_people', 1) }}" class="form-control" required></div>
           <div class="col-md-6"><label class="form-label">Tầng</label><input name="floor" type="number" min="0" value="{{ old('floor') }}" class="form-control" placeholder="Để trống nếu không áp dụng"></div>
           
@@ -75,14 +79,54 @@
     (() => {
       const propertySelect = document.getElementById('property_id');
       const roomCodeInput = document.getElementById('room_code_preview');
+      const priceInput = document.getElementById('price');
+      const depositInput = document.getElementById('deposit');
+      const depositError = document.getElementById('depositError');
+      const form = document.querySelector('form');
 
       const updateRoomCodePreview = () => {
         const selectedOption = propertySelect.options[propertySelect.selectedIndex];
         roomCodeInput.value = selectedOption?.dataset.roomCode ?? '';
       };
 
-      propertySelect.addEventListener('change', updateRoomCodePreview);
-      updateRoomCodePreview();
+      const validateDeposit = () => {
+        const price = parseFloat(priceInput.value) || 0;
+        const deposit = parseFloat(depositInput.value) || 0;
+        if (price > 0) {
+          depositInput.max = price;
+        } else {
+          depositInput.removeAttribute('max');
+        }
+        if (depositInput.value !== '' && (deposit > price || deposit < 0)) {
+          depositError.style.display = 'block';
+          depositInput.classList.add('is-invalid');
+          return false;
+        } else {
+          depositError.style.display = 'none';
+          depositInput.classList.remove('is-invalid');
+          return true;
+        }
+      };
+
+      if (propertySelect) {
+        propertySelect.addEventListener('change', updateRoomCodePreview);
+        updateRoomCodePreview();
+      }
+
+      if (priceInput && depositInput) {
+        priceInput.addEventListener('input', validateDeposit);
+        depositInput.addEventListener('input', validateDeposit);
+      }
+
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          if (!validateDeposit()) {
+            e.preventDefault();
+            alert('Tiền cọc không được là số âm và không được lớn hơn tiền thuê phòng.');
+            depositInput.focus();
+          }
+        });
+      }
     })();
   </script>
 

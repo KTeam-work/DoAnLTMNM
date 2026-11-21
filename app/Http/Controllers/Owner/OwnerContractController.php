@@ -341,9 +341,14 @@ class OwnerContractController extends Controller{
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'identity_card' => ['required', 'string', 'max:20'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'identity_card' => ['required', 'regex:/^(?:[0-9]{9}|[0-9]{12})$/'],
+            'phone' => ['nullable', 'regex:/^0[0-9]{9}$/'],
             'relationship' => ['nullable', 'string', 'max:50'],
+        ], [
+            'name.required' => 'Vui lòng nhập họ và tên người ở cùng.',
+            'identity_card.required' => 'Vui lòng nhập số CCCD.',
+            'identity_card.regex' => 'Số CCCD phải gồm đúng 12 chữ số (hoặc CMND 9 chữ số), không được là số âm hay chứa chữ cái.',
+            'phone.regex' => 'Số điện thoại phải gồm đúng 10 chữ số, không được là số âm và phải bắt đầu bằng số 0.',
         ]);
         $room = $contract->room;
         $memberError = null;

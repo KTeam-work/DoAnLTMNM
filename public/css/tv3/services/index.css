@@ -129,3 +129,73 @@
         @media (max-width: 992px) { .property-select { margin-top: 15px; } .service-table { min-width: 950px; } }
         @media (max-width: 768px) { .service-panel-header { align-items: flex-start; gap: 12px; } .action-group { justify-content: flex-start; flex-wrap: wrap; } }
         @media (max-width: 576px) { .service-panel-header { flex-direction: column; } }
+
+        /* =========================================
+           MODAL THÊM DỊCH VỤ (PREMIUM DARK NAVY HEADER)
+        ========================================= */
+        #addServiceModal .modal-content {
+            border: none;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(12, 35, 64, 0.25);
+        }
+
+        #addServiceModal .modal-header {
+            background: #0c2340;
+            color: #ffffff;
+            border: none;
+            padding: 20px 26px;
+        }
+
+        #addServiceModal .modal-header .modal-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        #addServiceModal .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.85;
+            transition: opacity 0.2s ease;
+        }
+
+        #addServiceModal .modal-header .btn-close:hover {
+            opacity: 1;
+        }
+
+        #addServiceModal .form-control,
+        #addServiceModal .form-select {
+            border-radius: 12px;
+            padding: 11px 14px;
+            border-color: #e2e8f0;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        #addServiceModal .form-control:focus,
+        #addServiceModal .form-select:focus {
+            border-color: #0c2340;
+            box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.1);
+        }
+
+        #addServiceModal .property-summary-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 20px;
+        }
+
+        #addServiceModal .info-col-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        #addServiceModal .info-col-val {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #0f172a;
+        }

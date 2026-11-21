@@ -392,6 +392,35 @@
             modalContractSelect.addEventListener('change', syncModalContract);
             syncModalContract();
         }
+
+        // Ràng buộc kiểm tra form thêm người ở cùng (CCCD 9 hoặc 12 số, SĐT 10 số bắt đầu bằng 0)
+        var modalMemberForm = document.getElementById('modalMemberForm');
+        if (modalMemberForm) {
+            modalMemberForm.addEventListener('submit', function(e) {
+                var cccdInput = modalMemberForm.querySelector('input[name="identity_card"]');
+                var phoneInput = modalMemberForm.querySelector('input[name="phone"]');
+
+                if (cccdInput) {
+                    var cccdVal = cccdInput.value.trim();
+                    if (!/^(?:[0-9]{9}|[0-9]{12})$/.test(cccdVal)) {
+                        e.preventDefault();
+                        alert('Số CCCD không hợp lệ! Vui lòng nhập đúng 12 chữ số (hoặc CMND 9 chữ số), không chứa chữ cái, số âm hay ký tự đặc biệt.');
+                        cccdInput.focus();
+                        return false;
+                    }
+                }
+
+                if (phoneInput && phoneInput.value.trim() !== '') {
+                    var phoneVal = phoneInput.value.trim();
+                    if (!/^0[0-9]{9}$/.test(phoneVal)) {
+                        e.preventDefault();
+                        alert('Số điện thoại không hợp lệ! Vui lòng nhập đúng 10 chữ số, bắt đầu bằng số 0 và không chứa số âm.');
+                        phoneInput.focus();
+                        return false;
+                    }
+                }
+            });
+        }
     });
 </script>
 @endpush
@@ -500,12 +529,16 @@
                                     </label>
                                     <input
                                         type="text"
+                                        inputmode="numeric"
                                         name="identity_card"
                                         value="{{ old('identity_card') }}"
                                         class="form-control"
-                                        placeholder="VD: 079..."
+                                        placeholder="VD: 079123456789"
                                         required
-                                        maxlength="20"
+                                        maxlength="12"
+                                        pattern="[0-9]{9,12}"
+                                        title="Số CCCD gồm 12 số (hoặc CMND 9 số), không chứa chữ cái hay số âm"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);"
                                     >
                                 </div>
 
@@ -515,11 +548,15 @@
                                     </label>
                                     <input
                                         type="tel"
+                                        inputmode="numeric"
                                         name="phone"
                                         value="{{ old('phone') }}"
                                         class="form-control"
-                                        placeholder="VD: 090..."
-                                        maxlength="20"
+                                        placeholder="VD: 0901234567"
+                                        maxlength="10"
+                                        pattern="0[0-9]{9}"
+                                        title="Số điện thoại gồm đúng 10 số, bắt đầu bằng 0 và không có số âm"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
                                     >
                                 </div>
 

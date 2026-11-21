@@ -1,0 +1,290 @@
+/* =========================================================
+   TRANG ĐẶT LỊCH XEM PHÒNG (APPOINTMENT CREATE) - MODERN TRỌ ƠI
+   ========================================================= */
+
+.appointment-create-page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+}
+
+.back-link-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    color: #0c2340;
+    background: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(12, 35, 64, 0.04);
+    transition: all 0.2s ease;
+}
+
+.back-link-custom:hover {
+    color: #ffffff;
+    background: #0c2340;
+    border-color: #0c2340;
+    transform: translateX(-3px);
+}
+
+.badge-tag-clean {
+    display: inline-block;
+    padding: 5px 14px;
+    background: #e2e8f0;
+    color: #0c2340;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+}
+
+.appointment-page-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0c2340;
+    margin-bottom: 4px;
+}
+
+.appointment-page-desc {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 0;
+}
+
+/* CARDS */
+.appointment-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(12, 35, 64, 0.04);
+    padding: 26px;
+    position: relative;
+}
+
+.card-header-clean {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.card-header-clean h2,
+.card-header-clean h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0c2340;
+}
+
+.badge-vacant-clean {
+    padding: 4px 12px;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 999px;
+}
+
+.room-preview-thumb {
+    width: 100%;
+    height: 180px;
+    border-radius: 14px;
+    object-fit: cover;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(12, 35, 64, 0.06);
+}
+
+.room-title-highlight {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0c2340;
+    margin-bottom: 4px;
+}
+
+.room-address-text {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.room-specs-pill {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-price-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0c2340;
+}
+
+.room-price-val span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.btn-detail-clean {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    color: #0c2340;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-detail-clean:hover {
+    background: #0c2340;
+    color: #ffffff;
+    border-color: #0c2340;
+}
+
+/* FORM CONTROLS */
+.appointment-card .form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.appointment-card .form-control,
+.appointment-card .form-select {
+    border-radius: 12px;
+    height: 46px;
+    border: 1px solid #cbd5e1;
+    padding: 0 14px;
+    font-size: 14px;
+    color: #0f172a;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.appointment-card textarea.form-control {
+    height: auto;
+    padding: 12px 14px;
+    resize: vertical;
+}
+
+.appointment-card .form-control:focus,
+.appointment-card .form-select:focus {
+    border-color: #0c2340;
+    box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.1);
+}
+
+.appointment-card .form-text {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* NOTICE NOTE BOX */
+.notice-box-clean {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.notice-box-clean strong {
+    color: #0c2340;
+}
+
+/* BUTTONS */
+.btn-cancel-clean {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 22px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel-clean:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.btn-submit-clean {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 28px;
+    background: #0c2340;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(12, 35, 64, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-submit-clean:hover {
+    background: #163861;
+    transform: translateY(-1px);
+}
+
+/* PROCESS STEPS */
+.process-card-clean {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 6px 20px rgba(12, 35, 64, 0.03);
+}
+
+.step-num-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #0c2340;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.step-title-text {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0c2340;
+    margin-bottom: 2px;
+}
+
+.step-desc-text {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.45;
+}

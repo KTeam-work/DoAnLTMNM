@@ -53,8 +53,25 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('pricePreview').textContent =
             'Hiển thị: ' + formatMoney(fields.price.value);
 
-        document.getElementById('depositPreview').textContent =
-            'Hiển thị: ' + formatMoney(fields.deposit.value);
+        const priceNum = Number(fields.price.value) || 0;
+        const depositNum = Number(fields.deposit.value) || 0;
+        if (priceNum > 0) {
+            fields.deposit.max = priceNum;
+        }
+
+        if (fields.deposit.value !== '' && depositNum > priceNum) {
+            fields.deposit.classList.add('is-invalid');
+            document.getElementById('depositPreview').innerHTML =
+                '<span class="text-danger fw-semibold">Tiền cọc không được lớn hơn giá thuê</span>';
+        } else if (fields.deposit.value !== '' && depositNum < 0) {
+            fields.deposit.classList.add('is-invalid');
+            document.getElementById('depositPreview').innerHTML =
+                '<span class="text-danger fw-semibold">Tiền cọc không được là số âm</span>';
+        } else {
+            fields.deposit.classList.remove('is-invalid');
+            document.getElementById('depositPreview').textContent =
+                'Hiển thị: ' + formatMoney(fields.deposit.value);
+        }
 
         const statusNote = document.getElementById('statusNote');
         const notes = {
@@ -95,6 +112,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (area <= 0 || price < 0 || deposit < 0 || people < 1) {
             event.preventDefault();
             alert('Vui lòng kiểm tra diện tích, giá thuê, tiền cọc và sức chứa.');
+            return;
+        }
+
+        if (deposit > price) {
+            event.preventDefault();
+            alert('Tiền cọc không được lớn hơn tiền thuê phòng.');
+            fields.deposit.focus();
             return;
         }
 

@@ -67,13 +67,17 @@ class OwnerRoomController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
-            'deposit' => ['required', 'numeric', 'min:0'],
+            'deposit' => ['required', 'numeric', 'min:0', 'lte:price'],
             'max_people' => ['required', 'integer', 'min:1'],
             'floor' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'in:available,pending,rented,maintenance,hidden'],
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['integer', 'exists:amenities,id'],
+        ], [
+            'price.min' => 'Giá thuê không được là số âm.',
+            'deposit.min' => 'Tiền cọc không được là số âm.',
+            'deposit.lte' => 'Tiền cọc không được lớn hơn tiền thuê phòng.',
         ]);
 
         $amenityIds = $request->input('amenities', []);
@@ -190,7 +194,7 @@ class OwnerRoomController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
-            'deposit' => ['required', 'numeric', 'min:0'],
+            'deposit' => ['required', 'numeric', 'min:0', 'lte:price'],
             'max_people' => ['required', 'integer', 'min:1'],
             'floor' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
@@ -200,6 +204,10 @@ class OwnerRoomController extends Controller
             ],
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['integer', 'exists:amenities,id'],
+        ], [
+            'price.min' => 'Giá thuê không được là số âm.',
+            'deposit.min' => 'Tiền cọc không được là số âm.',
+            'deposit.lte' => 'Tiền cọc không được lớn hơn tiền thuê phòng.',
         ]);
 
         $amenityIds = $request->input('amenities', []);

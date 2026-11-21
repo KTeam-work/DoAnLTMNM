@@ -172,15 +172,15 @@ public function store(Request $request)
 
 
     public function show(RentalPost $rental_post)
-{
-    $this->authorizeOwnership($rental_post);
+    {
+        $this->authorizeOwnership($rental_post);
 
-    $rental_post->load(['room.property','images']);
+        $rental_post->load(['room.property', 'room.amenities', 'images']);
 
-    return view('owner.rental-posts.show', [
-        'post' => $rental_post,
-    ]);
-}
+        return view('owner.rental-posts.show', [
+            'post' => $rental_post,
+        ]);
+    }
 
     /**
      * Hiển thị form chỉnh sửa tin đăng.
