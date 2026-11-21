@@ -165,12 +165,16 @@
 
                     <input
                         type="text"
+                        inputmode="numeric"
                         name="identity_card"
                         value="{{ old('identity_card') }}"
                         class="form-control"
-                        placeholder="Nhập số CCCD"
+                        placeholder="VD: 079123456789"
                         required
-                        maxlength="20"
+                        maxlength="12"
+                        pattern="[0-9]{9,12}"
+                        title="Số CCCD gồm 12 số (hoặc CMND 9 số), không chứa chữ cái hay số âm"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);"
                     >
 
                 </div>
@@ -185,11 +189,15 @@
 
                     <input
                         type="tel"
+                        inputmode="numeric"
                         name="phone"
                         value="{{ old('phone') }}"
                         class="form-control"
-                        placeholder="Nhập số điện thoại"
-                        maxlength="20"
+                        placeholder="VD: 0901234567"
+                        maxlength="10"
+                        pattern="0[0-9]{9}"
+                        title="Số điện thoại gồm đúng 10 số, bắt đầu bằng 0 và không có số âm"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
                     >
 
                 </div>

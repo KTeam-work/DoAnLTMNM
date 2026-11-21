@@ -177,3 +177,49 @@
     .rp-panel { padding: 12px; }
     .rp-filters > * { width: 100%; }
 }
+
+/* =========================================
+   MODAL THÔNG BÁO XÁC NHẬN CHUYỂN TRẠNG THÁI
+========================================= */
+#statusConfirmModal .modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(12, 35, 64, 0.25);
+}
+
+#statusConfirmModal .modal-header {
+    background: #0c2340;
+    color: #ffffff;
+    border: none;
+    padding: 18px 24px;
+}
+
+#statusConfirmModal .modal-header .modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+#statusConfirmModal .modal-header .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+#statusConfirmModal .modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+#statusConfirmModal .form-control {
+    border-radius: 12px;
+    padding: 10px 14px;
+    border-color: #cbd5e1;
+    font-size: 13.5px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#statusConfirmModal .form-control:focus {
+    border-color: #0c2340;
+    box-shadow: 0 0 0 3px rgba(12, 35, 64, 0.1);
+}

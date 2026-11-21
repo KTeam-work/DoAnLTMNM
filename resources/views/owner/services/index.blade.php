@@ -17,9 +17,9 @@
                 <h1 class="page-title">Quản lý dịch vụ & tiện ích</h1>
                 <div class="page-desc">Quản lý các dịch vụ tính phí và tiện ích phòng áp dụng cho nhà trọ</div>
             </div>
-            <a href="{{ route('owner.services.create', ['property_id' => $selectedProperty?->id]) }}" class="btn-brand">
+            <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#addServiceModal">
                 <span>＋</span> Thêm dịch vụ
-            </a>
+            </button>
         </div>
 
         {{-- NAVIGATION TABS GIỮA DỊCH VỤ VÀ TIỆN ÍCH --}}
@@ -130,7 +130,7 @@
                             </td>
                             <td>
                                 <div class="action-group">
-                                    <a href="{{ route('owner.services.edit', ['id' => $service->id]) }}" class="btn-action btn-edit">Sửa</a>
+                                    <a href="{{ route('owner.services.edit', ['id' => $service->id, 'property_id' => $selectedProperty?->id]) }}" class="btn-action btn-edit">Sửa</a>
                                 </div>
                             </td>
                         </tr>
@@ -147,6 +147,136 @@
             </div>
         </div>
     </main>
+
+    {{-- MODAL THÊM DỊCH VỤ (MODERN DARK NAVY HEADER) --}}
+    <div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addServiceModalLabel">Thêm dịch vụ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                @if(!isset($properties) || $properties->isEmpty())
+                    <div class="modal-body p-4">
+                        <div class="alert alert-warning mb-0">
+                            Chưa có nhà trọ nào để cấu hình dịch vụ. Vui lòng tạo nhà trọ trước.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-3 px-4" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                @else
+                    <form id="modalServiceForm" action="{{ route('owner.services.store') }}" method="POST">
+                        @csrf
+                        <div class="modal-body p-4">
+                            {{-- CHỌN NHÀ TRỌ --}}
+                            <div class="mb-3">
+                                <label for="modalServicePropertySelect" class="form-label fw-semibold" style="font-size: 13.5px; color: #1e293b;">
+                                    Chọn nhà trọ áp dụng <span class="text-danger">*</span>
+                                </label>
+                                <select id="modalServicePropertySelect" name="property_id" class="form-select" required>
+                                    @foreach($properties as $prop)
+                                        @php
+                                            $serviceCount = \Illuminate\Support\Facades\DB::table('property_services')->where('property_id', $prop->id)->count();
+                                        @endphp
+                                        <option value="{{ $prop->id }}"
+                                            data-name="{{ $prop->name }}"
+                                            data-address="{{ $prop->address }}"
+                                            data-type="{{ $prop->type ?? 'Nhà trọ' }}"
+                                            data-count="{{ $serviceCount }}"
+                                            @selected($selectedProperty && $selectedProperty->id === $prop->id)>
+                                            {{ $prop->name }} — {{ $prop->address }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- THÔNG TIN TÓM TẮT NHÀ TRỌ --}}
+                            <div class="property-summary-card mb-4" id="modalPropertySummary">
+                                <div class="row g-3">
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Tên nhà trọ</div>
+                                        <div class="info-col-val text-primary" id="modalPropName">{{ $selectedProperty?->name ?? '—' }}</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Loại hình</div>
+                                        <div class="info-col-val" id="modalPropType">{{ $selectedProperty?->type ?? 'Nhà trọ' }}</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Dịch vụ hiện có</div>
+                                        <div class="info-col-val" id="modalPropCount">{{ $services->count() }} dịch vụ</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Địa chỉ</div>
+                                        <div class="info-col-val text-truncate" id="modalPropAddress" title="{{ $selectedProperty?->address ?? '' }}">{{ $selectedProperty?->address ?? '—' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- THÔNG TIN DỊCH VỤ --}}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Tên dịch vụ <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="name" class="form-control" placeholder="VD: Internet tốc độ cao, Rác..." required maxlength="100">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Đơn vị tính <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="unit" class="form-select" required>
+                                        @foreach(['tháng', 'người', 'chiếc', 'kWh', 'm³'] as $unit)
+                                            <option value="{{ $unit }}">{{ $unit }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Đơn giá áp dụng (VNĐ) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="price" class="form-control" placeholder="VD: 50000" min="0" step="1000" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Trạng thái <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="status" class="form-select">
+                                        <option value="active" selected>Đang hoạt động</option>
+                                        <option value="inactive">Tạm ngưng</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Mô tả dịch vụ
+                                    </label>
+                                    <input type="text" name="description" class="form-control" placeholder="VD: Đã bao gồm phí bảo trì và wifi cáp quang...">
+                                </div>
+                            </div>
+
+                            <div class="mt-3 p-2 bg-light rounded text-muted" style="font-size: 12.5px;">
+                                Dịch vụ sau khi tạo sẽ được liên kết và tính toán riêng cho nhà trọ đã chọn.
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light rounded-3 px-4 py-2 fw-semibold" data-bs-dismiss="modal">
+                                Hủy
+                            </button>
+                            <button type="submit" class="btn text-white rounded-3 px-4 py-2 fw-semibold" style="background: #0c2340; border-color: #0c2340;">
+                                Thêm dịch vụ
+                            </button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+        </div>
+    </div>
 
 @push('scripts')
 <script>
@@ -177,6 +307,29 @@
                 filterServices(status);
             });
         });
+
+        // Đồng bộ tóm tắt thông tin nhà trọ trong Modal Thêm dịch vụ
+        const modalPropSelect = document.getElementById('modalServicePropertySelect');
+        if (modalPropSelect) {
+            function syncModalProp() {
+                const opt = modalPropSelect.options[modalPropSelect.selectedIndex];
+                if (!opt) return;
+                const nameEl = document.getElementById('modalPropName');
+                const typeEl = document.getElementById('modalPropType');
+                const countEl = document.getElementById('modalPropCount');
+                const addrEl = document.getElementById('modalPropAddress');
+
+                if (nameEl) nameEl.textContent = opt.getAttribute('data-name') || '—';
+                if (typeEl) typeEl.textContent = opt.getAttribute('data-type') || 'Nhà trọ';
+                if (countEl) countEl.textContent = (opt.getAttribute('data-count') || '0') + ' dịch vụ';
+                if (addrEl) {
+                    addrEl.textContent = opt.getAttribute('data-address') || '—';
+                    addrEl.setAttribute('title', opt.getAttribute('data-address') || '');
+                }
+            }
+            modalPropSelect.addEventListener('change', syncModalProp);
+            syncModalProp();
+        }
     });
 </script>
 @endpush

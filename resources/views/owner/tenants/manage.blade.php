@@ -37,18 +37,37 @@
 
 
             <!--
-                Thêm người ở cùng tại trang riêng:
-                chọn hợp đồng rồi nhập thông tin.
+                Thêm người ở cùng qua Popup Modal
             -->
 
-            <a
-                href="{{ route('owner.tenants.create') }}"
-                class="btn-add-member text-decoration-none"
+            <button
+                type="button"
+                class="btn-add-member"
+                data-bs-toggle="modal"
+                data-bs-target="#addMemberModal"
             >
                 + Thêm người ở cùng
-            </a>
+            </button>
 
         </div>
+
+        {{-- THÔNG BÁO FLASH --}}
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        @endif
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+        @endif
 
 
 
@@ -345,9 +364,244 @@
                 applyFilter();
             });
         }
+
+        // Đồng bộ dữ liệu tóm tắt hợp đồng trong Modal
+        function syncModalContract() {
+            var select = document.getElementById('modalContractSelect');
+            var form = document.getElementById('modalMemberForm');
+            if (!select || !form) return;
+            var opt = select.options[select.selectedIndex];
+            if (!opt) return;
+            form.action = "{{ url('/owner/contracts') }}/" + opt.value + "/members";
+            var hidden = document.getElementById('modalContractIdHidden');
+            if (hidden) hidden.value = opt.value;
+            var infoCode = document.getElementById('modalInfoCode');
+            if (infoCode) infoCode.textContent = '#' + (opt.getAttribute('data-code') || '');
+            var infoTenant = document.getElementById('modalInfoTenant');
+            if (infoTenant) infoTenant.textContent = opt.getAttribute('data-tenant') || '—';
+            var infoRoom = document.getElementById('modalInfoRoom');
+            if (infoRoom) infoRoom.textContent = opt.getAttribute('data-room') || '—';
+            var infoCount = document.getElementById('modalInfoCount');
+            if (infoCount) {
+                infoCount.textContent = (1 + parseInt(opt.getAttribute('data-count') || '0', 10)) + ' / ' + (opt.getAttribute('data-max') || '?') + ' người';
+            }
+        }
+
+        var modalContractSelect = document.getElementById('modalContractSelect');
+        if (modalContractSelect) {
+            modalContractSelect.addEventListener('change', syncModalContract);
+            syncModalContract();
+        }
+
+        // Ràng buộc kiểm tra form thêm người ở cùng (CCCD 9 hoặc 12 số, SĐT 10 số bắt đầu bằng 0)
+        var modalMemberForm = document.getElementById('modalMemberForm');
+        if (modalMemberForm) {
+            modalMemberForm.addEventListener('submit', function(e) {
+                var cccdInput = modalMemberForm.querySelector('input[name="identity_card"]');
+                var phoneInput = modalMemberForm.querySelector('input[name="phone"]');
+
+                if (cccdInput) {
+                    var cccdVal = cccdInput.value.trim();
+                    if (!/^(?:[0-9]{9}|[0-9]{12})$/.test(cccdVal)) {
+                        e.preventDefault();
+                        alert('Số CCCD không hợp lệ! Vui lòng nhập đúng 12 chữ số (hoặc CMND 9 chữ số), không chứa chữ cái, số âm hay ký tự đặc biệt.');
+                        cccdInput.focus();
+                        return false;
+                    }
+                }
+
+                if (phoneInput && phoneInput.value.trim() !== '') {
+                    var phoneVal = phoneInput.value.trim();
+                    if (!/^0[0-9]{9}$/.test(phoneVal)) {
+                        e.preventDefault();
+                        alert('Số điện thoại không hợp lệ! Vui lòng nhập đúng 10 chữ số, bắt đầu bằng số 0 và không chứa số âm.');
+                        phoneInput.focus();
+                        return false;
+                    }
+                }
+            });
+        }
     });
 </script>
 @endpush
+
+    {{-- MODAL THÊM NGƯỜI Ở CÙNG (MODERN DARK NAVY HEADER) --}}
+    <div
+        class="modal fade"
+        id="addMemberModal"
+        tabindex="-1"
+        aria-labelledby="addMemberModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMemberModalLabel">
+                        Thêm người ở cùng
+                    </h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Đóng"
+                    ></button>
+                </div>
+
+                @if(!isset($contracts) || $contracts->isEmpty())
+                    <div class="modal-body p-4">
+                        <div class="alert alert-warning mb-0">
+                            Chưa có hợp đồng nào đang hiệu lực để thêm người ở cùng.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-3 px-4" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                @else
+                    <form id="modalMemberForm" action="#" method="POST">
+                        @csrf
+                        <input type="hidden" name="action" value="add">
+                        <input type="hidden" name="contract_id" id="modalContractIdHidden" value="">
+
+                        <div class="modal-body p-4">
+                            {{-- CHỌN HỢP ĐỒNG --}}
+                            <div class="mb-3">
+                                <label for="modalContractSelect" class="form-label fw-semibold" style="font-size: 13.5px; color: #1e293b;">
+                                    Chọn hợp đồng <span class="text-danger">*</span>
+                                </label>
+                                <select id="modalContractSelect" class="form-select form-select-lg fw-bold" required>
+                                    @foreach($contracts as $contract)
+                                        <option value="{{ $contract->id }}"
+                                            data-code="{{ $contract->contract_code }}"
+                                            data-tenant="{{ $contract->tenant->name ?? '' }}"
+                                            data-room="{{ $contract->room->name ?? '' }} · {{ $contract->room->property->name ?? '' }}"
+                                            data-count="{{ $contract->members->count() }}"
+                                            data-max="{{ $contract->room->max_people ?? '' }}"
+                                            @selected((string) old('contract_id') === (string) $contract->id)>
+                                            {{ $contract->contract_code }} — {{ $contract->room->name ?? '' }} ({{ $contract->tenant->name ?? '' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- THÔNG TIN TÓM TẮT HỢP ĐỒNG --}}
+                            <div class="contract-quick-info mb-4" id="modalContractInfoBox">
+                                <div class="row g-3">
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Mã hợp đồng</div>
+                                        <div class="info-col-val text-primary" id="modalInfoCode">—</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Người thuê chính</div>
+                                        <div class="info-col-val" id="modalInfoTenant">—</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Phòng</div>
+                                        <div class="info-col-val" id="modalInfoRoom">—</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="info-col-label">Đã ở / Tối đa</div>
+                                        <div class="info-col-val" id="modalInfoCount">—</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- THÔNG TIN NGƯỜI Ở CÙNG --}}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Họ và tên <span class="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value="{{ old('name') }}"
+                                        class="form-control"
+                                        placeholder="VD: Nguyễn Văn A"
+                                        required
+                                        maxlength="100"
+                                    >
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Số CCCD <span class="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        inputmode="numeric"
+                                        name="identity_card"
+                                        value="{{ old('identity_card') }}"
+                                        class="form-control"
+                                        placeholder="VD: 079123456789"
+                                        required
+                                        maxlength="12"
+                                        pattern="[0-9]{9,12}"
+                                        title="Số CCCD gồm 12 số (hoặc CMND 9 số), không chứa chữ cái hay số âm"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);"
+                                    >
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Số điện thoại
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        inputmode="numeric"
+                                        name="phone"
+                                        value="{{ old('phone') }}"
+                                        class="form-control"
+                                        placeholder="VD: 0901234567"
+                                        maxlength="10"
+                                        pattern="0[0-9]{9}"
+                                        title="Số điện thoại gồm đúng 10 số, bắt đầu bằng 0 và không có số âm"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"
+                                    >
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" style="font-size: 13px; color: #1e293b;">
+                                        Quan hệ với người thuê chính
+                                    </label>
+                                    <select name="relationship" class="form-select">
+                                        <option value="">-- Chọn quan hệ --</option>
+                                        @foreach(['Bạn', 'Vợ/Chồng', 'Anh/Chị/Em', 'Người thân', 'Khác'] as $rel)
+                                            <option value="{{ $rel }}" @selected(old('relationship') === $rel)>
+                                                {{ $rel }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 p-2 bg-light rounded text-muted" style="font-size: 12.5px;">
+                                Người ở cùng chỉ được ghi nhận trong hợp đồng và không cần tạo tài khoản Trọ Ơi.
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn btn-light rounded-3 px-4 py-2 fw-semibold"
+                                data-bs-dismiss="modal"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                type="submit"
+                                class="btn text-white rounded-3 px-4 py-2 fw-semibold"
+                                style="background: #0c2340; border-color: #0c2340;"
+                            >
+                                Thêm người ở cùng
+                            </button>
+                        </div>
+                    </form>
+                @endif
+
+            </div>
+        </div>
+    </div>
 
 @endsection
  

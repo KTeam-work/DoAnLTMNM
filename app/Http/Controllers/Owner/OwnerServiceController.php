@@ -20,15 +20,47 @@ class OwnerServiceController extends Controller
                 ? User::query()->where('role', 'owner')->orderBy('id')->first()
                 : $this->owner($request));
 
-        $services = $owner
-            ? Service::query()->where('owner_id', $owner->id)->orderBy('name')->get()
-            : collect();
-
         $properties = $owner ? $owner->properties()->orderBy('id')->get() : collect();
         $selectedPropertyId = $request->input('property_id');
         $selectedProperty = $selectedPropertyId
             ? $properties->firstWhere('id', $selectedPropertyId)
             : $properties->first();
+
+        // Lọc dịch vụ chỉ theo nhà trọ đang chọn
+        $services = collect();
+        if ($owner) {
+            if ($selectedProperty) {
+                // Chỉ lấy các dịch vụ áp dụng cho nhà trọ đang chọn
+                $services = Service::query()
+                    ->where('owner_id', $owner->id)
+                    ->whereIn('id', function ($query) use ($selectedProperty) {
+                        $query->select('service_id')
+                            ->from('property_services')
+                            ->where('property_id', $selectedProperty->id);
+                    })
+                    ->orderBy('id')
+                    ->get();
+
+                $propServices = DB::table('property_services')
+                    ->where('property_id', $selectedProperty->id)
+                    ->get()
+                    ->keyBy('service_id');
+
+                foreach ($services as $service) {
+                    if (isset($propServices[$service->id])) {
+                        $service->price = $propServices[$service->id]->price;
+                        if (! empty($propServices[$service->id]->status)) {
+                            $service->status = $propServices[$service->id]->status;
+                        }
+                    }
+                }
+            } else {
+                $services = Service::query()
+                    ->where('owner_id', $owner->id)
+                    ->orderBy('id')
+                    ->get();
+            }
+        }
 
         if (! $request->expectsJson()) {
             return view('owner.services.index', compact('services', 'properties', 'selectedProperty'));
@@ -81,10 +113,19 @@ class OwnerServiceController extends Controller
             : null;
 
         $properties = $owner ? $owner->properties()->orderBy('id')->get() : collect();
-        $selectedPropertyId = $request->input('property_id');
+
+        // Kiểm tra xem dịch vụ này đang gán cho nhà trọ nào
+        $propServiceRecord = $service ? DB::table('property_services')->where('service_id', $service->id)->first() : null;
+
+        $selectedPropertyId = $request->input('property_id', $propServiceRecord?->property_id);
         $selectedProperty = $selectedPropertyId
             ? $properties->firstWhere('id', $selectedPropertyId)
             : $properties->first();
+
+        // Nếu có giá riêng cho nhà trọ đó, nạp giá riêng
+        if ($propServiceRecord && $service) {
+            $service->price = $propServiceRecord->price;
+        }
 
         // Fallback để trang không 500 khi demo/id lạ: dựng object tạm để form vẫn render.
         $service ??= new Service([
@@ -110,10 +151,25 @@ class OwnerServiceController extends Controller
         $owner = $this->actingOwner($request);
         $data = $this->validatedService($request);
         $data['status'] ??= 'active';
+        $propertyId = $data['property_id'] ?? $request->input('property_id');
+        unset($data['property_id']);
+
         $service = $owner->services()->create($data);
 
+        if ($propertyId) {
+            DB::table('property_services')->updateOrInsert(
+                ['property_id' => $propertyId, 'service_id' => $service->id],
+                [
+                    'price' => $data['price'],
+                    'status' => $data['status'] ?? 'active',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
         if (! $request->expectsJson()) {
-            return redirect()->route('owner.services.index')->with('success', 'Thêm dịch vụ thành công.');
+            return redirect()->route('owner.services.index', ['property_id' => $propertyId])->with('success', 'Thêm dịch vụ thành công.');
         }
 
         return response()->json(['message' => 'Service created.', 'data' => $service], 201);
@@ -128,10 +184,27 @@ class OwnerServiceController extends Controller
             $data['status'] = 'inactive';
         }
         abort_if($data === [], 422, 'Provide at least one service field to update.');
+
+        $propertyId = $data['property_id'] ?? $request->input('property_id');
+        unset($data['property_id']);
+
         $service->update($data);
 
+        // Lưu đơn giá và gán nhà trọ tương ứng trong property_services
+        if ($propertyId) {
+            DB::table('property_services')->updateOrInsert(
+                ['service_id' => $service->id],
+                [
+                    'property_id' => $propertyId,
+                    'price' => $data['price'],
+                    'status' => $data['status'] ?? 'active',
+                    'updated_at' => now(),
+                ]
+            );
+        }
+
         if (! $request->expectsJson()) {
-            return redirect()->route('owner.services.index')->with('success', 'Cập nhật dịch vụ thành công.');
+            return redirect()->route('owner.services.index', ['property_id' => $propertyId])->with('success', 'Cập nhật dịch vụ thành công.');
         }
 
         return response()->json(['message' => 'Service updated.', 'data' => $service->fresh()]);
@@ -169,13 +242,20 @@ class OwnerServiceController extends Controller
     {
         $prefix = $updating ? 'sometimes' : 'required';
 
-        return $request->validate([
+        $validated = $request->validate([
+            'property_id' => ['nullable', 'integer', 'exists:properties,id'],
             'name' => [$prefix, 'string', 'max:100'],
             'description' => ['nullable', 'string'],
             'unit' => [$prefix, 'string', 'max:50'],
             'price' => [$prefix, 'numeric', 'min:0'],
             'status' => ['sometimes', 'in:active,inactive'],
         ]);
+
+        if (isset($validated['price']) && (float) $validated['price'] > 0 && (float) $validated['price'] < 1000) {
+            $validated['price'] = (float) $validated['price'] * 1000;
+        }
+
+        return $validated;
     }
 
     private function ownedService(Request $request, ?Service $service): Service

@@ -54,6 +54,12 @@
     $wOldVal = old('water_old', $reading?->water_old ?? ($initialPrevious['water_old'] ?? 0));
     $ePriceVal = old('electricity_price', $reading?->electricity_price ?? ($initialPrevious['electricity_price'] ?? 3500));
     $wPriceVal = old('water_price', $reading?->water_price ?? ($initialPrevious['water_price'] ?? 20000));
+    if ($ePriceVal > 0 && $ePriceVal < 1000) {
+        $ePriceVal = (float)$ePriceVal * 1000;
+    }
+    if ($wPriceVal > 0 && $wPriceVal < 1000) {
+        $wPriceVal = (float)$wPriceVal * 1000;
+    }
     $sourceVal = $reading ? 'Bản ghi hiện tại' : ($initialPrevious['source'] ?? 'Tự động từ hệ thống');
     $alreadyExists = ! $reading && ($initialPrevious['already_exists'] ?? false);
     $existingId = $initialPrevious['existing_id'] ?? null;
@@ -153,8 +159,8 @@
 
                     <div class="row-3">
                         <div class="form-group">
-                            <label>Chỉ số cũ</label>
-                            <input type="number" step="0.01" min="0" name="electricity_old" id="electricity_old" class="custom-input" value="{{ $eOldVal }}" placeholder="Tự động từ CSDL">
+                            <label>Chỉ số cũ <small class="text-muted fw-normal">(Cố định)</small></label>
+                            <input type="number" step="0.01" min="0" name="electricity_old" id="electricity_old" class="custom-input" value="{{ $eOldVal }}" placeholder="Tự động từ CSDL" readonly tabindex="-1" style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;">
                         </div>
                         <div class="form-group">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -165,8 +171,8 @@
                             <div id="e-calc-feedback" class="calc-feedback"></div>
                         </div>
                         <div class="form-group">
-                            <label>Đơn giá (đ/kWh) <span>*</span></label>
-                            <input type="number" step="0.01" min="0" name="electricity_price" id="electricity_price" class="custom-input" value="{{ $ePriceVal }}" required>
+                            <label>Đơn giá (đ/kWh) <small class="text-muted fw-normal">(Cố định)</small> <span>*</span></label>
+                            <input type="number" step="0.01" min="0" name="electricity_price" id="electricity_price" class="custom-input" value="{{ $ePriceVal }}" required readonly tabindex="-1" style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;">
                         </div>
                     </div>
                 </div>
@@ -180,8 +186,8 @@
 
                     <div class="row-3">
                         <div class="form-group">
-                            <label>Chỉ số cũ</label>
-                            <input type="number" step="0.01" min="0" name="water_old" id="water_old" class="custom-input" value="{{ $wOldVal }}" placeholder="Tự động từ CSDL">
+                            <label>Chỉ số cũ <small class="text-muted fw-normal">(Cố định)</small></label>
+                            <input type="number" step="0.01" min="0" name="water_old" id="water_old" class="custom-input" value="{{ $wOldVal }}" placeholder="Tự động từ CSDL" readonly tabindex="-1" style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;">
                         </div>
                         <div class="form-group">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -192,8 +198,8 @@
                             <div id="w-calc-feedback" class="calc-feedback"></div>
                         </div>
                         <div class="form-group">
-                            <label>Đơn giá (đ/m³) <span>*</span></label>
-                            <input type="number" step="0.01" min="0" name="water_price" id="water_price" class="custom-input" value="{{ $wPriceVal }}" required>
+                            <label>Đơn giá (đ/m³) <small class="text-muted fw-normal">(Cố định)</small> <span>*</span></label>
+                            <input type="number" step="0.01" min="0" name="water_price" id="water_price" class="custom-input" value="{{ $wPriceVal }}" required readonly tabindex="-1" style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;">
                         </div>
                     </div>
                 </div>
@@ -351,12 +357,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const eOld = parseFloat(inputEOld?.value) || 0;
         const eNewVal = inputENew?.value;
         const eNew = (eNewVal !== '' && eNewVal !== null && eNewVal !== undefined) ? parseFloat(eNewVal) : null;
-        const ePrice = parseFloat(inputEPrice?.value) || 0;
+        let ePrice = parseFloat(inputEPrice?.value) || 0;
+        if (ePrice > 0 && ePrice < 1000) {
+            ePrice = ePrice * 1000;
+        }
 
         const wOld = parseFloat(inputWOld?.value) || 0;
         const wNewVal = inputWNew?.value;
         const wNew = (wNewVal !== '' && wNewVal !== null && wNewVal !== undefined) ? parseFloat(wNewVal) : null;
-        const wPrice = parseFloat(inputWPrice?.value) || 0;
+        let wPrice = parseFloat(inputWPrice?.value) || 0;
+        if (wPrice > 0 && wPrice < 1000) {
+            wPrice = wPrice * 1000;
+        }
 
         let eDiff = 0;
         let eMoney = 0;
@@ -413,10 +425,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (wSourceText) wSourceText.textContent = `Nguồn: ${data.source}`;
 
                     if (data.electricity_price !== undefined && inputEPrice) {
-                        inputEPrice.value = data.electricity_price;
+                        let ep = parseFloat(data.electricity_price) || 0;
+                        if (ep > 0 && ep < 1000) ep *= 1000;
+                        inputEPrice.value = ep;
                     }
                     if (data.water_price !== undefined && inputWPrice) {
-                        inputWPrice.value = data.water_price;
+                        let wp = parseFloat(data.water_price) || 0;
+                        if (wp > 0 && wp < 1000) wp *= 1000;
+                        inputWPrice.value = wp;
                     }
                 }
 
@@ -437,6 +453,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (selectRoom) selectRoom.addEventListener('change', fetchPrevious);
     if (inputMonth) inputMonth.addEventListener('change', fetchPrevious);
+
+    function normalizePrice(input) {
+        if (!input) return;
+        let v = parseFloat(input.value) || 0;
+        if (v > 0 && v < 1000) {
+            input.value = Math.round(v * 1000);
+            calculate();
+        }
+    }
+    if (inputEPrice) inputEPrice.addEventListener('blur', () => normalizePrice(inputEPrice));
+    if (inputWPrice) inputWPrice.addEventListener('blur', () => normalizePrice(inputWPrice));
 
     [inputEOld, inputENew, inputEPrice, inputWOld, inputWNew, inputWPrice].forEach(input => {
         if (input) {

@@ -318,7 +318,7 @@ class OwnerUtilitiesController extends Controller
     {
         $prefix = $updating ? 'sometimes' : 'required';
 
-        return $request->validate([
+        $validated = $request->validate([
             'room_id' => [$prefix, 'integer', 'exists:rooms,id'],
             'month' => [$prefix, 'date'],
             'electricity_old' => ['nullable', 'numeric', 'min:0'],
@@ -328,6 +328,15 @@ class OwnerUtilitiesController extends Controller
             'water_new' => [$prefix, 'numeric', 'min:0'],
             'water_price' => [$prefix, 'numeric', 'min:0'],
         ]);
+
+        if (isset($validated['electricity_price']) && (float) $validated['electricity_price'] > 0 && (float) $validated['electricity_price'] < 1000) {
+            $validated['electricity_price'] = (float) $validated['electricity_price'] * 1000;
+        }
+        if (isset($validated['water_price']) && (float) $validated['water_price'] > 0 && (float) $validated['water_price'] < 1000) {
+            $validated['water_price'] = (float) $validated['water_price'] * 1000;
+        }
+
+        return $validated;
     }
 
     /**
@@ -382,6 +391,9 @@ class OwnerUtilitiesController extends Controller
                     $defaultElectricPrice = (float) $eService->price;
                 }
             }
+            if ($defaultElectricPrice > 0 && $defaultElectricPrice < 1000) {
+                $defaultElectricPrice *= 1000;
+            }
 
             // Giá nước từ dịch vụ áp dụng cho nhà trọ này nếu có
             $propWater = DB::table('property_services')
@@ -409,6 +421,9 @@ class OwnerUtilitiesController extends Controller
                     $defaultWaterPrice = (float) $wService->price;
                 }
             }
+            if ($defaultWaterPrice > 0 && $defaultWaterPrice < 1000) {
+                $defaultWaterPrice *= 1000;
+            }
         }
 
         // 2. Tìm kỳ trước gần nhất của chính phòng này
@@ -418,11 +433,20 @@ class OwnerUtilitiesController extends Controller
             ->first();
 
         if ($previous) {
+            $prevEPrice = (float) ($previous->electricity_price ?: $defaultElectricPrice);
+            if ($prevEPrice > 0 && $prevEPrice < 1000) {
+                $prevEPrice *= 1000;
+            }
+            $prevWPrice = (float) ($previous->water_price ?: $defaultWaterPrice);
+            if ($prevWPrice > 0 && $prevWPrice < 1000) {
+                $prevWPrice *= 1000;
+            }
+
             return [
                 'electricity_old' => (float) $previous->electricity_new,
                 'water_old' => (float) $previous->water_new,
-                'electricity_price' => (float) ($previous->electricity_price ?: $defaultElectricPrice),
-                'water_price' => (float) ($previous->water_price ?: $defaultWaterPrice),
+                'electricity_price' => $prevEPrice,
+                'water_price' => $prevWPrice,
                 'source' => 'Bản ghi kỳ ' . Carbon::parse($previous->month)->format('m/Y'),
                 'source_type' => 'previous_reading',
                 'already_exists' => (bool) $existing,
