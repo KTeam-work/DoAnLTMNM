@@ -25,7 +25,7 @@
         .then(response => response.json().then(data => ({ status: response.status, body: data })))
         .then(({ status, body }) => {
             submitBtn.disabled = false;
-            submitBtn.innerText = '🚀 Gửi Đánh Giá';
+            submitBtn.innerText = 'Gửi đánh giá';
 
             // Chấp nhận status 200 hoặc 201 (vì Controller trả về 201 Created)
             if ((status === 200 || status === 201) && body.success) {
@@ -50,7 +50,7 @@
                                 <div class="fw-bold mt-1 text-dark" style="font-size: 15px;">${r.room_name}</div>
                             </div>
                             <div class="text-end">
-                                <span class="badge-visible mb-1 d-inline-block">✓ Đang hiển thị</span>
+                                <span class="badge-visible mb-1 d-inline-block">Đang hiển thị</span>
                                 <div class="text-muted" style="font-size: 11px;">${r.created_at}</div>
                             </div>
                         </div>
@@ -77,7 +77,7 @@
         })
         .catch(error => {
             submitBtn.disabled = false;
-            submitBtn.innerText = '🚀 Gửi Đánh Giá';
+            submitBtn.innerText = 'Gửi đánh giá';
             console.error('Lỗi AJAX:', error);
         });
     });

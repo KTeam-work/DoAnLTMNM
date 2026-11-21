@@ -27,7 +27,7 @@
         <!-- 1. THÊM id="review-form" -->
         <form id="review-form" action="{{ route('tenant.reviews.store') }}" method="POST">
           @csrf
-          <h4 class="fw-bold mb-4" style="color: var(--green-dark); font-size: 18px;">✍️ Viết đánh giá mới</h4>
+          <h4 class="fw-bold mb-4" style="color: var(--green-dark); font-size: 18px;">Viết đánh giá mới</h4>
           
           <div class="mb-4">
             <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Phòng đang thuê</label>
@@ -36,7 +36,7 @@
             @else
               <select name="room_id" class="form-select fw-bold text-dark" required>
                 @foreach($rooms as $room)
-                  <option value="{{ $room->id }}">🏠 {{ $room->name }} — {{ $room->property->name ?? '' }}</option>
+                  <option value="{{ $room->id }}">{{ $room->name }} — {{ $room->property->name ?? '' }}</option>
                 @endforeach
               </select>
             @endif
@@ -59,7 +59,7 @@
           </div>
 
           <button type="submit" class="btn btn-brand w-100 py-3 mt-2" style="font-size: 14px; box-shadow: 0 4px 15px rgba(245,200,75,0.4);">
-            🚀 Gửi Đánh Giá
+            Gửi đánh giá
           </button>
         </form>
       </div>
@@ -69,7 +69,7 @@
     <div class="col-lg-7">
       <div class="review-panel">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="fw-bold mb-0" style="color: var(--green-dark); font-size: 18px;">🕒 Lịch sử đánh giá của bạn</h4>
+          <h4 class="fw-bold mb-0" style="color: var(--green-dark); font-size: 18px;">Lịch sử đánh giá của bạn</h4>
           <!-- 2. THÊM id="review-count" -->
           <span id="review-count" class="text-muted" style="font-size: 13px; font-weight: 600;">Tổng: {{ $reviews->count() }} lượt</span>
         </div>
@@ -84,7 +84,7 @@
                 <div class="fw-bold mt-1 text-dark" style="font-size: 15px;">{{ $review->room->name ?? '' }}</div>
               </div>
               <div class="text-end">
-                <span class="badge-visible mb-1 d-inline-block">✓ Đang hiển thị</span>
+                <span class="badge-visible mb-1 d-inline-block">Đang hiển thị</span>
                 <div class="text-muted" style="font-size: 11px;">{{ $review->created_at->format('d/m/Y') }}</div>
               </div>
             </div>

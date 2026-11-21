@@ -20,17 +20,17 @@ class GeminiService
         // Danh sách các model thử nghiệm (tự động fallback nếu model chính bị 404 không khả dụng hoặc 503 quá tải)
         $modelsToTry = array_values(array_unique(array_filter([
             $configuredModel,
-            'gemini-2.0-flash',
             'gemini-flash-lite-latest',
-            'gemini-2.0-flash-lite',
-            'gemini-1.5-pro',
+            'gemini-2.5-flash-lite',
+            'gemini-3.8-flash',
+            'gemini-flash-latest',
         ])));
 
         $lastError = null;
 
         foreach ($modelsToTry as $model) {
             try {
-                $response = Http::timeout(30)
+                $response = Http::timeout(12)
                     ->withHeaders([
                         'x-goog-api-key' => $apiKey,
                         'Content-Type' => 'application/json',
