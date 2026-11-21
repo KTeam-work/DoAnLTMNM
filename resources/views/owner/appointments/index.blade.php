@@ -110,7 +110,8 @@
                 id="appointmentCalendar"
                 data-events="{{ json_encode($calendarEvents) }}"
                 data-confirm-url="{{ route('owner.appointments.confirm', ['appointment' => '__ID__']) }}"
-                data-reject-url="{{ route('owner.appointments.reject', ['appointment' => '__ID__']) }}">
+                data-reject-url="{{ route('owner.appointments.reject', ['appointment' => '__ID__']) }}"
+                data-reschedule-url="{{ route('owner.appointments.reschedule', ['appointment' => '__ID__']) }}">
             </div>
         </div>
 
@@ -191,10 +192,41 @@
                         <button type="submit" class="btn-owner">Xác nhận lịch</button>
                     </form>
 
+                    <button type="button" class="btn btn-outline-warning" id="btnToggleReschedule" onclick="toggleRescheduleForm()" style="border-radius: 8px; font-weight: 600;">
+                        Đổi giờ / Đề xuất giờ mới
+                    </button>
+
                     <form id="rejectForm" method="POST" action="">
                         @csrf
                         @method('PUT')
                         <button type="submit" class="btn-reject">Từ chối lịch</button>
+                    </form>
+                </div>
+
+                <!-- FORM ĐỀ XUẤT GIỜ MỚI -->
+                <div id="rescheduleFormBox" class="mt-3 p-3 bg-light rounded border d-none">
+                    <h6 class="fw-bold mb-2 text-dark">Đề xuất ngày & giờ xem phòng mới</h6>
+                    <form id="rescheduleForm" method="POST" action="">
+                        @csrf
+                        @method('PUT')
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Ngày mới *</label>
+                                <input type="date" name="appointment_date" id="rescheduleDate" class="form-control form-control-sm" required min="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Giờ mới *</label>
+                                <input type="time" name="appointment_time" id="rescheduleTime" class="form-control form-control-sm" required>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Lời nhắn gửi khách thuê *</label>
+                            <textarea name="owner_note" id="rescheduleNote" class="form-control form-control-sm" rows="2" placeholder="Ví dụ: Giờ đó mình bận, hẹn bạn 15h chiều nhé..." required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-sm btn-light" onclick="toggleRescheduleForm(false)">Hủy</button>
+                            <button type="submit" class="btn btn-sm btn-warning fw-bold">Gửi đề xuất mới</button>
+                        </div>
                     </form>
                 </div>
 

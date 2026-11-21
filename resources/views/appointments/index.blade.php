@@ -421,14 +421,36 @@
                                 <span class="badge-status {{ $statusInfo[1] }}">
                                     {{ $statusInfo[0] }}
                                 </span>
+                                @if ($appointment->status === 'rescheduled' && $appointment->owner_note)
+                                    <div class="small text-danger mt-1" style="font-size: 11.5px; line-height: 1.3;">
+                                        <strong>Lời nhắn từ chủ trọ:</strong> {{ $appointment->owner_note }}
+                                    </div>
+                                @endif
                             </td>
 
                             <td>
-                                @if (in_array($appointment->status, ['pending', 'confirmed']))
+                                @if ($appointment->status === 'rescheduled')
+                                    <div class="d-flex flex-column gap-1">
+                                        <form action="{{ route('appointments.accept-reschedule', $appointment->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="btn btn-sm btn-success w-100" style="font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px;">
+                                                Đồng ý giờ mới
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn hủy lịch hẹn này?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" style="font-size: 12px; padding: 4px 8px; border-radius: 6px;">
+                                                Từ chối / Hủy
+                                            </button>
+                                        </form>
+                                    </div>
+                                @elseif (in_array($appointment->status, ['pending', 'confirmed']))
                                 <form
                                     action="{{ route('appointments.destroy', $appointment->id) }}"
                                     method="POST"
-                                    onsubmit="return confirm('Em có chắc muốn hủy lịch hẹn này không?')">
+                                    onsubmit="return confirm('Bạn có chắc muốn hủy lịch hẹn này không?')">
                                     @csrf
                                     @method('DELETE')
 

@@ -315,7 +315,7 @@
 
         .post-card {
             display: grid;
-            grid-template-columns: 190px minmax(0, 1fr) 160px;
+            grid-template-columns: 190px minmax(0, 1fr) auto;
             align-items: center;
             gap: 19px;
             padding: 13px;
@@ -408,8 +408,9 @@
 
         .post-actions {
             display: flex;
+            align-items: center;
             justify-content: flex-end;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 6px;
         }
 
@@ -427,10 +428,12 @@
             white-space: nowrap;
         }
 
+        .btn-resubmit { background: #e0f2fe; color: #0369a1; }
+        .btn-resubmit:hover { background: #bae6fd; color: #0284c7; }
         .btn-view { background: var(--green-light); color: var(--green); }
         .btn-edit { background: #f8fafc; color: #53635e; }
         .btn-delete { background: #fff0ed; color: #c65b4a; }
-        .post-actions form { margin: 0; }
+        .post-actions form { margin: 0; display: inline-block; }
 
         .empty-state {
             padding: 55px 20px;

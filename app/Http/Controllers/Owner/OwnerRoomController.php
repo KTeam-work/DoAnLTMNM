@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Amenity;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\User;
@@ -45,6 +46,8 @@ class OwnerRoomController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'district']);
 
+        $amenities = Amenity::where('status', 'active')->orderBy('name')->get();
+
         $existingCodes = Room::query()->whereNotNull('room_code')->pluck('room_code');
         foreach ($properties as $property) {
             $property->setAttribute(
@@ -53,7 +56,7 @@ class OwnerRoomController extends Controller
             );
         }
 
-        return view('owner.rooms.create', compact('properties'));
+        return view('owner.rooms.create', compact('properties', 'amenities'));
     }
 
     public function store(Request $request)
@@ -69,14 +72,19 @@ class OwnerRoomController extends Controller
             'floor' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'in:available,pending,rented,maintenance,hidden'],
+            'amenities' => ['nullable', 'array'],
+            'amenities.*' => ['integer', 'exists:amenities,id'],
         ]);
+
+        $amenityIds = $request->input('amenities', []);
+        unset($data['amenities']);
 
         $property = Property::query()
             ->whereKey($data['property_id'])
             ->where('owner_id', $owner->id)
             ->firstOrFail();
 
-        DB::transaction(function () use ($property, $data): void {
+        DB::transaction(function () use ($property, $data, $amenityIds): void {
             // Serialize generation for properties in the same district.
             Property::query()
                 ->where('district', $property->district)
@@ -86,7 +94,7 @@ class OwnerRoomController extends Controller
 
             $prefix = $this->roomCodePrefix($property->district);
             // Continue numbering from existing codes that used either "_" or "-".
-            Room::query()->create([
+            $room = Room::query()->create([
                 ...$data,
                 'room_code' => $this->nextRoomCode(
                     $prefix,
@@ -94,6 +102,10 @@ class OwnerRoomController extends Controller
                 ),
                 'status' => $data['status'] ?? 'available',
             ]);
+
+            if (!empty($amenityIds)) {
+                $room->amenities()->sync($amenityIds);
+            }
         });
 
         return redirect()->route('owner.rooms.index')->with('success', 'Tạo phòng thành công.');
@@ -158,7 +170,10 @@ class OwnerRoomController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('owner.rooms.edit', compact('room', 'properties'));
+        $amenities = Amenity::where('status', 'active')->orderBy('name')->get();
+        $room->load('amenities');
+
+        return view('owner.rooms.edit', compact('room', 'properties', 'amenities'));
     }
 
     /**
@@ -183,7 +198,12 @@ class OwnerRoomController extends Controller
                 'required',
                 'in:available,pending,rented,maintenance,hidden',
             ],
+            'amenities' => ['nullable', 'array'],
+            'amenities.*' => ['integer', 'exists:amenities,id'],
         ]);
+
+        $amenityIds = $request->input('amenities', []);
+        unset($data['amenities']);
 
         // Không được chuyển phòng sang nhà trọ của chủ khác.
         abort_unless(
@@ -195,6 +215,7 @@ class OwnerRoomController extends Controller
         );
 
         $room->update($data);
+        $room->amenities()->sync($amenityIds);
 
         return redirect()
             ->route('owner.rooms.index')

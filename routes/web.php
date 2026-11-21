@@ -34,6 +34,7 @@ use App\Http\Controllers\Tenant\TenantDashboardController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\OwnerRoomController;
 use App\Http\Controllers\Owner\OwnerRentalPostController;
+use App\Http\Controllers\Owner\OwnerAmenityController;
 
 
 
@@ -233,6 +234,7 @@ Route::patch('/admin/rental-posts/{post}/status', function (
             ->withInput();
     }
 
+    $oldStatus = $post->status;
     $post->status = $validated['status'];
 
     if ($post->status === 'published') {
@@ -245,6 +247,30 @@ Route::patch('/admin/rental-posts/{post}/status', function (
     }
 
     $post->save();
+
+    // Bắn thông báo cho chủ trọ khi trạng thái tin đăng thay đổi
+    $ownerId = $post->room?->property?->owner_id;
+    if ($ownerId && $oldStatus !== $post->status) {
+        if ($post->status === 'rejected') {
+            \App\Models\Notification::notify(
+                userId: $ownerId,
+                title: 'Tin đăng bị từ chối phê duyệt',
+                message: 'Tin đăng "' . $post->title . '" đã bị từ chối. Lý do: ' . $post->rejection_reason,
+                type: 'rental_post',
+                referenceType: 'rental_post',
+                referenceId: $post->id
+            );
+        } elseif ($post->status === 'published') {
+            \App\Models\Notification::notify(
+                userId: $ownerId,
+                title: 'Tin đăng đã được duyệt',
+                message: 'Tin đăng "' . $post->title . '" đã được phê duyệt và hiển thị công khai.',
+                type: 'rental_post',
+                referenceType: 'rental_post',
+                referenceId: $post->id
+            );
+        }
+    }
 
     return back()->with('success', 'Đã cập nhật trạng thái tin đăng.');
 })->name('admin.rental-posts.update-status');
@@ -334,6 +360,8 @@ Route::post('/appointments', [AppointmentController::class, 'store'])
 
 Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy'])
     ->name('appointments.destroy');
+Route::put('/appointments/{id}/accept-reschedule', [AppointmentController::class, 'acceptReschedule'])
+    ->name('appointments.accept-reschedule');
 
 
 /*
@@ -634,6 +662,16 @@ Route::delete(
     [OwnerServiceController::class, 'destroy']
 )->name('owner.services.destroy');
 
+/*
+|--------------------------------------------------------------------------
+| OWNER - TIỆN ÍCH PHÒNG TRỌ (AMENITIES)
+|--------------------------------------------------------------------------
+*/
+Route::get('/owner/amenities', [OwnerAmenityController::class, 'index'])->name('owner.amenities.index');
+Route::post('/owner/amenities', [OwnerAmenityController::class, 'store'])->name('owner.amenities.store');
+Route::put('/owner/amenities/{amenity}', [OwnerAmenityController::class, 'update'])->name('owner.amenities.update');
+Route::delete('/owner/amenities/{amenity}', [OwnerAmenityController::class, 'destroy'])->name('owner.amenities.destroy');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -760,12 +798,22 @@ Route::put(
     [OwnerApptionmentController::class, 'reject']
 )->name('owner.appointments.reject');
 
+Route::put(
+    '/owner/appointments/{appointment}/reschedule',
+    [OwnerApptionmentController::class, 'reschedule']
+)->name('owner.appointments.reschedule');
+
 
 
 Route::resource(
     'owner/properties',
     OwnerpropertiesController::class
 )->names('owner.properties');
+
+Route::post(
+    'owner/rental-posts/{rental_post}/resubmit',
+    [OwnerRentalPostController::class, 'resubmit']
+)->name('owner.rental-posts.resubmit')->middleware('auth');
 
 Route::resource(
     'owner/rental-posts',

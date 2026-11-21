@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Contract;
 use App\Models\ContractMember;
 use App\Models\ContractTermination;
+use App\Models\Notification;
 use App\Models\Room;
 use App\Models\Service;
 use App\Models\User;
@@ -294,6 +295,16 @@ class OwnerContractController extends Controller{
             ]);
         }
 
+        // Bắn thông báo chuông cho người thuê khi có hợp đồng mới
+        Notification::notify(
+            $tenant->id,
+            'Hợp đồng thuê phòng mới #' . $contract->contract_code,
+            "Chủ trọ vừa tạo hợp đồng thuê phòng {$room->name} ({$contract->contract_code}) cho bạn. Thời hạn từ " . \Carbon\Carbon::parse($contract->start_date)->format('d/m/Y') . " đến " . \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') . ".",
+            'contract',
+            'contract',
+            $contract->id
+        );
+
         $successMsg = $isNewAccount
             ? "Tạo hợp đồng thành công! Đã tự động tạo tài khoản người thuê và gửi mật khẩu đăng nhập ({$defaultPassword}) tới Gmail: {$tenant->email}."
             : "Tạo hợp đồng thành công! Đã gán hợp đồng và gửi email thông báo tới {$tenant->email}.";
@@ -424,6 +435,19 @@ class OwnerContractController extends Controller{
 
             return $termination;
         });
+
+        // Bắn thông báo chuông cho người thuê khi thanh lý / chấm dứt hợp đồng
+        if ($contract->tenant_id) {
+            $roomName = $contract->room?->name ?? 'phòng trọ';
+            Notification::notify(
+                $contract->tenant_id,
+                'Hợp đồng thuê phòng đã được thanh lý',
+                "Hợp đồng thuê {$roomName} (#{$contract->contract_code}) đã được thanh lý vào ngày " . \Carbon\Carbon::parse($data['return_date'])->format('d/m/Y') . ". Tiền hoàn cọc: " . number_format($termination->refund_amount) . " đ.",
+                'contract',
+                'contract',
+                $contract->id
+            );
+        }
 
         return response()->json(['message' => 'Contract terminated and deposit settled.', 'data' => $termination]);
     }
