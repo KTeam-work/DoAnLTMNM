@@ -41,6 +41,17 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        // Route /login đang dùng controller này; tài khoản inactive phải bị đăng xuất ngay.
+        if ($user && $user->status !== 'active') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.',
+            ]);
+        }
+
         switch ($user->role) {
             case 'admin':
                 return redirect()->route('admin.dashboard');

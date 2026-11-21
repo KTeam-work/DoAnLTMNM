@@ -237,6 +237,29 @@
                     </div>
 
                     <div class="col-12">
+                        <label class="form-label">Tiện ích phòng có sẵn</label>
+                        @php
+                            $selectedAmenityIds = old('amenities', $room->amenities->pluck('id')->toArray());
+                        @endphp
+                        @if(isset($amenities) && $amenities->isNotEmpty())
+                            <div class="p-3 bg-light rounded border d-flex flex-wrap gap-3">
+                                @foreach($amenities as $amenity)
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" name="amenities[]" value="{{ $amenity->id }}" id="edit_amenity_{{ $amenity->id }}" @checked(in_array($amenity->id, $selectedAmenityIds))>
+                                        <label class="form-check-label" for="edit_amenity_{{ $amenity->id }}" style="cursor: pointer; font-size: 14px;">
+                                            {{ $amenity->name }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-muted small">
+                                Chưa có tiện ích nào trong danh mục. Bạn có thể thêm trong mục <a href="{{ route('owner.amenities.index') }}" target="_blank">Quản lý tiện ích</a>.
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="col-12">
                         <label for="description" class="form-label">Mô tả phòng</label>
                         <textarea
                             id="description"

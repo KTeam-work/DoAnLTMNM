@@ -1,4 +1,23 @@
 
+function toggleRejectionReason(select) {
+    const form = select.closest('form');
+    if (!form) return;
+
+    const label = form.querySelector('[id^="reason-label-"]');
+    const textarea = form.querySelector('textarea[name="rejection_reason"]');
+
+    if (select.value === 'rejected') {
+        if (label) label.style.display = '';
+        if (textarea) {
+            textarea.style.display = '';
+            textarea.focus();
+        }
+    } else {
+        if (label) label.style.display = 'none';
+        if (textarea) textarea.style.display = 'none';
+    }
+}
+
 document.addEventListener('submit', (event) => {
     const form = event.target.closest('[data-confirm-status]');
     if (!form) return;

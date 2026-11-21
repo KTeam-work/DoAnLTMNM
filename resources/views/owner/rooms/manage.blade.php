@@ -106,6 +106,13 @@
                     placeholder="Tìm theo tên phòng, mã phòng hoặc nhà trọ..."
                     aria-label="Tìm phòng">
 
+                <select id="propertyFilter" class="filter-select" aria-label="Lọc theo nhà trọ">
+                    <option value="">Tất cả nhà trọ</option>
+                    @foreach ($properties as $property)
+                        <option value="{{ $property->id }}">{{ $property->name }}</option>
+                    @endforeach
+                </select>
+
                 <select id="statusFilter" class="filter-select" aria-label="Lọc trạng thái">
                     <option value="">Tất cả trạng thái</option>
                     <option value="available">Còn trống</option>
@@ -139,6 +146,7 @@
                             <tr
                                 class="room-row"
                                 data-search="{{ $room->name }} {{ $room->room_code ?? '' }} {{ $room->property?->name ?? '' }}"
+                                data-property="{{ $room->property_id }}"
                                 data-status="{{ $room->status }}">
 
                                 <td>

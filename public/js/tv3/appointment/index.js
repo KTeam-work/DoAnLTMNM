@@ -20,14 +20,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const confirmUrlTemplate = calendarElement.dataset.confirmUrl;
     const rejectUrlTemplate = calendarElement.dataset.rejectUrl;
+    const rescheduleUrlTemplate = calendarElement.dataset.rescheduleUrl;
 
     const modalElement = document.getElementById('appointmentDetailModal');
     const detailModal = new bootstrap.Modal(modalElement);
 
     const confirmForm = document.getElementById('confirmForm');
     const rejectForm = document.getElementById('rejectForm');
+    const rescheduleForm = document.getElementById('rescheduleForm');
+    const rescheduleFormBox = document.getElementById('rescheduleFormBox');
     const appointmentActions = document.getElementById('appointmentActions');
     const processedNotice = document.getElementById('processedNotice');
+
+    window.toggleRescheduleForm = function (show) {
+        if (!rescheduleFormBox) return;
+        if (show === undefined) {
+            rescheduleFormBox.classList.toggle('d-none');
+        } else if (show) {
+            rescheduleFormBox.classList.remove('d-none');
+        } else {
+            rescheduleFormBox.classList.add('d-none');
+        }
+    };
 
     function setText(id, value) {
         document.getElementById(id).textContent = value || '—';
@@ -69,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const statusClassMap = {
             pending: 'status-pending',
             confirmed: 'status-confirmed',
+            rescheduled: 'status-pending',
             completed: 'status-completed',
             cancelled: 'status-cancelled'
         };
@@ -77,7 +92,9 @@ document.addEventListener('DOMContentLoaded', function () {
             statusClassMap[data.status] || 'status-completed'
         );
 
-        if (data.status === 'pending') {
+        if (rescheduleFormBox) rescheduleFormBox.classList.add('d-none');
+
+        if (data.status === 'pending' || data.status === 'rescheduled') {
             confirmForm.action = confirmUrlTemplate.replace(
                 '__ID__',
                 encodeURIComponent(appointmentId)
@@ -87,6 +104,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 '__ID__',
                 encodeURIComponent(appointmentId)
             );
+
+            if (rescheduleForm) {
+                rescheduleForm.action = rescheduleUrlTemplate.replace(
+                    '__ID__',
+                    encodeURIComponent(appointmentId)
+                );
+                document.getElementById('rescheduleDate').value = data.date || '';
+                document.getElementById('rescheduleTime').value = data.time ? data.time.substring(0, 5) : '';
+                document.getElementById('rescheduleNote').value = data.message !== 'Không có lời nhắn' ? data.message : '';
+            }
 
             appointmentActions.classList.remove('d-none');
             processedNotice.classList.add('d-none');

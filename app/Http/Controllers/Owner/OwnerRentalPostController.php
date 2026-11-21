@@ -36,9 +36,26 @@ class OwnerRentalPostController extends Controller
      */
     public function create()
     {
-        $rooms = $this->getOwnerRooms();
+        $properties = Property::query()
+            ->where('owner_id', Auth::id())
+            ->orderBy('name')
+            ->get();
 
-        return view('owner.rental-posts.create', compact('rooms'));
+        // Chỉ lấy các phòng CÒN TRỐNG (available) và chưa có tin đăng đang hoạt động
+        $rooms = Room::query()
+            ->whereHas('property', function ($query) {
+                $query->where('owner_id', Auth::id());
+            })
+            ->where('status', 'available')
+            ->whereDoesntHave('rentalPosts', function ($query) {
+                $query->whereIn('status', ['published', 'pending']);
+            })
+            ->with('property')
+            ->orderBy('property_id')
+            ->orderBy('name')
+            ->get();
+
+        return view('owner.rental-posts.create', compact('rooms', 'properties'));
     }
 
     /**
@@ -57,7 +74,7 @@ public function store(Request $request)
                     Property::query()
                         ->select('id')
                         ->where('owner_id', Auth::id())
-                )
+                )->where('status', 'available')
             ),
         ],
 
@@ -80,7 +97,30 @@ public function store(Request $request)
             'mimes:jpg,jpeg,png,webp',
             'max:5120',
         ],
+    ], [
+        'room_id.required' => 'Vui lòng chọn phòng trọ.',
+        'room_id.exists' => 'Phòng được chọn không hợp lệ hoặc không ở trạng thái còn trống.',
+        'title.required' => 'Vui lòng nhập tiêu đề tin đăng.',
+        'description.required' => 'Vui lòng nhập mô tả chi tiết.',
+        'status.required' => 'Vui lòng chọn trạng thái tin đăng.',
+        'images.required' => 'Vui lòng tải lên ít nhất một hình ảnh.',
+        'images.min' => 'Vui lòng tải lên ít nhất một hình ảnh.',
+        'images.max' => 'Chỉ được tải lên tối đa 10 hình ảnh.',
     ]);
+
+    // Không cho phép tạo thêm tin nếu phòng đã có tin đăng đang hiển thị hoặc chờ duyệt
+    $hasActivePost = RentalPost::query()
+        ->where('room_id', $validated['room_id'])
+        ->whereIn('status', ['published', 'pending'])
+        ->exists();
+
+    if ($hasActivePost) {
+        return back()
+            ->withInput()
+            ->withErrors([
+                'room_id' => 'Phòng này hiện đã có tin đăng đang hiển thị hoặc chờ duyệt.',
+            ]);
+    }
 
     $uploadedPaths = [];
 
@@ -149,11 +189,33 @@ public function store(Request $request)
     {
         $this->authorizeOwnership($rental_post);
 
-        $rooms = $this->getOwnerRooms();
+        $properties = Property::query()
+            ->where('owner_id', Auth::id())
+            ->orderBy('name')
+            ->get();
+
+        // Lấy phòng hiện tại của tin đăng VÀ các phòng còn trống khác chưa có tin
+        $rooms = Room::query()
+            ->whereHas('property', function ($query) {
+                $query->where('owner_id', Auth::id());
+            })
+            ->where(function ($query) use ($rental_post) {
+                $query->where(function ($sub) {
+                    $sub->where('status', 'available')
+                        ->whereDoesntHave('rentalPosts', function ($q) {
+                            $q->whereIn('status', ['published', 'pending']);
+                        });
+                })->orWhere('id', $rental_post->room_id);
+            })
+            ->with('property')
+            ->orderBy('property_id')
+            ->orderBy('name')
+            ->get();
 
         return view('owner.rental-posts.edit', [
             'post' => $rental_post,
             'rooms' => $rooms,
+            'properties' => $properties,
         ]);
     }
 
@@ -175,7 +237,10 @@ public function update(Request $request, RentalPost $rental_post)
                     Property::query()
                         ->select('id')
                         ->where('owner_id', Auth::id())
-                )
+                )->where(function ($q) use ($rental_post) {
+                    $q->where('status', 'available')
+                      ->orWhere('id', $rental_post->room_id);
+                })
             ),
         ],
 
@@ -201,7 +266,30 @@ public function update(Request $request, RentalPost $rental_post)
 
         'remove_images' => ['nullable', 'array'],
         'remove_images.*' => ['required', 'integer'],
+    ], [
+        'room_id.required' => 'Vui lòng chọn phòng trọ.',
+        'room_id.exists' => 'Phòng được chọn không hợp lệ hoặc không ở trạng thái còn trống.',
+        'title.required' => 'Vui lòng nhập tiêu đề tin đăng.',
+        'description.required' => 'Vui lòng nhập mô tả chi tiết.',
+        'status.required' => 'Vui lòng chọn trạng thái tin đăng.',
     ]);
+
+    // Nếu đổi sang phòng khác, kiểm tra xem phòng mới đã có tin đăng active nào chưa
+    if ((int) $validated['room_id'] !== (int) $rental_post->room_id) {
+        $hasActivePost = RentalPost::query()
+            ->where('room_id', $validated['room_id'])
+            ->where('id', '!=', $rental_post->id)
+            ->whereIn('status', ['published', 'pending'])
+            ->exists();
+
+        if ($hasActivePost) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'room_id' => 'Phòng này hiện đã có tin đăng khác đang hiển thị hoặc chờ duyệt.',
+                ]);
+        }
+    }
 
     // Kiểm tra ảnh được yêu cầu xóa có thuộc tin đăng này không.
     $removeIds = $request->input('remove_images', []);
@@ -242,8 +330,7 @@ public function update(Request $request, RentalPost $rental_post)
 
     $contentChanged =
         $rental_post->title !== $validated['title']
-        || $rental_post->description !== $validated['description']
-        || (int) $rental_post->room_id !== (int) $validated['room_id'];
+        || $rental_post->description !== $validated['description'];
 
     if ($rental_post->status === 'published' && $contentChanged) {
         $validated['status'] = 'pending';
@@ -253,6 +340,11 @@ public function update(Request $request, RentalPost $rental_post)
         && $validated['status'] === 'pending'
     ) {
         $validated['published_at'] = null;
+    }
+
+    // Nếu tin bị từ chối và chủ trọ chọn gửi duyệt lại
+    if ($rental_post->status === 'rejected' && $validated['status'] === 'pending') {
+        $validated['rejection_reason'] = null;
     }
 
     unset($validated['images'], $validated['remove_images']);
@@ -335,17 +427,36 @@ public function update(Request $request, RentalPost $rental_post)
 
 
     /**
-     * Xóa tin đăng.
+     * Ẩn tin đăng (thay vì xóa cứng khỏi database để bảo toàn dữ liệu).
      */
     public function destroy(RentalPost $rental_post)
     {
         $this->authorizeOwnership($rental_post);
 
-        $rental_post->delete();
+        $rental_post->update([
+            'status' => 'hidden',
+        ]);
 
         return redirect()
             ->route('owner.rental-posts.index')
-            ->with('success', 'Xóa tin đăng thành công.');
+            ->with('success', 'Đã ẩn tin đăng thành công! Tin sẽ không còn hiển thị với người thuê.');
+    }
+
+    /**
+     * Gửi duyệt lại tin đăng (chuyển từ rejected/draft sang pending).
+     */
+    public function resubmit(RentalPost $rental_post)
+    {
+        $this->authorizeOwnership($rental_post);
+
+        $rental_post->update([
+            'status' => 'pending',
+            'rejection_reason' => null,
+        ]);
+
+        return redirect()
+            ->route('owner.rental-posts.index')
+            ->with('success', 'Đã gửi duyệt lại tin đăng "' . $rental_post->title . '". Vui lòng chờ Admin kiểm duyệt.');
     }
 
     /**
@@ -357,7 +468,14 @@ public function update(Request $request, RentalPost $rental_post)
             ->whereHas('property', function ($query) {
                 $query->where('owner_id', Auth::id());
             })
-            ->with('property')
+            ->with([
+                'property',
+                'rentalPosts' => function ($query) {
+                    $query->whereIn('status', ['published', 'pending']);
+                },
+            ])
+            ->orderBy('property_id')
+            ->orderBy('name')
             ->get();
     }
 

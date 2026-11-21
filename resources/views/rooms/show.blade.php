@@ -87,6 +87,7 @@
             'description' => $room->description ?? 'Không có mô tả chi tiết.',
             'amenities' => optional($room->amenities)->pluck('name')->toArray()
                 ?? ['WC riêng', 'Wi-Fi', 'Chỗ để xe'],
+            'services' => optional(optional($property)->owner)->services ?? collect(),
             'landlord' => optional($owner)->name ?? 'Chủ trọ',
             'phone' => optional($owner)->phone ?? '',
             'latitude' => $lat,
@@ -400,6 +401,42 @@
 
                         </div>
 
+                    </section>
+
+                    <!-- =========================
+                         BẢNG GIÁ DỊCH VỤ / CHI PHÍ HÀNG THÁNG
+                    ========================== -->
+                    <section class="room-content-card">
+                        <h2>
+                            ⚡ Chi phí dịch vụ hàng tháng
+                        </h2>
+                        <div class="section-line"></div>
+
+                        @if(!empty($room['services']) && count($room['services']) > 0)
+                            <div class="services-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 15px;">
+                                @foreach($room['services'] as $svc)
+                                    <div class="service-item" style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
+                                        <div>
+                                            <div style="font-weight: 700; color: #0f172a; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+                                                <i class="fas fa-concierge-bell" style="color: #2563eb; font-size: 13px;"></i>
+                                                {{ $svc->name }}
+                                            </div>
+                                            @if($svc->description)
+                                                <div style="font-size: 12px; color: #64748b; margin-top: 2px;">{{ $svc->description }}</div>
+                                            @endif
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <span style="font-weight: 700; color: #2563eb; font-size: 15px;">{{ number_format((float)$svc->price, 0, ',', '.') }} ₫</span>
+                                            <span style="font-size: 12px; color: #64748b;">/ {{ $svc->unit }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-secondary mb-0" style="font-size: 14px; color: #64748b; margin-top: 10px;">
+                                ℹ️ Các dịch vụ cơ bản đã bao gồm trong giá phòng hoặc sẽ được thỏa thuận trực tiếp với chủ trọ khi làm hợp đồng.
+                            </p>
+                        @endif
                     </section>
 
 
