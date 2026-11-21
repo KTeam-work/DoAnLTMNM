@@ -351,7 +351,7 @@ class OwnerContractController extends Controller{
         $member = $contract->members()->create($data);
 
         if (! $request->expectsJson()) {
-            return redirect()->route('owner.contracts.show', $contract)->with('success', 'Đã thêm người ở cùng.');
+            return back()->with('success', 'Đã thêm người ở cùng thành công.');
         }
 
         return response()->json(['message' => 'Contract member added.', 'data' => $member], 201);
