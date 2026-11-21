@@ -234,55 +234,37 @@
         </div>
     </div>
 </div>
-@endsection
 
-@push('scripts')
 <script>
-    const chatBox = document.getElementById('chatBox');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const typingIndicator = document.getElementById('typingIndicator');
-    const welcomeCard = document.getElementById('welcomeCard');
-
+(function() {
     const STORAGE_KEY = 'tro_oi_chat_history_{{ $currentRole }}_{{ $currentUser?->id ?? "guest" }}';
 
-    // Tự động co giãn chiều cao của Textarea khi nhập nhiều dòng
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-        if (this.scrollHeight > 120) {
-            this.style.overflowY = 'auto';
-        } else {
-            this.style.overflowY = 'hidden';
-        }
-    });
+    function getElements() {
+        return {
+            chatBox: document.getElementById('chatBox'),
+            messageInput: document.getElementById('messageInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            typingIndicator: document.getElementById('typingIndicator'),
+            welcomeCard: document.getElementById('welcomeCard'),
+            chatForm: document.getElementById('chatForm')
+        };
+    }
 
-    // Bắt sự kiện phím Enter để gửi tin nhắn (Shift+Enter để xuống dòng)
-    messageInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            document.getElementById('chatForm').dispatchEvent(new Event('submit', { cancelable: true }));
-        }
-    });
-
-    // Cuộn xuống cuối cùng của khung chat
     function scrollToBottom() {
+        const { chatBox } = getElements();
+        if (!chatBox) return;
         setTimeout(() => {
             chatBox.scrollTop = chatBox.scrollHeight;
         }, 50);
     }
 
-    // Định dạng thời gian hiện tại HH:MM
     function getCurrentTime() {
         const now = new Date();
         return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
     }
 
-    // Bộ phân giải Markdown nhẹ & An toàn tuyệt đối chống XSS
     function formatMarkdown(rawText) {
         if (!rawText) return '';
-
-        // 1. Thoát các ký tự HTML nguy hiểm
         let text = rawText
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
@@ -290,43 +272,29 @@
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
 
-        // 2. Chuyển đổi Headers
         text = text.replace(/^### (.*$)/gim, '<h6>$1</h6>');
         text = text.replace(/^## (.*$)/gim, '<h5>$1</h5>');
         text = text.replace(/^# (.*$)/gim, '<h4>$1</h4>');
-
-        // 3. Chuyển đổi Bold (**text**) và Italic (*text*)
         text = text.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
         text = text.replace(/\*(.*?)\*/gim, '<em>$1</em>');
-
-        // 4. Đường phân cách ngang (---)
         text = text.replace(/^---+$/gim, '<hr style="border:0; border-top:1px solid rgba(32,88,79,0.15); margin:12px 0;">');
-
-        // 5. Danh sách gạch đầu dòng (* hoặc -)
         text = text.replace(/^\s*[\*\-]\s+(.*$)/gim, '<li>$1</li>');
         text = text.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
         text = text.replace(/<\/ul>\s*<ul>/gim, '');
-
-        // 6. Chuyển đổi xuống dòng
         text = text.replace(/\n/gim, '<br>');
-
         return text;
     }
 
-    // Thêm bong bóng tin nhắn vào giao diện
     function appendMessage(role, content, time = null, save = true) {
-        const timeStr = time || getCurrentTime();
+        const { chatBox, typingIndicator, welcomeCard } = getElements();
+        if (!chatBox) return;
 
-        // Ẩn welcome card khi đã có tin nhắn
-        if (welcomeCard) {
-            welcomeCard.style.display = 'none';
-        }
+        const timeStr = time || getCurrentTime();
+        if (welcomeCard) welcomeCard.style.display = 'none';
 
         const row = document.createElement('div');
         row.className = `chat-msg-row ${role}`;
-
         const avatarIcon = role === 'user' ? '{{ strtoupper(mb_substr($currentUser?->name ?? "U", 0, 1)) }}' : '<i class="fa-solid fa-robot"></i>';
-
         const bubbleContent = role === 'bot' ? formatMarkdown(content) : document.createTextNode(content).textContent;
 
         row.innerHTML = `
@@ -337,8 +305,11 @@
             </div>
         `;
 
-        // Chèn trước typing indicator
-        chatBox.insertBefore(row, typingIndicator);
+        if (typingIndicator) {
+            chatBox.insertBefore(row, typingIndicator);
+        } else {
+            chatBox.appendChild(row);
+        }
         scrollToBottom();
 
         if (save) {
@@ -346,7 +317,6 @@
         }
     }
 
-    // Lưu vào LocalStorage
     function saveMessageToHistory(role, content, time) {
         try {
             const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -357,11 +327,11 @@
         }
     }
 
-    // Tải lại lịch sử từ LocalStorage
     function loadHistory() {
         try {
             const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             if (history.length > 0) {
+                const { welcomeCard } = getElements();
                 if (welcomeCard) welcomeCard.style.display = 'none';
                 history.forEach(item => {
                     appendMessage(item.role, item.content, item.time, false);
@@ -372,55 +342,55 @@
         }
     }
 
-    // Xóa lịch sử trò chuyện
-    function confirmClearHistory() {
+    window.confirmClearHistory = function() {
         if (confirm('Bạn có chắc chắn muốn xóa toàn bộ đoạn hội thoại này để bắt đầu lại không?')) {
             localStorage.removeItem(STORAGE_KEY);
-            // Xóa tất cả tin nhắn trừ typing indicator và welcome card
             const rows = document.querySelectorAll('.chat-msg-row:not(.typing-indicator-row)');
             rows.forEach(r => r.remove());
+            const { welcomeCard } = getElements();
             if (welcomeCard) welcomeCard.style.display = 'block';
             scrollToBottom();
         }
-    }
+    };
 
-    // Gửi câu hỏi nhanh từ chip hoặc sidebar
-    function sendQuickPrompt(promptText) {
+    window.sendQuickPrompt = function(promptText) {
         if (!promptText) return;
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
-        sendMessageToServer(promptText);
-    }
+        const { messageInput } = getElements();
+        if (messageInput) {
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+        }
+        window.sendMessageToServer(promptText);
+    };
 
-    // Xử lý gửi tin nhắn từ Form
-    function handleFormSubmit(e) {
+    window.handleFormSubmit = function(e) {
         if (e) {
             e.preventDefault();
             e.stopPropagation();
         }
+        const { messageInput } = getElements();
+        if (!messageInput) return;
 
         const message = messageInput.value.trim();
         if (!message) return;
 
-        // Reset input
         messageInput.value = '';
         messageInput.style.height = 'auto';
+        window.sendMessageToServer(message);
+    };
 
-        sendMessageToServer(message);
-    }
-
-    // Gửi tin nhắn đến Server
-    async function sendMessageToServer(message) {
+    window.sendMessageToServer = async function(message) {
         if (!message) return;
+        const { messageInput, sendBtn, typingIndicator } = getElements();
 
-        // Hiển thị tin nhắn của User
         appendMessage('user', message);
 
-        // Khóa input và bật typing indicator
-        messageInput.disabled = true;
-        sendBtn.disabled = true;
-        sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        typingIndicator.style.display = 'flex';
+        if (messageInput) messageInput.disabled = true;
+        if (sendBtn) {
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        }
+        if (typingIndicator) typingIndicator.style.display = 'flex';
         scrollToBottom();
 
         try {
@@ -439,8 +409,7 @@
 
             const data = await response.json();
 
-            // Tắt typing indicator
-            typingIndicator.style.display = 'none';
+            if (typingIndicator) typingIndicator.style.display = 'none';
 
             if (data.success && data.reply) {
                 appendMessage('bot', data.reply);
@@ -450,22 +419,48 @@
 
         } catch (err) {
             console.error('Chatbot API Error:', err);
-            typingIndicator.style.display = 'none';
+            if (typingIndicator) typingIndicator.style.display = 'none';
             appendMessage('bot', '⚠️ Không thể kết nối với máy chủ. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau giây lát.');
         } finally {
-            // Mở khóa input
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
-            messageInput.focus();
+            if (messageInput) {
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+            }
             scrollToBottom();
         }
-    }
+    };
 
-    // Khởi chạy khi load trang
-    document.addEventListener('DOMContentLoaded', function() {
+    function setupChatbot() {
+        const { messageInput } = getElements();
+        if (!messageInput) return;
+
+        messageInput.oninput = function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            this.style.overflowY = this.scrollHeight > 120 ? 'auto' : 'hidden';
+        };
+
+        messageInput.onkeydown = function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                window.handleFormSubmit(e);
+            }
+        };
+
         loadHistory();
         messageInput.focus();
-    });
+    }
+
+    // Khởi chạy ngay lập tức và khi DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupChatbot);
+    } else {
+        setupChatbot();
+    }
+})();
 </script>
-@endpush
+@endsection

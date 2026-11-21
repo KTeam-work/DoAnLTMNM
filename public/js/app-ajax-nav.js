@@ -2,9 +2,57 @@
  * Trọ Ơi - Universal Seamless AJAX Navigation & Instant Tab Switching
  * Áp dụng toàn bộ cho: Navbar, Menu, Phân trang và Bộ lọc Tab trên Admin, Chủ trọ (Landlord) và Người thuê (Tenant).
  * Tự động đồng bộ CSS / <head> và Navbar để KHÔNG BAO GIỜ bị mất layout khi bấm qua lại giữa các trang.
+ * Không làm mờ màn hình - hiển thị thanh tiến trình tinh tế (Top Loader) ở mép trên cùng.
  */
 (function () {
     let isFetching = false;
+
+    // Khởi tạo thanh tiến trình mỏng mép trên màn hình (Top Progress Bar)
+    function getOrCreateTopLoader() {
+        let loader = document.getElementById('tro-oi-ajax-loader');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.id = 'tro-oi-ajax-loader';
+            loader.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 3px;
+                width: 0%;
+                background: linear-gradient(90deg, #10b981, #059669, #38bdf8);
+                box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+                z-index: 9999999;
+                transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+                pointer-events: none;
+                opacity: 0;
+            `;
+            document.body.appendChild(loader);
+        }
+        return loader;
+    }
+
+    function startTopLoader() {
+        const loader = getOrCreateTopLoader();
+        loader.style.transition = 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease';
+        loader.style.opacity = '1';
+        loader.style.width = '35%';
+        setTimeout(() => {
+            if (isFetching) {
+                loader.style.width = '75%';
+            }
+        }, 120);
+    }
+
+    function finishTopLoader() {
+        const loader = getOrCreateTopLoader();
+        loader.style.width = '100%';
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.width = '0%';
+            }, 250);
+        }, 150);
+    }
 
     // Lấy thẻ <main> chứa nội dung chính của trang
     function getMainElement(doc = document) {
@@ -68,7 +116,7 @@
 
     // Kích hoạt lại các script đặc thù của trang mới nếu có
     function reexecuteScripts(container, newDoc) {
-        // Chạy các script nằm trong <main>
+        // 1. Chạy các script nằm trong <main>
         const inlineScripts = container.querySelectorAll('script');
         inlineScripts.forEach(oldScript => {
             const newScript = document.createElement('script');
@@ -79,18 +127,34 @@
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
 
-        // Nạp các script mới trong body/scripts stack nếu chưa có
+        // 2. Nạp và kích hoạt các script từ newDoc.body (bao gồm cả inline scripts trong @push('scripts'))
         if (newDoc) {
             const currentScriptSrcs = new Set(
                 Array.from(document.querySelectorAll('script[src]')).map(s => s.src)
             );
-            const newPageScripts = newDoc.querySelectorAll('script[src]');
-            newPageScripts.forEach(s => {
+
+            // Nạp external script mới nếu chưa có
+            const newPageExternalScripts = newDoc.querySelectorAll('body script[src]');
+            newPageExternalScripts.forEach(s => {
                 if (s.src && !currentScriptSrcs.has(s.src)) {
                     const tag = document.createElement('script');
                     tag.src = s.src;
                     if (s.defer) tag.defer = true;
                     document.body.appendChild(tag);
+                }
+            });
+
+            // Chạy inline script bên ngoài <main> (ví dụ từ stack scripts)
+            const newBodyInlineScripts = newDoc.querySelectorAll('body > script:not([src])');
+            newBodyInlineScripts.forEach(s => {
+                const scriptContent = s.textContent.trim();
+                if (scriptContent && !scriptContent.includes('tro-oi-ajax-loader')) {
+                    try {
+                        const runScript = new Function(scriptContent);
+                        runScript();
+                    } catch (e) {
+                        console.warn('Script execution notice:', e);
+                    }
                 }
             });
         }
@@ -116,8 +180,8 @@
 
         try {
             isFetching = true;
-            currentMain.style.transition = 'opacity 0.12s ease';
-            currentMain.style.opacity = '0.35';
+            // Bật thanh tải mỏng phía trên cùng, KHÔNG làm mờ toàn bộ màn hình
+            startTopLoader();
 
             const res = await fetch(url, {
                 headers: {
@@ -165,9 +229,7 @@
             console.error('AJAX navigation error:', err);
             window.location.href = url;
         } finally {
-            if (currentMain) {
-                currentMain.style.opacity = '1';
-            }
+            finishTopLoader();
             isFetching = false;
         }
     }

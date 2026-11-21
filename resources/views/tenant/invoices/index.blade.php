@@ -36,30 +36,21 @@
     <!-- Card 1 -->
     <div class="col-md-4">
       <div class="stat-card p-3 rounded-4" style="border-left: 3px solid var(--red);">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="stat-label hide-on-skeleton mb-0">Tổng nợ quá hạn</div>
-          <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1" style="font-size: 11px; font-weight: 700;">Cần xử lý ngay</span>
-        </div>
+        <div class="stat-label hide-on-skeleton mb-2">Tổng nợ quá hạn</div>
         <div class="stat-value hide-on-skeleton" style="color: var(--red); font-size: 26px;">{{ number_format((float) $stats['overdue']) }} đ</div>
       </div>
     </div>
     <!-- Card 2 -->
     <div class="col-md-4">
       <div class="stat-card p-3 rounded-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="stat-label hide-on-skeleton mb-0">Chưa thanh toán</div>
-          <span class="badge rounded-pill px-2 py-1" style="background: #fff8e8; color: #9b6a00; font-size: 11px; font-weight: 700;">Chờ thanh toán</span>
-        </div>
+        <div class="stat-label hide-on-skeleton mb-2">Chưa thanh toán</div>
         <div class="stat-value hide-on-skeleton" style="font-size: 26px; color: #0c2340;">{{ number_format((float) $stats['unpaid']) }} đ</div>
       </div>
     </div>
     <!-- Card 3 -->
     <div class="col-md-4">
       <div class="stat-card p-3 rounded-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <div class="stat-label hide-on-skeleton mb-0">Đã thanh toán (Năm nay)</div>
-          <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1" style="font-size: 11px; font-weight: 700;">Đã hoàn tất</span>
-        </div>
+        <div class="stat-label hide-on-skeleton mb-2">Đã thanh toán (Năm nay)</div>
         <div class="stat-value hide-on-skeleton" style="color: var(--green); font-size: 26px;">{{ number_format((float) $stats['paid_year']) }} đ</div>
       </div>
     </div>

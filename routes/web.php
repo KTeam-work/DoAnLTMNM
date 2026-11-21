@@ -787,19 +787,8 @@ Route::middleware('auth')->group(function () {
 });
 
 // Chat box AI Trợ Ơi (Hỗ trợ cả khách chưa đăng nhập, người thuê, chủ trọ và admin)
-Route::middleware(['throttle:30,1'])->group(function () {
-
-    Route::get('/chatbot', [
-        ChatbotController::class,
-        'index'
-    ])->name('chatbot.index');
-
-    Route::post('/chatbot/send', [
-        ChatbotController::class,
-        'sendMessage'
-    ])->name('chatbot.send');
-
-});
+Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot.index');
+Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage'])->middleware(['throttle:30,1'])->name('chatbot.send');
 
 // QR 
 Route::post('/sepay/webhook', [PaymentController::class, 'webhook']);

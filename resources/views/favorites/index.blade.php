@@ -31,7 +31,7 @@
             <a
                 href="{{ route('rooms.index') }}"
                 class="btn-brand text-decoration-none">
-                🔎 Tìm thêm phòng
+                Tìm thêm phòng
             </a>
 
         </div>
@@ -52,12 +52,8 @@
 
                     <div class="stat-top">
 
-                        <div class="stat-icon red">
-                            ♥
-                        </div>
-
-                        <span class="stat-trend">
-                            Đã lưu
+                        <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">
+                            Phòng yêu thích
                         </span>
 
                     </div>
@@ -69,7 +65,7 @@
 
 
                     <div class="stat-label">
-                        Phòng yêu thích
+                        Tổng số phòng đã lưu
                     </div>
 
                 </div>
@@ -84,12 +80,8 @@
 
                     <div class="stat-top">
 
-                        <div class="stat-icon green">
-                            📍
-                        </div>
-
-                        <span class="stat-trend">
-                            Quan tâm
+                        <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">
+                            Khu vực
                         </span>
 
                     </div>
@@ -116,12 +108,8 @@
 
                     <div class="stat-top">
 
-                        <div class="stat-icon">
-                            💰
-                        </div>
-
-                        <span class="stat-trend">
-                            Tham khảo
+                        <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">
+                            Mức giá
                         </span>
 
                     </div>
@@ -281,7 +269,7 @@
                         </div>
 
                         <div class="room-stats">
-                            <span>📐 {{ $room->area }} m²</span>
+                            <span>{{ $room->area }} m²</span>
                             @forelse ($room->amenities->take(2) as $amenity)
                             <span>{{ $amenity->name }}</span>
                             @empty
@@ -328,10 +316,6 @@
 
             <div class="d-flex align-items-center gap-3">
 
-                <div class="stat-icon red">
-                    ♥
-                </div>
-
                 <div>
 
                     <div class="cell-title">
@@ -339,8 +323,7 @@
                     </div>
 
                     <div class="cell-sub">
-                        Khi tìm thấy phòng phù hợp, hãy bấm biểu tượng
-                        ♥ trên phòng để thêm vào danh sách yêu thích.
+                        Khi tìm thấy phòng phù hợp, hãy bấm nút yêu thích trên phòng để thêm vào danh sách theo dõi cá nhân.
                     </div>
 
                 </div>
