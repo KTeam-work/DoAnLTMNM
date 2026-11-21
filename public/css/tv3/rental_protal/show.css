@@ -6,5 +6,9 @@
         .label { color:#64748b; font-size:12px; margin-bottom:5px; }
         .value { font-weight:600; margin-bottom:22px; }
         .description { white-space:pre-line; line-height:1.8; overflow-wrap:anywhere; }
-        .btn-main { background:#0c2340; color:white; border:0; border-radius:11px; padding:11px 18px; font-weight:700; }
+        .btn-main { background:#0c2340; color:white; border:0; border-radius:11px; padding:10px 18px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; }
         .btn-main:hover { background:#071526; color:white; }
+        .btn-action-hide { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:11px; padding:10px 18px; font-weight:700; cursor:pointer; }
+        .btn-action-hide:hover { background:#fee2e2; color:#b91c1c; }
+        .btn-action-publish { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; border-radius:11px; padding:10px 18px; font-weight:700; cursor:pointer; }
+        .btn-action-publish:hover { background:#dbeafe; color:#1d4ed8; }

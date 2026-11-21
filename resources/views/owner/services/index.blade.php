@@ -14,11 +14,21 @@
         {{-- HEADER --}}
         <div class="page-header">
             <div>
-                <h1 class="page-title">Quản lý dịch vụ</h1>
-                <div class="page-desc">Quản lý các dịch vụ và đơn giá áp dụng cho nhà trọ</div>
+                <h1 class="page-title">Quản lý dịch vụ & tiện ích</h1>
+                <div class="page-desc">Quản lý các dịch vụ tính phí và tiện ích phòng áp dụng cho nhà trọ</div>
             </div>
             <a href="{{ route('owner.services.create', ['property_id' => $selectedProperty?->id]) }}" class="btn-brand">
                 <span>＋</span> Thêm dịch vụ
+            </a>
+        </div>
+
+        {{-- NAVIGATION TABS GIỮA DỊCH VỤ VÀ TIỆN ÍCH --}}
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 2px;">
+            <a href="{{ route('owner.services.index') }}" style="padding: 10px 20px; font-weight: 700; font-size: 15px; color: #0c2340; border-bottom: 3px solid #0c2340; text-decoration: none; margin-bottom: -4px;">
+                Dịch vụ tính phí
+            </a>
+            <a href="{{ route('owner.amenities.index') }}" style="padding: 10px 20px; font-weight: 600; font-size: 15px; color: #64748b; text-decoration: none; margin-bottom: -4px; transition: color 0.2s;">
+                Tiện ích phòng
             </a>
         </div>
 

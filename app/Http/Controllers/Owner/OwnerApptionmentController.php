@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\ViewingAppointment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -29,6 +30,7 @@ class OwnerApptionmentController extends Controller
         $validStatuses = [
             'pending',
             'confirmed',
+            'rescheduled',
             'completed',
             'cancelled',
         ];
@@ -47,6 +49,8 @@ class OwnerApptionmentController extends Controller
                 ->where('status', 'pending')->count(),
             'confirmed' => (clone $baseQuery)
                 ->where('status', 'confirmed')->count(),
+            'rescheduled' => (clone $baseQuery)
+                ->where('status', 'rescheduled')->count(),
             'completed' => (clone $baseQuery)
                 ->where('status', 'completed')->count(),
             'cancelled' => (clone $baseQuery)
@@ -70,6 +74,7 @@ class OwnerApptionmentController extends Controller
             $statusLabels = [
                 'pending' => 'Chờ xác nhận',
                 'confirmed' => 'Đã xác nhận',
+                'rescheduled' => 'Đã đề xuất giờ mới',
                 'completed' => 'Hoàn thành',
                 'cancelled' => 'Đã hủy',
             ];
@@ -126,6 +131,62 @@ class OwnerApptionmentController extends Controller
         );
     }
 
+    public function reschedule(Request $request, int $id)
+    {
+        $request->validate([
+            'appointment_date' => 'required|date|after_or_equal:today',
+            'appointment_time' => 'required',
+            'owner_note' => 'required|string|max:500',
+        ], [
+            'appointment_date.required' => 'Vui lòng chọn ngày mới.',
+            'appointment_date.after_or_equal' => 'Ngày hẹn mới không thể là ngày trong quá khứ.',
+            'appointment_time.required' => 'Vui lòng chọn giờ mới.',
+            'owner_note.required' => 'Vui lòng nhập lời nhắn/lý do đổi lịch cho khách.',
+        ]);
+
+        $ownerId = Auth::id();
+
+        $appointment = ViewingAppointment::query()
+            ->with(['room', 'tenant'])
+            ->whereHas('room.property', function ($query) use ($ownerId) {
+                $query->where('owner_id', $ownerId);
+            })
+            ->findOrFail($id);
+
+        if (!in_array($appointment->status, ['pending', 'rescheduled'])) {
+            return redirect()
+                ->route('owner.appointments.index')
+                ->withErrors(['status' => 'Lịch hẹn này không thể đổi giờ.']);
+        }
+
+        $appointment->update([
+            'appointment_date' => $request->input('appointment_date'),
+            'appointment_time' => $request->input('appointment_time'),
+            'owner_note' => $request->input('owner_note'),
+            'status' => 'rescheduled',
+        ]);
+
+        // Gửi thông báo cho người thuê
+        if ($appointment->tenant_id) {
+            $formattedDate = \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y');
+            $timeStr = substr((string)$appointment->appointment_time, 0, 5);
+            $roomName = $appointment->room?->name ?? 'phòng trọ';
+
+            Notification::notify(
+                $appointment->tenant_id,
+                'Chủ trọ đề xuất giờ xem phòng mới',
+                "Chủ trọ đề xuất đổi lịch xem phòng {$roomName} sang {$timeStr} ngày {$formattedDate}. Lời nhắn: \"{$appointment->owner_note}\". Vui lòng vào xác nhận.",
+                'appointment',
+                'appointment',
+                $appointment->id
+            );
+        }
+
+        return redirect()
+            ->route('owner.appointments.index')
+            ->with('success', 'Đã gửi đề xuất giờ xem phòng mới cho khách thuê.');
+    }
+
     private function updateStatus(
         Request $request,
         int $id,
@@ -140,7 +201,7 @@ class OwnerApptionmentController extends Controller
             })
             ->findOrFail($id);
 
-        if ($appointment->status !== 'pending') {
+        if (!in_array($appointment->status, ['pending', 'rescheduled'])) {
             return redirect()
                 ->route('owner.appointments.index')
                 ->withErrors([
@@ -157,6 +218,30 @@ class OwnerApptionmentController extends Controller
         }
 
         $appointment->update($data);
+
+        // Gửi thông báo cho khách thuê
+        if ($appointment->tenant_id) {
+            $roomName = $appointment->room?->name ?? 'phòng trọ';
+            if ($status === 'confirmed') {
+                Notification::notify(
+                    $appointment->tenant_id,
+                    'Lịch xem phòng đã được xác nhận',
+                    "Chủ trọ đã xác nhận lịch hẹn xem phòng {$roomName} của bạn.",
+                    'appointment',
+                    'appointment',
+                    $appointment->id
+                );
+            } elseif ($status === 'cancelled') {
+                Notification::notify(
+                    $appointment->tenant_id,
+                    'Lịch xem phòng bị từ chối',
+                    "Rất tiếc, chủ trọ đã từ chối lịch xem phòng {$roomName}.",
+                    'appointment',
+                    'appointment',
+                    $appointment->id
+                );
+            }
+        }
 
         return redirect()
             ->route('owner.appointments.index')

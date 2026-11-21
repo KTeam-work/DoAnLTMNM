@@ -151,7 +151,9 @@ class RoomController extends Controller
     {
         $room = Room::query()
             ->with([
-                'property.owner',
+                'property.owner.services' => function ($query) {
+                    $query->where('status', 'active')->orderBy('name');
+                },
                 'property.images',
                 'amenities',
                 'rentalPosts' => function ($query) {

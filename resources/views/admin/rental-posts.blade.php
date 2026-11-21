@@ -174,8 +174,10 @@
                                     <label for="status-{{ $post->id }}">Trạng thái mới</label>
                                     <select name="status"
                                             id="status-{{ $post->id }}"
+                                            onchange="toggleRejectionReason(this)"
                                             required>
                                         @foreach ($statusLabels as $key => $label)
+                                            @continue($key === 'draft')
                                             <option value="{{ $key }}"
                                                 @selected($post->status === $key)>
                                                 {{ $label }}
@@ -183,14 +185,17 @@
                                         @endforeach
                                     </select>
 
-                                    <label for="reason-{{ $post->id }}">
-                                        Lý do từ chối (nếu có)
+                                    <label for="reason-{{ $post->id }}"
+                                           id="reason-label-{{ $post->id }}"
+                                           style="{{ $post->status === 'rejected' ? '' : 'display: none;' }}">
+                                        Lý do từ chối (bắt buộc)
                                     </label>
                                     <textarea name="rejection_reason"
                                               id="reason-{{ $post->id }}"
                                               rows="2"
                                               maxlength="500"
-                                              placeholder="Nhập lý do nếu từ chối">{{ $post->rejection_reason }}</textarea>
+                                              style="{{ $post->status === 'rejected' ? '' : 'display: none;' }}"
+                                              placeholder="Nhập lý do từ chối">{{ $post->rejection_reason }}</textarea>
 
                                     <button type="submit" class="rp-btn rp-btn-primary">
                                         Lưu trạng thái

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\ViewingAppointment;
 use App\Models\Room;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class AppointmentController extends Controller
 
         $totalAppointments = $appointments->count();
 
-        $pendingCount = $appointments->where('status', 'pending')->count();
+        $pendingCount = $appointments->whereIn('status', ['pending', 'rescheduled'])->count();
 
         $confirmedCount = $appointments->where('status', 'confirmed')->count();
 
@@ -35,7 +36,7 @@ class AppointmentController extends Controller
         // Lịch sắp tới: chỉ lấy lịch chưa diễn ra và chưa bị hủy/từ chối
         $upcomingAppointments = $appointments
             ->filter(function ($appointment) {
-                if (!in_array($appointment->status, ['pending', 'confirmed'], true)) {
+                if (!in_array($appointment->status, ['pending', 'confirmed', 'rescheduled'], true)) {
                     return false;
                 }
 
@@ -160,5 +161,46 @@ class AppointmentController extends Controller
         ]);
 
         return back()->with('success', 'Đã hủy lịch xem phòng.');
+    }
+
+    // Người thuê đồng ý giờ mới mà chủ trọ đã đề xuất
+    public function acceptReschedule(int $id)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Vui lòng đăng nhập để thực hiện thao tác.');
+        }
+
+        $appointment = ViewingAppointment::with(['room.property.owner'])
+            ->where('tenant_id', Auth::id())
+            ->findOrFail($id);
+
+        if ($appointment->status !== 'rescheduled') {
+            return back()->with('error', 'Lịch hẹn này không ở trạng thái đề xuất giờ mới.');
+        }
+
+        $appointment->update([
+            'status' => 'confirmed',
+            'confirmed_at' => now(),
+        ]);
+
+        // Gửi thông báo cho chủ trọ biết khách đã đồng ý
+        $owner = $appointment->room?->property?->owner;
+        if ($owner) {
+            $formattedDate = \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y');
+            $timeStr = substr((string)$appointment->appointment_time, 0, 5);
+            $roomName = $appointment->room?->name ?? 'phòng trọ';
+
+            Notification::notify(
+                $owner->id,
+                'Khách thuê đã đồng ý giờ xem phòng mới',
+                "Khách thuê {$appointment->tenant?->name} đã đồng ý lịch hẹn xem phòng {$roomName} vào lúc {$timeStr} ngày {$formattedDate}.",
+                'appointment',
+                'appointment',
+                $appointment->id
+            );
+        }
+
+        return back()->with('success', 'Bạn đã đồng ý lịch hẹn mới. Lịch xem phòng đã được xác nhận thành công!');
     }
 }

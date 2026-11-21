@@ -14,12 +14,39 @@
     <a href="{{ route('owner.rental-posts.index') }}" class="text-decoration-none">← Quay lại danh sách</a>
 
     <div class="panel mt-3">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 pb-3 border-bottom">
             <div>
                 <div class="label">CHI TIẾT TIN ĐĂNG #{{ $post->id }}</div>
-                <h1>{{ $post->title }}</h1>
+                <h1 class="mb-0">{{ $post->title }}</h1>
             </div>
-            <a href="{{ route('owner.rental-posts.edit', $post) }}" class="btn btn-main">Chỉnh sửa</a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('owner.rental-posts.edit', $post) }}" class="btn-main">
+                    Chỉnh sửa
+                </a>
+
+                @if ($post->status === 'hidden')
+                    <form action="{{ route('owner.rental-posts.resubmit', $post) }}"
+                          method="POST"
+                          class="m-0"
+                          onsubmit="return confirm('Bạn có chắc muốn đăng lại tin này để Admin kiểm duyệt?')">
+                        @csrf
+                        <button type="submit" class="btn-action-publish">
+                            Đăng lại
+                        </button>
+                    </form>
+                @elseif ($post->status === 'published')
+                    <form action="{{ route('owner.rental-posts.destroy', $post) }}"
+                          method="POST"
+                          class="m-0"
+                          onsubmit="return confirm('Bạn có chắc muốn ẩn tin đăng này không? Tin sẽ không còn hiển thị với người thuê nhưng bạn có thể đăng lại bất kỳ lúc nào.')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn-action-hide">
+                            Ẩn tin
+                        </button>
+                    </form>
+                @endif
+            </div>
         </div>
 
         @php

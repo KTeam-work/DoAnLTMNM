@@ -28,9 +28,17 @@
             </div>
         @endif
 
+        @if ($post->status === 'rejected' && $post->rejection_reason)
+            <div class="alert alert-danger">
+                <strong>⚠️ Tin đăng đã bị Admin từ chối phê duyệt!</strong>
+                <div class="mt-1"><strong>Lý do từ chối:</strong> {{ $post->rejection_reason }}</div>
+                <div class="mt-1 small">Vui lòng kiểm tra và chỉnh sửa lại thông tin, sau đó chọn trạng thái <strong>"Chờ duyệt"</strong> rồi lưu lại để gửi Admin kiểm duyệt.</div>
+            </div>
+        @endif
+
         @if ($post->status === 'published')
             <div class="alert alert-info">
-                Nếu thay đổi tiêu đề, mô tả hoặc phòng, tin đăng sẽ chuyển sang trạng thái chờ duyệt lại.
+                Nếu thay đổi tiêu đề hoặc mô tả, tin đăng sẽ chuyển sang trạng thái chờ duyệt lại.
             </div>
         @endif
 
@@ -42,19 +50,20 @@
             @csrf
             @method('PUT')
 
+            {{-- CỐ ĐỊNH PHÒNG TRỌ (Không cho đổi sang phòng khác khi sửa tin) --}}
+            <input type="hidden" name="room_id" value="{{ $post->room_id }}">
+
             <div class="mb-3">
-                <label class="form-label">Phòng trọ</label>
-                <select name="room_id" class="form-select" required>
-                    <option value="">-- Chọn phòng --</option>
-                    @foreach ($rooms as $room)
-                        <option value="{{ $room->id }}"
-                            @selected(old('room_id', $post->room_id) == $room->id)>
-                            {{ $room->room_number ?? $room->name ?? ('Phòng #' . $room->id) }}
-                            — {{ $room->property->name ?? 'Nhà trọ' }}
-                            — {{ number_format((float) $room->price, 0, ',', '.') }}đ/tháng
-                        </option>
-                    @endforeach
-                </select>
+                <label class="form-label fw-semibold">Phòng trọ</label>
+                <div class="p-3 bg-light border rounded-3 text-secondary small">
+                    <span class="fw-bold text-dark fs-6 d-block mb-1">
+                        {{ $post->room?->name ?? ('Phòng #' . $post->room_id) }}
+                        — {{ $post->room?->property?->name ?? 'Nhà trọ' }}
+                    </span>
+                    <span>Giá thuê: <strong class="text-primary">{{ number_format((float) ($post->room?->price ?? 0), 0, ',', '.') }}đ/tháng</strong></span>
+                    <span class="ms-3">Diện tích: <strong>{{ $post->room?->area ?? '-' }} m²</strong></span>
+                    <small class="text-muted d-block mt-1">🔒 Phòng trọ được gắn cố định với tin đăng này (không thể đổi sang phòng khác).</small>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -132,12 +141,14 @@
 
 
             <div class="mb-3">
-                <label class="form-label">Trạng thái</label>
+                <label class="form-label fw-semibold">Trạng thái sau khi sửa</label>
                 <select name="status" class="form-select" required>
-                    <option value="draft" @selected(old('status', $post->status) === 'draft')>Bản nháp</option>
-                    <option value="pending" @selected(old('status', $post->status) === 'pending')>Chờ duyệt</option>
-                    <option value="hidden" @selected(old('status', $post->status) === 'hidden')>Ẩn tin</option>
+                    <option value="pending" @selected(old('status', $post->status) === 'pending' || $post->status === 'rejected')>Gửi duyệt (chờ Admin kiểm duyệt)</option>
+                    <option value="draft" @selected(old('status', $post->status) === 'draft')>Lưu bản nháp (chưa gửi duyệt)</option>
                 </select>
+                <small class="text-secondary d-block mt-1">
+                    Nếu bạn đã chỉnh sửa xong theo yêu cầu của Admin, hãy chọn <strong>"Gửi duyệt"</strong> để Admin kiểm tra lại.
+                </small>
             </div>
 
             <div class="mb-4">

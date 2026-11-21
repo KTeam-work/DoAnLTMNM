@@ -114,6 +114,8 @@
         $publishedCount = $posts->where('status', 'published')->count();
         $pendingCount = $posts->where('status', 'pending')->count();
         $draftCount = $posts->where('status', 'draft')->count();
+        $rejectedCount = $posts->where('status', 'rejected')->count();
+        $hiddenCount = $posts->where('status', 'hidden')->count();
     @endphp
 
     <div class="segmented-filter-wrapper mb-4">
@@ -129,6 +131,14 @@
             <button type="button" class="segmented-tab" data-filter="pending">
                 <span class="tab-label">Chờ duyệt</span>
                 <span class="tab-count">{{ $pendingCount }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="rejected">
+                <span class="tab-label">Bị từ chối</span>
+                <span class="tab-count">{{ $rejectedCount }}</span>
+            </button>
+            <button type="button" class="segmented-tab" data-filter="hidden">
+                <span class="tab-label">Đã ẩn</span>
+                <span class="tab-count">{{ $hiddenCount }}</span>
             </button>
             <button type="button" class="segmented-tab" data-filter="draft">
                 <span class="tab-label">Bản nháp</span>
@@ -258,20 +268,33 @@
                         </span>
 
                         <div class="post-actions">
+                            @if ($post->status === 'hidden')
+                                <form action="{{ route('owner.rental-posts.resubmit', $post) }}"
+                                      method="POST"
+                                      onsubmit="return confirm('Bạn có chắc muốn đăng lại tin này để Admin kiểm duyệt?')">
+                                    @csrf
+                                    <button type="submit" class="btn-resubmit" style="background: #e0f2fe; color: #0369a1;">
+                                        Đăng lại
+                                    </button>
+                                </form>
+                            @endif
+
                             <a href="{{ route('owner.rental-posts.show', $post) }}"
                                class="btn-view">Xem</a>
 
                             <a href="{{ route('owner.rental-posts.edit', $post) }}"
                                class="btn-edit">Sửa</a>
 
-                            <form action="{{ route('owner.rental-posts.destroy', $post) }}"
-                                  method="POST"
-                                  onsubmit="return confirm('Em có chắc muốn xóa tin đăng này không?')">
-                                @csrf
-                                @method('DELETE')
+                            @if ($post->status !== 'hidden')
+                                <form action="{{ route('owner.rental-posts.destroy', $post) }}"
+                                      method="POST"
+                                      onsubmit="return confirm('Bạn có chắc muốn ẩn tin đăng này không? Tin sẽ không còn hiển thị với người thuê nhưng bạn có thể đăng lại bất kỳ lúc nào.')">
+                                    @csrf
+                                    @method('DELETE')
 
-                                <button type="submit" class="btn-delete">Xóa</button>
-                            </form>
+                                    <button type="submit" class="btn-delete" style="background: #fef2f2; color: #dc2626;">Ẩn tin</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </article>
