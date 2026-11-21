@@ -23,36 +23,27 @@
     body {
         margin: 0;
         min-height: 100vh;
-
         font-family: "Be Vietnam Pro", sans-serif;
-
-        background: #dfe5e1;
+        background: #071526;
+        color: #071526;
     }
 
     .page {
         min-height: 100vh;
-
         padding: 24px;
-
         position: relative;
-
         display: flex;
         align-items: center;
         justify-content: center;
-
         overflow: hidden;
     }
 
     .background {
         position: absolute;
-
         inset: 24px;
-
         border-radius: 28px;
-
         overflow: hidden;
-
-        background: #d8dedb;
+        background: linear-gradient(135deg, #071526 0%, #0c2340 50%, #163b65 100%);
     }
 
 
@@ -62,184 +53,143 @@
 
     .tenant-bg {
         position: absolute;
-
         inset: 0;
-
         background:
             linear-gradient(
                 90deg,
-                rgba(23, 70, 62, .88) 0%,
-                rgba(23, 70, 62, .55) 42%,
-                rgba(23, 70, 62, .12) 75%,
-                rgba(23, 70, 62, .20) 100%
+                rgba(7, 21, 38, .92) 0%,
+                rgba(12, 35, 64, .65) 45%,
+                rgba(22, 59, 101, .2) 78%,
+                rgba(7, 21, 38, .4) 100%
             ),
             linear-gradient(
                 135deg,
-                #d7d0c0,
-                #eee8dc
+                #071526,
+                #0c2340
             );
-
         transition: .5s ease;
     }
 
     .tenant-window {
         position: absolute;
-
         width: 31%;
         height: 58%;
-
         top: 12%;
         left: 15%;
-
         background:
             linear-gradient(
                 135deg,
-                #dcebe8,
-                #b8d4cf
+                #091e36,
+                #164e63
             );
-
-        border: 12px solid #f8f4ea;
-
+        border: 10px solid #1e3a5f;
+        border-radius: 12px;
         box-shadow:
-            inset 0 0 0 2px rgba(0, 0, 0, .04),
-            0 18px 35px rgba(0, 0, 0, .10);
+            inset 0 0 0 2px rgba(56, 189, 248, .15),
+            0 20px 45px rgba(0, 0, 0, .35);
     }
 
     .tenant-window::before {
         content: "";
-
         position: absolute;
-
         left: 50%;
         top: 0;
         bottom: 0;
-
-        width: 5px;
-
-        background: #f8f4ea;
+        width: 6px;
+        transform: translateX(-50%);
+        background: #1e3a5f;
     }
 
     .tenant-window::after {
         content: "";
-
         position: absolute;
-
         left: 0;
         right: 0;
         top: 50%;
-
-        height: 5px;
-
-        background: #f8f4ea;
+        height: 6px;
+        transform: translateY(-50%);
+        background: #1e3a5f;
     }
 
     .tenant-floor {
         position: absolute;
-
         left: 0;
         right: 0;
         bottom: 0;
-
         height: 27%;
-
         background:
             linear-gradient(
-                135deg,
-                #b9aa91,
-                #a9967b
+                160deg,
+                #081220,
+                #0c1c30
             );
     }
 
     .tenant-sofa {
         position: absolute;
-
         left: 34%;
         bottom: 17%;
-
         width: 25%;
         height: 18%;
-
-        background: #e8dfcd;
-
+        background: #163b65;
         border-radius: 16px 16px 8px 8px;
-
         box-shadow:
-            0 18px 30px rgba(0, 0, 0, .14);
+            0 18px 30px rgba(0, 0, 0, .3);
     }
 
     .tenant-sofa::before {
         content: "";
-
         position: absolute;
-
         left: 5%;
         right: 5%;
         top: -32%;
-
         height: 48%;
-
-        background: #f4eddf;
-
+        background: #1e4a7a;
         border-radius: 14px 14px 6px 6px;
     }
 
     .tenant-table {
         position: absolute;
-
         width: 15%;
         height: 7%;
-
         left: 17%;
         bottom: 22%;
-
-        background: #735a43;
-
+        background: #1e293b;
         border-radius: 50%;
-
         box-shadow:
-            0 12px 18px rgba(0, 0, 0, .12);
+            0 12px 18px rgba(0, 0, 0, .25);
     }
 
     .tenant-plant {
         position: absolute;
-
         left: 8%;
         bottom: 22%;
-
         width: 90px;
         height: 150px;
     }
 
     .plant-pot {
         position: absolute;
-
         bottom: 0;
         left: 25px;
-
         width: 40px;
         height: 45px;
-
-        background: #c7a681;
-
+        background: #1e3a5f;
         border-radius: 5px 5px 12px 12px;
     }
 
     .plant-leaves {
         position: absolute;
-
         bottom: 35px;
         left: 22px;
-
         width: 48px;
         height: 90px;
-
         background:
             radial-gradient(
                 ellipse at center,
-                #638275 0%,
-                #42685c 70%
+                #2dd4bf 0%,
+                #0d9488 70%
             );
-
         border-radius: 50% 50% 40% 40%;
     }
 
@@ -250,27 +200,22 @@
 
     .owner-bg {
         position: absolute;
-
         inset: 0;
-
         opacity: 0;
-
         transform: scale(1.03);
-
         background:
             linear-gradient(
                 90deg,
-                rgba(23, 70, 62, .94) 0%,
-                rgba(23, 70, 62, .72) 42%,
-                rgba(23, 70, 62, .22) 78%,
-                rgba(23, 70, 62, .34) 100%
+                rgba(7, 21, 38, .94) 0%,
+                rgba(12, 35, 64, .65) 45%,
+                rgba(22, 59, 101, .25) 78%,
+                rgba(7, 21, 38, .45) 100%
             ),
             linear-gradient(
                 135deg,
-                #c6c0b0,
-                #e7e0d2
+                #06111f,
+                #0c2340
             );
-
         transition:
             opacity .45s ease,
             transform .45s ease;
@@ -278,144 +223,108 @@
 
     .owner-building {
         position: absolute;
-
         left: 12%;
         top: 11%;
-
         width: 43%;
         height: 65%;
-
         background:
             linear-gradient(
-                90deg,
-                #d7d1c4,
-                #eee9df
+                135deg,
+                #0e294b,
+                #163e6e
             );
-
-        border-radius: 10px 10px 0 0;
-
+        border-radius: 12px 12px 0 0;
+        border: 1px solid rgba(56, 189, 248, 0.2);
         box-shadow:
-            0 20px 45px rgba(0, 0, 0, .16);
+            0 25px 50px rgba(0, 0, 0, .4);
     }
 
     .building-title {
         height: 22%;
-
         display: flex;
-
         align-items: center;
         justify-content: center;
-
-        font-size: 24px;
-
+        font-size: 22px;
         font-weight: 800;
-
-        color: #0c2340;
-
+        color: #38bdf8;
         letter-spacing: 2px;
-
-        background: #f4efe4;
+        background: rgba(7, 21, 38, 0.6);
+        border-bottom: 1px solid rgba(56, 189, 248, 0.15);
     }
 
     .building-rooms {
         padding: 25px;
-
         display: grid;
-
         grid-template-columns: repeat(2, 1fr);
-
         gap: 18px;
     }
 
     .building-rooms span {
         height: 75px;
-
         background:
             linear-gradient(
                 135deg,
-                #b8d0cb,
-                #d9e6e2
+                rgba(56, 189, 248, 0.15),
+                rgba(37, 99, 235, 0.25)
             );
-
-        border: 7px solid #f5f0e6;
-
+        border: 4px solid #1e3a5f;
+        border-radius: 8px;
         box-shadow:
-            inset 0 0 0 2px rgba(12, 35, 64, .10);
+            inset 0 0 12px rgba(56, 189, 248, .2);
     }
 
     .owner-desk {
         position: absolute;
-
         right: 18%;
         bottom: 20%;
-
         width: 24%;
         height: 8%;
-
-        background: #745b45;
-
+        background: #163b65;
         border-radius: 8px;
-
         box-shadow:
-            0 15px 25px rgba(0, 0, 0, .15);
+            0 15px 25px rgba(0, 0, 0, .3);
     }
 
     .owner-desk::before {
         content: "";
-
         position: absolute;
-
         left: 10%;
         right: 10%;
         top: 15px;
-
         height: 70px;
-
-        background: #e9e1d1;
-
+        background: #0f2b4e;
         border-radius: 6px;
     }
 
     .owner-key {
         position: absolute;
-
         right: 14%;
         bottom: 31%;
-
-        width: 70px;
-        height: 70px;
-
+        width: 60px;
+        height: 60px;
         display: flex;
-
         align-items: center;
         justify-content: center;
-
-        font-size: 34px;
-
-        background: rgba(242, 223, 181, .92);
-
+        background: rgba(12, 35, 64, .85);
+        border: 1px solid rgba(56, 189, 248, .3);
         border-radius: 50%;
-
         box-shadow:
-            0 15px 30px rgba(0, 0, 0, .15);
-
+            0 15px 30px rgba(0, 0, 0, .35);
+        color: #ef7d27;
         transform: rotate(-12deg);
     }
 
     .owner-floor {
         position: absolute;
-
         left: 0;
         right: 0;
         bottom: 0;
-
         height: 24%;
-
         background:
             linear-gradient(
-                135deg,
-                #a99b82,
-                #bcae94
+                160deg,
+                #081220,
+                #0c1c30
             );
     }
 
@@ -451,6 +360,215 @@
 
 
     /* =====================================================
+       HANGING LAMP (INTERACTIVE)
+    ===================================================== */
+    .hanging-lamp {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 35;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .lamp-wire {
+        width: 3px;
+        height: 110px;
+        background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), #475569);
+        box-shadow: 0 0 2px rgba(0,0,0,0.5);
+    }
+
+    .lamp-fixture {
+        width: 28px;
+        height: 18px;
+        background: linear-gradient(180deg, #475569, #1e293b);
+        border-radius: 4px 4px 2px 2px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    }
+
+    .lamp-bulb {
+        width: 50px;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 2px solid rgba(255, 255, 255, 0.28);
+        border-radius: 50% 50% 36% 36%;
+        position: relative;
+        cursor: pointer;
+        pointer-events: auto;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(2px);
+        margin-top: -2px;
+        box-shadow: inset 0 -4px 10px rgba(255, 255, 255, 0.08), 0 8px 18px rgba(0, 0, 0, 0.2);
+    }
+
+    .lamp-bulb:hover {
+        transform: scale(1.06);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .bulb-reflection {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 10px;
+        height: 18px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: rotate(-25deg);
+        pointer-events: none;
+    }
+
+    .filament {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 14px;
+        height: 18px;
+        border: 2px solid rgba(203, 213, 225, 0.5);
+        border-bottom: none;
+        border-radius: 8px 8px 0 0;
+        transition: all 0.3s ease;
+    }
+
+    .filament::before,
+    .filament::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        width: 2px;
+        height: 10px;
+        background: rgba(203, 213, 225, 0.5);
+    }
+    .filament::before { left: -1px; }
+    .filament::after { right: -1px; }
+
+    .pull-chain {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        pointer-events: auto;
+        padding: 4px 14px 14px;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .pull-chain:hover .chain-handle {
+        transform: scale(1.2);
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.7);
+    }
+
+    .pull-chain:active {
+        transform: translateY(18px);
+    }
+
+    .chain-line {
+        width: 2px;
+        height: 68px;
+        background: repeating-linear-gradient(
+            180deg,
+            #cbd5e1 0px,
+            #cbd5e1 3px,
+            transparent 3px,
+            transparent 6px
+        );
+    }
+
+    .chain-handle {
+        width: 12px;
+        height: 16px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .light-beam {
+        position: absolute;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 720px;
+        height: 720px;
+        border-radius: 50%;
+        background: radial-gradient(
+            circle,
+            rgba(254, 240, 138, 0.42) 0%,
+            rgba(245, 158, 11, 0.22) 35%,
+            rgba(217, 119, 6, 0.08) 55%,
+            transparent 72%
+        );
+        pointer-events: none;
+        opacity: 0;
+        filter: blur(35px);
+        transition: opacity 0.45s ease, transform 0.45s ease;
+        transform: translateX(-50%) scale(0.85);
+        z-index: -1;
+    }
+
+    /* KHI BẬT ĐÈN (IS-ON) */
+    .hanging-lamp.is-on .lamp-bulb {
+        background: radial-gradient(circle at 50% 35%, #ffffff 0%, #fff7ed 25%, #fef08a 55%, #f59e0b 100%) !important;
+        border-color: #fef08a !important;
+        box-shadow:
+            0 0 35px 12px rgba(254, 240, 138, 1),
+            0 0 80px 35px rgba(245, 158, 11, 0.75),
+            0 0 140px 70px rgba(239, 125, 39, 0.45) !important;
+    }
+
+    .hanging-lamp.is-on .bulb-reflection {
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .hanging-lamp.is-on .filament {
+        border-color: #ffffff !important;
+        box-shadow: 0 0 12px #ffffff !important;
+    }
+
+    .hanging-lamp.is-on .filament::before,
+    .hanging-lamp.is-on .filament::after {
+        background: #ffffff !important;
+        box-shadow: 0 0 10px #ffffff !important;
+    }
+
+    .hanging-lamp.is-on .light-beam {
+        opacity: 1 !important;
+        transform: translateX(-50%) scale(1.05) !important;
+    }
+
+    .room-spotlight {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+        background: radial-gradient(
+            circle at 50% 28%,
+            rgba(254, 240, 138, 0.42) 0%,
+            rgba(245, 158, 11, 0.25) 30%,
+            rgba(37, 99, 235, 0.08) 58%,
+            transparent 76%
+        );
+        mix-blend-mode: screen;
+        z-index: 4;
+    }
+
+    .page.lamp-lit .room-spotlight {
+        opacity: 1;
+    }
+
+    .page.lamp-lit .background {
+        filter: brightness(1.22) contrast(1.04);
+        transition: filter 0.45s ease;
+    }
+
+    /* =====================================================
        LOGO TRỌ ƠI
     ===================================================== */
 
@@ -467,6 +585,12 @@
         text-decoration: none;
         display: inline-flex;
         align-items: center;
+        background: rgba(12, 35, 64, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 8px 18px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .logo span {
@@ -486,14 +610,14 @@
         width: 440px;
         max-width: calc(100% - 520px);
         z-index: 25;
-        background: rgba(12, 35, 64, 0.85);
+        background: rgba(255, 255, 255, 0.88);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         padding: 34px 38px;
         border-radius: 26px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.28);
-        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.85);
+        box-shadow: 0 20px 45px rgba(12, 35, 64, 0.10);
+        color: #0c2340;
     }
 
     .intro-label {
@@ -502,9 +626,9 @@
         gap: 6px;
         padding: 6px 14px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.12);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #ffffff;
+        background: rgba(12, 35, 64, 0.07);
+        border: 1px solid rgba(12, 35, 64, 0.14);
+        color: #0c2340;
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 1.2px;
@@ -518,19 +642,19 @@
         line-height: 1.15;
         letter-spacing: -1.2px;
         font-weight: 800;
-        color: #ffffff;
+        color: #0c2340;
     }
 
     .intro h1 span {
-        color: #f59e0b;
+        color: #ef7d27;
     }
 
     .intro p {
         margin: 0 0 20px;
         max-width: 100%;
-        color: rgba(255, 255, 255, 0.84);
+        color: #475569;
         font-size: 14px;
-        font-weight: 400;
+        font-weight: 500;
         line-height: 1.7;
     }
 
@@ -539,7 +663,7 @@
         flex-direction: column;
         gap: 10px;
         padding-top: 16px;
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        border-top: 1px solid rgba(12, 35, 64, 0.08);
     }
 
     .intro-feature-item {
@@ -548,7 +672,7 @@
         gap: 10px;
         font-size: 13px;
         font-weight: 600;
-        color: rgba(255, 255, 255, 0.95);
+        color: #1e293b;
     }
 
     .intro-feature-check {
@@ -558,7 +682,7 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: #ef7d27;
+        background: #0c2340;
         color: #ffffff;
         font-size: 11px;
         font-weight: 800;
@@ -572,25 +696,20 @@
 
     .register-card {
         position: absolute;
-
-        z-index: 10;
-
-        right: 6%;
+        z-index: 50;
+        right: 4.5%;
         top: 50%;
-
         transform: translateY(-50%);
-
         width: 440px;
-
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
         padding: 34px 38px;
-
         background: rgba(255, 255, 255, .97);
-
-        border-radius: 22px;
-
-        box-shadow:
-            0 25px 70px rgba(20, 45, 39, .22),
-            0 5px 15px rgba(0, 0, 0, .05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow: 0 30px 70px rgba(7, 21, 38, 0.22);
     }
 
 
@@ -604,22 +723,16 @@
 
     .card-header h2 {
         margin: 0 0 6px;
-
         font-size: 25px;
-
         letter-spacing: -.5px;
-
         font-weight: 800;
-
-        color: #1b2925;
+        color: #0c2340;
     }
 
     .card-header p {
         margin: 0;
-
-        font-size: 11px;
-
-        color: #8a9490;
+        font-size: 12px;
+        color: #64748b;
     }
 
 
@@ -629,37 +742,23 @@
 
     .error-box {
         margin-bottom: 15px;
-
         padding: 10px 12px;
-
         border-radius: 9px;
-
         background: #fff1f1;
-
         border: 1px solid #f2cccc;
-
         color: #b33a3a;
-
-        font-size: 10px;
-
+        font-size: 11px;
         line-height: 1.6;
     }
 
     .success-box {
         margin-bottom: 15px;
-
         padding: 10px 12px;
-
         border-radius: 9px;
-
         background: #eef9f3;
-
         border: 1px solid #c7e8d5;
-
         color: #217a48;
-
-        font-size: 10px;
-
+        font-size: 11px;
         line-height: 1.6;
     }
 
@@ -674,122 +773,53 @@
 
     .field label {
         display: block;
-
         margin-bottom: 6px;
-
-        font-size: 10px;
-
+        font-size: 11px;
         font-weight: 700;
-
-        color: #394640;
+        color: #0c2340;
     }
 
     .field input {
         width: 100%;
-
         height: 43px;
-
-        border: 1px solid #e0e5e2;
-
+        border: 1px solid #cbd5e1;
         border-radius: 9px;
-
         padding: 0 13px;
-
         outline: none;
-
         font-family: inherit;
-
-        font-size: 11px;
-
-        color: #26342f;
-
+        font-size: 12px;
+        color: #0f172a;
         background: #fff;
-
         transition: .2s;
     }
 
     .field input::placeholder {
-        color: #b2bab7;
+        color: #94a3b8;
     }
 
     .field input:focus {
         border-color: #0c2340;
-
-        box-shadow:
-            0 0 0 3px rgba(12, 35, 64, .07);
+        box-shadow: 0 0 0 3px rgba(12, 35, 64, .08);
     }
 
     .field input.input-error {
         border-color: #d9534f;
-
         background: #fffafa;
     }
 
     .field input.input-error:focus {
         border-color: #c0392b;
-
-        box-shadow:
-            0 0 0 3px rgba(192, 57, 43, .08);
+        box-shadow: 0 0 0 3px rgba(192, 57, 43, .08);
     }
 
     .field-error {
         margin-top: 5px;
-
-        font-size: 9px;
-
+        font-size: 10px;
         line-height: 1.4;
-
         color: #c0392b;
     }
 
 
-
-    /* =====================================================
-       PASSWORD STRENGTH
-    ===================================================== */
-
-    .password-strength {
-        margin-top: 8px;
-    }
-
-    .strength-track {
-        display: flex;
-        gap: 4px;
-        height: 5px;
-        margin-bottom: 6px;
-    }
-
-    .strength-segment {
-        flex: 1;
-        border-radius: 99px;
-        background: #e7ece9;
-        transition: background .2s ease;
-    }
-
-    .strength-segment.active.weak { background: #dc5555; }
-    .strength-segment.active.medium { background: #e5a33b; }
-    .strength-segment.active.strong { background: #299764; }
-
-    .strength-label {
-        font-size: 9px;
-        color: #8a9490;
-    }
-
-    .password-rules {
-        margin: 6px 0 0;
-        padding-left: 15px;
-        font-size: 9px;
-        line-height: 1.6;
-        color: #8a9490;
-    }
-
-    .password-rules li.valid {
-        color: #217a48;
-    }
-
-    .password-rules li.valid::marker {
-        color: #299764;
-    }
 
     /* =====================================================
        HỌ VÀ TÊN
@@ -797,7 +827,6 @@
 
     #name {
         ime-mode: auto;
-
         spellcheck: false;
     }
 
@@ -808,9 +837,7 @@
 
     .row {
         display: grid;
-
         grid-template-columns: 1fr 1fr;
-
         gap: 12px;
     }
 
@@ -820,22 +847,16 @@
     ===================================================== */
 
     .role-title {
-        font-size: 10px;
-
+        font-size: 11px;
         font-weight: 700;
-
-        color: #394640;
-
+        color: #0c2340;
         margin-bottom: 7px;
     }
 
     .roles {
         display: grid;
-
         grid-template-columns: 1fr 1fr;
-
         gap: 10px;
-
         margin-bottom: 14px;
     }
 
@@ -844,65 +865,54 @@
     }
 
     .role {
-        border: 1px solid #e0e5e2;
-
-        border-radius: 10px;
-
-        padding: 10px;
-
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 10px 12px;
         display: flex;
-
         align-items: center;
-
-        gap: 9px;
-
+        gap: 10px;
         cursor: pointer;
-
         transition: .2s;
+        background: #fff;
     }
 
     .role:hover {
-        border-color: #b8c9c4;
+        border-color: #0c2340;
     }
 
     .role-input:checked + .role {
         border-color: #0c2340;
-
-        background: #f1f7f5;
+        background: #f0f7ff;
+        box-shadow: 0 0 0 2px rgba(12, 35, 64, .12);
     }
 
     .role-icon {
-        width: 30px;
-        height: 30px;
-
+        width: 32px;
+        height: 32px;
         border-radius: 8px;
-
-        background: #f0f2f1;
-
+        background: #f1f5f9;
         display: flex;
-
         align-items: center;
         justify-content: center;
-
-        font-size: 13px;
+        color: #475569;
+        transition: .2s;
+        flex-shrink: 0;
     }
 
     .role-input:checked + .role .role-icon {
         background: #0c2340;
+        color: #ffffff;
     }
 
     .role-text strong {
         display: block;
-
-        font-size: 10px;
-
-        color: #27352f;
+        font-size: 11px;
+        color: #0c2340;
     }
 
     .role-text small {
-        font-size: 8px;
-
-        color: #949d9a;
+        font-size: 9px;
+        color: #64748b;
     }
 
 
@@ -912,31 +922,22 @@
 
     .terms {
         display: flex;
-
         gap: 7px;
-
         align-items: flex-start;
-
         margin: 3px 0 17px;
-
-        color: #8a9490;
-
-        font-size: 9px;
-
+        color: #64748b;
+        font-size: 10px;
         line-height: 1.55;
     }
 
     .terms input {
         margin-top: 2px;
-
         accent-color: #0c2340;
     }
 
     .terms a {
         color: #0c2340;
-
         font-weight: 600;
-
         text-decoration: none;
     }
 
@@ -947,34 +948,21 @@
 
     .register-button {
         width: 100%;
-
         height: 44px;
-
         border: 0;
-
         border-radius: 9px;
-
         background: #0c2340;
-
         color: white;
-
         font-family: inherit;
-
-        font-size: 11px;
-
+        font-size: 12px;
         font-weight: 700;
-
         cursor: pointer;
-
-        box-shadow:
-            0 7px 16px rgba(12, 35, 64, .16);
-
+        box-shadow: 0 8px 18px rgba(12, 35, 64, .2);
         transition: .2s;
     }
 
     .register-button:hover {
         background: #071526;
-
         transform: translateY(-1px);
     }
 
@@ -985,25 +973,19 @@
 
     .login {
         text-align: center;
-
         margin-top: 17px;
-
-        font-size: 10px;
-
-        color: #8b9491;
+        font-size: 11px;
+        color: #64748b;
     }
 
     .login a {
         color: #0c2340;
-
         font-weight: 700;
-
         text-decoration: none;
     }
 
     .login a:hover {
-        color: #071526;
-
+        color: #ef7d27;
         text-decoration: underline;
     }
 
@@ -1267,12 +1249,14 @@ input::-ms-clear {
         <div class="owner-desk"></div>
 
         <div class="owner-key">
-            🔑
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef7d27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
         </div>
 
         <div class="owner-floor"></div>
 
     </div>
+
+    <div class="room-spotlight"></div>
 
 </div>
 
@@ -1282,6 +1266,22 @@ input::-ms-clear {
 ===================================================== -->
 
 <div class="content">
+
+
+    <!-- BÓNG ĐÈN TƯƠNG TÁC GIỮA MÀN HÌNH -->
+    <div class="hanging-lamp" id="hangingLamp">
+        <div class="lamp-wire"></div>
+        <div class="lamp-fixture"></div>
+        <div class="lamp-bulb" id="lampBulb" title="Nhấn vào bóng đèn để bật / tắt">
+            <div class="bulb-reflection"></div>
+            <div class="filament"></div>
+        </div>
+        <div class="pull-chain" id="pullChain" title="Kéo dây để bật / tắt đèn">
+            <div class="chain-line"></div>
+            <div class="chain-handle"></div>
+        </div>
+        <div class="light-beam" id="lightBeam"></div>
+    </div>
 
 
     <!-- LOGO -->
@@ -1549,7 +1549,7 @@ input::-ms-clear {
                 >
 
                     <div class="role-icon">
-                        🏠
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     </div>
 
                     <div class="role-text">
@@ -1588,7 +1588,7 @@ input::-ms-clear {
                 >
 
                     <div class="role-icon">
-                        🔑
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
                     </div>
 
                     <div class="role-text">
@@ -1668,21 +1668,7 @@ input::-ms-clear {
 
         </div>
 
-        <div class="password-strength" aria-live="polite">
-            <div class="strength-track">
-                <span class="strength-segment" id="strength-1"></span>
-                <span class="strength-segment" id="strength-2"></span>
-                <span class="strength-segment" id="strength-3"></span>
-            </div>
-            <div class="strength-label" id="strength-label">Độ mạnh mật khẩu: Chưa nhập</div>
-            <ul class="password-rules">
-                <li id="rule-length">Ít nhất 8 ký tự</li>
-                <li id="rule-lower">Có chữ thường (a-z)</li>
-                <li id="rule-upper">Có chữ hoa (A-Z)</li>
-                <li id="rule-number">Có chữ số (0-9)</li>
-                <li id="rule-special">Có ký tự đặc biệt (!@#$...)</li>
-            </ul>
-        </div>
+        <div id="password-error" class="field-error" aria-live="polite"></div>
 
         @error('password')
 
@@ -1915,61 +1901,15 @@ input::-ms-clear {
             special: /[^A-Za-z0-9\s]/.test(password)
         };
 
-        const rules = {
-            length: "rule-length",
-            lower: "rule-lower",
-            upper: "rule-upper",
-            number: "rule-number",
-            special: "rule-special"
-        };
-
-        Object.keys(checks).forEach(function (key) {
-            const element = document.getElementById(rules[key]);
-            if (element) element.classList.toggle("valid", checks[key]);
-        });
-
-        const score = Object.values(checks).filter(Boolean).length;
-        const segments = [
-            document.getElementById("strength-1"),
-            document.getElementById("strength-2"),
-            document.getElementById("strength-3")
-        ];
-
-        let level = 0;
-        let label = "Chưa nhập";
-        let className = "";
-
-        if (password.length > 0) {
-            if (score <= 2) {
-                level = 1;
-                label = "Yếu";
-                className = "weak";
-            } else if (score <= 4) {
-                level = 2;
-                label = "Trung bình";
-                className = "medium";
-            } else {
-                level = 3;
-                label = "Mạnh";
-                className = "strong";
-            }
-        }
-
-        segments.forEach(function (segment, index) {
-            if (!segment) return;
-            segment.className = "strength-segment";
-            if (index < level) {
-                segment.classList.add("active", className);
-            }
-        });
-
-        const labelElement = document.getElementById("strength-label");
-        if (labelElement) {
-            labelElement.textContent = "Độ mạnh mật khẩu: " + label;
-        }
-
         const isValid = Object.values(checks).every(Boolean);
         input.classList.toggle("input-error", password.length > 0 && !isValid);
+
+        const passError = document.getElementById("password-error");
+        if (passError) {
+            passError.textContent = (password.length > 0 && !isValid)
+                ? "Mật khẩu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt."
+                : "";
+        }
 
         validatePasswordConfirmation();
 
@@ -2091,29 +2031,82 @@ input::-ms-clear {
 |--------------------------------------------------------------------------
 */
 
-document.querySelectorAll(".toggle-password").forEach(function (button) {
+    document.querySelectorAll(".toggle-password").forEach(function (button) {
+        button.addEventListener("click", function () {
+            const input = document.getElementById(button.dataset.target);
+            if (!input) return;
 
-    button.addEventListener("click", function () {
+            const isPassword = input.type === "password";
+            input.type = isPassword ? "text" : "password";
 
-        const input = document.getElementById(button.dataset.target);
-
-        if (!input) return;
-
-        const isPassword = input.type === "password";
-        input.type = isPassword ? "text" : "password";
-
-        const eyeOpen = button.querySelector(".eye-open");
-        const eyeClosed = button.querySelector(".eye-closed");
-        if (eyeOpen && eyeClosed) {
-            eyeOpen.style.display = isPassword ? "none" : "block";
-            eyeClosed.style.display = isPassword ? "block" : "none";
-        }
-        button.setAttribute("aria-label", isPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
-        button.setAttribute("aria-pressed", String(isPassword));
-
+            const eyeOpen = button.querySelector(".eye-open");
+            const eyeClosed = button.querySelector(".eye-closed");
+            if (eyeOpen && eyeClosed) {
+                eyeOpen.style.display = isPassword ? "none" : "block";
+                eyeClosed.style.display = isPassword ? "block" : "none";
+            }
+            button.setAttribute("aria-label", isPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+            button.setAttribute("aria-pressed", String(isPassword));
+        });
     });
 
-});
+    /*
+|--------------------------------------------------------------------------
+| BẬT / TẮT BÓNG ĐÈN TƯƠNG TÁC
+|--------------------------------------------------------------------------
+*/
+    const hangingLamp = document.getElementById("hangingLamp");
+    const lampBulb = document.getElementById("lampBulb");
+    const pullChain = document.getElementById("pullChain");
+    const pageEl = document.querySelector(".page");
+
+    function playSwitchSound(isLit) {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(isLit ? 650 : 420, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(isLit ? 1100 : 250, ctx.currentTime + 0.06);
+
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start();
+            osc.stop(ctx.currentTime + 0.06);
+        } catch (e) {}
+    }
+
+    function toggleLamp() {
+        if (!hangingLamp) return;
+        const isLit = hangingLamp.classList.toggle("is-on");
+
+        if (pageEl) {
+            pageEl.classList.toggle("lamp-lit", isLit);
+        }
+
+        playSwitchSound(isLit);
+    }
+
+    if (lampBulb) {
+        lampBulb.addEventListener("click", toggleLamp);
+    }
+
+    if (pullChain) {
+        pullChain.addEventListener("click", function () {
+            pullChain.style.transform = "translateY(16px)";
+            setTimeout(function () {
+                pullChain.style.transform = "";
+            }, 180);
+            toggleLamp();
+        });
+    }
 
 </script>
 
