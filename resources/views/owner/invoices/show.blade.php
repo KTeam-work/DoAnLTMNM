@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv4/invoice/show.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/modal_premium.css') }}">
 @endpush
 
 @section('content')
@@ -70,13 +71,16 @@
       <!-- Action Buttons -->
       <div class="d-flex gap-2 align-items-center flex-wrap">
         @if($invoice->status !== 'paid' && $invoice->status !== 'cancelled')
-          <form action="{{ route('owner.invoices.record-cash', $invoice->id) }}" method="POST" class="m-0" onsubmit="return confirm('Xác nhận khách đã nộp {{ number_format((float) $invoice->total) }} đ tiền mặt trực tiếp?')">
-            @csrf
-            <button type="submit" class="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm" 
-                    style="border-radius: 12px; background: #059669; border: none; font-size: 13.5px; padding: 9px 18px;">
-              <i class="bi bi-cash-stack"></i> Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
-            </button>
-          </form>
+          <button type="button" class="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm btn-open-confirm-modal" 
+                  style="border-radius: 12px; background: #059669; border: none; font-size: 13.5px; padding: 9px 18px;"
+                  data-action="{{ route('owner.invoices.record-cash', $invoice->id) }}"
+                  data-method-field=""
+                  data-amount="{{ number_format((float) $invoice->total) }} đ"
+                  data-code="{{ $invoice->invoice_code }}"
+                  data-paymethod="Tiền mặt trực tiếp"
+                  data-note="Xác nhận khách đã nộp tiền mặt trực tiếp và gạch nợ hóa đơn này?">
+            <i class="bi bi-cash-stack"></i> Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
+          </button>
         @endif
 
         <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" 
@@ -110,24 +114,22 @@
         </div>
       </div>
       <div class="d-flex gap-2">
-        <form action="{{ route('owner.payments.confirm', $pendingPayment->id) }}" method="POST" class="m-0">
-          @csrf
-          @method('PUT')
-          <button type="submit" class="btn btn-success fw-bold px-3 py-2 shadow-sm" 
-                  style="border-radius: 10px; font-size: 13px; background: #059669; border: none;" 
-                  onclick="return confirm('Xác nhận đã nhận đủ {{ number_format((float) $pendingPayment->amount) }} đ và gạch nợ hóa đơn?')">
-            ✓ Xác nhận đã nhận tiền
-          </button>
-        </form>
-        <form action="{{ route('owner.payments.reject', $pendingPayment->id) }}" method="POST" class="m-0">
-          @csrf
-          @method('PUT')
-          <button type="submit" class="btn btn-outline-danger fw-bold px-3 py-2" 
-                  style="border-radius: 10px; font-size: 13px;" 
-                  onclick="return confirm('Từ chối giao dịch xác nhận này?')">
-            Từ chối
-          </button>
-        </form>
+        <button type="button" class="btn btn-success fw-bold px-3 py-2 shadow-sm btn-open-confirm-modal" 
+                style="border-radius: 10px; font-size: 13px; background: #059669; border: none;"
+                data-action="{{ route('owner.payments.confirm', $pendingPayment->id) }}"
+                data-method-field="PUT"
+                data-amount="{{ number_format((float) $pendingPayment->amount) }} đ"
+                data-code="{{ $pendingPayment->payment_code }}"
+                data-paymethod="{{ ['cash' => 'Tiền mặt', 'bank_transfer' => 'Chuyển khoản', 'qr' => 'QR SePay'][$pendingPayment->method] ?? $pendingPayment->method }}"
+                data-note="Xác nhận đã nhận đủ số tiền và gạch nợ hóa đơn này?">
+          ✓ Xác nhận đã nhận tiền
+        </button>
+        <button type="button" class="btn btn-outline-danger fw-bold px-3 py-2 btn-open-reject-modal" 
+                style="border-radius: 10px; font-size: 13px;"
+                data-action="{{ route('owner.payments.reject', $pendingPayment->id) }}"
+                data-code="{{ $pendingPayment->payment_code }}">
+          Từ chối
+        </button>
       </div>
     </div>
   @endif
@@ -281,20 +283,22 @@
 
           @if($payment->status === 'pending')
             <div class="d-flex gap-1">
-              <form action="{{ route('owner.payments.confirm', $payment->id) }}" method="POST" class="d-inline m-0">
-                @csrf
-                @method('PUT')
-                <button type="submit" class="btn btn-sm btn-success fw-bold px-3 py-1" style="border-radius: 8px;" onclick="return confirm('Xác nhận đã nhận {{ number_format((float) $payment->amount) }} đ?')">
-                  ✓ Xác nhận
-                </button>
-              </form>
-              <form action="{{ route('owner.payments.reject', $payment->id) }}" method="POST" class="d-inline m-0">
-                @csrf
-                @method('PUT')
-                <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-3 py-1" style="border-radius: 8px;" onclick="return confirm('Từ chối giao dịch này?')">
-                  Từ chối
-                </button>
-              </form>
+              <button type="button" class="btn btn-sm btn-success fw-bold px-3 py-1 btn-open-confirm-modal" 
+                      style="border-radius: 8px; background: #059669; border: none;"
+                      data-action="{{ route('owner.payments.confirm', $payment->id) }}"
+                      data-method-field="PUT"
+                      data-amount="{{ number_format((float) $payment->amount) }} đ"
+                      data-code="{{ $payment->payment_code }}"
+                      data-paymethod="{{ ['cash' => 'Tiền mặt', 'bank_transfer' => 'Chuyển khoản', 'qr' => 'QR SePay'][$payment->method] ?? $payment->method }}"
+                      data-note="Xác nhận đã nhận đủ số tiền và gạch nợ hóa đơn này?">
+                ✓ Xác nhận
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-danger fw-bold px-3 py-1 btn-open-reject-modal" 
+                      style="border-radius: 8px;"
+                      data-action="{{ route('owner.payments.reject', $payment->id) }}"
+                      data-code="{{ $payment->payment_code }}">
+                Từ chối
+              </button>
             </div>
           @endif
         </div>
@@ -306,5 +310,128 @@
     @endforelse
   </div>
 </main>
+
+<!-- CONFIRM PAYMENT MODAL (PREMIUM) -->
+<div class="modal fade modal-premium" id="confirmPaymentModal" tabindex="-1" aria-labelledby="confirmPaymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmPaymentModalLabel">Xác nhận nhận tiền thanh toán</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <form id="confirmPaymentForm" method="POST" action="">
+        @csrf
+        <div id="confirmMethodFieldContainer"></div>
+        <div class="modal-body p-4 text-center">
+          <div class="mb-2 text-muted small text-uppercase fw-bold" style="letter-spacing: 0.5px;">Số tiền xác nhận</div>
+          <div class="fw-bold text-success mb-3" id="confirmModalAmount" style="font-size: 28px; font-family: 'Be Vietnam Pro', sans-serif;">
+            0 đ
+          </div>
+          <div class="p-3 bg-light rounded-3 text-start small mb-3 border">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Mã tham chiếu:</span>
+              <strong class="text-dark" id="confirmModalCode">—</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Hình thức thanh toán:</span>
+              <strong class="text-dark" id="confirmModalMethod">—</strong>
+            </div>
+          </div>
+          <p class="text-secondary small mb-0" id="confirmModalNote">
+            Bạn xác nhận đã nhận đủ số tiền trên và muốn cập nhật trạng thái hóa đơn này sang <strong>Đã thanh toán</strong>?
+          </p>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-light px-4 rounded-3 border" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-success px-4 rounded-3 fw-bold" style="background: #059669; border: none;">
+            ✓ Xác nhận đã nhận tiền
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- REJECT PAYMENT MODAL (PREMIUM) -->
+<div class="modal fade modal-premium" id="rejectPaymentModal" tabindex="-1" aria-labelledby="rejectPaymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #991b1b !important;">
+        <h5 class="modal-title" id="rejectPaymentModalLabel">Từ chối giao dịch thanh toán</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <form id="rejectPaymentForm" method="POST" action="">
+        @csrf
+        @method('PUT')
+        <div class="modal-body p-4 text-center">
+          <div class="text-danger mb-3" style="font-size: 42px;">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <h6 class="fw-bold text-dark mb-2">Bạn có chắc chắn muốn từ chối?</h6>
+          <p class="text-secondary small mb-2">
+            Giao dịch <strong id="rejectModalCode">—</strong> sẽ bị chuyển sang trạng thái <strong>Thất bại / Đã hủy</strong> và hóa đơn sẽ tiếp tục chờ thanh toán.
+          </p>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <button type="button" class="btn btn-light px-4 rounded-3 border" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-danger px-4 rounded-3 fw-bold">
+            ✕ Xác nhận từ chối
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var confirmModalEl = document.getElementById('confirmPaymentModal');
+  var confirmModal = confirmModalEl ? new bootstrap.Modal(confirmModalEl) : null;
+  var confirmForm = document.getElementById('confirmPaymentForm');
+  var confirmAmount = document.getElementById('confirmModalAmount');
+  var confirmCode = document.getElementById('confirmModalCode');
+  var confirmMethod = document.getElementById('confirmModalMethod');
+  var confirmNote = document.getElementById('confirmModalNote');
+  var confirmMethodFieldContainer = document.getElementById('confirmMethodFieldContainer');
+
+  document.querySelectorAll('.btn-open-confirm-modal').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!confirmModal) return;
+      confirmForm.action = this.getAttribute('data-action') || '';
+      confirmAmount.textContent = this.getAttribute('data-amount') || '0 đ';
+      confirmCode.textContent = this.getAttribute('data-code') || '—';
+      confirmMethod.textContent = this.getAttribute('data-paymethod') || 'Tiền mặt';
+      if (confirmNote) {
+        confirmNote.innerHTML = this.getAttribute('data-note') || 'Bạn xác nhận đã nhận đủ số tiền trên và muốn cập nhật trạng thái hóa đơn này?';
+      }
+
+      var methodField = this.getAttribute('data-method-field');
+      if (methodField === 'PUT') {
+        confirmMethodFieldContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+      } else {
+        confirmMethodFieldContainer.innerHTML = '';
+      }
+
+      confirmModal.show();
+    });
+  });
+
+  var rejectModalEl = document.getElementById('rejectPaymentModal');
+  var rejectModal = rejectModalEl ? new bootstrap.Modal(rejectModalEl) : null;
+  var rejectForm = document.getElementById('rejectPaymentForm');
+  var rejectCode = document.getElementById('rejectModalCode');
+
+  document.querySelectorAll('.btn-open-reject-modal').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!rejectModal) return;
+      rejectForm.action = this.getAttribute('data-action') || '';
+      rejectCode.textContent = this.getAttribute('data-code') || '—';
+      rejectModal.show();
+    });
+  });
+});
+</script>
+@endpush
 
 @endsection

@@ -1,0 +1,97 @@
+/* =========================================================
+   PREMIUM DARK HEADER MODAL & CARD STYLE (TRỌ ƠI)
+   ========================================================= */
+
+.modal-premium .modal-content {
+    border: none !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    box-shadow: 0 25px 50px -12px rgba(12, 35, 64, 0.25) !important;
+}
+
+.modal-premium .modal-header {
+    background: #0c2340 !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 20px 26px !important;
+}
+
+.modal-premium .modal-header .modal-title {
+    font-size: 18.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+}
+
+.modal-premium .modal-header .btn-close {
+    filter: brightness(0) invert(1) !important;
+    opacity: 0.85 !important;
+    transition: opacity 0.2s ease !important;
+}
+
+.modal-premium .modal-header .btn-close:hover {
+    opacity: 1 !important;
+}
+
+.modal-premium .modal-body {
+    padding: 24px 26px !important;
+    background: #ffffff !important;
+}
+
+.modal-premium .modal-footer {
+    border-top: 1px solid #f1f5f9 !important;
+    padding: 16px 26px !important;
+    background: #ffffff !important;
+}
+
+.modal-premium .form-control,
+.modal-premium .form-select {
+    border-radius: 12px !important;
+    padding: 11px 14px !important;
+    border-color: #e2e8f0 !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.modal-premium .form-control:focus,
+.modal-premium .form-select:focus {
+    border-color: #0c2340 !important;
+    box-shadow: 0 0 0 .2rem rgba(12, 35, 64, .10) !important;
+}
+
+/* Card panel styled like Modal (Dark header, rounded, clean body) */
+.panel-premium-card {
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 45px -12px rgba(12, 35, 64, 0.12);
+    border: 1px solid #eef2f6;
+    margin-bottom: 2rem;
+}
+
+.panel-premium-header {
+    background: #0c2340;
+    color: #ffffff;
+    padding: 20px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-premium-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.panel-premium-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.panel-premium-body {
+    padding: 28px;
+    background: #ffffff;
+}

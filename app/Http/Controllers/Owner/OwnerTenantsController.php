@@ -172,15 +172,24 @@ public function update(Request $request, int $id)
         })
         ->findOrFail($id);
 
+    $minAgeDate = now()->subYears(18)->format('Y-m-d');
+
     $validated = $request->validate([
         'name' => ['required', 'string', 'max:255'],
         'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $tenant->id],
-        'phone' => ['nullable', 'string', 'max:20'],
+        'phone' => ['nullable', 'regex:/^(0[3|5|7|8|9])[0-9]{8}$/'],
+        'gender' => ['nullable', 'in:male,female,other'],
+        'date_of_birth' => ['nullable', 'date', 'before_or_equal:' . $minAgeDate],
+        'identity_card' => ['nullable', 'regex:/^(?:[0-9]{9}|[0-9]{12})$/'],
+        'address' => ['nullable', 'string', 'max:255'],
     ], [
         'name.required' => 'Vui lòng nhập họ và tên.',
         'email.required' => 'Vui lòng nhập email.',
         'email.email' => 'Email không đúng định dạng.',
-        'email.unique' => 'Email này đã được sử dụng.',
+        'email.unique' => 'Email này đã được sử dụng bởi người dùng khác.',
+        'phone.regex' => 'Số điện thoại không hợp lệ (phải gồm đúng 10 chữ số, ví dụ: 0901234567, không được là số âm).',
+        'date_of_birth.before_or_equal' => 'Người đứng tên thuê phòng phải từ đủ 18 tuổi trở lên (sinh vào hoặc trước ngày ' . now()->subYears(18)->format('d/m/Y') . ').',
+        'identity_card.regex' => 'Số CCCD không hợp lệ. Vui lòng nhập đúng 12 chữ số (hoặc CMND 9 chữ số), không được là số âm (-) hay chứa chữ cái.',
     ]);
 
     $tenant->update($validated);

@@ -5,6 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/rooms/manage.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/modal_premium.css') }}">
 @endpush
 
 @section('content')
@@ -35,10 +36,9 @@
                     + Tạo tin đăng
                 </a>
 
-                <a class="btn-brand"
-                    href="{{ route('owner.rooms.create') }}">
+                <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#createRoomModal">
                     + Thêm phòng
-                </a>
+                </button>
             </div>
         </div>
 
@@ -239,9 +239,9 @@
                                     <div class="mb-3">
                                         Hãy thêm phòng đầu tiên để bắt đầu quản lý.
                                     </div>
-                                    <a class="btn-brand" href="{{ route('owner.rooms.create') }}">
+                                    <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#createRoomModal">
                                         + Thêm phòng
-                                    </a>
+                                    </button>
                                 </td>
                             </tr>
                         @endforelse
@@ -263,6 +263,94 @@
         </script>
     </main>
 
+    <!-- MODAL TẠO PHÒNG MỚI (PREMIUM DARK HEADER NHƯ HÌNH 3) -->
+    <div class="modal fade modal-premium" id="createRoomModal" tabindex="-1" aria-labelledby="createRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRoomModalLabel">Tạo phòng mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                @if ($properties->isEmpty())
+                    <div class="modal-body p-4">
+                        <div class="alert alert-warning mb-0">Bạn chưa có khu trọ nào. Hãy tạo khu trọ trước khi thêm phòng.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                @else
+                    <form method="POST" action="{{ route('owner.rooms.store') }}" id="modalCreateRoomForm">
+                        @csrf
+                        <div class="modal-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="modal_property_id">Khu trọ <span class="text-danger">*</span></label>
+                                    <select id="modal_property_id" name="property_id" class="form-select" required>
+                                        <option value="">Chọn khu trọ</option>
+                                        @foreach ($properties as $property)
+                                            <option value="{{ $property->id }}" data-room-code="{{ $property->next_room_code }}" @selected(old('property_id') == $property->id)>
+                                                {{ $property->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tên phòng <span class="text-danger">*</span></label>
+                                    <input name="name" value="{{ old('name') }}" class="form-control" placeholder="Ví dụ: Phòng 101" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="modal_room_code_preview" class="form-label fw-semibold">Mã phòng</label>
+                                    <input id="modal_room_code_preview" class="form-control bg-light" value="" placeholder="Chọn khu trọ để xem mã" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Trạng thái ban đầu</label>
+                                    <select name="status" class="form-select">
+                                        <option value="available">Còn trống</option>
+                                        <option value="maintenance">Đang bảo trì</option>
+                                        <option value="hidden">Đang ẩn</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Diện tích (m²) <span class="text-danger">*</span></label>
+                                    <input name="area" type="number" min="0.01" step="0.01" value="{{ old('area') }}" class="form-control" placeholder="Ví dụ: 25" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Giá thuê (đ/tháng) <span class="text-danger">*</span></label>
+                                    <input id="modal_price" name="price" type="text" class="form-control" placeholder="Ví dụ: 3.000.000" required autocomplete="off">
+                                    <div class="form-text text-primary fw-medium" id="modalPricePreview" style="font-size: 11.5px; min-height: 18px;"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Tiền đặt cọc (đ) <span class="text-danger">*</span></label>
+                                    <input id="modal_deposit" name="deposit" type="text" class="form-control" placeholder="Ví dụ: 3.000.000" required autocomplete="off">
+                                    <div class="form-text text-primary fw-medium" id="modalDepositPreview" style="font-size: 11.5px; min-height: 18px;"></div>
+                                    <div id="modalDepositError" class="text-danger small mt-1" style="display: none;">Tiền cọc không được lớn hơn tiền thuê.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Sức chứa tối đa (người) <span class="text-danger">*</span></label>
+                                    <input name="max_people" type="number" min="1" value="{{ old('max_people', 1) }}" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Tầng</label>
+                                    <input name="floor" type="number" min="0" value="{{ old('floor') }}" class="form-control" placeholder="Để trống nếu không áp dụng">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Mô tả phòng</label>
+                                    <textarea name="description" class="form-control" rows="2" placeholder="Nhập thêm thông tin mô tả chi tiết phòng nếu có...">{{ old('description') }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4 rounded-3 border fw-semibold" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-3 fw-bold" style="background: #0c2340; border-color: #0c2340;">
+                                Thêm phòng mới
+                            </button>
+                        </div>
+                    </form>
+                @endif
+            </div>
+        </div>
+    </div>
+
   
 
  
@@ -272,6 +360,40 @@
         if (typeof window.initRoomManage === 'function') {
             window.initRoomManage();
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var propSel = document.getElementById('modal_property_id');
+            var codeInp = document.getElementById('modal_room_code_preview');
+            if (propSel && codeInp) {
+                function updateCode() {
+                    var opt = propSel.options[propSel.selectedIndex];
+                    codeInp.value = opt ? (opt.getAttribute('data-room-code') || '') : '';
+                }
+                propSel.addEventListener('change', updateCode);
+                updateCode();
+            }
+
+            function setupCurFmt(inpId, prevId) {
+                var inp = document.getElementById(inpId);
+                var prev = document.getElementById(prevId);
+                if (!inp || !prev) return;
+                inp.addEventListener('input', function () {
+                    var raw = inp.value.replace(/\D/g, '');
+                    if (!raw) { prev.textContent = ''; return; }
+                    var num = Number(raw);
+                    inp.value = num.toLocaleString('vi-VN');
+                    if (num >= 1e6) {
+                        prev.textContent = '≈ ' + (num / 1e6).toLocaleString('vi-VN', {maximumFractionDigits: 2}) + ' triệu đồng';
+                    } else if (num >= 1e3) {
+                        prev.textContent = '≈ ' + (num / 1e3).toLocaleString('vi-VN', {maximumFractionDigits: 2}) + ' nghìn đồng';
+                    } else {
+                        prev.textContent = '≈ ' + num.toLocaleString('vi-VN') + ' đồng';
+                    }
+                });
+            }
+            setupCurFmt('modal_price', 'modalPricePreview');
+            setupCurFmt('modal_deposit', 'modalDepositPreview');
+        });
     </script>
 @endpush
 
