@@ -28,9 +28,9 @@ class Notification extends Model
         return trim(str_replace(['✓', '✔', '📅', '❌', '✅', '⚠️', '🚫', 'ℹ️', '🔔', '⏰', '🔍', '💬', '🗓️', '💰', '💳', '🔧', '⭐', '📜', '🕒'], '', $clean));
     }
 
-    /**
-     * Tạo thông báo cho người dùng. Dùng cho mọi sự kiện hệ thống.
-     */
+    
+    # Tạo thông báo cho người dùng. Dùng cho mọi sự kiện hệ thống.
+    
     public static function notify(
         int $userId,
         string $title,
@@ -55,9 +55,9 @@ class Notification extends Model
         ]);
     }
 
-    /**
-     * Link điều hướng theo dữ liệu tham chiếu (chịu lỗi khi bản ghi đã xóa).
-     */
+    
+     # Link điều hướng theo dữ liệu tham chiếu (chịu lỗi khi bản ghi đã xóa).
+     
     public function targetUrl(): ?string
     {
         try {

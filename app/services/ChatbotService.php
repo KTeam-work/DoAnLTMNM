@@ -18,9 +18,7 @@ class ChatbotService
         $this->gemini = $gemini;
     }
 
-    /**
-     * Lấy dữ liệu ngữ cảnh an toàn từ MySQL tùy theo phân quyền người dùng
-     */
+    
     private function buildContext(?User $user = null): array
     {
         $role = $user?->role ?? 'tenant';
@@ -29,9 +27,9 @@ class ChatbotService
             'ten_nguoi_dung' => $user?->name ?? 'Khách',
         ];
 
-        // 1. NGƯỜI THUÊ (TENANT) HOẶC KHÁCH CHƯA ĐĂNG NHẬP
+        // NGƯỜI THUÊ (TENANT) HOẶC KHÁCH CHƯA ĐĂNG NHẬP
         if ($role === 'tenant' || !$user) {
-            // Lấy danh sách phòng đang hoạt động (không lấy phòng ẩn 'hidden')
+         
             $rooms = Room::with(['property.owner', 'amenities'])
                 ->whereIn('status', ['available', 'rented', 'maintenance', 'pending'])
                 ->limit(35)
@@ -141,7 +139,7 @@ class ChatbotService
             $context['danh_sach_phong'] = $this->formatRooms($rooms);
         }
 
-        // 3. QUẢN TRỊ VIÊN (ADMIN)
+        //  QUẢN TRỊ VIÊN (ADMIN)
         elseif ($role === 'admin') {
             $totalUsers = User::count();
             $totalOwners = User::where('role', 'owner')->count();
