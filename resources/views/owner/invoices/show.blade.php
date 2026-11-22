@@ -71,13 +71,16 @@
       <!-- Action Buttons -->
       <div class="d-flex gap-2 align-items-center flex-wrap">
         @if($invoice->status !== 'paid' && $invoice->status !== 'cancelled')
-          <form action="{{ route('owner.invoices.record-cash', $invoice->id) }}" method="POST" class="m-0" onsubmit="return confirm('Xác nhận khách đã nộp {{ number_format((float) $invoice->total) }} đ tiền mặt trực tiếp?')">
-            @csrf
-            <button type="submit" class="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm" 
-                    style="border-radius: 12px; background: #059669; border: none; font-size: 13.5px; padding: 9px 18px;">
-              <i class="bi bi-cash-stack"></i> Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
-            </button>
-          </form>
+          <button type="button" class="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm btn-open-confirm-modal" 
+                  style="border-radius: 12px; background: #059669; border: none; font-size: 13.5px; padding: 9px 18px;"
+                  data-action="{{ route('owner.invoices.record-cash', $invoice->id) }}"
+                  data-method-field=""
+                  data-amount="{{ number_format((float) $invoice->total) }} đ"
+                  data-code="{{ $invoice->invoice_code }}"
+                  data-paymethod="Tiền mặt trực tiếp"
+                  data-note="Xác nhận khách đã nộp tiền mặt trực tiếp và gạch nợ hóa đơn này?">
+            <i class="bi bi-cash-stack"></i> Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
+          </button>
 
           <button type="button" class="btn btn-outline-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#editDueDateModal" style="border-radius: 12px; font-size: 13.5px; padding: 9px 18px;">
             Đổi hạn thanh toán
@@ -90,17 +93,6 @@
               Hủy hóa đơn
             </button>
           </form>
-          <button type="button" class="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm btn-open-confirm-modal" 
-                  style="border-radius: 12px; background: #059669; border: none; font-size: 13.5px; padding: 9px 18px;"
-                  data-action="{{ route('owner.invoices.record-cash', $invoice->id) }}"
-                  data-method-field=""
-                  data-amount="{{ number_format((float) $invoice->total) }} đ"
-                  data-code="{{ $invoice->invoice_code }}"
-                  data-paymethod="Tiền mặt trực tiếp"
-                  data-note="Xác nhận khách đã nộp tiền mặt trực tiếp và gạch nợ hóa đơn này?">
-            <i class="bi bi-cash-stack"></i> Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
-          </button>
-
         @endif
 
         <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" 
