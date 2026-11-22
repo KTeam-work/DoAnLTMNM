@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/rental_protal/index.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/modal_premium.css') }}">
     <style>
         .segmented-filter-wrapper {
             display: flex !important;
@@ -104,9 +105,9 @@
             <p>Quản lý tin cho thuê, theo dõi trạng thái và cập nhật nội dung.</p>
         </div>
 
-        <a href="{{ route('owner.rental-posts.create') }}" class="btn-owner">
+        <button type="button" class="btn-owner" data-bs-toggle="modal" data-bs-target="#createPostModal">
             + Tạo tin đăng
-        </a>
+        </button>
     </div>
 
     @php
@@ -302,9 +303,9 @@
                 <div class="empty-state">
                     <h3>Chưa có tin đăng nào</h3>
                     <p>Tạo tin đăng cho phòng trọ để bắt đầu quản lý tại đây.</p>
-                    <a href="{{ route('owner.rental-posts.create') }}" class="btn-owner">
+                    <button type="button" class="btn-owner" data-bs-toggle="modal" data-bs-target="#createPostModal">
                         + Tạo tin đăng đầu tiên
-                    </a>
+                    </button>
                 </div>
             @endforelse
         </div>
@@ -317,8 +318,114 @@
     </section>
 </main>
 
+<!-- MODAL TẠO TIN ĐĂNG MỚI (PREMIUM DARK HEADER NHƯ HÌNH 3) -->
+<div class="modal fade modal-premium" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createPostModalLabel">Tạo tin đăng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            @if (!isset($availableRooms) || $availableRooms->isEmpty())
+                <div class="modal-body p-4">
+                    <div class="alert alert-warning mb-0" style="border-radius: 12px;">
+                        <strong>Thông báo:</strong> Hiện tại bạn không có phòng nào ở trạng thái <strong>Còn trống</strong> (hoặc tất cả phòng trống đã có tin đăng). Vui lòng cập nhật trạng thái phòng trong <a href="{{ route('owner.rooms.index') }}" class="fw-bold">Quản lý phòng</a> trước.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            @else
+                <form action="{{ route('owner.rental-posts.store') }}" method="POST" enctype="multipart/form-data" id="modalCreatePostForm">
+                    @csrf
+                    <div class="modal-body p-4">
+                        <div class="mb-3 p-3 bg-light border rounded-3">
+                            <label class="form-label fw-bold mb-2">Chọn phòng trọ cần đăng tin <span class="text-danger">*</span></label>
+                            @if (isset($properties) && $properties->count() > 1)
+                                <div class="mb-2">
+                                    <select id="modalPropertyFilter" class="form-select form-select-sm mb-2">
+                                        <option value="">-- Tất cả nhà trọ ({{ $availableRooms->count() }} phòng trống) --</option>
+                                        @foreach ($properties as $property)
+                                            <option value="{{ $property->id }}">{{ $property->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+                            <select name="room_id" id="modal_room_id" class="form-select" required>
+                                <option value="">-- Chọn phòng trọ còn trống --</option>
+                                @foreach ($availableRooms as $room)
+                                    <option value="{{ $room->id }}"
+                                        data-property-id="{{ $room->property_id }}"
+                                        data-price="{{ number_format((float) $room->price, 0, ',', '.') }}đ/tháng"
+                                        data-area="{{ $room->area }}"
+                                        data-property="{{ $room->property->name ?? '' }}">
+                                        {{ $room->name }} ({{ $room->property->name ?? '' }}) — Giá: {{ number_format((float) $room->price, 0, ',', '.') }}đ/tháng — {{ $room->area }}m²
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tiêu đề tin đăng <span class="text-danger">*</span></label>
+                            <input type="text" name="title" class="form-control" placeholder="Ví dụ: Phòng trọ đầy đủ tiện nghi gần trường ĐH..." required maxlength="255">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Mô tả chi tiết <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Nhập mô tả vị trí, nội thất, giờ giấc, an ninh..." required></textarea>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Trạng thái tin</label>
+                                <select name="status" class="form-select">
+                                    <option value="draft">Bản nháp</option>
+                                    <option value="pending" selected>Gửi duyệt</option>
+                                    <option value="hidden">Ẩn tin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Hình ảnh phòng (1 - 10 ảnh) <span class="text-danger">*</span></label>
+                                <input type="file" name="images[]" class="form-control" accept="image/jpeg,image/png,image/webp" multiple required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-light px-4 rounded-3 border fw-semibold" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary px-4 rounded-3 fw-bold" style="background: #0c2340; border-color: #0c2340;">
+                            Lưu &amp; Đăng tin
+                        </button>
+                    </div>
+                </form>
+            @endif
+        </div>
+    </div>
+</div>
+
 @push('scripts')
     <script src="{{ asset('js/tv3/rental_protal/index.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var propFilter = document.getElementById('modalPropertyFilter');
+            var roomSelect = document.getElementById('modal_room_id');
+            if (propFilter && roomSelect) {
+                propFilter.addEventListener('change', function () {
+                    var selectedProp = this.value;
+                    var opts = roomSelect.querySelectorAll('option');
+                    opts.forEach(function (opt) {
+                        if (!opt.value) return;
+                        var propId = opt.getAttribute('data-property-id');
+                        if (!selectedProp || propId === selectedProp) {
+                            opt.style.display = '';
+                        } else {
+                            opt.style.display = 'none';
+                        }
+                    });
+                    roomSelect.value = '';
+                });
+            }
+        });
+    </script>
 @endpush
 
 

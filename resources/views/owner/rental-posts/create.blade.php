@@ -5,35 +5,41 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/rental_protal/edit.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/modal_premium.css') }}">
 @endpush
 
 @section('content')
 
+<div class="page" style="max-width: 920px; margin: 30px auto; padding: 0 16px;">
+    <div class="mb-3">
+        <a href="{{ route('owner.rental-posts.index') }}" class="text-decoration-none fw-semibold text-muted">← Quay lại danh sách tin đăng</a>
+    </div>
 
-
-
-<div class="page">
-    <a href="{{ route('owner.rental-posts.index') }}" class="text-decoration-none">← Quay lại danh sách</a>
-
-    <div class="panel mt-3">
-        <h1>Tạo tin đăng mới</h1>
-        <p class="text-secondary">Chọn phòng và nhập thông tin cho thuê.</p>
-
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+    <div class="panel-premium-card">
+        <div class="panel-premium-header">
+            <div>
+                <h2 class="panel-premium-title">Tạo tin đăng mới</h2>
+                <div class="panel-premium-subtitle">Chọn phòng trống và soạn nội dung giới thiệu tin đăng cho thuê</div>
             </div>
-        @endif
+            <span class="badge bg-light text-dark px-3 py-2 rounded-3 fw-bold" style="font-size: 11.5px;">Đăng tin mới</span>
+        </div>
 
-      <form
-            action="{{ route('owner.rental-posts.store') }}"
-            method="POST"
-            enctype="multipart/form-data"
-        >
+        <div class="panel-premium-body">
+            @if ($errors->any())
+                <div class="alert alert-danger mb-4">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form
+                action="{{ route('owner.rental-posts.store') }}"
+                method="POST"
+                enctype="multipart/form-data"
+            >
             @csrf
 
             {{-- BỘ LỌC VÀ CHỌN PHÒNG CÒN TRỐNG --}}
@@ -194,10 +200,15 @@
                        value="{{ old('expired_at') }}">
             </div>
 
-            <button type="submit" class="btn btn-main"
-                    @disabled($rooms->isEmpty())>Lưu tin đăng</button>
-            <a href="{{ route('owner.rental-posts.index') }}" class="btn btn-light ms-2">Hủy</a>
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                <a href="{{ route('owner.rental-posts.index') }}" class="btn btn-light px-4 py-2 rounded-3 border fw-semibold">Hủy</a>
+                <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-bold" style="background: #0c2340; border-color: #0c2340;"
+                        @disabled($rooms->isEmpty())>
+                    Lưu tin đăng
+                </button>
+            </div>
         </form>
+        </div>
     </div>
 </div>
 

@@ -102,28 +102,46 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label for="date_of_birth" class="form-label">Ngày sinh</label>
+                    <label for="date_of_birth" class="form-label">
+                        Ngày sinh <span class="text-muted small">(Đủ 18 tuổi)</span>
+                    </label>
 
                     <input
                         type="date"
                         id="date_of_birth"
                         name="date_of_birth"
-                        class="form-control"
+                        class="form-control @error('date_of_birth') is-invalid @enderror"
                         value="{{ old('date_of_birth', $tenant->date_of_birth ? \Illuminate\Support\Carbon::parse($tenant->date_of_birth)->format('Y-m-d') : '') }}"
+                        max="{{ now()->subYears(18)->format('Y-m-d') }}"
                     >
+                    <div class="form-text text-muted" style="font-size: 11.5px;">
+                        Người đứng tên hợp đồng thuê phải từ đủ 18 tuổi trở lên (sinh trước hoặc trong ngày {{ now()->subYears(18)->format('d/m/Y') }}).
+                    </div>
+                    @error('date_of_birth')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label for="identity_card" class="form-label">Số CCCD</label>
+                    <label for="identity_card" class="form-label">Số CCCD / CMND</label>
 
                     <input
                         type="text"
                         id="identity_card"
                         name="identity_card"
-                        class="form-control"
+                        class="form-control @error('identity_card') is-invalid @enderror"
                         value="{{ old('identity_card', $tenant->identity_card ?? '') }}"
-                        placeholder="Nhập số CCCD"
+                        placeholder="Nhập 12 số CCCD (hoặc 9 số CMND)"
+                        maxlength="12"
+                        inputmode="numeric"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     >
+                    <div class="form-text text-muted" style="font-size: 11.5px;">
+                        Chỉ gồm số, không chứa dấu âm (-) hay ký tự đặc biệt.
+                    </div>
+                    @error('identity_card')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
             </div>
@@ -146,10 +164,16 @@
                         type="tel"
                         id="phone"
                         name="phone"
-                        class="form-control"
+                        class="form-control @error('phone') is-invalid @enderror"
                         value="{{ old('phone', $tenant->phone ?? '') }}"
-                        placeholder="Nhập số điện thoại"
+                        placeholder="Ví dụ: 0901234567"
+                        maxlength="10"
+                        inputmode="numeric"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                     >
+                    @error('phone')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
@@ -159,10 +183,13 @@
                         type="email"
                         id="email"
                         name="email"
-                        class="form-control"
+                        class="form-control @error('email') is-invalid @enderror"
                         value="{{ old('email', $tenant->email ?? '') }}"
                         placeholder="Nhập email"
                     >
+                    @error('email')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-12">
