@@ -109,6 +109,14 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
+/*
+|--------------------------------------------------------------------------
+| ROUTE MỞ KHÓA TÀI KHOẢN (PUBLIC - KHÔNG YÊU CẦU ĐĂNG NHẬP)
+|--------------------------------------------------------------------------
+*/
+Route::get('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'show'])->name('account.unlock.show');
+Route::post('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'submit'])->name('account.unlock.submit');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -177,7 +185,31 @@ Route::middleware('auth')->group(function () {
                 \Illuminate\Support\Facades\Log::error('Lỗi gửi email khóa tài khoản: ' . $e->getMessage());
             }
 
-            return back()->with('success', "Đã khóa tài khoản {$user->name} thành công.");
+            $msg = "Đã khóa tài khoản {$user->name} thành công. Email hướng dẫn mở khóa đã được gửi tới người dùng.";
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'action' => 'locked',
+                    'status' => 'inactive',
+                    'message' => $msg,
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'status' => $user->status,
+                        'unlock_requested_at' => $user->unlock_requested_at,
+                    ],
+                    'counts' => [
+                        'all' => \App\Models\User::count(),
+                        'owner' => \App\Models\User::where('role', 'owner')->count(),
+                        'tenant' => \App\Models\User::where('role', 'tenant')->count(),
+                        'inactive' => \App\Models\User::where('status', 'inactive')->count(),
+                        'unlock_requested' => \App\Models\User::where('status', 'inactive')->whereNotNull('unlock_requested_at')->count(),
+                    ]
+                ]);
+            }
+
+            return back()->with('success', $msg);
         } else {
             // MỞ KHÓA TÀI KHOẢN: Khôi phục trạng thái active và gửi Gmail kích hoạt
             $user->update([
@@ -195,14 +227,33 @@ Route::middleware('auth')->group(function () {
                 \Illuminate\Support\Facades\Log::error('Lỗi gửi email mở khóa tài khoản: ' . $e->getMessage());
             }
 
-            return back()->with('success', "Đã mở khóa tài khoản {$user->name} thành công.");
+            $msg = "Đã mở khóa tài khoản {$user->name} thành công.";
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'action' => 'unlocked',
+                    'status' => 'active',
+                    'message' => $msg,
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'status' => $user->status,
+                        'unlock_requested_at' => null,
+                    ],
+                    'counts' => [
+                        'all' => \App\Models\User::count(),
+                        'owner' => \App\Models\User::where('role', 'owner')->count(),
+                        'tenant' => \App\Models\User::where('role', 'tenant')->count(),
+                        'inactive' => \App\Models\User::where('status', 'inactive')->count(),
+                        'unlock_requested' => \App\Models\User::where('status', 'inactive')->whereNotNull('unlock_requested_at')->count(),
+                    ]
+                ]);
+            }
+
+            return back()->with('success', $msg);
         }
     })->name('admin.users.update-status');
-
-    // Route mở khóa tài khoản từ liên kết trong Gmail
-    Route::get('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'show'])->name('account.unlock.show');
-    Route::post('/account/unlock/{token}', [\App\Http\Controllers\AccountUnlockController::class, 'submit'])->name('account.unlock.submit');
-
 
     Route::get('/admin/rental-posts', function () {
 
