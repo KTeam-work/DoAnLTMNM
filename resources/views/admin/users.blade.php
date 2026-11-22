@@ -4,7 +4,7 @@
 @section('title', 'Quản lý người dùng | Trọ Ơi')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/tv1/users.css') }}?v=5">
+<link rel="stylesheet" href="{{ asset('css/tv1/users.css') }}?v={{ time() }}">
 @endpush
 
 @section('content')
@@ -67,7 +67,7 @@
 @endphp
 
 {{-- BỘ LỌC DẠNG TAB PHÂN ĐOẠN --}}
-<div class="segmented-filter-wrapper mb-4">
+<div class="segmented-filter-wrapper mb-4" id="segmentedFilterWrapper">
     <div class="segmented-filter-bar" role="tablist">
         <a href="{{ route('admin.users') }}" class="segmented-tab {{ ($role === '' && $status === '') ? 'active' : '' }}">
             <span class="tab-label">Tất cả</span>
@@ -120,7 +120,7 @@
         <a href="{{ route('admin.users') }}" class="tv1-btn-secondary">Đặt lại</a>
     </form>
 
-    <div class="table-responsive">
+    <div class="table-responsive" id="usersTableContainer">
         <table class="tv1-table">
             <thead>
                 <tr>
@@ -184,30 +184,40 @@
                             @if ($user->id === auth()->id())
                                 <span class="badge bg-light text-muted border py-1 px-2" style="font-size: 11px;">Tài khoản của bạn</span>
                             @else
-                                <form method="POST" action="{{ route('admin.users.update-status', $user) }}" class="d-inline">
+                                <form method="POST" action="{{ route('admin.users.update-status', $user) }}" class="d-inline status-toggle-form">
                                     @csrf
                                     @method('PATCH')
                                     @if ($user->status === 'active')
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger py-1 px-3"
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger py-1 px-3 btn-action-trigger"
                                                 style="font-size: 11.5px; border-radius: 8px;"
-                                                onclick="return confirm('Xác nhận KHÓA tài khoản {{ $user->name }}?')"
+                                                data-user-id="{{ $user->id }}"
+                                                data-user-name="{{ $user->name }}"
+                                                data-user-email="{{ $user->email }}"
+                                                data-action-type="lock"
                                                 title="Tài khoản đang hoạt động. Nhấn để khóa">
                                             Khóa
                                         </button>
                                     @elseif ($user->unlock_requested_at)
-                                        <button type="submit"
-                                                class="btn btn-sm btn-warning text-dark py-1 px-3 fw-bold"
+                                        <button type="button"
+                                                class="btn btn-sm btn-warning text-dark py-1 px-3 fw-bold btn-action-trigger"
                                                 style="font-size: 11.5px; border-radius: 8px;"
-                                                onclick="return confirm('Xác nhận DUYỆT MỞ KHÓA cho tài khoản {{ $user->name }}?')"
+                                                data-user-id="{{ $user->id }}"
+                                                data-user-name="{{ $user->name }}"
+                                                data-user-email="{{ $user->email }}"
+                                                data-unlock-reason="{{ $user->unlock_reason }}"
+                                                data-action-type="approve"
                                                 title="Người dùng có đơn xin mở khóa. Nhấn để duyệt mở khóa">
                                             Duyệt mở khóa
                                         </button>
                                     @else
-                                        <button type="submit"
-                                                class="btn btn-sm btn-danger py-1 px-3 fw-semibold"
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger py-1 px-3 fw-semibold btn-action-trigger"
                                                 style="font-size: 11.5px; border-radius: 8px;"
-                                                onclick="return confirm('Tài khoản {{ $user->name }} đang bị khóa. Bạn có chắc muốn MỞ KHÓA lại?')"
+                                                data-user-id="{{ $user->id }}"
+                                                data-user-name="{{ $user->name }}"
+                                                data-user-email="{{ $user->email }}"
+                                                data-action-type="unlock"
                                                 title="Tài khoản đang bị khóa. Nhấn vào để mở khóa">
                                             Đã khóa
                                         </button>
@@ -225,10 +235,34 @@
         </table>
     </div>
 
-    <div class="tv1-pagination">{{ $users->links() }}</div>
+    <div class="tv1-pagination" id="usersPaginationContainer">{{ $users->links() }}</div>
 </div>
+
+{{-- MODAL XÁC NHẬN THAO TÁC (CRISP, ĐẸP MẮT, KHÔNG BỊ MỜ) --}}
+<div class="custom-modal-backdrop" id="userActionModal">
+    <div class="custom-modal-card">
+        <div class="custom-modal-header">
+            <div class="modal-badge-icon lock" id="modalBadgeIcon"></div>
+            <h5 class="modal-title" id="modalActionTitle">Xác nhận thao tác</h5>
+            <button type="button" class="btn-modal-close" id="btnModalClose">&times;</button>
+        </div>
+        <div class="custom-modal-body">
+            <div id="modalTargetUserInfo" class="modal-user-box mb-3"></div>
+            <p id="modalActionDesc" class="modal-desc-text"></p>
+        </div>
+        <div class="custom-modal-footer">
+            <button type="button" class="btn-modal-cancel" id="btnModalCancel">Hủy bỏ</button>
+            <button type="button" class="btn-modal-confirm btn-danger-confirm" id="btnModalConfirm">
+                <span class="btn-text">Xác nhận</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- TOAST THÔNG BÁO HOÀN TẤT AJAX --}}
+<div id="customToastContainer" class="custom-toast-container"></div>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/tv1/users.js') }}" defer></script>
+    <script src="{{ asset('js/tv1/users.js') }}?v={{ time() }}" defer></script>
 @endpush
