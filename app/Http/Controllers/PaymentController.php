@@ -12,15 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    /**
-     * Webhook nhận thông báo biến động số dư từ SePay.
-     * Xác minh giao dịch, kiểm tra số tiền và cập nhật trạng thái hóa đơn.
-     */
+    
+    // webhook nhận thông báo biến động số dư từ SePay.
+    // xác minh giao dịch, kiểm tra số tiền và cập nhật trạng thái hóa đơn.
     public function webhook(Request $request)
     {
         Log::info('SePay Webhook Received:', $request->all());
 
-        // 1. Xác thực Webhook (nếu có cấu hình token)
+        //xác thực Webhook 
         $configuredToken = config('services.sepay.webhook_token');
         if (!empty($configuredToken)) {
             $authHeader = $request->header('Authorization', '');
@@ -45,7 +44,7 @@ class PaymentController extends Controller
                 ], 401);
             }
         } elseif (app()->isProduction()) {
-            // Môi trường Production bắt buộc phải cấu hình webhook token
+            //môi trường Production bắt buộc phải cấu hình webhook token
             Log::critical('SePay Webhook: Rejected in production because SEPAY_WEBHOOK_TOKEN is not configured');
             return response()->json([
                 'success' => false,
@@ -53,7 +52,7 @@ class PaymentController extends Controller
             ], 401);
         }
 
-        // 2. Chỉ xử lý giao dịch tiền vào (transferType === "in")
+        //chỉ xử lý giao dịch tiền vào (transferType === "in")
         $transferType = strtolower((string) $request->input('transferType', ''));
         if ($transferType !== 'in') {
             Log::info('SePay Webhook: Ignored non-incoming transfer', ['transferType' => $transferType]);
@@ -63,7 +62,7 @@ class PaymentController extends Controller
             ], 200);
         }
 
-        // 3. Kiểm tra mã giao dịch SePay (ID / referenceCode) để chống webhook lặp
+        //kiểm tra mã giao dịch SePay (ID / referenceCode) để chống webhook lặp
         $sepayId = (string) ($request->input('id') ?? $request->input('referenceCode') ?? '');
         if ($sepayId === '') {
             Log::warning('SePay Webhook: Missing SePay transaction ID', $request->all());
@@ -73,7 +72,7 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        // Kiểm tra xem ID giao dịch SePay này đã được áp dụng cho thanh toán nào chưa
+        //kiểm tra xem ID giao dịch SePay này đã được áp dụng cho thanh toán nào chưa
         $alreadyProcessed = Payment::query()
             ->where('transaction_code', $sepayId)
             ->where('status', 'success')
@@ -91,7 +90,7 @@ class PaymentController extends Controller
             ], 200);
         }
 
-        // 4. Trích xuất chính xác payment_code từ content / description
+        //trích xuất chính xác payment_code từ content / description
         $content = (string) ($request->input('content') ?? $request->input('description') ?? '');
         $paymentCode = $this->extractPaymentCode($content);
 
@@ -106,7 +105,7 @@ class PaymentController extends Controller
             ], 422);
         }
 
-        // 5. Kiểm tra số tiền chuyển
+        //kiểm tra số tiền chuyển
         $transferAmount = $request->input('transferAmount');
         if ($transferAmount === null || !is_numeric($transferAmount)) {
             Log::warning('SePay Webhook: Invalid transferAmount', ['transferAmount' => $transferAmount]);
@@ -118,7 +117,7 @@ class PaymentController extends Controller
 
         $paidAmount = round((float) $transferAmount, 2);
 
-        // 6. Xử lý cập nhật DB bằng Transaction và lockForUpdate
+        //xử lý cập nhật DB bằng Transaction và lockForUpdate
         return DB::transaction(function () use ($paymentCode, $paidAmount, $sepayId, $request) {
             /** @var Payment|null $payment */
             $payment = Payment::query()
@@ -134,7 +133,7 @@ class PaymentController extends Controller
                 ], 404);
             }
 
-            // Nếu payment đã thành công trước đó (idempotent)
+            //nếu payment đã thành công trước đó (idempotent)
             if ($payment->status === 'success') {
                 Log::info('SePay Webhook: Payment is already marked as success', ['payment_code' => $paymentCode]);
                 return response()->json([
@@ -144,7 +143,7 @@ class PaymentController extends Controller
                 ], 200);
             }
 
-            // Không xử lý payment đã failed hoặc cancelled
+            //không xử lý payment đã failed hoặc cancelled
             if (in_array($payment->status, ['failed', 'cancelled'], true)) {
                 Log::warning("SePay Webhook: Payment {$paymentCode} is in terminal status: {$payment->status}");
                 return response()->json([
@@ -153,7 +152,7 @@ class PaymentController extends Controller
                 ], 422);
             }
 
-            // So sánh số tiền (tránh lỗi làm tròn float)
+            //so sánh số tiền (tránh lỗi làm tròn float)
             $expectedAmount = round((float) $payment->amount, 2);
             if ($paidAmount < $expectedAmount) {
                 Log::warning('SePay Webhook: Insufficient transfer amount', [
@@ -167,7 +166,7 @@ class PaymentController extends Controller
                 ], 422);
             }
 
-            // Thời gian thanh toán
+            //thời gian thanh toán
             $txDate = $request->input('transactionDate');
             $paidAt = null;
             if ($txDate) {
@@ -180,7 +179,7 @@ class PaymentController extends Controller
                 $paidAt = now();
             }
 
-            // Cập nhật Payment: status = 'success', method = 'qr'
+            //cập nhật Payment: status = 'success', method = 'qr'
             $payment->update([
                 'status' => 'success',
                 'method' => 'qr',
@@ -188,7 +187,7 @@ class PaymentController extends Controller
                 'paid_at' => $paidAt,
             ]);
 
-            // Cập nhật Invoice: status = 'paid'
+            //cập nhật Invoice: status = 'paid'
             /** @var Invoice|null $invoice */
             $invoice = $payment->invoice()->lockForUpdate()->first();
             if ($invoice && $invoice->status !== 'cancelled') {
@@ -197,7 +196,7 @@ class PaymentController extends Controller
                 ]);
             }
 
-            // Gửi thông báo hệ thống nếu có Notification model
+            //gửi thông báo hệ thống nếu có Notification model
             if ($invoice && $invoice->contract) {
                 try {
                     Notification::notify(

@@ -104,6 +104,7 @@ class PaymentController extends Controller
         return $this->settle($request, $id, 'cancelled');
     }
 
+    // xử lí duyệt giao dịch
     private function settle(Request $request, int $id, string $status)
     {
         $owner = $this->actingOwner($request);
