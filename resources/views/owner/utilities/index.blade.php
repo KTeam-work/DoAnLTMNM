@@ -17,10 +17,10 @@
       <div class="page-desc">Theo dõi mức tiêu thụ và chốt chỉ số cho các phòng trong tháng.</div>
     </div>
     <div class="d-flex gap-2">
-      <a href="{{ route('owner.utilities.export', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" id="utilitiesExcelLink" class="btn-outline-brand text-decoration-none d-inline-flex align-items-center gap-1" data-no-ajax="true">
+      <a href="{{ route('owner.utilities.export', array_filter(['month' => $month, 'room_id' => $selectedRoomId, 'property_id' => $selectedPropertyId])) }}" id="utilitiesExcelLink" class="btn-outline-brand text-decoration-none d-inline-flex align-items-center gap-1" data-no-ajax="true">
         Xuất Excel
       </a>
-      <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" >Ghi chỉ số mới</a>
+      <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId, 'property_id' => $selectedPropertyId])) }}" >Ghi chỉ số mới</a>
     </div>
   </div>
 
@@ -100,20 +100,36 @@
     
     <!-- FILTERS -->
     <form method="GET" action="{{ route('owner.utilities.index') }}" id="utilityFilterForm" class="row g-3 mb-3">
-      <div class="col-md-4">
-        <label class="filter-label">Phòng</label>
-        <select name="room_id" id="utilityRoomSelect" class="custom-input">
-          <option value="">Tất cả phòng</option>
-          @foreach($rooms as $room)
-            <option value="{{ $room->id }}" @selected((string) $selectedRoomId === (string) $room->id)>{{ $room->name }} · {{ $room->property->name ?? '' }}</option>
+      <div class="col-md-3">
+        <label class="filter-label">Khu trọ / Nhà trọ</label>
+        <select name="property_id" id="utilityPropertySelect" class="custom-input">
+          <option value="">Tất cả khu trọ</option>
+          @foreach($properties as $prop)
+            <option value="{{ $prop->id }}" @selected((string) $selectedPropertyId === (string) $prop->id)>{{ $prop->name }}</option>
           @endforeach
         </select>
       </div>
-      <div class="col-md-4">
-        <label class="filter-label">Tháng ghi chỉ số (để trống để xem tất cả)</label>
+      <div class="col-md-3">
+        <label class="filter-label">Phòng</label>
+        <select name="room_id" id="utilityRoomSelect" class="custom-input">
+          <option value="">Tất cả phòng</option>
+          @php
+            $groupedRooms = $rooms->groupBy(fn($r) => $r->property->name ?? 'Khác');
+          @endphp
+          @foreach($groupedRooms as $propName => $propRooms)
+            <optgroup label="Khu: {{ $propName }}">
+              @foreach($propRooms as $room)
+                <option value="{{ $room->id }}" @selected((string) $selectedRoomId === (string) $room->id)>{{ $room->name }}</option>
+              @endforeach
+            </optgroup>
+          @endforeach
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="filter-label">Tháng ghi chỉ số (trống = tất cả)</label>
         <input type="month" name="month" id="utilityMonthInput" class="custom-input" value="{{ $month }}" lang="vi" title="Chọn tháng và năm ghi chỉ số">
       </div>
-      <div class="col-md-4 d-flex align-items-end gap-2">
+      <div class="col-md-3 d-flex align-items-end gap-2">
         <button type="submit" class="btn-brand flex-grow-1" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>
         <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none utility-ajax-link" style="height: 44px; display: inline-flex; align-items: center; white-space: nowrap;">Tất cả kỳ</a>
       </div>
@@ -126,6 +142,9 @@
           Đang xem kỳ: <strong class="text-dark">{{ \Carbon\Carbon::parse($month)->format('m/Y') }}</strong>
         @else
           Đang xem: <strong class="text-dark">Tất cả các kỳ</strong>
+        @endif
+        @if($selectedPropertyId)
+          &bull; Khu trọ: <strong class="text-dark">{{ $properties->firstWhere('id', $selectedPropertyId)?->name ?? '' }}</strong>
         @endif
         @if($selectedRoomId)
           &bull; Phòng: <strong class="text-dark">{{ $rooms->firstWhere('id', $selectedRoomId)?->name ?? $selectedRoomId }}</strong>
@@ -143,7 +162,7 @@
         <thead>
           <tr>
             <th>Phòng</th>
-            <th>Tháng</th>
+            <th>Kỳ &amp; Ngày ghi</th>
             <th>Chỉ số Điện (Cũ - Mới)</th>
             <th>Chỉ số Nước (Cũ - Mới)</th>
             <th>Tiêu thụ</th>
@@ -166,11 +185,16 @@
                 <div class="avatar-sm">{{ substr($reading->room->name ?? '?', -3) }}</div>
                 <div>
                   <div class="cell-title">{{ $reading->room->name ?? '—' }} · {{ $reading->room->room_code ?? '' }}</div>
-                  <div class="cell-sub">{{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</div>
+                  <div class="cell-sub" style="font-size: 11px; color: #64748b;">Ngày ghi: {{ $reading->created_at ? $reading->created_at->format('d/m/Y') : \Carbon\Carbon::parse($reading->month)->format('d/m/Y') }}</div>
                 </div>
               </div>
             </td>
-            <td><strong style="color: #4b3621;">{{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</strong></td>
+            <td>
+              <div style="font-weight: 700; color: #4b3621;">Tháng {{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</div>
+              <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
+                Ngày ghi: <span style="font-weight: 600; color: #0c2340;">{{ $reading->created_at ? $reading->created_at->format('d/m/Y') : \Carbon\Carbon::parse($reading->month)->format('d/m/Y') }}</span>
+              </div>
+            </td>
             <td>
               <div>Cũ: <strong>{{ number_format((float)$reading->electricity_old) }}</strong></div>
               <div class="mt-1">Mới: <strong>{{ number_format((float)$reading->electricity_new) }}</strong></div>
@@ -274,7 +298,12 @@
         const curExcel = document.getElementById('utilitiesExcelLink');
         if (newExcel && curExcel) curExcel.href = newExcel.href;
 
-        // 5. Cập nhật URL trên thanh địa chỉ không tải lại trang
+        // 5. Cập nhật Select phòng tương ứng khu trọ
+        const newRoomSelect = doc.getElementById('utilityRoomSelect');
+        const curRoomSelect = document.getElementById('utilityRoomSelect');
+        if (newRoomSelect && curRoomSelect) curRoomSelect.innerHTML = newRoomSelect.innerHTML;
+
+        // 6. Cập nhật URL trên thanh địa chỉ không tải lại trang
         window.history.pushState({}, '', url);
 
         // Rebind click events

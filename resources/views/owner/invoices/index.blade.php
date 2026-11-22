@@ -82,6 +82,12 @@
     <div class="panel-head">
       <h3 class="fw-bold fs-5 mb-0">Danh sách Hóa đơn</h3>
       <form id="invoiceFilterForm" method="GET" action="{{ route('owner.invoices.index') }}" class="d-flex flex-wrap gap-2">
+        <select name="property_id" class="form-select form-select-sm w-auto shadow-none">
+          <option value="">Tất cả khu trọ</option>
+          @foreach($properties as $property)
+            <option value="{{ $property->id }}" @selected(($filters['property_id'] ?? '') == $property->id)>{{ $property->name }}</option>
+          @endforeach
+        </select>
         <input type="month" name="month" class="form-control form-control-sm w-auto shadow-none" value="{{ $filters['month'] ?? '' }}">
         <select name="status" class="form-select form-select-sm w-auto shadow-none">
           <option value="">Tất cả trạng thái</option>
@@ -90,7 +96,7 @@
           @endforeach
         </select>
         <div id="invoiceResetWrapper" class="d-inline-flex">
-          @if(!empty($filters['month']) || !empty($filters['status']))
+          @if(!empty($filters['month']) || !empty($filters['status']) || !empty($filters['property_id']))
             <a href="{{ route('owner.invoices.index') }}" class="btn btn-sm btn-light border" id="resetInvoiceFilterBtn">Xóa lọc</a>
           @endif
         </div>
@@ -123,7 +129,7 @@
               <div class="cell-sub">Hạn: {{ $invoice->due_date->format('d/m/Y') }}</div>
             </td>
             <td>
-              <div class="cell-title">{{ $invoice->contract->room->name ?? '' }}</div>
+              <div class="cell-title">{{ $invoice->contract->room->name ?? '' }} · <span class="text-muted fw-normal" style="font-size: 12px;">{{ $invoice->contract->room->property->name ?? '' }}</span></div>
               <div class="cell-sub">{{ $invoice->contract->tenant->name ?? '' }}</div>
             </td>
             <td><strong>{{ number_format((float) $invoice->total) }} ₫</strong></td>
@@ -162,36 +168,80 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
+        <div class="row g-2 mb-3">
+          <div class="col-md-6">
+            <label for="invoice-month" class="form-label small fw-bold">Tháng tính tiền <span class="text-danger">*</span></label>
+            <input id="invoice-month" type="month" name="month" class="form-control" value="{{ $currentMonth }}" lang="vi" title="Chọn tháng và năm tính tiền" required>
+            <div class="form-text">Chọn tháng cần lập hóa đơn.</div>
+          </div>
+          <div class="col-md-6">
+            <label for="invoice-property" class="form-label small fw-bold">Khu trọ / Nhà trọ</label>
+            <select id="invoice-property" name="property_id" class="form-select">
+              <option value="">-- Tất cả khu trọ ({{ $properties->count() }}) --</option>
+              @foreach($properties as $property)
+                <option value="{{ $property->id }}" @selected(($selectedPropertyId ?? '') == $property->id)>{{ $property->name }}</option>
+              @endforeach
+            </select>
+            <div class="form-text">Lọc phòng theo từng khu trọ.</div>
+          </div>
+        </div>
+
+        <!-- HỘP TÓM TẮT TRẠNG THÁI ĐIỆN NƯỚC KỲ NÀY -->
+        <div id="invoice-status-banner" class="mb-3 p-3 rounded-3" style="font-size: 13px; {{ ($initialSummary['eligible'] ?? 0) > 0 ? 'background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;' : 'background: #fffbeb; border: 1px solid #fde68a; color: #92400e;' }}">
+          @if(($initialSummary['eligible'] ?? 0) > 0)
+            <div><strong>Sẵn sàng lập HĐ:</strong> {{ $initialSummary['eligible'] }}/{{ $initialSummary['total'] }} phòng đã chốt điện nước.</div>
+            @if(($initialSummary['missing'] ?? 0) > 0)
+              <div class="small mt-1 text-muted">Còn {{ $initialSummary['missing'] }} phòng chưa chốt điện nước: <strong>{{ implode(', ', $initialSummary['missing_names'] ?? []) }}</strong></div>
+            @endif
+          @else
+            <div><strong>Chưa sẵn sàng:</strong> Chưa có phòng nào chốt điện nước kỳ này (hoặc tất cả đã lập hóa đơn). Vui lòng ghi điện nước trước!</div>
+          @endif
+        </div>
+
         <div class="mb-3">
           <label for="invoice-contract" class="form-label small fw-bold">Người thuê / phòng</label>
-          <select id="invoice-contract" name="contract_id" class="form-select">
-            <option value="">Tất cả người thuê đang có hợp đồng hiệu lực</option>
-            @foreach($activeContracts as $contract)
-              <option value="{{ $contract->id }}">
-                {{ $contract->room->name ?? 'Phòng chưa xác định' }} — {{ $contract->tenant->name ?? 'Người thuê chưa xác định' }}
-              </option>
-            @endforeach
+          <select id="invoice-contract" name="contract_id" class="form-select" {{ $activeContracts->isEmpty() ? 'disabled' : '' }}>
+            @if($activeContracts->isEmpty())
+              <option value="" disabled selected>-- Chưa có phòng nào chốt điện nước kỳ này --</option>
+            @else
+              <option value="">-- Tất cả phòng đã chốt điện nước ({{ $activeContracts->count() }} phòng) --</option>
+              @php
+                $groupedContracts = $activeContracts->groupBy(fn($c) => $c->room->property->name ?? 'Khác');
+              @endphp
+              @foreach($groupedContracts as $propName => $cList)
+                <optgroup label="Khu: {{ $propName }}" data-prop-id="{{ $cList->first()->room->property_id ?? '' }}">
+                  @foreach($cList as $contract)
+                    @php
+                      $cDay = \Carbon\Carbon::parse($contract->start_date)->day;
+                      $bMonth = \Carbon\Carbon::parse($currentMonth)->startOfMonth();
+                      $tDay = min($cDay, $bMonth->daysInMonth);
+                      $tDate = $bMonth->copy()->day($tDay);
+                      $sDueDate = (now()->format('Y-m') === $bMonth->format('Y-m') && now()->day > $tDay) ? now()->addDays(3)->toDateString() : $tDate->toDateString();
+                    @endphp
+                    <option value="{{ $contract->id }}" data-property-id="{{ $contract->room->property_id ?? '' }}" data-suggested-due="{{ $sDueDate }}">
+                      {{ $contract->room->name ?? 'Phòng chưa xác định' }} — {{ $contract->tenant->name ?? 'Người thuê chưa xác định' }}
+                    </option>
+                  @endforeach
+                </optgroup>
+              @endforeach
+            @endif
           </select>
-          <div class="form-text">Chọn một người thuê để lập hóa đơn riêng, hoặc giữ “Tất cả” để phát hành hàng loạt.</div>
+          <div class="form-text">Chỉ hiển thị các phòng <strong>đã chốt điện nước</strong> và <strong>chưa lập hóa đơn</strong> kỳ này.</div>
         </div>
         <div class="mb-3">
-          <label for="invoice-month" class="form-label small fw-bold">Tháng tính tiền</label>
-          <input id="invoice-month" type="month" name="month" class="form-control" value="{{ $currentMonth }}" lang="vi" title="Chọn tháng và năm tính tiền" required>
-          <div class="form-text">Chọn tháng và năm cần tính hóa đơn.</div>
-        </div>
-        <div class="mb-3">
-          <label for="invoice-due-date" class="form-label small fw-bold">Hạn chót thanh toán (tùy chọn)</label>
-          <input id="invoice-due-date" type="date" name="due_date" class="form-control" value="{{ now()->addDays(7)->toDateString() }}">
+          <label for="invoice-due-date" class="form-label small fw-bold">Hạn thanh toán</label>
+          <input id="invoice-due-date" type="date" name="due_date" class="form-control" value="{{ $initialDefaultDueDate ?? now()->addDays(3)->toDateString() }}">
+          <div class="form-text" id="invoice-due-date-help">Tự động gợi ý theo ngày hợp đồng. Bạn có thể tự chọn ngày khác để gia hạn thêm cho khách.</div>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-bold">Giảm giá chung (đ, tùy chọn)</label>
           <input type="number" name="discount" class="form-control" min="0" step="0.01" value="0">
         </div>
-        <div class="alert alert-info mb-0" style="font-size: 13px;">Chọn kỳ đã có chỉ số điện nước (VD: 2026-10). Phòng thiếu chỉ số của kỳ sẽ bị bỏ qua và liệt kê sau khi tạo. Không tạo trùng kỳ/hợp đồng.</div>
+        <div class="alert alert-info mb-0" style="font-size: 13px;">Tự động tính tiền phòng, tiền điện nước đã ghi và các dịch vụ cố định theo hợp đồng.</div>
       </div>
       <div class="modal-footer bg-light border-0">
         <button type="button" class="btn btn-light border fw-bold px-4" data-bs-dismiss="modal">Hủy</button>
-        <button type="submit" class="btn btn-brand fw-bold px-4">Phát hành Hóa đơn</button>
+        <button type="submit" id="btn-submit-invoice" class="btn btn-brand fw-bold px-4" {{ $activeContracts->isEmpty() ? 'disabled' : '' }}>Phát hành Hóa đơn</button>
       </div>
     </form>
   </div>
@@ -339,6 +389,109 @@ function initInvoiceAjaxFilters() {
       applyInvoiceFilterAjax(resetLink.href);
     }
   });
+
+  // Modal tạo hóa đơn: Lọc phòng ĐÃ GHI ĐIỆN NƯỚC theo Tháng và Khu trọ
+  const modalMonthInput = document.getElementById('invoice-month');
+  const modalPropertySelect = document.getElementById('invoice-property');
+  const modalContractSelect = document.getElementById('invoice-contract');
+  const modalStatusBanner = document.getElementById('invoice-status-banner');
+  const modalSubmitBtn = document.getElementById('btn-submit-invoice');
+  const modalDueDateInput = document.getElementById('invoice-due-date');
+
+  function refreshModalEligibleContracts() {
+    if (!modalMonthInput || !modalContractSelect) return;
+    const month = modalMonthInput.value;
+    const propertyId = modalPropertySelect ? modalPropertySelect.value : '';
+
+    if (modalStatusBanner) {
+      modalStatusBanner.innerHTML = '<span class="text-muted">Đang kiểm tra dữ liệu điện nước kỳ này...</span>';
+      modalStatusBanner.style.background = '#f8fafc';
+      modalStatusBanner.style.borderColor = '#e2e8f0';
+      modalStatusBanner.style.color = '#475569';
+    }
+
+    fetch(`{{ route('owner.invoices.eligible-contracts') }}?month=${month}&property_id=${propertyId}`)
+      .then(res => res.json())
+      .then(data => {
+        // 1. Cập nhật Banner tóm tắt
+        if (modalStatusBanner) {
+          if (data.eligible_count > 0) {
+            let html = `<div><strong>Sẵn sàng lập HĐ:</strong> ${data.eligible_count}/${data.total_rooms} phòng đã chốt điện nước.</div>`;
+            if (data.missing_readings_count > 0) {
+              const missingNames = data.missing_readings.map(r => r.room_name).join(', ');
+              html += `<div class="small mt-1 text-muted">Còn ${data.missing_readings_count} phòng chưa chốt điện nước: <strong>${missingNames}</strong></div>`;
+            }
+            modalStatusBanner.innerHTML = html;
+            modalStatusBanner.style.background = '#f0fdf4';
+            modalStatusBanner.style.borderColor = '#bbf7d0';
+            modalStatusBanner.style.color = '#166534';
+          } else {
+            modalStatusBanner.innerHTML = `<div><strong>Chưa sẵn sàng:</strong> Chưa có phòng nào chốt điện nước kỳ này (hoặc tất cả đã lập hóa đơn). Vui lòng ghi điện nước trước!</div>`;
+            modalStatusBanner.style.background = '#fffbeb';
+            modalStatusBanner.style.borderColor = '#fde68a';
+            modalStatusBanner.style.color = '#92400e';
+          }
+        }
+
+        // 2. Cập nhật Dropdown phòng (Chỉ hiện phòng đủ điều kiện)
+        modalContractSelect.innerHTML = '';
+        if (data.eligible_count === 0) {
+          modalContractSelect.disabled = true;
+          modalContractSelect.innerHTML = '<option value="" disabled selected>-- Chưa có phòng nào chốt điện nước kỳ này --</option>';
+          if (modalSubmitBtn) modalSubmitBtn.disabled = true;
+        } else {
+          modalContractSelect.disabled = false;
+          if (modalSubmitBtn) modalSubmitBtn.disabled = false;
+
+          let defaultOpt = document.createElement('option');
+          defaultOpt.value = '';
+          defaultOpt.textContent = `-- Tất cả phòng đã chốt điện nước (${data.eligible_count} phòng) --`;
+          modalContractSelect.appendChild(defaultOpt);
+
+          const grouped = {};
+          data.eligible_contracts.forEach(c => {
+            const pName = c.property_name || 'Khác';
+            if (!grouped[pName]) grouped[pName] = [];
+            grouped[pName].push(c);
+          });
+
+          for (const [pName, list] of Object.entries(grouped)) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = `Khu: ${pName}`;
+            list.forEach(c => {
+              const opt = document.createElement('option');
+              opt.value = c.id;
+              opt.textContent = `${c.room_name} — ${c.tenant_name || 'Đang thuê'}`;
+              if (c.suggested_due_date) {
+                opt.setAttribute('data-suggested-due', c.suggested_due_date);
+              }
+              optgroup.appendChild(opt);
+            });
+            modalContractSelect.appendChild(optgroup);
+          }
+
+          if (modalDueDateInput && data.eligible_contracts.length > 0) {
+            modalDueDateInput.value = data.eligible_contracts[0].suggested_due_date;
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Lỗi kiểm tra hợp đồng hợp lệ:', err);
+      });
+  }
+
+  if (modalContractSelect && modalDueDateInput) {
+    modalContractSelect.addEventListener('change', function() {
+      const selectedOption = this.options[this.selectedIndex];
+      const suggestedDue = selectedOption ? selectedOption.getAttribute('data-suggested-due') : null;
+      if (suggestedDue) {
+        modalDueDateInput.value = suggestedDue;
+      }
+    });
+  }
+
+  if (modalMonthInput) modalMonthInput.addEventListener('change', refreshModalEligibleContracts);
+  if (modalPropertySelect) modalPropertySelect.addEventListener('change', refreshModalEligibleContracts);
 }
 
 window.initInvoiceAjaxFilters = initInvoiceAjaxFilters;

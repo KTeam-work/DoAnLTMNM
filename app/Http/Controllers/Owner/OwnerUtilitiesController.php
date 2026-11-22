@@ -24,6 +24,7 @@ class OwnerUtilitiesController extends Controller
                 ? User::query()->where('role', 'owner')->orderBy('id')->first()
                 : $this->owner($request));
 
+        $selectedPropertyId = $request->input('property_id');
         $selectedRoomId = $request->input('room_id');
 
         // Xác định tháng lọc:
@@ -49,6 +50,7 @@ class OwnerUtilitiesController extends Controller
         $readings = $owner
             ? UtilityReading::query()
                 ->whereHas('room.property', fn ($query) => $query->where('owner_id', $owner->id))
+                ->when($selectedPropertyId, fn ($query) => $query->whereHas('room', fn ($rq) => $rq->where('property_id', $selectedPropertyId)))
                 ->when($selectedRoomId, fn ($query) => $query->where('room_id', $selectedRoomId))
                 ->when($month, fn ($query) => $query->whereDate('month', Carbon::parse($month)->startOfMonth()))
                 ->with('room:id,name,room_code,property_id')
@@ -60,13 +62,18 @@ class OwnerUtilitiesController extends Controller
         $rooms = $owner
             ? Room::query()
                 ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id))
+                ->when($selectedPropertyId, fn ($query) => $query->where('property_id', $selectedPropertyId))
                 ->with('property:id,name')
                 ->orderBy('name')
                 ->get()
             : collect();
 
+        $properties = $owner
+            ? \App\Models\Property::query()->where('owner_id', $owner->id)->orderBy('name')->get()
+            : collect();
+
         if (! $request->expectsJson()) {
-            return view('owner.utilities.index', compact('readings', 'rooms', 'month', 'selectedRoomId'));
+            return view('owner.utilities.index', compact('readings', 'rooms', 'properties', 'month', 'selectedRoomId', 'selectedPropertyId'));
         }
 
         $owner = $this->owner($request);
@@ -191,19 +198,6 @@ class OwnerUtilitiesController extends Controller
                 ? User::query()->where('role', 'owner')->orderBy('id')->first()
                 : $this->owner($request));
 
-        // Chỉ lấy những phòng ĐANG CÓ HỢP ĐỒNG HIỆU LỰC (đang được thuê)
-        $rooms = $owner
-            ? Room::query()
-                ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id))
-                ->whereHas('contracts', fn ($query) => $query->where('status', 'active'))
-                ->with([
-                    'property:id,name,owner_id',
-                    'contracts' => fn ($query) => $query->where('status', 'active')->with('tenant:id,name'),
-                ])
-                ->orderBy('name')
-                ->get()
-            : collect();
-
         // Chế độ sửa khi có ?id=: load bản ghi để prefill form.
         $reading = null;
         if ($request->filled('id') && $owner) {
@@ -214,15 +208,40 @@ class OwnerUtilitiesController extends Controller
                     'room.contracts' => fn ($query) => $query->where('status', 'active')->with('tenant:id,name'),
                 ])
                 ->find($request->input('id'));
+        }
 
-            // Nếu đang sửa bản ghi của phòng mà hợp đồng đã kết thúc sau đó, vẫn giữ phòng vào danh sách
-            if ($reading && $reading->room && ! $rooms->contains('id', $reading->room_id)) {
-                $rooms->push($reading->room);
-            }
+        $selectedPropertyId = $request->input('property_id');
+        $prefillMonth = $request->input('month', $reading ? Carbon::parse($reading->month)->format('Y-m') : now()->format('Y-m'));
+        $targetMonthDate = Carbon::parse($prefillMonth)->startOfMonth()->toDateString();
+
+        $properties = $owner
+            ? \App\Models\Property::query()->where('owner_id', $owner->id)->orderBy('name')->get()
+            : collect();
+
+        // Chỉ lấy những phòng ĐANG CÓ HỢP ĐỒNG HIỆU LỰC (đang được thuê)
+        // VÀ LOẠI BỎ các phòng đã có chỉ số trong tháng này (nếu không phải đang sửa bản ghi đó)
+        $rooms = $owner
+            ? Room::query()
+                ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id))
+                ->whereHas('contracts', fn ($query) => $query->where('status', 'active'))
+                ->when($selectedPropertyId && ! $reading, fn ($q) => $q->where('property_id', $selectedPropertyId))
+                ->when(! $reading, function ($q) use ($targetMonthDate) {
+                    $q->whereDoesntHave('utilityReadings', fn ($uq) => $uq->whereDate('month', $targetMonthDate));
+                })
+                ->with([
+                    'property:id,name,owner_id',
+                    'contracts' => fn ($query) => $query->where('status', 'active')->with('tenant:id,name'),
+                ])
+                ->orderBy('name')
+                ->get()
+            : collect();
+
+        // Nếu đang sửa bản ghi của phòng mà phòng chưa có trong danh sách thì vẫn đưa vào để hiển thị
+        if ($reading && $reading->room && ! $rooms->contains('id', $reading->room_id)) {
+            $rooms->push($reading->room);
         }
 
         $prefillRoomId = $request->input('room_id', $reading?->room_id ?? $rooms->first()?->id);
-        $prefillMonth = $request->input('month', $reading ? Carbon::parse($reading->month)->format('Y-m') : now()->format('Y-m'));
 
         $initialPrevious = null;
         if (! $reading && $prefillRoomId && $owner) {
@@ -232,7 +251,7 @@ class OwnerUtilitiesController extends Controller
             }
         }
 
-        return view('owner.utilities.create', compact('rooms', 'reading', 'prefillRoomId', 'prefillMonth', 'initialPrevious'));
+        return view('owner.utilities.create', compact('rooms', 'properties', 'reading', 'prefillRoomId', 'prefillMonth', 'selectedPropertyId', 'initialPrevious'));
     }
 
     /**
@@ -390,8 +409,8 @@ class OwnerUtilitiesController extends Controller
 
         $monthParam = Carbon::parse($utilityReading->month)->format('Y-m');
 
-        // Không cho phép xóa chỉ số đã được gắn với hóa đơn
-        if ($utilityReading->invoice()->exists()) {
+        // Không cho phép xóa chỉ số đã được gắn với hóa đơn còn hiệu lực (chưa hủy)
+        if ($utilityReading->invoice()->where('status', '!=', 'cancelled')->exists()) {
             $msg = 'Không thể xóa chỉ số này vì đã được dùng để lập hóa đơn tiền phòng.';
             if (! $request->expectsJson()) {
                 return redirect()->route('owner.utilities.index', ['month' => $monthParam])
