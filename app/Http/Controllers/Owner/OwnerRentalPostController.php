@@ -20,15 +20,34 @@ class OwnerRentalPostController extends Controller
      */
     public function index()
     {
+        $ownerId = Auth::id() ?: (config('app.demo_guest') ? \App\Models\User::where('role', 'owner')->value('id') : null);
+
         $posts = RentalPost::query()
-            ->whereHas('room.property', function ($query) {
-                $query->where('owner_id', Auth::id());
+            ->whereHas('room.property', function ($query) use ($ownerId) {
+                $query->where('owner_id', $ownerId);
             })
             ->with(['room.property','images'])
             ->latest()
             ->get();
 
-        return view('owner.rental-posts.index', compact('posts'));
+        $properties = Property::query()
+            ->where('owner_id', $ownerId)
+            ->orderBy('name')
+            ->get();
+
+        $availableRooms = Room::query()
+            ->whereHas('property', function ($query) use ($ownerId) {
+                $query->where('owner_id', $ownerId);
+            })
+            ->where('status', 'available')
+            ->whereDoesntHave('rentalPosts', function ($query) {
+                $query->whereIn('status', ['published', 'pending', 'draft']);
+            })
+            ->with('property')
+            ->orderBy('name')
+            ->get();
+
+        return view('owner.rental-posts.index', compact('posts', 'properties', 'availableRooms'));
     }
 
     /**

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
         people: document.getElementById('max_people'),
         price: document.getElementById('price'),
         deposit: document.getElementById('deposit'),
-        status: document.getElementById('status'),
+        status: document.getElementById('status') || document.getElementById('status_disabled'),
         description: document.getElementById('description')
     };
 
@@ -19,9 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const statusLabels = {
         available: 'Còn trống',
-        pending: 'Đang chờ',
         rented: 'Đang thuê',
-        maintenance: 'Bảo trì',
+        maintenance: 'Đang bảo trì',
         hidden: 'Đang ẩn'
     };
 
@@ -67,17 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fields.people.value || '0';
 
         document.getElementById('previewStatus').textContent =
-            statusLabels[fields.status.value] || fields.status.value;
-
-        const rawPrice = String(fields.price.value).replace(/\D/g, '');
-        if (rawPrice) {
-            const numPrice = parseInt(rawPrice, 10);
-            fields.price.value = numPrice.toLocaleString('vi-VN');
-            document.getElementById('pricePreview').textContent = '≈ ' + formatWords(numPrice);
-        } else {
-            document.getElementById('pricePreview').textContent = '';
-        }
-
+            fields.status ? (statusLabels[fields.status.value] || fields.status.value) : '';
 
         // Chuẩn hóa giá thuê và tiền cọc về dạng số
         const rawPrice = String(fields.price.value).replace(/\D/g, '');

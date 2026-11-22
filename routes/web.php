@@ -556,6 +556,11 @@ Route::put(
     [OwnerContractController::class, 'terminate']
 )->name('owner.contracts.terminate');
 
+Route::put(
+    '/owner/contracts/{contract}/extend',
+    [OwnerContractController::class, 'extend']
+)->name('owner.contracts.extend');
+
 
 /*
 |--------------------------------------------------------------------------

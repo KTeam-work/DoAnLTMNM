@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv4/invoice/show.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/modal_premium.css') }}">
 @endpush
 
 @section('content')
@@ -89,6 +90,17 @@
               Hủy hóa đơn
             </button>
           </form>
+          <button type="button" class="btn btn-success fw-bold d-flex align-items-center gap-2 shadow-sm btn-open-confirm-modal" 
+                  style="border-radius: 12px; background: #059669; border: none; font-size: 13.5px; padding: 9px 18px;"
+                  data-action="{{ route('owner.invoices.record-cash', $invoice->id) }}"
+                  data-method-field=""
+                  data-amount="{{ number_format((float) $invoice->total) }} đ"
+                  data-code="{{ $invoice->invoice_code }}"
+                  data-paymethod="Tiền mặt trực tiếp"
+                  data-note="Xác nhận khách đã nộp tiền mặt trực tiếp và gạch nợ hóa đơn này?">
+            <i class="bi bi-cash-stack"></i> Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
+          </button>
+
         @endif
 
         <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" 
@@ -332,49 +344,313 @@
   </div>
 </main>
 
+
 @if($invoice->status !== 'paid' && $invoice->status !== 'cancelled')
-<div class="modal fade" id="editDueDateModal" tabindex="-1" aria-labelledby="editDueDateModalLabel" aria-hidden="true" style="z-index: 1060;">
-  <div class="modal-dialog modal-dialog-centered">
-    <form method="POST" action="{{ route('owner.invoices.update-due-date', $invoice->id) }}" class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
-      @csrf
-      @method('PUT')
-      <div class="modal-header bg-light border-0 py-3 px-4">
-        <h5 class="modal-title fw-bold text-dark m-0" id="editDueDateModalLabel">Đổi hạn thanh toán</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body p-4">
-        <div class="mb-3">
-          <label class="form-label small fw-bold text-secondary">Hạn thanh toán hiện tại</label>
-          <input type="text" class="form-control bg-light" value="{{ $invoice->due_date->format('d/m/Y') }}" disabled>
+<!-- MODAL ĐỔI HẠN THANH TOÁN -->
+<div class="modal fade" id="editDueDateModal" tabindex="-1"
+     aria-labelledby="editDueDateModalLabel" aria-hidden="true"
+     style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST"
+              action="{{ route('owner.invoices.update-due-date', $invoice->id) }}"
+              class="modal-content border-0 shadow-lg"
+              style="border-radius: 16px; overflow: hidden;">
+            @csrf
+            @method('PUT')
+
+            <div class="modal-header bg-light border-0 py-3 px-4">
+                <h5 class="modal-title fw-bold text-dark m-0"
+                    id="editDueDateModalLabel">
+                    Đổi hạn thanh toán
+                </h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary">
+                        Hạn thanh toán hiện tại
+                    </label>
+                    <input type="text" class="form-control bg-light"
+                           value="{{ $invoice->due_date->format('d/m/Y') }}"
+                           disabled>
+                </div>
+
+                <div class="mb-3">
+                    <label for="new_due_date"
+                           class="form-label small fw-bold text-secondary">
+                        Hạn thanh toán mới
+                    </label>
+                    <input type="date" id="new_due_date" name="due_date"
+                           class="form-control"
+                           value="{{ $invoice->due_date->toDateString() }}"
+                           required>
+
+                    <div class="form-text mt-1 text-muted">
+                        Hệ thống sẽ cập nhật và tự động gửi thông báo đến tài khoản người thuê.
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light border-0 py-3 px-4">
+                <button type="button"
+                        class="btn btn-light border fw-bold px-4"
+                        data-bs-dismiss="modal">
+                    Đóng
+                </button>
+
+                <button type="submit" class="btn btn-primary fw-bold px-4"
+                        style="background: #20584f; border-color: #20584f;">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+
+<!-- MODAL XÁC NHẬN NHẬN TIỀN -->
+<div class="modal fade modal-premium" id="confirmPaymentModal"
+     tabindex="-1" aria-labelledby="confirmPaymentModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmPaymentModalLabel">
+                    Xác nhận nhận tiền thanh toán
+                </h5>
+
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <form id="confirmPaymentForm" method="POST" action="">
+                @csrf
+
+                <div id="confirmMethodFieldContainer"></div>
+
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-2 text-muted small text-uppercase fw-bold"
+                         style="letter-spacing: 0.5px;">
+                        Số tiền xác nhận
+                    </div>
+
+                    <div class="fw-bold text-success mb-3"
+                         id="confirmModalAmount"
+                         style="font-size: 28px; font-family: 'Be Vietnam Pro', sans-serif;">
+                        0 đ
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 text-start small mb-3 border">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Mã tham chiếu:</span>
+                            <strong class="text-dark" id="confirmModalCode">—</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Hình thức thanh toán:</span>
+                            <strong class="text-dark" id="confirmModalMethod">—</strong>
+                        </div>
+                    </div>
+
+                    <p class="text-secondary small mb-0"
+                       id="confirmModalNote">
+                        Bạn xác nhận đã nhận đủ số tiền trên và muốn cập nhật trạng thái hóa đơn này sang Đã thanh toán?
+                    </p>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button"
+                            class="btn btn-light px-4 rounded-3 border"
+                            data-bs-dismiss="modal">
+                        Hủy
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success px-4 rounded-3 fw-bold"
+                            style="background: #059669; border: none;">
+                        Xác nhận đã nhận tiền
+                    </button>
+                </div>
+            </form>
+
         </div>
-        <div class="mb-3">
-          <label for="new_due_date" class="form-label small fw-bold text-secondary">Hạn thanh toán mới</label>
-          <input type="date" id="new_due_date" name="due_date" class="form-control" value="{{ $invoice->due_date->toDateString() }}" required>
-          <div class="form-text mt-1 text-muted">Hệ thống sẽ cập nhật và tự động gửi thông báo đến tài khoản người thuê.</div>
-        </div>
-      </div>
-      <div class="modal-footer bg-light border-0 py-3 px-4">
-        <button type="button" class="btn btn-light border fw-bold px-4" data-bs-dismiss="modal">Đóng</button>
-        <button type="submit" class="btn btn-primary fw-bold px-4" style="background: #20584f; border-color: #20584f;">Lưu thay đổi</button>
-      </div>
-    </form>
-  </div>
+    </div>
 </div>
 
+
+<!-- MODAL TỪ CHỐI GIAO DỊCH -->
+<div class="modal fade modal-premium" id="rejectPaymentModal"
+     tabindex="-1" aria-labelledby="rejectPaymentModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header" style="background: #991b1b !important;">
+                <h5 class="modal-title" id="rejectPaymentModalLabel">
+                    Từ chối giao dịch thanh toán
+                </h5>
+
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <form id="rejectPaymentForm" method="POST" action="">
+                @csrf
+                @method('PUT')
+
+                <div class="modal-body p-4 text-center">
+                    <div class="text-danger mb-3" style="font-size: 42px;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+
+                    <h6 class="fw-bold text-dark mb-2">
+                        Bạn có chắc chắn muốn từ chối?
+                    </h6>
+
+                    <p class="text-secondary small mb-2">
+                        Giao dịch
+                        <strong id="rejectModalCode">—</strong>
+                        sẽ bị chuyển sang trạng thái
+                        <strong>Thất bại / Đã hủy</strong>
+                        và hóa đơn sẽ tiếp tục chờ thanh toán.
+                    </p>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-between">
+                    <button type="button"
+                            class="btn btn-light px-4 rounded-3 border"
+                            data-bs-dismiss="modal">
+                        Hủy
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger px-4 rounded-3 fw-bold">
+                        Xác nhận từ chối
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+@push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modalEl = document.getElementById('editDueDateModal');
-    if (modalEl && typeof bootstrap !== 'undefined') {
-        const myModal = new bootstrap.Modal(modalEl);
-        document.querySelectorAll('[data-bs-target="#editDueDateModal"]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                myModal.show();
+document.addEventListener('DOMContentLoaded', function () {
+
+    const editDueModalEl = document.getElementById('editDueDateModal');
+
+    if (editDueModalEl && typeof bootstrap !== 'undefined') {
+        const editDueModal = new bootstrap.Modal(editDueModalEl);
+
+        document.querySelectorAll('[data-bs-target="#editDueDateModal"]')
+            .forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    editDueModal.show();
+                });
+            });
+    }
+
+
+    const confirmModalEl = document.getElementById('confirmPaymentModal');
+
+    const confirmModal = (
+        confirmModalEl && typeof bootstrap !== 'undefined'
+    ) ? new bootstrap.Modal(confirmModalEl) : null;
+
+    const confirmForm = document.getElementById('confirmPaymentForm');
+    const confirmAmount = document.getElementById('confirmModalAmount');
+    const confirmCode = document.getElementById('confirmModalCode');
+    const confirmMethod = document.getElementById('confirmModalMethod');
+    const confirmNote = document.getElementById('confirmModalNote');
+    const confirmMethodFieldContainer = document.getElementById('confirmMethodFieldContainer');
+
+    document.querySelectorAll('.btn-open-confirm-modal')
+        .forEach(function (btn) {
+
+            btn.addEventListener('click', function () {
+
+                if (!confirmModal || !confirmForm) return;
+
+                // Lấy thông tin từ nút xác nhận
+                confirmForm.action = this.getAttribute('data-action') || '';
+
+                confirmAmount.textContent =
+                    this.getAttribute('data-amount') || '0 đ';
+
+                confirmCode.textContent =
+                    this.getAttribute('data-code') || '—';
+
+                confirmMethod.textContent =
+                    this.getAttribute('data-paymethod') || 'Tiền mặt';
+
+                confirmNote.textContent =
+                    this.getAttribute('data-note') ||
+                    'Bạn xác nhận đã nhận đủ số tiền trên và muốn cập nhật trạng thái hóa đơn này?';
+
+                // Xử lý HTTP method
+                const methodField = this.getAttribute('data-method-field');
+
+                if (confirmMethodFieldContainer) {
+                    confirmMethodFieldContainer.innerHTML = '';
+
+                    if (methodField === 'PUT') {
+                        const input = document.createElement('input');
+
+                        input.type = 'hidden';
+                        input.name = '_method';
+                        input.value = 'PUT';
+
+                        confirmMethodFieldContainer.appendChild(input);
+                    }
+                }
+
+                // Hiển thị Modal
+                confirmModal.show();
             });
         });
-    }
+
+
+    const rejectModalEl = document.getElementById('rejectPaymentModal');
+
+    const rejectModal = (
+        rejectModalEl && typeof bootstrap !== 'undefined'
+    ) ? new bootstrap.Modal(rejectModalEl) : null;
+
+    const rejectForm = document.getElementById('rejectPaymentForm');
+    const rejectCode = document.getElementById('rejectModalCode');
+
+    document.querySelectorAll('.btn-open-reject-modal')
+        .forEach(function (btn) {
+
+            btn.addEventListener('click', function () {
+
+                if (!rejectModal || !rejectForm) return;
+
+                // Lấy URL xử lý giao dịch
+                rejectForm.action =
+                    this.getAttribute('data-action') || '';
+
+                // Hiển thị mã giao dịch
+                rejectCode.textContent =
+                    this.getAttribute('data-code') || '—';
+
+                // Hiển thị Modal
+                rejectModal.show();
+            });
+        });
+
 });
 </script>
-@endif
+@endpush
+
 
 @endsection

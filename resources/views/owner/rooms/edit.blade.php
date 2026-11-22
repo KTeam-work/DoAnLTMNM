@@ -47,7 +47,6 @@
         {{-- FORM --}}
         <section class="panel">
             <div class="panel-heading">
-                <div class="heading-icon">🏠</div>
                 <div>
                     <h2 class="panel-title">Thông tin phòng</h2>
                     <div class="panel-subtitle">
@@ -65,15 +64,14 @@
                 @method('PUT')
 
                 <div class="mb-4">
-                    <label for="property_id" class="form-label">
-                        Nhà trọ <span class="required">*</span>
+                    <label for="property_id" class="form-label d-flex align-items-center justify-content-between">
+                        <span>Nhà trọ <span class="required">*</span></span>
+                        <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" style="font-size: 11px;">Cố định</span>
                     </label>
                     <select
-                        id="property_id"
-                        name="property_id"
-                        class="form-select @error('property_id') is-invalid @enderror"
-                        required>
-                        <option value="">Chọn nhà trọ</option>
+                        id="property_id_select"
+                        class="form-select bg-light text-muted"
+                        disabled>
                         @foreach ($properties as $property)
                             <option
                                 value="{{ $property->id }}"
@@ -82,8 +80,10 @@
                             </option>
                         @endforeach
                     </select>
+                    <input type="hidden" name="property_id" value="{{ $room->property_id }}">
+                    <div class="form-text text-muted">Khu trọ gắn liền với vị trí phòng và không thể thay đổi sau khi tạo.</div>
                     @error('property_id')
-                        <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
 
@@ -107,14 +107,18 @@
                     </div>
 
                     <div class="col-md-5">
-                        <label for="room_code" class="form-label">Mã phòng</label>
+                        <label for="room_code" class="form-label d-flex align-items-center justify-content-between">
+                            <span>Mã phòng</span>
+                            <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" style="font-size: 11px;">Cố định</span>
+                        </label>
                         <input
                             id="room_code"
                             type="text"
-                            class="form-control"
+                            class="form-control bg-light text-muted fw-bold"
                             value="{{ $room->room_code }}"
-                            readonly>
-                        <div class="form-text">Mã phòng được tạo tự động và không thể chỉnh sửa.</div>
+                            readonly
+                            disabled>
+                        <div class="form-text text-muted">Mã phòng được tạo tự động và cố định, không thể chỉnh sửa.</div>
                     </div>
 
                     <div class="col-md-6">
@@ -154,47 +158,67 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="price" class="form-label">
-                            Giá thuê (VNĐ/tháng) <span class="required">*</span>
+                        <label for="price" class="form-label d-flex align-items-center justify-content-between">
+                            <span>Giá thuê (VNĐ/tháng) <span class="required">*</span></span>
+                            @if(!empty($hasActiveContract))
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 11px;">Khóa theo HĐ</span>
+                            @endif
                         </label>
                         <div class="input-group">
                             <input
                                 id="price"
                                 name="price"
                                 type="text"
-                                class="form-control @error('price') is-invalid @enderror"
+                                class="form-control @error('price') is-invalid @enderror @if(!empty($hasActiveContract)) bg-light @endif"
                                 value="{{ old('price') ? number_format((float) preg_replace('/[^\d]/', '', old('price')), 0, ',', '.') : number_format((float) $room->price, 0, ',', '.') }}"
                                 placeholder="Ví dụ: 3.000.000"
                                 required
+                                @if(!empty($hasActiveContract)) readonly @endif
                                 autocomplete="off">
                             <span class="input-group-text">đ/tháng</span>
                         </div>
+                        @if(!empty($hasActiveContract))
+                            <div class="form-text text-warning-emphasis fw-medium mt-1" style="font-size: 12px;">
+                                Giá thuê được cố định theo hợp đồng thuê đang có hiệu lực.
+                            </div>
+                        @else
+                            <div class="form-text text-primary fw-medium" id="pricePreview" style="font-size: 12px; min-height: 18px;"></div>
+                        @endif
                         @error('price')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
-                        <div class="form-text text-primary fw-medium" id="pricePreview" style="font-size: 12px; min-height: 18px;"></div>
                     </div>
 
                     <div class="col-md-6">
-                        <label for="deposit" class="form-label">
-                            Tiền đặt cọc (VNĐ) <span class="required">*</span>
+                        <label for="deposit" class="form-label d-flex align-items-center justify-content-between">
+                            <span>Tiền đặt cọc (VNĐ) <span class="required">*</span></span>
+                            @if(!empty($hasActiveContract))
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 11px;">Khóa theo HĐ</span>
+                            @endif
                         </label>
                         <div class="input-group">
                             <input
                                 id="deposit"
                                 name="deposit"
                                 type="text"
-                                class="form-control @error('deposit') is-invalid @enderror"
+                                class="form-control @error('deposit') is-invalid @enderror @if(!empty($hasActiveContract)) bg-light @endif"
                                 value="{{ old('deposit') ? number_format((float) preg_replace('/[^\d]/', '', old('deposit')), 0, ',', '.') : number_format((float) $room->deposit, 0, ',', '.') }}"
                                 placeholder="Ví dụ: 3.000.000"
                                 required
+                                @if(!empty($hasActiveContract)) readonly @endif
                                 autocomplete="off">
                             <span class="input-group-text">đ</span>
                         </div>
+                        @if(!empty($hasActiveContract))
+                            <div class="form-text text-warning-emphasis fw-medium mt-1" style="font-size: 12px;">
+                                Tiền đặt cọc đang được bảo lưu theo hợp đồng.
+                            </div>
+                        @else
+                            <div class="form-text text-primary fw-medium" id="depositPreview" style="font-size: 12px; min-height: 18px;"></div>
+                        @endif
                         @error('deposit')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
-                        <div class="form-text text-primary fw-medium" id="depositPreview" style="font-size: 12px; min-height: 18px;"></div>
                     </div>
 
                     <div class="col-md-6">
@@ -214,30 +238,36 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="status" class="form-label">
-                            Trạng thái <span class="required">*</span>
+                        <label for="status" class="form-label d-flex align-items-center justify-content-between">
+                            <span>Trạng thái <span class="required">*</span></span>
+                            @if(!empty($hasActiveContract))
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 11px;">Khóa theo HĐ</span>
+                            @endif
                         </label>
-                        <select
-                            id="status"
-                            name="status"
-                            class="form-select @error('status') is-invalid @enderror"
-                            required>
-                            @foreach ([
-                                'available' => 'Còn trống',
-                                'pending' => 'Đang chờ',
-                                'rented' => 'Đang thuê',
-                                'maintenance' => 'Bảo trì',
-                                'hidden' => 'Đang ẩn',
-                            ] as $value => $label)
-                                <option
-                                    value="{{ $value }}"
-                                    @selected(old('status', $room->status) === $value)>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
+                        @if(!empty($hasActiveContract))
+                            <select id="status_disabled" class="form-select bg-light text-muted" disabled>
+                                <option value="rented" selected>Đang thuê (Tự động theo hợp đồng có hiệu lực)</option>
+                            </select>
+                            <input type="hidden" name="status" value="rented">
+                            <div class="form-text text-warning-emphasis fw-medium mt-1" style="font-size: 12px;">
+                                Phòng đang có hợp đồng thuê có hiệu lực, trạng thái được khóa là "Đang thuê". Khi thanh lý hợp đồng, phòng sẽ tự động chuyển về "Còn trống".
+                            </div>
+                        @else
+                            <select
+                                id="status"
+                                name="status"
+                                class="form-select @error('status') is-invalid @enderror"
+                                required>
+                                <option value="available" @selected(in_array(old('status', $room->status), ['available', 'rented', 'pending']))>Còn trống</option>
+                                <option value="maintenance" @selected(old('status', $room->status) === 'maintenance')>Đang bảo trì</option>
+                                <option value="hidden" @selected(old('status', $room->status) === 'hidden')>Đang ẩn</option>
+                            </select>
+                            <div class="form-text text-muted mt-1" style="font-size: 12px;">
+                                Chỉ có 3 trạng thái: Còn trống, Đang bảo trì hoặc Đang ẩn.
+                            </div>
+                        @endif
                         @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                         <div id="statusNote" class="status-note" hidden></div>
                     </div>
@@ -284,7 +314,7 @@
                         Hủy
                     </a>
                     <button type="submit" id="saveButton" class="btn-brand">
-                        <span>✓</span> Lưu thay đổi
+                        Lưu thay đổi
                     </button>
                 </div>
             </form>
@@ -322,16 +352,13 @@
 
                 <div class="info-list">
                     <div class="info-item">
-                        <span class="info-icon">🔐</span>
                         <span>Chỉ chủ trọ sở hữu phòng mới được phép cập nhật thông tin.</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-icon">💰</span>
                         <span>Kiểm tra giá thuê và tiền đặt cọc trước khi lưu.</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-icon">📋</span>
-                        <span>Thông tin chỉ được lưu khi em bấm nút Lưu thay đổi.</span>
+                        <span>Thông tin chỉ được lưu khi bấm nút Lưu thay đổi.</span>
                     </div>
                 </div>
             </section>

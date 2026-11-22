@@ -213,6 +213,8 @@ class OwnerRoomController extends Controller
         // Chỉ cho phép sửa phòng thuộc nhà trọ của chủ trọ hiện tại.
         $this->authorizeRoomOwner($room, $owner);
 
+        $hasActiveContract = $room->contracts()->where('status', 'active')->exists() || $room->status === 'rented';
+
         $properties = Property::query()
             ->where('owner_id', $owner->id)
             ->orderBy('name')
@@ -224,7 +226,7 @@ class OwnerRoomController extends Controller
             ->get();
         $room->load('amenities');
 
-        return view('owner.rooms.edit', compact('room', 'properties', 'amenities'));
+        return view('owner.rooms.edit', compact('room', 'properties', 'amenities', 'hasActiveContract'));
     }
 
     /**
@@ -235,6 +237,29 @@ class OwnerRoomController extends Controller
         $owner = $this->actingOwner($request);
 
         $this->authorizeRoomOwner($room, $owner);
+
+        $hasActiveContract = $room->contracts()->where('status', 'active')->exists() || $room->status === 'rented';
+
+        // Không cho phép đổi nhà trọ của phòng đã tạo
+        $request->merge([
+            'property_id' => $room->property_id,
+        ]);
+
+        // Nếu phòng đang có hợp đồng thuê hoạt động hoặc đang được thuê:
+        if ($hasActiveContract) {
+            // Giá thuê và tiền cọc được cố định theo hợp đồng
+            $request->merge([
+                'price' => $room->price,
+                'deposit' => $room->deposit,
+            ]);
+
+            // Không thể chuyển trạng thái về "Còn trống" khi hợp đồng còn hiệu lực
+            if ($request->input('status') === 'available') {
+                return back()->withInput()->withErrors([
+                    'status' => 'Phòng đang có hợp đồng thuê đang có hiệu lực. Không thể chuyển trạng thái về "Còn trống" khi chưa thanh lý hợp đồng.',
+                ]);
+            }
+        }
 
         // Chuẩn hóa tiền tệ trước khi validate
         $cleanPrice = preg_replace('/[^\d]/', '', (string) $request->input('price'));

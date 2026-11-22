@@ -193,7 +193,10 @@
                 <div class="info-row">
                     <div class="info-label">Giới tính</div>
                     <div class="info-value">
-                        {{ $tenant->gender ?? 'Chưa cập nhật' }}
+                        @php
+                            $genderLabels = ['female' => 'Nữ', 'male' => 'Nam', 'other' => 'Khác'];
+                        @endphp
+                        {{ $genderLabels[$tenant->gender ?? ''] ?? ($tenant->gender ?: 'Chưa cập nhật') }}
                     </div>
                 </div>
 
@@ -207,7 +210,8 @@
                 <div class="info-row">
                     <div class="info-label">Số CCCD</div>
                     <div class="info-value">
-                        {{ $tenant->identity_number
+                        {{ $tenant->identity_card
+                            ?? $tenant->identity_number
                             ?? $tenant->cccd
                             ?? $tenant->citizen_id
                             ?? 'Chưa cập nhật' }}
@@ -440,10 +444,9 @@
 
                 @if($contract)
 
-                    <a href="{{ url('/owner/contracts/' . $contract->id . '/members/create') }}"
-                       class="btn btn-action w-100 mt-3">
+                    <button type="button" class="btn btn-action w-100 mt-3" data-bs-toggle="modal" data-bs-target="#addMemberModal">
                         + Thêm người ở cùng
-                    </a>
+                    </button>
 
                 @endif
 
@@ -479,5 +482,47 @@
     </div>
 
 </div>
+
+@if($contract)
+<div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.12);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addMemberModalLabel" style="color: #0c2340;">+ Thêm người ở cùng phòng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ route('owner.contracts.members', $contract) }}">
+                @csrf
+                <input type="hidden" name="action" value="add">
+                <div class="modal-body pt-3">
+                    <p class="text-muted small mb-3">Người ở cùng sẽ được thêm vào hợp đồng <strong>#{{ $contractCode }}</strong> (Phòng: <strong>{{ $roomName }}</strong>).</p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Số CCCD / CMND <span class="text-danger">*</span></label>
+                        <input type="text" name="identity_card" class="form-control" placeholder="Nhập số CCCD/CMND" required maxlength="20">
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark">Số điện thoại</label>
+                            <input type="text" name="phone" class="form-control" placeholder="0901234567" maxlength="20">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-dark">Quan hệ</label>
+                            <input type="text" name="relationship" class="form-control" placeholder="Bạn, Em..." maxlength="50">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success fw-bold rounded-pill px-4" style="background: #059669; border: none;">Lưu người ở cùng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 
 @endsection

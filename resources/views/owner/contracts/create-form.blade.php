@@ -134,8 +134,8 @@
                                 <label class="tenant-mode-card w-100 h-100 {{ $defaultMode === 'existing' ? 'active' : '' }}" id="modeCardExisting">
                                     <input type="radio" name="tenant_mode" value="existing" id="modeExisting" class="form-check-input" @checked($defaultMode === 'existing')>
                                     <div>
-                                        <div class="mode-title">Chế độ 1: Khách có sẵn / Đã đặt lịch hẹn</div>
-                                        <div class="mode-desc">Chọn người thuê đã có tài khoản trên hệ thống hoặc đã gửi lịch hẹn xem phòng</div>
+                                        <div class="mode-title">Chế độ 1: Khách đã đặt lịch hẹn xem phòng</div>
+                                        <div class="mode-desc">Chỉ chọn khách thuê đã gửi lịch hẹn xem phòng với các khu trọ của bạn</div>
                                     </div>
                                 </label>
                             </div>
@@ -144,61 +144,58 @@
                                     <input type="radio" name="tenant_mode" value="walkin" id="modeWalkin" class="form-check-input" @checked($defaultMode === 'walkin')>
                                     <div>
                                         <div class="mode-title">Chế độ 2: Khách vãng lai đến thuê trực tiếp</div>
-                                        <div class="mode-desc">Tự động tạo tài khoản Người thuê và gửi Gmail thông báo kèm mật khẩu mặc định qua Resend API</div>
+                                        <div class="mode-desc">Nhập thông tin người thuê mới chưa có tài khoản hoặc chưa từng đặt lịch hẹn</div>
                                     </div>
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Chế độ 1: Khách có sẵn --}}
+                    {{-- Chế độ 1: Khách đã đặt lịch hẹn --}}
                     <div class="col-12 {{ $defaultMode === 'existing' ? '' : 'd-none' }}" id="existingTenantSection">
-                        <label class="form-label">Chọn người thuê <span class="text-danger">*</span></label>
-                        @if($tenants->isEmpty())
-                            <div class="alert alert-warning py-2 small mb-0">
-                                Hệ thống chưa có tài khoản người thuê nào. Vui lòng chuyển sang <b>Chế độ 2: Khách vãng lai</b> bên trên để nhập thông tin và tự động tạo tài khoản.
-                            </div>
-                        @else
+                        <label class="form-label d-flex align-items-center justify-content-between mb-2">
+                            <span>Người thuê đã đặt lịch hẹn <span class="text-danger">*</span></span>
+                            <span class="text-muted small fw-normal" id="tenantCountBadge"></span>
+                        </label>
+
+                        {{-- Khung thông báo/thông tin người thuê theo phòng đã chọn --}}
+                        <div id="tenantAppointmentStatusBox"></div>
+
+                        {{-- Dropdown người thuê (sẽ hiện khi có >= 2 người đặt hẹn) --}}
+                        <div id="tenantSelectWrapper" class="d-none mt-2">
                             <select name="tenant_id" id="tenantSelect" class="form-select">
-                                <option value="">-- Chọn người thuê từ hệ thống --</option>
-                                @foreach($tenants as $tenant)
-                                    <option value="{{ $tenant->id }}" @selected((string) old('tenant_id', request('tenant_id')) === (string) $tenant->id)>
-                                        {{ $tenant->name }}{{ $tenant->phone ? ' — SĐT: '.$tenant->phone : '' }}{{ $tenant->email ? ' ('.$tenant->email.')' : '' }}
-                                    </option>
-                                @endforeach
+                                <option value="">-- Chọn khách thuê đã đặt lịch hẹn xem phòng --</option>
                             </select>
-                        @endif
+                            <div class="form-text small">Phòng này có nhiều người cùng đặt lịch hẹn. Vui lòng chọn người bạn đồng ý ký hợp đồng.</div>
+                        </div>
                     </div>
 
                     {{-- Chế độ 2: Khách vãng lai --}}
                     <div class="col-12 {{ $defaultMode === 'walkin' ? '' : 'd-none' }}" id="walkinTenantSection">
                         <div class="border rounded-3 p-3 bg-light">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <span class="fw-bold" style="color: var(--green-dark); font-size: 14px;">Thông tin khách thuê trực tiếp</span>
-                                <span class="badge bg-success text-white py-1 px-2" style="font-size: 11px;">Tự động gửi thông tin qua Resend API</span>
+                            <div class="mb-3">
+                                <span class="fw-bold text-dark" style="font-size: 14.5px;">Thông tin khách thuê trực tiếp</span>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Họ và tên khách thuê <span class="text-danger">*</span></label>
-                                    <input type="text" name="walkin_name" id="walkinName" class="form-control" placeholder="Ví dụ: Đỗ Hoàng Yến" value="{{ old('walkin_name') }}">
+                                    <input type="text" name="walkin_name" id="walkinName" class="form-control" placeholder="Ví dụ: Đỗ Hoàng Yến" value="{{ old('walkin_name') }}" minlength="2" maxlength="100">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                                    <input type="text" name="walkin_phone" id="walkinPhone" class="form-control" placeholder="Ví dụ: 0912345678" value="{{ old('walkin_phone') }}">
+                                    <input type="tel" name="walkin_phone" id="walkinPhone" class="form-control" placeholder="Ví dụ: 0912345678" value="{{ old('walkin_phone') }}" maxlength="10" pattern="0[35789][0-9]{8}">
+                                    <div class="form-text small">Gồm 10 số, bắt đầu bằng 03, 05, 07, 08 hoặc 09.</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Email nhận hợp đồng & tài khoản <span class="text-danger">*</span></label>
-                                    <input type="email" name="walkin_email" id="walkinEmail" class="form-control" placeholder="Ví dụ: yen.do@gmail.com" value="{{ old('walkin_email') }}">
-                                    <div class="form-text small">Gmail của khách để nhận thông báo hợp đồng và mật khẩu đăng nhập.</div>
+                                    <input type="email" name="walkin_email" id="walkinEmail" class="form-control" placeholder="Ví dụ: yen.do@gmail.com" value="{{ old('walkin_email') }}" maxlength="150">
+                                    <div class="form-text small">Email của khách thuê để nhận thông báo hợp đồng.</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Số CCCD / CMND</label>
-                                    <input type="text" name="walkin_identity_card" id="walkinIdCard" class="form-control" placeholder="Ví dụ: 012345678901" value="{{ old('walkin_identity_card') }}">
-                                    <div class="form-text small">Thông tin định danh để lưu vào hồ sơ hợp đồng.</div>
+                                    <input type="text" name="walkin_identity_card" id="walkinIdCard" class="form-control" placeholder="Ví dụ: 012345678901" value="{{ old('walkin_identity_card') }}" maxlength="12" pattern="[0-9]{9}|[0-9]{12}">
+                                    <div class="form-text small">Gồm 9 hoặc 12 số định danh để lưu vào hồ sơ hợp đồng.</div>
                                 </div>
-                            </div>
-                            <div class="alert alert-info py-2 px-3 small mt-3 mb-0">
-                                💡 <b>Cơ chế thông minh:</b> Nếu Email này đã có tài khoản trên hệ thống, hợp đồng sẽ được gán vào tài khoản đó. Nếu chưa, hệ thống sẽ tự động khởi tạo tài khoản Người thuê mới theo đúng Email bạn nhập với mật khẩu mặc định <code>default_password_123</code> và gửi thư về Gmail khách.
                             </div>
                         </div>
                     </div>
@@ -286,13 +283,31 @@
 
         <script>
         (function () {
+            var roomAppointments = @json($appointmentsByRoom ?? []);
+            var preselectedTenantId = "{{ old('tenant_id', request('tenant_id', '')) }}";
+
             // Giá phòng tự động điền khi chọn phòng
             var roomSelect = document.getElementById('roomSelect');
             var rentInput = document.getElementById('rentInput');
             var depositInput = document.getElementById('depositInput');
             var priceBox = document.getElementById('roomPriceBox');
+
+            var tenantSelect = document.getElementById('tenantSelect');
+            var tenantSelectWrapper = document.getElementById('tenantSelectWrapper');
+            var statusBox = document.getElementById('tenantAppointmentStatusBox');
+            var tenantCountBadge = document.getElementById('tenantCountBadge');
+
             function fmt(n) { return Number(n).toLocaleString('vi-VN'); }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>"']/g, function (m) {
+                    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m];
+                });
+            }
+
             function updatePrice() {
+                if (!roomSelect) return;
                 var opt = roomSelect.options[roomSelect.selectedIndex];
                 if (!opt || !opt.value) { priceBox.classList.add('d-none'); return; }
                 var price = Math.round(parseFloat(opt.getAttribute('data-price') || 0));
@@ -302,9 +317,90 @@
                 priceBox.textContent = 'Giá phòng: ' + fmt(price) + ' đ/tháng · Cọc gợi ý: ' + fmt(deposit) + ' đ';
                 priceBox.classList.remove('d-none');
             }
+
+            // Tự động tải & cập nhật danh sách người thuê theo phòng đã chọn
+            function updateTenantList() {
+                if (!roomSelect || !statusBox || !tenantSelect) return;
+                var roomId = String(roomSelect.value || '');
+                var appts = (roomId && roomAppointments[roomId]) ? roomAppointments[roomId] : [];
+
+                statusBox.innerHTML = '';
+                tenantSelect.innerHTML = '';
+                if (tenantCountBadge) tenantCountBadge.textContent = '';
+
+                if (!roomId) {
+                    statusBox.innerHTML = '<div class="alert alert-light border py-2 px-3 small mb-0 text-muted">Vui lòng chọn phòng trống ở trên để hệ thống tự động tải người thuê đã đặt lịch hẹn.</div>';
+                    if (tenantSelectWrapper) tenantSelectWrapper.classList.add('d-none');
+                    tenantSelect.required = false;
+                    return;
+                }
+
+                if (appts.length === 0) {
+                    // 0 người đặt hẹn cho phòng này
+                    if (tenantCountBadge) tenantCountBadge.innerHTML = '<span class="badge bg-secondary-subtle text-secondary">0 người đặt hẹn</span>';
+                    statusBox.innerHTML = '<div class="alert alert-warning py-2 px-3 small mb-0" style="border-radius: 10px;">Chưa có khách nào đặt lịch hẹn xem phòng này. Nếu khách đến thuê trực tiếp, vui lòng chuyển sang <b>Chế độ 2: Khách vãng lai đến thuê trực tiếp</b> bên trên.</div>';
+                    if (tenantSelectWrapper) tenantSelectWrapper.classList.add('d-none');
+                    tenantSelect.required = false;
+                } else if (appts.length === 1) {
+                    // Đúng 1 người đặt hẹn -> TỰ ĐỘNG CHỌN VÀ HIỂN THỊ THÔNG TIN LUÔN!
+                    var t = appts[0];
+                    if (tenantCountBadge) tenantCountBadge.innerHTML = '<span class="badge bg-success-subtle text-success">1 người đặt hẹn</span>';
+
+                    var opt = document.createElement('option');
+                    opt.value = t.tenant_id;
+                    opt.textContent = t.tenant_name + ' — SĐT: ' + (t.tenant_phone || '—');
+                    opt.selected = true;
+                    tenantSelect.appendChild(opt);
+                    tenantSelect.value = t.tenant_id;
+                    tenantSelect.required = true;
+
+                    if (tenantSelectWrapper) tenantSelectWrapper.classList.add('d-none');
+                    statusBox.innerHTML = 
+                        '<div class="alert alert-success d-flex align-items-center justify-content-between py-2 px-3 mb-0" style="border-radius: 10px;">' +
+                            '<div>' +
+                                '<div class="small text-success fw-bold mb-1">Khách đã đặt lịch hẹn cho phòng này:</div>' +
+                                '<div class="fw-bold fs-6 text-dark">' + escapeHtml(t.tenant_name) + (t.tenant_phone ? ' — SĐT: ' + escapeHtml(t.tenant_phone) : '') + '</div>' +
+                                (t.appointment_date ? '<div class="text-muted small mt-1">Ngày hẹn xem phòng: ' + escapeHtml(t.appointment_date) + '</div>' : '') +
+                            '</div>' +
+                            '<span class="badge bg-success px-2 py-1" style="font-size: 11px;">Đã tự động chọn</span>' +
+                        '</div>';
+                } else {
+                    // 2 người đặt hẹn trở lên -> HIỆN DROPDOWN ĐỂ CHỦ TRỌ LỰA CHỌN
+                    if (tenantCountBadge) tenantCountBadge.innerHTML = '<span class="badge bg-primary-subtle text-primary">' + appts.length + ' người đặt hẹn</span>';
+                    statusBox.innerHTML = 
+                        '<div class="alert alert-info py-2 px-3 small mb-2" style="border-radius: 10px;">' +
+                            'Phòng này có <strong>' + appts.length + ' người</strong> đã đặt lịch hẹn xem phòng. Vui lòng chọn người thuê bạn đồng ý ký hợp đồng bên dưới:' +
+                        '</div>';
+
+                    var defaultOpt = document.createElement('option');
+                    defaultOpt.value = '';
+                    defaultOpt.textContent = '-- Chọn 1 trong số ' + appts.length + ' người đã đặt lịch hẹn --';
+                    tenantSelect.appendChild(defaultOpt);
+
+                    var matched = false;
+                    appts.forEach(function (t) {
+                        var opt = document.createElement('option');
+                        opt.value = t.tenant_id;
+                        opt.textContent = t.tenant_name + (t.tenant_phone ? ' — SĐT: ' + t.tenant_phone : '') + (t.appointment_date ? ' (Ngày hẹn: ' + t.appointment_date + ')' : '');
+                        if (preselectedTenantId && String(preselectedTenantId) === String(t.tenant_id)) {
+                            opt.selected = true;
+                            matched = true;
+                        }
+                        tenantSelect.appendChild(opt);
+                    });
+
+                    if (tenantSelectWrapper) tenantSelectWrapper.classList.remove('d-none');
+                    tenantSelect.required = true;
+                }
+            }
+
             if (roomSelect) {
-                roomSelect.addEventListener('change', updatePrice);
+                roomSelect.addEventListener('change', function () {
+                    updatePrice();
+                    updateTenantList();
+                });
                 updatePrice();
+                updateTenantList();
             }
 
             // Tự động tính Ngày kết thúc là 1 năm sau Ngày bắt đầu
@@ -313,6 +409,7 @@
             if (startDateInput && endDateInput) {
                 startDateInput.addEventListener('change', function () {
                     if (!this.value) return;
+                    endDateInput.min = this.value;
                     var parts = this.value.split('-');
                     if (parts.length === 3) {
                         var y = parseInt(parts[0], 10) + 1;
@@ -334,7 +431,6 @@
             var existingSec = document.getElementById('existingTenantSection');
             var walkinSec = document.getElementById('walkinTenantSection');
 
-            var tenantSelect = document.getElementById('tenantSelect');
             var walkinName = document.getElementById('walkinName');
             var walkinPhone = document.getElementById('walkinPhone');
             var walkinEmail = document.getElementById('walkinEmail');
@@ -359,7 +455,8 @@
                     if (modeCardExisting) modeCardExisting.classList.add('active');
                     if (modeCardWalkin) modeCardWalkin.classList.remove('active');
 
-                    if (tenantSelect) { tenantSelect.required = true; tenantSelect.disabled = false; }
+                    if (tenantSelect) { tenantSelect.disabled = false; }
+                    updateTenantList();
                     if (walkinName) { walkinName.required = false; walkinName.disabled = true; }
                     if (walkinPhone) { walkinPhone.required = false; walkinPhone.disabled = true; }
                     if (walkinEmail) { walkinEmail.required = false; walkinEmail.disabled = true; }
@@ -370,6 +467,88 @@
             if (modeExisting) modeExisting.addEventListener('change', applyMode);
             if (modeWalkin) modeWalkin.addEventListener('change', applyMode);
             applyMode();
+
+            // Ràng buộc kiểm tra dữ liệu trước khi gửi form
+            var contractForm = document.getElementById('contractForm');
+            if (contractForm) {
+                contractForm.addEventListener('submit', function (e) {
+                    if (!roomSelect || !roomSelect.value) {
+                        alert('Vui lòng chọn phòng trống cần lập hợp đồng.');
+                        if (roomSelect) roomSelect.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    var isWalkin = modeWalkin && modeWalkin.checked;
+                    if (isWalkin) {
+                        var nameVal = walkinName ? walkinName.value.trim() : '';
+                        if (!nameVal || nameVal.length < 2) {
+                            alert('Vui lòng nhập họ và tên khách thuê (ít nhất 2 ký tự).');
+                            if (walkinName) walkinName.focus();
+                            e.preventDefault();
+                            return false;
+                        }
+
+                        var phoneVal = walkinPhone ? walkinPhone.value.trim() : '';
+                        var phoneRegex = /^0[35789]\d{8}$/;
+                        if (!phoneRegex.test(phoneVal)) {
+                            alert('Số điện thoại khách thuê không hợp lệ. Vui lòng nhập đúng 10 số (bắt đầu bằng 03, 05, 07, 08 hoặc 09).');
+                            if (walkinPhone) walkinPhone.focus();
+                            e.preventDefault();
+                            return false;
+                        }
+
+                        var emailVal = walkinEmail ? walkinEmail.value.trim() : '';
+                        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(emailVal)) {
+                            alert('Vui lòng nhập địa chỉ email hợp lệ của khách thuê.');
+                            if (walkinEmail) walkinEmail.focus();
+                            e.preventDefault();
+                            return false;
+                        }
+
+                        var idCardVal = walkinIdCard ? walkinIdCard.value.trim() : '';
+                        if (idCardVal && !/^\d{9}$|^\d{12}$/.test(idCardVal)) {
+                            alert('Số CCCD/CMND không hợp lệ (phải gồm đúng 9 hoặc 12 số).');
+                            if (walkinIdCard) walkinIdCard.focus();
+                            e.preventDefault();
+                            return false;
+                        }
+                    } else {
+                        if (!tenantSelect || !tenantSelect.value) {
+                            alert('Vui lòng chọn khách thuê đã đặt lịch hẹn xem phòng trong danh sách.');
+                            if (tenantSelect) tenantSelect.focus();
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+
+                    if (startDateInput && endDateInput && startDateInput.value && endDateInput.value) {
+                        if (endDateInput.value <= startDateInput.value) {
+                            alert('Ngày kết thúc hợp đồng phải sau ngày bắt đầu.');
+                            endDateInput.focus();
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+
+                    var rentVal = rentInput ? parseFloat(rentInput.value) : -1;
+                    if (isNaN(rentVal) || rentVal < 0) {
+                        alert('Tiền thuê phòng phải lớn hơn hoặc bằng 0 đ.');
+                        if (rentInput) rentInput.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    var depositVal = depositInput ? parseFloat(depositInput.value) : -1;
+                    if (isNaN(depositVal) || depositVal < 0) {
+                        alert('Tiền cọc phòng phải lớn hơn hoặc bằng 0 đ.');
+                        if (depositInput) depositInput.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
         })();
         </script>
     @endif
