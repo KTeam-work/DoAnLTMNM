@@ -109,9 +109,14 @@
             <div class="navbar-actions">
                 @if($currentUser)
                     {{-- THÔNG BÁO --}}
-                    <a class="notif-btn text-decoration-none" href="{{ route('tenant.notifications.index') }}" title="Thông báo">
+                    @php
+                        $unreadNotifCount = $currentUser ? \App\Models\Notification::where('user_id', $currentUser->id)->whereNull('read_at')->count() : 0;
+                    @endphp
+                    <a class="notif-btn text-decoration-none" href="{{ route('tenant.notifications.index') }}" title="Thông báo ({{ $unreadNotifCount }} chưa đọc)">
                         🔔
-                        <span class="notif-dot"></span>
+                        @if($unreadNotifCount > 0)
+                            <span class="notif-dot"></span>
+                        @endif
                     </a>
 
                     {{-- TÀI KHOẢN NGƯỜI DÙNG --}}
@@ -151,7 +156,13 @@
 
                             <div class="dropdown-divider-custom"></div>
 
-                            <form method="POST" action="{{ route('logout') }}">
+                            <a class="dropdown-item-custom text-decoration-none" href="{{ route('tenant.reports.index') }}">
+                                Báo cáo của tôi
+                            </a>
+
+                            <div class="dropdown-divider-custom"></div>
+
+                            <form method="POST" action="{{ route('logout') }}" class="m-0">
                                 @csrf
 
                                 <button

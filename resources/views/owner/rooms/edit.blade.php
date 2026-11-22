@@ -157,38 +157,44 @@
                         <label for="price" class="form-label">
                             Giá thuê (VNĐ/tháng) <span class="required">*</span>
                         </label>
-                        <input
-                            id="price"
-                            name="price"
-                            type="number"
-                            min="0"
-                            step="1"
-                            class="form-control @error('price') is-invalid @enderror"
-                            value="{{ old('price', (int) $room->price) }}"
-                            required>
+                        <div class="input-group">
+                            <input
+                                id="price"
+                                name="price"
+                                type="text"
+                                class="form-control @error('price') is-invalid @enderror"
+                                value="{{ old('price') ? number_format((float) preg_replace('/[^\d]/', '', old('price')), 0, ',', '.') : number_format((float) $room->price, 0, ',', '.') }}"
+                                placeholder="Ví dụ: 3.000.000"
+                                required
+                                autocomplete="off">
+                            <span class="input-group-text">đ/tháng</span>
+                        </div>
                         @error('price')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
-                        <div class="form-text" id="pricePreview"></div>
+                        <div class="form-text text-primary fw-medium" id="pricePreview" style="font-size: 12px; min-height: 18px;"></div>
                     </div>
 
                     <div class="col-md-6">
                         <label for="deposit" class="form-label">
                             Tiền đặt cọc (VNĐ) <span class="required">*</span>
                         </label>
-                        <input
-                            id="deposit"
-                            name="deposit"
-                            type="number"
-                            min="0"
-                            step="1"
-                            class="form-control @error('deposit') is-invalid @enderror"
-                            value="{{ old('deposit', (int) $room->deposit) }}"
-                            required>
+                        <div class="input-group">
+                            <input
+                                id="deposit"
+                                name="deposit"
+                                type="text"
+                                class="form-control @error('deposit') is-invalid @enderror"
+                                value="{{ old('deposit') ? number_format((float) preg_replace('/[^\d]/', '', old('deposit')), 0, ',', '.') : number_format((float) $room->deposit, 0, ',', '.') }}"
+                                placeholder="Ví dụ: 3.000.000"
+                                required
+                                autocomplete="off">
+                            <span class="input-group-text">đ</span>
+                        </div>
                         @error('deposit')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
-                        <div class="form-text" id="depositPreview"></div>
+                        <div class="form-text text-primary fw-medium" id="depositPreview" style="font-size: 12px; min-height: 18px;"></div>
                     </div>
 
                     <div class="col-md-6">

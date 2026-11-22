@@ -5,9 +5,9 @@
 @push('styles')
 <style>
     .notif-container {
-        max-width: 900px;
+        max-width: 1200px;
         margin: 30px auto 60px auto;
-        padding: 0 16px;
+        padding: 0 20px;
     }
 
     .notif-heading {
@@ -164,13 +164,13 @@
         <div class="d-flex align-items-center gap-2 mb-1">
             <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 11px;">Kênh chủ trọ</span>
         </div>
-        <h1>🔔 Thông báo từ hệ thống</h1>
+        <h1>Thông báo từ hệ thống</h1>
         <p>Cập nhật trạng thái tin đăng, cảnh cáo vi phạm, thanh toán và các phản ánh liên quan tới phòng trọ của bạn.</p>
     </div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 shadow-sm mb-4" role="alert">
-            <strong>✓ Thành công!</strong> {{ session('success') }}
+            <strong>Thành công!</strong> {{ session('success') }}
             <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -195,35 +195,17 @@
                 <form action="{{ route('owner.notifications.mark_read') }}" method="POST" class="m-0">
                     @csrf
                     <button type="submit" class="mark-read-btn">
-                        ✓ Đánh dấu tất cả đã đọc
+                        Đánh dấu tất cả đã đọc
                     </button>
                 </form>
             @endif
         </div>
 
-        @php
-            $typeIcons = [
-                'warning' => ['icon-warning', '⚠️'],
-                'danger' => ['icon-danger', '🚫'],
-                'success' => ['icon-success', '✅'],
-                'info' => ['icon-info', 'ℹ️'],
-                'invoice' => ['icon-invoice', '💰'],
-                'payment' => ['icon-invoice', '💳'],
-                'maintenance' => ['icon-maintenance', '🔧'],
-                'review' => ['icon-contract', '⭐'],
-                'contract' => ['icon-contract', '📜'],
-                'general' => ['icon-general', '🔔'],
-            ];
-        @endphp
-
         @forelse($notifications as $notification)
             @php
-                [$iconClass, $icon] = $typeIcons[$notification->type] ?? ['icon-general', '🔔'];
                 $target = $notification->targetUrl();
             @endphp
             <div class="notify-item {{ $notification->read_at ? '' : 'unread' }}">
-                <div class="notify-icon {{ $iconClass }}">{{ $icon }}</div>
-
                 <div class="flex-grow-1">
                     <div class="d-flex align-items-center gap-2">
                         @if($target)
@@ -270,7 +252,6 @@
             </div>
         @empty
             <div class="text-center text-muted py-5">
-                <div style="font-size: 40px;" class="mb-2">📭</div>
                 <div>Bạn không có thông báo nào.</div>
             </div>
         @endforelse

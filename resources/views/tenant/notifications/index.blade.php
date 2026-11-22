@@ -9,7 +9,7 @@
 
 @section('content')
 
-<div class="page-wrap" style="padding-top: 40px; max-width: 850px; margin: 0 auto;">
+<div class="page-wrap" style="padding-top: 40px; max-width: 1200px; margin: 0 auto;">
   
   <div class="mb-4 animate-up delay-1">
     <h2 class="page-title skeleton-box"><span class="hide-on-skeleton">Thông báo của bạn</span></h2>
@@ -19,7 +19,7 @@
   <!-- Thông báo thành công sẽ hiện ở đây khi búng về -->
   @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show mb-4 border-0 rounded-3 animate-up delay-1" role="alert" style="background-color: #d1e7dd; color: #0f5132; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-      <strong>✓ Thành công!</strong> {{ session('success') }}
+      <strong>Thành công!</strong> {{ session('success') }}
       <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert"></button>
     </div>
   @endif
@@ -39,31 +39,16 @@
         <form action="{{ route('tenant.notifications.mark_read') }}" method="POST" class="m-0">
           @csrf
           <button type="submit" class="mark-read-btn" style="background: transparent; border: none; padding: 0;">
-            ✓ Đánh dấu tất cả đã đọc
+            Đánh dấu tất cả đã đọc
           </button>
         </form>
       </div>
 
-      @php
-        $typeIcons = [
-            'invoice' => ['icon-invoice', '💰'],
-            'maintenance' => ['icon-maintenance', '🔧'],
-            'contract' => ['icon-contract', '📜'],
-            'payment' => ['icon-invoice', '💳'],
-            'review' => ['icon-contract', '⭐'],
-            'warning' => ['icon-appointment', '⚠️'],
-            'danger' => ['icon-appointment', '🚫'],
-            'success' => ['icon-contract', '✅'],
-            'info' => ['icon-maintenance', 'ℹ️'],
-        ];
-      @endphp
       @forelse($notifications as $notification)
         @php
-          [$iconClass, $icon] = $typeIcons[$notification->type] ?? ['icon-contract', '🔔'];
           $target = $notification->targetUrl();
         @endphp
         <div class="notify-item {{ $notification->read_at ? '' : 'unread' }}">
-          <div class="notify-icon {{ $iconClass }}">{{ $icon }}</div>
           <div class="flex-grow-1">
             @if($target)
               <a href="{{ $target }}" class="fw-bold text-dark text-decoration-none" style="font-size: 15px;">{{ $notification->title }}</a>
@@ -74,14 +59,14 @@
             <div class="notify-time">{{ $notification->created_at->diffForHumans() }} · {{ $notification->created_at->format('d/m/Y H:i') }}</div>
           </div>
           @if($notification->read_at)
-            <span class="text-muted" style="font-size: 12px;">Đã đọc</span>
+            <span class="text-muted flex-shrink-0" style="font-size: 12px; white-space: nowrap;">Đã đọc</span>
           @else
-            <div class="d-flex flex-column align-items-end gap-2">
+            <div class="d-flex flex-column align-items-end gap-2 flex-shrink-0">
               <div class="notify-dot"></div>
               <form action="{{ route('tenant.notifications.read', $notification->id) }}" method="POST" class="m-0">
                 @csrf
                 @method('PUT')
-                <button type="submit" class="mark-read-btn" style="background: transparent; border: none; padding: 0;">Đánh dấu đã đọc</button>
+                <button type="submit" class="mark-read-btn" style="background: transparent; border: none; padding: 0; white-space: nowrap;">Đánh dấu đã đọc</button>
               </form>
             </div>
           @endif

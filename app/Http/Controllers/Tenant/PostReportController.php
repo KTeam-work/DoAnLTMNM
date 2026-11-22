@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\PostReport;
 use App\Models\RentalPost;
 use Illuminate\Http\Request;
@@ -11,6 +12,36 @@ use Illuminate\Support\Str;
 
 class PostReportController extends Controller
 {
+    /**
+     * Danh sách báo cáo vi phạm mà người thuê đã gửi.
+     */
+    public function index(Request $request)
+    {
+        if (! Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $status = $request->input('status', '');
+
+        $reports = PostReport::query()
+            ->with(['rentalPost.room.property.owner'])
+            ->where('reporter_id', Auth::id())
+            ->when($status !== '', fn ($b) => $b->where('status', $status))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $counts = [
+            'all' => PostReport::where('reporter_id', Auth::id())->count(),
+            'pending' => PostReport::where('reporter_id', Auth::id())->where('status', 'pending')->count(),
+            'investigating' => PostReport::where('reporter_id', Auth::id())->where('status', 'investigating')->count(),
+            'resolved' => PostReport::where('reporter_id', Auth::id())->where('status', 'resolved')->count(),
+            'dismissed' => PostReport::where('reporter_id', Auth::id())->where('status', 'dismissed')->count(),
+        ];
+
+        return view('tenant.reports.index', compact('reports', 'counts', 'status'));
+    }
+
     /**
      * Gửi báo cáo vi phạm tin đăng cho thuê.
      */
@@ -71,6 +102,31 @@ class PostReportController extends Controller
             'status' => 'pending',
             'action_taken' => 'none',
         ]);
+
+        // CƠ CHẾ BẢO VỆ CỘNG ĐỒNG: Nếu tin đăng nhận dồn dập từ 3 báo cáo chờ xử lý từ các khách khác nhau,
+        // hệ thống tự động tạm ẩn tin để ngăn chặn lừa cọc hàng loạt trong khi chờ Admin kiểm tra.
+        $pendingReportsCount = PostReport::query()
+            ->where('rental_post_id', $post->id)
+            ->where('status', 'pending')
+            ->count();
+
+        if ($pendingReportsCount >= 3 && $post->status === 'active') {
+            $post->update(['status' => 'hidden']);
+
+            $owner = $post->room?->property?->owner;
+            if ($owner) {
+                Notification::notify(
+                    $owner->id,
+                    'Tin đăng bị tạm ẩn do nhận nhiều khiếu nại',
+                    "Tin đăng \"{$post->title}\" đã nhận {$pendingReportsCount} lượt báo cáo vi phạm từ người tìm trọ và đã được hệ thống tạm ẩn tự động để Quản trị viên tiến hành xác minh.",
+                    'warning',
+                    'rental_post',
+                    $post->id
+                );
+            }
+
+            return back()->with('success', 'Báo cáo vi phạm (Mã: ' . $reportCode . ') đã được gửi. Tin đăng này đã nhận nhiều phản ánh và đã được hệ thống tạm ẩn tự động để bảo vệ cộng đồng trong lúc chờ Quản trị viên kiểm tra!');
+        }
 
         return back()->with('success', 'Báo cáo vi phạm (Mã: ' . $reportCode . ') đã được gửi thành công. Quản trị viên sẽ sớm kiểm tra và xử lý!');
     }

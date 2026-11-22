@@ -26,12 +26,31 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function formatMoney(value) {
-        const number = Number(value);
-        if (value === '' || !Number.isFinite(number)) return '0đ';
+        const raw = String(value).replace(/\D/g, '');
+        if (!raw) return '0đ';
+        const number = Number(raw);
+        if (!Number.isFinite(number)) return '0đ';
 
         return new Intl.NumberFormat('vi-VN', {
             maximumFractionDigits: 0
         }).format(number) + 'đ';
+    }
+
+    function formatWords(num) {
+        if (!num || num <= 0) return '';
+        if (num >= 1e9) {
+            const ty = (num / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+            return `${ty} tỷ đồng`;
+        }
+        if (num >= 1e6) {
+            const tr = (num / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+            return `${tr} triệu đồng`;
+        }
+        if (num >= 1e3) {
+            const k = (num / 1e3).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+            return `${k} nghìn đồng`;
+        }
+        return `${num.toLocaleString('vi-VN')} đồng`;
     }
 
     function updatePreview() {
@@ -50,27 +69,58 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('previewStatus').textContent =
             statusLabels[fields.status.value] || fields.status.value;
 
-        document.getElementById('pricePreview').textContent =
-            'Hiển thị: ' + formatMoney(fields.price.value);
-
-        const priceNum = Number(fields.price.value) || 0;
-        const depositNum = Number(fields.deposit.value) || 0;
-        if (priceNum > 0) {
-            fields.deposit.max = priceNum;
+        const rawPrice = String(fields.price.value).replace(/\D/g, '');
+        if (rawPrice) {
+            const numPrice = parseInt(rawPrice, 10);
+            fields.price.value = numPrice.toLocaleString('vi-VN');
+            document.getElementById('pricePreview').textContent = '≈ ' + formatWords(numPrice);
+        } else {
+            document.getElementById('pricePreview').textContent = '';
         }
 
-        if (fields.deposit.value !== '' && depositNum > priceNum) {
-            fields.deposit.classList.add('is-invalid');
-            document.getElementById('depositPreview').innerHTML =
-                '<span class="text-danger fw-semibold">Tiền cọc không được lớn hơn giá thuê</span>';
-        } else if (fields.deposit.value !== '' && depositNum < 0) {
-            fields.deposit.classList.add('is-invalid');
-            document.getElementById('depositPreview').innerHTML =
-                '<span class="text-danger fw-semibold">Tiền cọc không được là số âm</span>';
+
+        // Chuẩn hóa giá thuê và tiền cọc về dạng số
+        const rawPrice = String(fields.price.value).replace(/\D/g, '');
+        const rawDeposit = String(fields.deposit.value).replace(/\D/g, '');
+
+        const priceNum = rawPrice ? parseInt(rawPrice, 10) : 0;
+        const depositNum = rawDeposit ? parseInt(rawDeposit, 10) : 0;
+
+        // Định dạng giá thuê
+        if (rawPrice) {
+            fields.price.value = priceNum.toLocaleString('vi-VN');
+            document.getElementById('pricePreview').textContent =
+                '≈ ' + formatWords(priceNum);
+        } else {
+            document.getElementById('pricePreview').textContent = '';
+        }
+
+        // Kiểm tra và định dạng tiền cọc
+        if (rawPrice && priceNum > 0) {
+            fields.deposit.max = priceNum;
+        } else {
+            fields.deposit.removeAttribute('max');
+        }
+
+        if (rawDeposit) {
+            fields.deposit.value = depositNum.toLocaleString('vi-VN');
+
+            if (rawPrice && depositNum > priceNum) {
+                fields.deposit.classList.add('is-invalid');
+
+                document.getElementById('depositPreview').textContent =
+                    'Tiền cọc không được lớn hơn giá thuê';
+            } else {
+                fields.deposit.classList.remove('is-invalid');
+
+                document.getElementById('depositPreview').textContent =
+                    '≈ ' + formatWords(depositNum);
+            }
         } else {
             fields.deposit.classList.remove('is-invalid');
-            document.getElementById('depositPreview').textContent =
-                'Hiển thị: ' + formatMoney(fields.deposit.value);
+            document.getElementById('depositPreview').textContent = '';
+        }
+
         }
 
         const statusNote = document.getElementById('statusNote');
@@ -105,8 +155,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const area = Number(fields.area.value);
-        const price = Number(fields.price.value);
-        const deposit = Number(fields.deposit.value);
+        const price = Number(String(fields.price.value).replace(/\D/g, ''));
+        const deposit = Number(String(fields.deposit.value).replace(/\D/g, ''));
         const people = Number(fields.people.value);
 
         if (area <= 0 || price < 0 || deposit < 0 || people < 1) {

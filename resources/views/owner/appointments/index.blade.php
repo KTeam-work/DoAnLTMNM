@@ -196,10 +196,25 @@
                         Đổi giờ / Đề xuất giờ mới
                     </button>
 
+                    <button type="button" class="btn-reject" id="btnToggleReject" onclick="toggleRejectForm()">
+                        Từ chối lịch
+                    </button>
+                </div>
+
+                <!-- FORM TỪ CHỐI KÈM LÝ DO -->
+                <div id="rejectFormBox" class="mt-3 p-3 bg-light rounded border border-danger-subtle d-none">
+                    <h6 class="fw-bold mb-2 text-danger">Từ chối lịch xem phòng</h6>
                     <form id="rejectForm" method="POST" action="">
                         @csrf
                         @method('PUT')
-                        <button type="submit" class="btn-reject">Từ chối lịch</button>
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Lý do từ chối (bắt buộc) *</label>
+                            <textarea name="rejection_reason" id="rejectionReason" class="form-control form-control-sm" rows="2" placeholder="Ví dụ: Phòng đã có người đặt cọc, chủ nhà bận đột xuất..." required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-sm btn-light" onclick="toggleRejectForm(false)">Hủy</button>
+                            <button type="submit" class="btn btn-sm btn-danger fw-bold">Xác nhận từ chối</button>
+                        </div>
                     </form>
                 </div>
 

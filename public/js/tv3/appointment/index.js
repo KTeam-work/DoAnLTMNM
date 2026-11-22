@@ -29,17 +29,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const rejectForm = document.getElementById('rejectForm');
     const rescheduleForm = document.getElementById('rescheduleForm');
     const rescheduleFormBox = document.getElementById('rescheduleFormBox');
+    const rejectFormBox = document.getElementById('rejectFormBox');
     const appointmentActions = document.getElementById('appointmentActions');
     const processedNotice = document.getElementById('processedNotice');
 
     window.toggleRescheduleForm = function (show) {
         if (!rescheduleFormBox) return;
+        if (rejectFormBox) rejectFormBox.classList.add('d-none');
         if (show === undefined) {
             rescheduleFormBox.classList.toggle('d-none');
         } else if (show) {
             rescheduleFormBox.classList.remove('d-none');
         } else {
             rescheduleFormBox.classList.add('d-none');
+        }
+    };
+
+    window.toggleRejectForm = function (show) {
+        if (!rejectFormBox) return;
+        if (rescheduleFormBox) rescheduleFormBox.classList.add('d-none');
+        if (rejectFormBox) {
+            rejectFormBox.classList.add('d-none');
+            const reasonInput = document.getElementById('rejectionReason');
+            if (reasonInput) reasonInput.value = '';
+        }
+        if (show === undefined) {
+            rejectFormBox.classList.toggle('d-none');
+        } else if (show) {
+            rejectFormBox.classList.remove('d-none');
+        } else {
+            rejectFormBox.classList.add('d-none');
         }
     };
 
@@ -93,6 +112,11 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         if (rescheduleFormBox) rescheduleFormBox.classList.add('d-none');
+        if (rejectFormBox) {
+            rejectFormBox.classList.add('d-none');
+            const reasonInput = document.getElementById('rejectionReason');
+            if (reasonInput) reasonInput.value = '';
+        }
 
         if (data.status === 'pending' || data.status === 'rescheduled') {
             confirmForm.action = confirmUrlTemplate.replace(
@@ -112,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
                 document.getElementById('rescheduleDate').value = data.date || '';
                 document.getElementById('rescheduleTime').value = data.time ? data.time.substring(0, 5) : '';
-                document.getElementById('rescheduleNote').value = data.message !== 'Không có lời nhắn' ? data.message : '';
+                document.getElementById('rescheduleNote').value = data.owner_note || '';
             }
 
             appointmentActions.classList.remove('d-none');
