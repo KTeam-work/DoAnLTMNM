@@ -100,7 +100,7 @@ class OwnerRoomController extends Controller
             ],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
-            'deposit' => ['required', 'numeric', 'min:0'],
+            'deposit' => ['required', 'numeric', 'min:0', 'lte:price'],
             'max_people' => ['required', 'integer', 'min:1'],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'in:available,pending,rented,maintenance,hidden'],
@@ -121,6 +121,7 @@ class OwnerRoomController extends Controller
             'area.numeric' => 'Diện tích phòng phải là một số.',
             'max_people.required' => 'Vui lòng nhập sức chứa.',
             'max_people.min' => 'Sức chứa tối thiểu là 1 người.',
+
         ]);
 
         $amenityIds = $request->input('amenities', []);
@@ -270,7 +271,7 @@ class OwnerRoomController extends Controller
             ],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
-            'deposit' => ['required', 'numeric', 'min:0'],
+            'deposit' => ['required', 'numeric', 'min:0', 'lte:price'],
             'max_people' => ['required', 'integer', 'min:1'],
             'description' => ['nullable', 'string'],
             'status' => [

@@ -768,6 +768,221 @@
                 transition-duration: .01ms !important;
             }
         }
+
+        /* =====================================================
+           HANGING LAMP (INTERACTIVE)
+        ===================================================== */
+        .hanging-lamp {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 35;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .lamp-wire {
+            width: 3px;
+            height: 110px;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), #475569);
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+
+        .lamp-fixture {
+            width: 28px;
+            height: 18px;
+            background: linear-gradient(180deg, #475569, #1e293b);
+            border-radius: 4px 4px 2px 2px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .lamp-bulb {
+            width: 50px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.28);
+            border-radius: 50% 50% 36% 36%;
+            position: relative;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(2px);
+            margin-top: -2px;
+            box-shadow: inset 0 -4px 10px rgba(255, 255, 255, 0.08), 0 8px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        .lamp-bulb:hover {
+            transform: scale(1.06);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .bulb-reflection {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 10px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: rotate(-25deg);
+            pointer-events: none;
+        }
+
+        .filament {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 18px;
+            border: 2px solid rgba(203, 213, 225, 0.5);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .filament::before,
+        .filament::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            height: 10px;
+            background: rgba(203, 213, 225, 0.5);
+        }
+        .filament::before { left: -1px; }
+        .filament::after { right: -1px; }
+
+        .pull-chain {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            pointer-events: auto;
+            padding: 4px 14px 14px;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .pull-chain:hover .chain-handle {
+            transform: scale(1.2);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.7);
+        }
+
+        .pull-chain:active {
+            transform: translateY(18px);
+        }
+
+        .chain-line {
+            width: 2px;
+            height: 68px;
+            background: repeating-linear-gradient(
+                180deg,
+                #cbd5e1 0px,
+                #cbd5e1 3px,
+                transparent 3px,
+                transparent 6px
+            );
+        }
+
+        .chain-handle {
+            width: 12px;
+            height: 16px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .light-beam {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 720px;
+            height: 720px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(254, 240, 138, 0.42) 0%,
+                rgba(245, 158, 11, 0.22) 35%,
+                rgba(217, 119, 6, 0.08) 55%,
+                transparent 72%
+            );
+            pointer-events: none;
+            opacity: 0;
+            filter: blur(35px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+            transform: translateX(-50%) scale(0.85);
+            z-index: -1;
+        }
+
+        /* KHI BẬT ĐÈN (IS-ON) */
+        .hanging-lamp.is-on .lamp-bulb {
+            background: radial-gradient(circle at 50% 35%, #ffffff 0%, #fff7ed 25%, #fef08a 55%, #f59e0b 100%) !important;
+            border-color: #fef08a !important;
+            box-shadow:
+                0 0 35px 12px rgba(254, 240, 138, 1),
+                0 0 80px 35px rgba(245, 158, 11, 0.75),
+                0 0 140px 70px rgba(239, 125, 39, 0.45) !important;
+        }
+
+        .hanging-lamp.is-on .bulb-reflection {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .hanging-lamp.is-on .filament {
+            border-color: #ffffff !important;
+            box-shadow: 0 0 12px #ffffff !important;
+        }
+
+        .hanging-lamp.is-on .filament::before,
+        .hanging-lamp.is-on .filament::after {
+            background: #ffffff !important;
+            box-shadow: 0 0 10px #ffffff !important;
+        }
+
+        .hanging-lamp.is-on .light-beam {
+            opacity: 1 !important;
+            transform: translateX(-50%) scale(1.05) !important;
+        }
+
+        .room-spotlight {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.45s ease;
+            background: radial-gradient(
+                circle at 50% 28%,
+                rgba(254, 240, 138, 0.42) 0%,
+                rgba(245, 158, 11, 0.25) 30%,
+                rgba(37, 99, 235, 0.08) 58%,
+                transparent 76%
+            );
+            mix-blend-mode: screen;
+            z-index: 4;
+        }
+
+        .page.lamp-lit .room-spotlight {
+            opacity: 1;
+        }
+
+        .page.lamp-lit .background {
+            filter: brightness(1.22) contrast(1.04);
+            transition: filter 0.45s ease;
+        }
+
+        @media(max-width: 900px) {
+            .hanging-lamp {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -828,9 +1043,25 @@
             <div class="plant-stem"></div>
             <div class="plant-pot"></div>
         </div>
+        <div class="room-spotlight"></div>
     </div>
 
     <main class="content">
+        <!-- BÓNG ĐÈN TƯƠNG TÁC GIỮA MÀN HÌNH -->
+        <div class="hanging-lamp" id="hangingLamp">
+            <div class="lamp-wire"></div>
+            <div class="lamp-fixture"></div>
+            <div class="lamp-bulb" id="lampBulb" title="Nhấn vào bóng đèn để bật / tắt">
+                <div class="bulb-reflection"></div>
+                <div class="filament"></div>
+            </div>
+            <div class="pull-chain" id="pullChain" title="Kéo dây để bật / tắt đèn">
+                <div class="chain-line"></div>
+                <div class="chain-handle"></div>
+            </div>
+            <div class="light-beam" id="lightBeam"></div>
+        </div>
+
         <a href="{{ url('/') }}" class="logo">
             Trọ <span>Ơi</span>
         </a>
@@ -1035,6 +1266,64 @@ document.addEventListener("DOMContentLoaded", function () {
                     loginButton.textContent = "Đăng nhập";
                 }
             }, 10000);
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BẬT / TẮT BÓNG ĐÈN TƯƠNG TÁC
+    |--------------------------------------------------------------------------
+    */
+    const hangingLamp = document.getElementById("hangingLamp");
+    const lampBulb = document.getElementById("lampBulb");
+    const pullChain = document.getElementById("pullChain");
+    const pageEl = document.querySelector(".page");
+
+    function playSwitchSound(isLit) {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(isLit ? 650 : 420, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(isLit ? 1100 : 250, ctx.currentTime + 0.06);
+
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start();
+            osc.stop(ctx.currentTime + 0.06);
+        } catch (e) {}
+    }
+
+    function toggleLamp() {
+        if (!hangingLamp) return;
+        const isLit = hangingLamp.classList.toggle("is-on");
+
+        if (pageEl) {
+            pageEl.classList.toggle("lamp-lit", isLit);
+        }
+
+        playSwitchSound(isLit);
+    }
+
+    if (lampBulb) {
+        lampBulb.addEventListener("click", toggleLamp);
+    }
+
+    if (pullChain) {
+        pullChain.addEventListener("click", function () {
+            pullChain.style.transform = "translateY(16px)";
+            setTimeout(function () {
+                pullChain.style.transform = "";
+            }, 180);
+            toggleLamp();
         });
     }
 

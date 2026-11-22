@@ -78,13 +78,49 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('pricePreview').textContent = '';
         }
 
+
+        // Chuẩn hóa giá thuê và tiền cọc về dạng số
+        const rawPrice = String(fields.price.value).replace(/\D/g, '');
         const rawDeposit = String(fields.deposit.value).replace(/\D/g, '');
-        if (rawDeposit) {
-            const numDeposit = parseInt(rawDeposit, 10);
-            fields.deposit.value = numDeposit.toLocaleString('vi-VN');
-            document.getElementById('depositPreview').textContent = '≈ ' + formatWords(numDeposit);
+
+        const priceNum = rawPrice ? parseInt(rawPrice, 10) : 0;
+        const depositNum = rawDeposit ? parseInt(rawDeposit, 10) : 0;
+
+        // Định dạng giá thuê
+        if (rawPrice) {
+            fields.price.value = priceNum.toLocaleString('vi-VN');
+            document.getElementById('pricePreview').textContent =
+                '≈ ' + formatWords(priceNum);
         } else {
+            document.getElementById('pricePreview').textContent = '';
+        }
+
+        // Kiểm tra và định dạng tiền cọc
+        if (rawPrice && priceNum > 0) {
+            fields.deposit.max = priceNum;
+        } else {
+            fields.deposit.removeAttribute('max');
+        }
+
+        if (rawDeposit) {
+            fields.deposit.value = depositNum.toLocaleString('vi-VN');
+
+            if (rawPrice && depositNum > priceNum) {
+                fields.deposit.classList.add('is-invalid');
+
+                document.getElementById('depositPreview').textContent =
+                    'Tiền cọc không được lớn hơn giá thuê';
+            } else {
+                fields.deposit.classList.remove('is-invalid');
+
+                document.getElementById('depositPreview').textContent =
+                    '≈ ' + formatWords(depositNum);
+            }
+        } else {
+            fields.deposit.classList.remove('is-invalid');
             document.getElementById('depositPreview').textContent = '';
+        }
+
         }
 
         const statusNote = document.getElementById('statusNote');
@@ -126,6 +162,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (area <= 0 || price < 0 || deposit < 0 || people < 1) {
             event.preventDefault();
             alert('Vui lòng kiểm tra diện tích, giá thuê, tiền cọc và sức chứa.');
+            return;
+        }
+
+        if (deposit > price) {
+            event.preventDefault();
+            alert('Tiền cọc không được lớn hơn tiền thuê phòng.');
+            fields.deposit.focus();
             return;
         }
 

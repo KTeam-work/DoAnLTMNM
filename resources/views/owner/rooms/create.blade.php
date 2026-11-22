@@ -37,25 +37,72 @@
               <option value="maintenance">Bảo trì</option>
               <option value="hidden">Ẩn</option>
             </select></div>
-          <div class="col-md-4">
-            <label class="form-label">Diện tích (m²) <span class="text-danger">*</span></label>
-            <input name="area" type="number" min="0.01" step="0.01" value="{{ old('area') }}" class="form-control" placeholder="Ví dụ: 25" required>
+  <div class="col-md-4">
+            <label class="form-label">
+              Diện tích (m²) <span class="text-danger">*</span>
+            </label>
+            <input
+              name="area"
+              type="number"
+              min="0.01"
+              step="0.01"
+              value="{{ old('area') }}"
+              class="form-control"
+              placeholder="Ví dụ: 25"
+              required>
           </div>
+
           <div class="col-md-4">
-            <label class="form-label">Giá thuê (VNĐ/tháng) <span class="text-danger">*</span></label>
+            <label class="form-label">
+              Giá thuê (VNĐ/tháng) <span class="text-danger">*</span>
+            </label>
             <div class="input-group">
-              <input id="price" name="price" type="text" value="{{ old('price') ? number_format((float) preg_replace('/[^\d]/', '', old('price')), 0, ',', '.') : '' }}" class="form-control" placeholder="Ví dụ: 3.000.000" required autocomplete="off">
+              <input
+                id="price"
+                name="price"
+                type="text"
+                value="{{ old('price') ? number_format((float) preg_replace('/[^\d]/', '', old('price')), 0, ',', '.') : '' }}"
+                class="form-control"
+                placeholder="Ví dụ: 3.000.000"
+                required
+                autocomplete="off">
               <span class="input-group-text">đ/tháng</span>
             </div>
-            <div class="form-text text-primary fw-medium" id="pricePreview" style="font-size: 12px; min-height: 18px;"></div>
+            <div
+              class="form-text text-primary fw-medium"
+              id="pricePreview"
+              style="font-size: 12px; min-height: 18px;">
+            </div>
           </div>
+
           <div class="col-md-4">
-            <label class="form-label">Tiền đặt cọc (VNĐ) <span class="text-danger">*</span></label>
+            <label class="form-label">
+              Tiền đặt cọc (VNĐ) <span class="text-danger">*</span>
+            </label>
             <div class="input-group">
-              <input id="deposit" name="deposit" type="text" value="{{ old('deposit') ? number_format((float) preg_replace('/[^\d]/', '', old('deposit')), 0, ',', '.') : '' }}" class="form-control" placeholder="Ví dụ: 3.000.000" required autocomplete="off">
+              <input
+                id="deposit"
+                name="deposit"
+                type="text"
+                value="{{ old('deposit') ? number_format((float) preg_replace('/[^\d]/', '', old('deposit')), 0, ',', '.') : '' }}"
+                class="form-control"
+                placeholder="Ví dụ: 3.000.000"
+                required
+                autocomplete="off">
               <span class="input-group-text">đ</span>
             </div>
-            <div class="form-text text-primary fw-medium" id="depositPreview" style="font-size: 12px; min-height: 18px;"></div>
+            <div
+              class="form-text text-primary fw-medium"
+              id="depositPreview"
+              style="font-size: 12px; min-height: 18px;">
+            </div>
+            <div
+              id="depositError"
+              class="text-danger small mt-1"
+              style="display: none;">
+              Tiền cọc không được lớn hơn tiền thuê phòng.
+            </div>
+          </div>
           </div>
           <div class="col-md-6"><label class="form-label">Sức chứa</label><input name="max_people" type="number" min="1" value="{{ old('max_people', 1) }}" class="form-control" required></div>
           <div class="col-md-6"><label class="form-label">Tầng</label><input name="floor" type="number" min="0" value="{{ old('floor') }}" class="form-control" placeholder="Để trống nếu không áp dụng"></div>
@@ -92,14 +139,21 @@
     (() => {
       const propertySelect = document.getElementById('property_id');
       const roomCodeInput = document.getElementById('room_code_preview');
+      const priceInput = document.getElementById('price');
+      const depositInput = document.getElementById('deposit');
+      const depositError = document.getElementById('depositError');
+      const form = document.querySelector('form');
 
       const updateRoomCodePreview = () => {
         const selectedOption = propertySelect.options[propertySelect.selectedIndex];
         roomCodeInput.value = selectedOption?.dataset.roomCode ?? '';
       };
 
-      propertySelect.addEventListener('change', updateRoomCodePreview);
-      updateRoomCodePreview();
+
+      if (propertySelect) {
+        propertySelect.addEventListener('change', updateRoomCodePreview);
+        updateRoomCodePreview();
+      }
 
       // Tự động định dạng tiền tệ và hiển thị chữ tiếng Việt
       function setupCurrencyFormatter(inputId, previewId) {
@@ -109,37 +163,100 @@
 
         function formatWords(num) {
           if (num >= 1e9) {
-            const ty = (num / 1e9).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+            const ty = (num / 1e9).toLocaleString('vi-VN', {
+              maximumFractionDigits: 2
+            });
             return `${ty} tỷ đồng`;
           }
           if (num >= 1e6) {
-            const tr = (num / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+            const tr = (num / 1e6).toLocaleString('vi-VN', {
+              maximumFractionDigits: 2
+            });
             return `${tr} triệu đồng`;
           }
           if (num >= 1e3) {
-            const k = (num / 1e3).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+            const k = (num / 1e3).toLocaleString('vi-VN', {
+              maximumFractionDigits: 2
+            });
             return `${k} nghìn đồng`;
           }
           return `${num.toLocaleString('vi-VN')} đồng`;
         }
 
+        function getRawValue() {
+          return input.value.replace(/\D/g, '');
+        }
+
         function update() {
-          const raw = input.value.replace(/\D/g, '');
+          const raw = getRawValue();
+
           if (!raw) {
             preview.textContent = '';
             return;
           }
+
           const num = parseInt(raw, 10);
           input.value = num.toLocaleString('vi-VN');
           preview.textContent = '≈ ' + formatWords(num);
         }
 
         input.addEventListener('input', update);
+
         if (input.value) update();
       }
 
       setupCurrencyFormatter('price', 'pricePreview');
       setupCurrencyFormatter('deposit', 'depositPreview');
+
+      // Kiểm tra tiền cọc không vượt quá giá thuê
+      const validateDeposit = () => {
+        if (!priceInput || !depositInput) return true;
+
+        const priceRaw = priceInput.value.replace(/\D/g, '');
+        const depositRaw = depositInput.value.replace(/\D/g, '');
+
+        const price = priceRaw ? Number(priceRaw) : 0;
+        const deposit = depositRaw ? Number(depositRaw) : 0;
+
+        if (price > 0) {
+          depositInput.max = price;
+        } else {
+          depositInput.removeAttribute('max');
+        }
+
+        if (
+          depositRaw !== '' &&
+          price > 0 &&
+          deposit > price
+        ) {
+          depositError.style.display = 'block';
+          depositInput.classList.add('is-invalid');
+          return false;
+        }
+
+        depositError.style.display = 'none';
+        depositInput.classList.remove('is-invalid');
+        return true;
+      };
+
+      if (priceInput && depositInput) {
+        priceInput.addEventListener('input', validateDeposit);
+        depositInput.addEventListener('input', validateDeposit);
+      }
+
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          if (!validateDeposit()) {
+            e.preventDefault();
+            alert('Tiền cọc không được lớn hơn tiền thuê phòng.');
+            depositInput.focus();
+          }
+        });
+      }
+
+      // Kiểm tra trạng thái ban đầu
+      validateDeposit();
+
     })();
   </script>
 

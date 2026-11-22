@@ -37,7 +37,13 @@ class OwnerpropertiesController extends Controller
 
         $property->load(['rooms', 'images', 'thumbnail']);
 
-        return view('owner.properties.show', compact('property'));
+        $propertyServices = DB::table('property_services')
+            ->join('services', 'property_services.service_id', '=', 'services.id')
+            ->where('property_services.property_id', $property->id)
+            ->select('services.name', 'services.unit', 'services.description', 'property_services.price', 'property_services.status')
+            ->get();
+
+        return view('owner.properties.show', compact('property', 'propertyServices'));
     }
 
     public function edit(Property $property)

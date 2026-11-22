@@ -187,35 +187,68 @@
             <!-- =========================
                  HÌNH ẢNH
             ========================== -->
+            @php
+                $imageCount = count($room['images']);
+            @endphp
 
-            <div class="room-gallery">
-
-                @foreach($room['images'] as $index => $image)
-
-                    <div class="room-gallery-item">
-
+            @if($imageCount <= 1)
+                <div class="room-gallery-single">
+                    <img
+                        src="{{ $room['images'][0] ?? 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80' }}"
+                        alt="{{ $room['title'] }}"
+                        loading="lazy"
+                        onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';"
+                    >
+                    <div class="gallery-badge-clean">
+                        Ảnh đại diện
+                    </div>
+                </div>
+            @elseif($imageCount === 2)
+                <div class="room-gallery-two">
+                    @foreach($room['images'] as $idx => $img)
+                        <div class="gallery-item-two">
+                            <img
+                                src="{{ $img }}"
+                                alt="{{ $room['title'] }}"
+                                loading="lazy"
+                                onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';"
+                            >
+                            @if($idx === 0)
+                                <div class="gallery-badge-clean">
+                                    Ảnh đại diện
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="room-gallery-grid">
+                    <div class="gallery-item-main">
                         <img
-                            src="{{ $image }}"
+                            id="mainGalleryImg"
+                            src="{{ $room['images'][0] }}"
                             alt="{{ $room['title'] }}"
                             loading="lazy"
                             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';"
                         >
-
-
-
-                        @if($index === 0)
-
-                            <div class="gallery-main-badge">
-                                📷 Hình ảnh phòng
-                            </div>
-
-                        @endif
-
+                        <div class="gallery-badge-clean">
+                            Ảnh đại diện
+                        </div>
                     </div>
-
-                @endforeach
-
-            </div>
+                    <div class="gallery-thumbs-col">
+                        @foreach(array_slice($room['images'], 1, 4) as $subIdx => $subImg)
+                            <div class="gallery-thumb-item" onclick="document.getElementById('mainGalleryImg').src = '{{ $subImg }}'">
+                                <img
+                                    src="{{ $subImg }}"
+                                    alt="Ảnh chi tiết {{ $subIdx + 1 }}"
+                                    loading="lazy"
+                                    onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';"
+                                >
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
 
 
@@ -250,166 +283,76 @@
 
 
                                 <div class="room-address">
-
-                                    📍
-
-                                    <span>
-                                        {{ $room['address'] }}
-                                    </span>
-
+                                    <span>{{ $room['address'] }}</span>
                                 </div>
-
                             </div>
-
-
 
                             <div class="room-price-box">
-
                                 <div class="room-price">
-
                                     {{ $room['price'] }}
-
-                                    <span>
-                                        / tháng
-                                    </span>
-
+                                    <span>/ tháng</span>
                                 </div>
-
-
 
                                 <div class="available-badge">
-
                                     <span class="available-dot"></span>
-
                                     Còn phòng
-
                                 </div>
-
                             </div>
-
                         </div>
-
-
 
                         <div class="room-info-box">
-
-
-
                             <div class="room-info-item">
-
-                                <div class="label">
-                                    Diện tích
-                                </div>
-
-                                <div class="value">
-                                    {{ $room['area'] }}
-                                </div>
-
+                                <div class="label">Diện tích</div>
+                                <div class="value">{{ $room['area'] }}</div>
                             </div>
 
-
-
                             <div class="room-info-item">
-
-                                <div class="label">
-                                    Số người
-                                </div>
-
-                                <div class="value">
-                                    {{ $room['people'] }}
-                                </div>
-
+                                <div class="label">Số người</div>
+                                <div class="value">{{ $room['people'] }}</div>
                             </div>
 
-
-
                             <div class="room-info-item">
-
-                                <div class="label">
-                                    Phòng tắm
-                                </div>
-
-                                <div class="value">
-                                    {{ $room['bathroom'] }}
-                                </div>
-
+                                <div class="label">Phòng tắm</div>
+                                <div class="value">{{ $room['bathroom'] }}</div>
                             </div>
 
-
-
                             <div class="room-info-item">
-
-                                <div class="label">
-                                    Loại phòng
-                                </div>
-
-                                <div class="value">
-                                    {{ $room['type'] }}
-                                </div>
-
+                                <div class="label">Loại phòng</div>
+                                <div class="value">{{ $room['type'] }}</div>
                             </div>
-
                         </div>
-
                     </section>
-
-
 
                     <!-- =========================
                          MÔ TẢ
                     ========================== -->
-
                     <section class="room-content-card">
-
-                        <h2>
-                            📝 Mô tả phòng
-                        </h2>
-
+                        <h2>Mô tả phòng</h2>
                         <div class="section-line"></div>
-
-                        <p>
-                            {{ $room['description'] }}
-                        </p>
-
+                        <p>{{ $room['description'] }}</p>
                     </section>
-
-
 
                     <!-- =========================
                          TIỆN ÍCH
                     ========================== -->
-
                     <section class="room-content-card">
-
-                        <h2>
-                            ✨ Tiện ích phòng
-                        </h2>
-
+                        <h2>Tiện ích phòng</h2>
                         <div class="section-line"></div>
 
-
-
                         <div class="amenities">
-
                             @foreach($room['amenities'] as $amenity)
-
                                 <div class="amenity-item">
                                     {{ $amenity }}
                                 </div>
-
                             @endforeach
-
                         </div>
-
                     </section>
 
                     <!-- =========================
                          BẢNG GIÁ DỊCH VỤ / CHI PHÍ HÀNG THÁNG
                     ========================== -->
                     <section class="room-content-card">
-                        <h2>
-                            ⚡ Chi phí dịch vụ hàng tháng
-                        </h2>
+                        <h2>Chi phí dịch vụ hàng tháng</h2>
                         <div class="section-line"></div>
 
                         @if(!empty($room['services']) && count($room['services']) > 0)
@@ -417,8 +360,7 @@
                                 @foreach($room['services'] as $svc)
                                     <div class="service-item" style="padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
                                         <div>
-                                            <div style="font-weight: 700; color: #0f172a; font-size: 15px; display: flex; align-items: center; gap: 6px;">
-                                                <i class="fas fa-concierge-bell" style="color: #2563eb; font-size: 13px;"></i>
+                                            <div style="font-weight: 700; color: #0f172a; font-size: 15px;">
                                                 {{ $svc->name }}
                                             </div>
                                             @if($svc->description)
@@ -426,7 +368,7 @@
                                             @endif
                                         </div>
                                         <div style="text-align: right;">
-                                            <span style="font-weight: 700; color: #2563eb; font-size: 15px;">{{ number_format((float)$svc->price, 0, ',', '.') }} ₫</span>
+                                            <span style="font-weight: 700; color: #0c2340; font-size: 15px;">{{ number_format((float)$svc->price, 0, ',', '.') }} ₫</span>
                                             <span style="font-size: 12px; color: #64748b;">/ {{ $svc->unit }}</span>
                                         </div>
                                     </div>
@@ -434,27 +376,23 @@
                             </div>
                         @else
                             <p class="text-secondary mb-0" style="font-size: 14px; color: #64748b; margin-top: 10px;">
-                                ℹ️ Các dịch vụ cơ bản đã bao gồm trong giá phòng hoặc sẽ được thỏa thuận trực tiếp với chủ trọ khi làm hợp đồng.
+                                Các dịch vụ cơ bản đã bao gồm trong giá phòng hoặc sẽ được thỏa thuận trực tiếp với chủ trọ khi làm hợp đồng.
                             </p>
                         @endif
                     </section>
 
-
-
                     <!-- =========================
                          VỊ TRÍ PHÒNG TRỌ (GOOGLE MAPS)
                     ========================== -->
-
                     <section class="room-content-card">
-
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                             <h2 style="margin: 0;">
-                                📍 Vị trí phòng trọ
+                                Vị trí phòng trọ
                             </h2>
 
                             @if(!empty($room['has_coords']))
                                 <span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; background: rgba(12, 35, 64, 0.08); border: 1px solid rgba(12, 35, 64, 0.15); border-radius: 999px; font-size: 12px; font-weight: 700; color: #0c2340;">
-                                    🎯 Tọa độ GPS: {{ number_format((float)$room['latitude'], 5) }}, {{ number_format((float)$room['longitude'], 5) }}
+                                    Tọa độ GPS: {{ number_format((float)$room['latitude'], 5) }}, {{ number_format((float)$room['longitude'], 5) }}
                                 </span>
                             @endif
                         </div>
@@ -463,16 +401,16 @@
 
                         <div class="map-address" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                             <div>
-                                📌 <span>{{ $room['address'] }}</span>
+                                <span>{{ $room['address'] }}</span>
                             </div>
 
                             <a
                                 href="https://www.google.com/maps/search/?api=1&query={{ urlencode($room['map_query']) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                style="font-size: 13px; font-weight: 700; color: #ef7d27; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
+                                style="font-size: 13px; font-weight: 700; color: #0c2340; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;"
                             >
-                                Mở chỉ đường trên Google Maps ↗
+                                Mở chỉ đường trên Google Maps
                             </a>
                         </div>
 
@@ -485,140 +423,68 @@
                                 referrerpolicy="no-referrer-when-downgrade"
                             ></iframe>
                         </div>
-
                     </section>
-
-
 
                     <!-- =========================
                          CHỦ TRỌ
                     ========================== -->
-
                     <section class="room-content-card">
-
                         <h2>
-                            👤 Thông tin chủ trọ
+                            Thông tin chủ trọ
                         </h2>
-
                         <div class="section-line"></div>
 
-
-
                         <div class="landlord-box">
-
-
-
                             <div class="landlord-info">
-
-
-
                                 <div class="landlord-avatar">
-
                                     {{ strtoupper(substr($room['landlord'], 0, 1)) }}
-
                                 </div>
-
-
 
                                 <div>
-
                                     <div class="landlord-name">
-
                                         {{ $room['landlord'] }}
-
                                     </div>
-
-
 
                                     <div class="landlord-status">
-
-                                        ● Đang hoạt động
-
+                                        <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 rounded-pill" style="font-size: 11.5px;">Đang hoạt động</span>
                                     </div>
-
                                 </div>
-
                             </div>
-
-
 
                             <div class="landlord-contact">
-
-                                ✓ Chủ trọ xác minh
-
+                                <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill" style="font-size: 12px;">Chủ trọ đã xác minh</span>
                             </div>
-
                         </div>
-
                     </section>
-
                 </div>
-
-
 
                 <!-- =================================================
                      RIGHT
                 ================================================== -->
-
                 <div class="col-lg-4">
-
-
-
                     <div class="booking-card">
-
-
-
                         <div class="booking-top">
-
-
-
                             <h2>
-                                📅 Đặt lịch xem phòng
+                                Đặt lịch xem phòng
                             </h2>
 
-
-
                             <div class="booking-note">
-
                                 Chọn thời gian phù hợp để đến xem phòng.
                                 Chủ trọ sẽ xác nhận lịch hẹn của bạn.
-
                             </div>
-
-
 
                             <div class="booking-room-price">
-
                                 {{ $room['price'] }}
-
-                                <span>
-                                    / tháng
-                                </span>
-
+                                <span>/ tháng</span>
                             </div>
-
                         </div>
-
-
-
-                        <!--
-                        |-----------------------------------------------------------
-                        | QUAN TRỌNG:
-                        | Truyền room_id sang trang appointments/create.
-                        | Ví dụ:
-                        | /appointments/create?id=1
-                        | /appointments/create?id=2
-                        |-----------------------------------------------------------
-                        -->
 
                         <a
                             href="{{ route('appointments.create', ['id' => $room['id'] ?? 0]) }}"
                             class="btn-booking text-decoration-none d-flex align-items-center justify-content-center"
                         >
-                            📅 Đặt lịch xem phòng
+                            Đặt lịch xem phòng
                         </a>
-
-
 
                         <div class="booking-secure-note">
                             Thông tin của bạn được bảo mật
@@ -628,18 +494,16 @@
                             <div class="mt-3 text-center border-top pt-2">
                                 @auth
                                     <button type="button" class="btn btn-link text-muted text-decoration-none small p-0" data-bs-toggle="modal" data-bs-target="#reportModal" style="font-size: 12.5px;">
-                                        🚩 Báo cáo tin đăng vi phạm
+                                        Báo cáo tin đăng vi phạm
                                     </button>
                                 @else
                                     <a href="{{ route('login') }}" class="text-muted text-decoration-none small" style="font-size: 12.5px;">
-                                        🚩 Đăng nhập để báo cáo vi phạm
+                                        Đăng nhập để báo cáo vi phạm
                                     </a>
                                 @endauth
                             </div>
                         @endif
-
                     </div>
-
                 </div>
 
             </div>
@@ -657,7 +521,7 @@
         <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
             <div class="modal-header" style="background: #fff8f8; border-bottom: 1px solid #fee2e2; border-top-left-radius: 16px; border-top-right-radius: 16px;">
                 <h5 class="modal-title text-danger fw-bold fs-6" id="reportModalLabel">
-                    🚩 Báo cáo tin đăng vi phạm
+                    Báo cáo tin đăng vi phạm
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>

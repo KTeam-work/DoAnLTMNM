@@ -31,8 +31,17 @@ class OwnerTenantsController extends Controller{
                 ->get()
             : collect();
 
+        $contracts = $owner
+            ? Contract::query()
+                ->where('owner_id', $owner->id)
+                ->where('status', '!=', 'terminated')
+                ->with(['room.property', 'tenant:id,name', 'members'])
+                ->latest('start_date')
+                ->get()
+            : collect();
+
         if (! $request->expectsJson()) {
-            return view('owner.tenants.manage', compact('tenants'));
+            return view('owner.tenants.manage', compact('tenants', 'contracts'));
         }
 
         $this->owner($request);

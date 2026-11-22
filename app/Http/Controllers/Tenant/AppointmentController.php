@@ -70,7 +70,7 @@ class AppointmentController extends Controller
                 ->with('error', 'Vui lòng đăng nhập để đặt lịch xem phòng.');
         }
 
-        $rooms = Room::with('property')
+        $rooms = Room::with(['property.images', 'rentalPosts.images'])
             ->where('status', 'available')
             ->whereHas('rentalPosts', function ($query) {
                 $query->where('status', 'published')
@@ -107,8 +107,15 @@ class AppointmentController extends Controller
             'room_id' => ['required', 'integer', 'exists:rooms,id'],
             'appointment_date' => ['required', 'date', 'after_or_equal:today'],
             'appointment_time' => ['required', 'date_format:H:i'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'regex:/^0[0-9]{9}$/'],
             'message' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'room_id.required' => 'Vui lòng chọn phòng muốn xem.',
+            'appointment_date.required' => 'Vui lòng chọn ngày xem phòng.',
+            'appointment_date.after_or_equal' => 'Ngày xem phòng không được ở trong quá khứ.',
+            'appointment_time.required' => 'Vui lòng chọn giờ xem phòng.',
+            'phone.required' => 'Vui lòng nhập số điện thoại liên hệ.',
+            'phone.regex' => 'Số điện thoại phải gồm đúng 10 chữ số, không chứa số âm và bắt đầu bằng số 0.',
         ]);
 
         $room = Room::where('status', 'available')

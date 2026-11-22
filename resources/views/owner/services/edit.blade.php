@@ -73,6 +73,23 @@
                             </div>
                         @endif
 
+                        {{-- ÁP DỤNG CHO NHÀ TRỌ --}}
+                        <div class="service-form-group">
+                            <label class="service-label">Áp dụng cho nhà trọ <span class="service-required">*</span></label>
+                            @if(isset($properties) && $properties->isNotEmpty())
+                                <select name="property_id" class="service-select" required>
+                                    @foreach($properties as $prop)
+                                        <option value="{{ $prop->id }}" @selected(($selectedProperty && $selectedProperty->id === $prop->id) || old('property_id') == $prop->id)>
+                                            {{ $prop->name }} ({{ $prop->address }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <div class="text-danger small">Chưa có nhà trọ nào trong hệ thống. Hãy tạo nhà trọ trước.</div>
+                            @endif
+                            <div class="service-help">Dịch vụ sẽ chỉ hiển thị và tính toán riêng cho nhà trọ này.</div>
+                        </div>
+
                         {{-- TÊN DỊCH VỤ --}}
                         <div class="service-form-group">
                             <label class="service-label">Tên dịch vụ <span class="service-required">*</span></label>

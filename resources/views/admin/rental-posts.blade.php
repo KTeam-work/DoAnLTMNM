@@ -167,7 +167,12 @@
                                 <form method="POST"
                                       action="{{ route('admin.rental-posts.update-status', $post->id) }}"
                                       class="rp-action-form"
-                                      data-confirm-status>
+                                      data-confirm-status
+                                      data-post-id="{{ $post->id }}"
+                                      data-post-title="{{ $post->title }}"
+                                      data-room-name="{{ $post->room?->name ?? 'Phòng không còn tồn tại' }}"
+                                      data-current-status="{{ $post->status }}"
+                                      data-current-label="{{ $statusLabels[$post->status] ?? $post->status }}">
                                     @csrf
                                     @method('PATCH')
 
@@ -215,8 +220,80 @@
 
     <div class="rp-pagination">{{ $posts->links() }}</div>
 </div>
+
+{{-- MODAL THÔNG BÁO XÁC NHẬN CHUYỂN TRẠNG THÁI --}}
+<div class="modal fade" id="statusConfirmModal" tabindex="-1" aria-labelledby="statusConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            {{-- HEADER DARK NAVY --}}
+            <div class="modal-header border-0 px-4 py-3" style="background: #0c2340; color: #ffffff;">
+                <div class="d-flex align-items-center gap-2">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(255, 255, 255, 0.15); font-size: 15px;">
+                        🔔
+                    </span>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="statusConfirmModalLabel" style="font-size: 17px;">
+                        Thông báo xác nhận
+                    </h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                {{-- DIỄN TIẾN TRẠNG THÁI --}}
+                <div class="d-flex align-items-center justify-content-between p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                    <div class="text-center flex-grow-1">
+                        <div class="text-muted fw-semibold mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Trạng thái cũ</div>
+                        <span id="modalCurrentStatusBadge" class="rp-status">Chờ duyệt</span>
+                    </div>
+
+                    <div class="px-2 text-muted fw-bold" style="font-size: 18px;">➔</div>
+
+                    <div class="text-center flex-grow-1">
+                        <div class="text-muted fw-semibold mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Trạng thái mới</div>
+                        <span id="modalNewStatusBadge" class="rp-status">Đã đăng</span>
+                    </div>
+                </div>
+
+                {{-- TÓM TẮT TIN ĐĂNG --}}
+                <div class="p-3 rounded-3 mb-3" style="background: #fdfdfd; border: 1px solid #edf2f7;">
+                    <div class="text-muted fw-semibold mb-1" style="font-size: 11.5px; text-transform: uppercase;">Tin đăng áp dụng</div>
+                    <div class="fw-bold text-dark" id="modalPostTitle" style="font-size: 15px; color: #0c2340;">—</div>
+                    <div class="small text-muted mt-1" id="modalPostRoom">Phòng: —</div>
+                </div>
+
+                {{-- CÂU XÁC NHẬN --}}
+                <div class="mb-3" style="font-size: 14.5px; color: #334155; line-height: 1.6;">
+                    Bạn có chắc chắn muốn chuyển tin đăng này sang trạng thái <strong id="modalTargetStatusName" class="text-dark">"Đã đăng"</strong>?
+                </div>
+
+                {{-- NHẬP LÝ DO TỪ CHỐI (KHI TRẠNG THÁI LÀ TỪ CHỐI) --}}
+                <div id="modalRejectionReasonGroup" style="display: none;" class="mb-3">
+                    <label for="modalRejectionReasonInput" class="form-label fw-bold text-danger" style="font-size: 13px;">
+                        Lý do từ chối tin đăng <span class="text-danger">*</span>
+                    </label>
+                    <textarea id="modalRejectionReasonInput" class="form-control" rows="3" placeholder="Nhập lý do từ chối để thông báo cho chủ trọ..." style="border-radius: 10px; font-size: 13.5px;"></textarea>
+                    <div id="modalRejectionError" class="text-danger small mt-1" style="display: none;">Vui lòng nhập lý do từ chối tin đăng.</div>
+                </div>
+
+                {{-- GHI CHÚ GIẢI THÍCH TRẠNG THÁI --}}
+                <div id="modalStatusHint" class="p-2 px-3 rounded text-muted" style="background: #f1f5f9; font-size: 12.5px;">
+                    <!-- Sẽ cập nhật theo trạng thái mới -->
+                </div>
+            </div>
+
+            <div class="modal-footer px-4 py-3" style="background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                <button type="button" class="btn btn-light rounded-3 px-4 py-2 fw-semibold" data-bs-dismiss="modal">
+                    Hủy bỏ
+                </button>
+                <button type="button" id="btnModalConfirmStatus" class="btn text-white rounded-3 px-4 py-2 fw-bold" style="background: #0c2340; border-color: #0c2340;">
+                    ✓ Đồng ý thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/tv1/rental-posts.js') }}" defer></script>
+    <script src="{{ asset('js/tv1/rental-posts.js') }}?v={{ file_exists(public_path('js/tv1/rental-posts.js')) ? filemtime(public_path('js/tv1/rental-posts.js')) : time() }}" defer></script>
 @endpush
