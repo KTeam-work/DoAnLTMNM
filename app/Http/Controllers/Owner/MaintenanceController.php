@@ -166,10 +166,17 @@ class MaintenanceController extends Controller
 
         if ($data['status'] !== 'completed') {
             $statusLabels = ['processing' => 'đang xử lý', 'rejected' => 'từ chối'];
+            $tenantTitle = $data['status'] === 'processing'
+                ? 'Chủ trọ đã bắt đầu sửa chữa sự cố'
+                : 'Yêu cầu sửa chữa: ' . ($statusLabels[$data['status']] ?? $data['status']);
+            $tenantMessage = $data['status'] === 'processing'
+                ? "Chủ trọ đã tiếp nhận sự cố '{$maintenance->title}' (#TCK-{$maintenance->id}) và đang tiến hành kiểm tra, sửa chữa."
+                : "Yêu cầu sửa chữa sự cố #TCK-{$maintenance->id} ({$maintenance->title}) đã bị từ chối.";
+
             Notification::notify(
                 $maintenance->tenant_id,
-                'Yêu cầu sửa chữa ' . ($statusLabels[$data['status']] ?? $data['status']),
-                "Yêu cầu #TCK-{$maintenance->id} ({$maintenance->title}) đã được chủ nhà cập nhật.",
+                $tenantTitle,
+                $tenantMessage,
                 'maintenance',
                 'maintenance',
                 $maintenance->id
@@ -177,7 +184,13 @@ class MaintenanceController extends Controller
         }
 
         if (! $request->expectsJson()) {
-            return back()->with('success', 'Đã cập nhật trạng thái yêu cầu.');
+            $flashMsg = match ($data['status']) {
+                'processing' => "Đã tiếp nhận sự cố #TCK-{$maintenance->id} và bắt đầu sửa chữa! Hệ thống đã gửi thông báo đến người thuê.",
+                'completed' => "Đã hoàn thành xử lý sự cố #TCK-{$maintenance->id} thành công!",
+                'rejected' => "Đã từ chối yêu cầu sự cố #TCK-{$maintenance->id}.",
+                default => 'Đã cập nhật trạng thái yêu cầu.',
+            };
+            return back()->with('success', $flashMsg);
         }
 
         return response()->json(['message' => 'Status updated.', 'data' => $maintenance->fresh()]);

@@ -238,20 +238,33 @@ class PaymentController extends Controller
             ], 400);
         }
 
+        $headers = [];
+        $webhookToken = config('services.sepay.webhook_token');
+        if (!empty($webhookToken)) {
+            $headers['HTTP_AUTHORIZATION'] = 'Apikey ' . $webhookToken;
+        }
+
         // Tạo request giả lập SePay webhook chuẩn
-        $mockWebhookRequest = Request::create('/api/sepay/webhook', 'POST', [
-            'gateway' => config('services.sepay.bank_name', 'MSB'),
-            'transactionDate' => now()->format('Y-m-d H:i:s'),
-            'accountNumber' => config('services.sepay.bank_account', '0000000001'),
-            'subAccount' => 'SBSEPAYTEST',
-            'code' => null,
-            'content' => $payment->payment_code,
-            'transferType' => 'in',
-            'description' => $payment->payment_code,
-            'transferAmount' => (float) $payment->amount,
-            'referenceCode' => 'SIM' . time(),
-            'id' => rand(100000, 999999)
-        ]);
+        $mockWebhookRequest = Request::create(
+            '/api/sepay/webhook',
+            'POST',
+            [
+                'gateway' => config('services.sepay.bank_name', 'MSB'),
+                'transactionDate' => now()->format('Y-m-d H:i:s'),
+                'accountNumber' => config('services.sepay.bank_account', '0000000001'),
+                'subAccount' => 'SBSEPAYTEST',
+                'code' => null,
+                'content' => $payment->payment_code,
+                'transferType' => 'in',
+                'description' => $payment->payment_code,
+                'transferAmount' => (float) $payment->amount,
+                'referenceCode' => 'SIM' . time(),
+                'id' => rand(100000, 999999)
+            ],
+            [],
+            [],
+            $headers
+        );
 
         $webhookController = app(\App\Http\Controllers\PaymentController::class);
         return $webhookController->webhook($mockWebhookRequest);
@@ -313,18 +326,29 @@ class PaymentController extends Controller
     {
         $user = $request->user();
         if ($user) {
-            abort_unless($user->role === 'tenant', 403, 'Only tenants can pay invoices.');
-
-            return $user;
-        }
-        if (! $request->expectsJson()) {
-            if (! config('app.demo_guest')) {
-                throw new AuthenticationException('Vui lòng đăng nhập để tiếp tục.', ['web'], route('login'));
+            if ($user->role === 'tenant') {
+                return $user;
             }
-            $demo = User::query()->where('role', 'tenant')->orderBy('id')->first();
-            abort_unless($demo, 401, 'Chưa có tài khoản người thuê, vui lòng đăng nhập.');
+            // Cho phép tài khoản chủ trọ test/xem thử thanh toán
+            if ($user->role === 'owner') {
+                $demo = User::query()->where('role', 'tenant')->orderBy('id')->first();
+                if ($demo) {
+                    return $demo;
+                }
+            }
+            abort(403, 'Only tenants can pay invoices.');
+        }
 
-            return $demo;
+        // Nếu chưa đăng nhập nhưng hệ thống bật demo_guest
+        if (config('app.demo_guest', true)) {
+            $demo = User::query()->where('role', 'tenant')->orderBy('id')->first();
+            if ($demo) {
+                return $demo;
+            }
+        }
+
+        if (! $request->expectsJson()) {
+            throw new AuthenticationException('Vui lòng đăng nhập để tiếp tục.', ['web'], route('login'));
         }
         abort(401, 'Authentication is required.');
     }

@@ -77,13 +77,26 @@ class OwnerDashboardController extends Controller
             ->take(5)
             ->get();
 
-       return view('owner.dashboard', compact(
+        $properties = Auth::user()
+            ->properties()
+            ->with(['thumbnail', 'images', 'rooms'])
+            ->latest('id')
+            ->take(6)
+            ->get();
+
+        $propertiesCount = Auth::user()->properties()->count();
+        $occupancyRate = $totalRooms > 0 ? round(($rentedRooms / $totalRooms) * 100) : 0;
+
+        return view('owner.dashboard', compact(
             'totalRooms',
             'rentedRooms',
             'availableRooms',
             'monthlyRevenue',
             'rooms',
-            'appointments'
+            'appointments',
+            'properties',
+            'propertiesCount',
+            'occupancyRate'
         ));
     }
 }

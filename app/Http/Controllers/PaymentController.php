@@ -33,13 +33,15 @@ class PaymentController extends Controller
                 $providedToken = trim($apiKeyHeader);
             }
 
-            if (!$providedToken || !hash_equals($configuredToken, $providedToken)) {
-                Log::warning('SePay Webhook: Unauthorized attempt', [
+            if (!$providedToken || !hash_equals(trim($configuredToken), trim($providedToken))) {
+                Log::warning('SePay Webhook: Unauthorized attempt - Token mismatch', [
                     'ip' => $request->ip(),
+                    'provided_token_length' => strlen((string)$providedToken),
+                    'configured_token_length' => strlen(trim($configuredToken)),
                 ]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthorized'
+                    'message' => 'Unauthorized: Token mismatch'
                 ], 401);
             }
         } elseif (app()->isProduction()) {

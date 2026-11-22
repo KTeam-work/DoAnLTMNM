@@ -165,13 +165,16 @@
 
           <!-- 2 Phương thức thanh toán -->
           <div id="pay">
-            @if($canPayQr)
-              @if($invoice->status === 'pending' || $invoice->payments->where('status', 'pending')->count())
-                <div class="alert alert-warning p-2 mb-3 text-center" style="font-size: 12px; border-radius: 8px;">
-                  Đang có yêu cầu thanh toán chờ chủ nhà xác nhận. Bạn vẫn có thể quét mã VietQR để gạch nợ tự động ngay.
-                </div>
-              @endif
+            @php
+              $isPendingCash = ($invoice->status === 'pending' || $invoice->payments->where('status', 'pending')->count() > 0);
+            @endphp
 
+            @if($isPendingCash)
+              <div class="p-3 rounded-3 text-center border" style="background: #fffbeb; border-color: #fde68a !important;">
+                <div class="fw-bold text-dark mb-1" style="font-size: 13.5px; color: #92400e !important;">Đã gửi báo nộp tiền mặt</div>
+                <div class="text-muted mb-0" style="font-size: 12px; line-height: 1.5;">Bạn đã gửi yêu cầu xác nhận nộp tiền mặt cho chủ trọ. Vui lòng chờ chủ trọ kiểm tra và duyệt hóa đơn.</div>
+              </div>
+            @elseif($canPayQr)
               <div class="fw-bold mb-2 text-dark" style="font-size: 13px;">Chọn phương thức thanh toán:</div>
 
               <!-- 2 Tabs chuyển đổi phương thức (không dùng icon) -->
@@ -207,24 +210,18 @@
                 <div class="tab-pane fade" id="tab-method-confirm" role="tabpanel" aria-labelledby="pay-confirm-tab">
                   <div class="p-3 rounded-3 border bg-light">
                     <div class="fw-bold mb-1 text-dark" style="font-size: 13px;">Báo xác nhận với chủ nhà</div>
-                    <div class="text-muted mb-3" style="font-size: 12px; line-height: 1.5;">Dành cho trường hợp nộp tiền mặt hoặc chuyển khoản thủ công. Chủ nhà sẽ kiểm tra và xác nhận hóa đơn.</div>
+                    <div class="text-muted mb-3" style="font-size: 12px; line-height: 1.5;">Dành cho trường hợp nộp tiền mặt trực tiếp cho chủ trọ. Chủ nhà sẽ kiểm tra và xác nhận hóa đơn.</div>
 
                     @if($canPay)
                       <form id="payForm" action="{{ route('tenant.payment.store') }}" method="POST" class="print-hide">
                         @csrf
                         <input type="hidden" name="invoice_id" value="{{ $invoice->id }}">
 
-                        <div class="mb-2">
+                        <div class="mb-3">
                           <label class="fw-bold mb-1 text-secondary" style="font-size: 12px;">Hình thức nộp tiền</label>
                           <select name="method" id="payMethod" class="form-select form-select-sm" required>
-                            <option value="bank_transfer">Chuyển khoản trực tiếp</option>
-                            <option value="cash">Nộp tiền mặt cho chủ trọ</option>
+                            <option value="cash" selected>Tiền mặt</option>
                           </select>
-                        </div>
-
-                        <div class="mb-3">
-                          <label class="fw-bold mb-1 text-secondary" style="font-size: 12px;">Mã tham chiếu / Ghi chú (nếu có)</label>
-                          <input type="text" name="transaction_code" class="form-control form-control-sm" placeholder="Mã giao dịch hoặc ghi chú..." maxlength="100">
                         </div>
 
                         <button type="submit" class="btn btn-dark w-100 py-2 fw-bold" style="border-radius: 8px; font-size: 13px;">
@@ -249,17 +246,10 @@
           </div>
 
           <div class="d-flex flex-column gap-2 print-hide mt-3">
-            <div class="row g-2 mt-1">
-              <div class="col-6">
-                <a href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center text-decoration-none" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
-                  In hóa đơn
-                </a>
-              </div>
-              <div class="col-6">
-                <a href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center text-decoration-none" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
-                  Lưu PDF
-                </a>
-              </div>
+            <div class="mt-1">
+              <a href="{{ route('tenant.invoices.print', $invoice->id) }}" target="_blank" class="btn btn-outline-brand w-100 py-2 d-flex justify-content-center align-items-center text-decoration-none" style="font-size: 13px; background: #f8f9fa; border-color: #ddd; color: var(--text);">
+                In hóa đơn
+              </a>
             </div>
           </div>
 

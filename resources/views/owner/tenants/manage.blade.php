@@ -134,24 +134,15 @@
 
 
                     <!-- FILTER -->
-
                     <select
+                        id="tenantStatusSelect"
                         class="form-select form-select-sm border-light-subtle shadow-none"
-                        style="width: 150px;"
+                        style="width: 160px;"
                     >
-
-                        <option value="">
-                            Tất cả trạng thái
-                        </option>
-
-                        <option value="active">
-                            Đang ở
-                        </option>
-
-                        <option value="leaving">
-                            Sắp chuyển đi
-                        </option>
-
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="active">Đang ở</option>
+                        <option value="leaving">Sắp chuyển đi</option>
+                        <option value="left">Đã chuyển đi</option>
                     </select>
 
 
@@ -228,8 +219,9 @@
                                 $contract = $tenant->rentedContracts->first();
                                 $isExp = $contract && $contract->status === 'active' && $contract->end_date && \Carbon\Carbon::parse($contract->end_date)->diffInDays(now(), false) > -60;
                                 $hasActive = $contract && $contract->status === 'active';
+                                $statusVal = $isExp ? 'leaving' : ($hasActive ? 'active' : 'left');
                             @endphp
-                            <tr class="tenant-row" data-expiring="{{ $isExp ? '1' : '0' }}" data-active-contract="{{ $hasActive ? '1' : '0' }}">
+                            <tr class="tenant-row" data-status="{{ $statusVal }}" data-expiring="{{ $isExp ? '1' : '0' }}" data-active-contract="{{ $hasActive ? '1' : '0' }}">
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="avatar-circle bg-blue-soft">
@@ -254,13 +246,21 @@
                                     <div class="text-dark fw-medium">{{ $contract ? \Carbon\Carbon::parse($contract->start_date)->format('d/m/Y') : '—' }}</div>
                                     <div class="small text-muted">HĐ: {{ $contract?->contract_code ?? '—' }}</div>
                                 </td>
-                                <td><span class="badge-soft-success">● Đang ở</span></td>
+                                <td>
+                                    @if($isExp)
+                                        <span class="badge-soft-warning">● Sắp chuyển đi</span>
+                                    @elseif($hasActive)
+                                        <span class="badge-soft-success">● Đang ở</span>
+                                    @else
+                                        <span class="badge-soft-secondary">● Đã chuyển đi</span>
+                                    @endif
+                                </td>
                                 <td class="text-end">
                                     <a href="{{ route('owner.tenants.show', $tenant->id) }}" class="btn btn-action text-decoration-none">Hồ sơ</a>
                                 </td>
                             </tr>
                             @foreach($contract?->members ?? [] as $member)
-                            <tr class="tenant-row" data-expiring="{{ $isExp ? '1' : '0' }}" data-active-contract="{{ $hasActive ? '1' : '0' }}">
+                            <tr class="tenant-row" data-status="{{ $statusVal }}" data-expiring="{{ $isExp ? '1' : '0' }}" data-active-contract="{{ $hasActive ? '1' : '0' }}">
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="avatar-circle bg-purple-soft">
@@ -285,7 +285,15 @@
                                     <div class="text-dark fw-medium">{{ $member->created_at?->format('d/m/Y') ?? '—' }}</div>
                                     <div class="small text-muted">HĐ: {{ $contract?->contract_code ?? '—' }}</div>
                                 </td>
-                                <td><span class="badge-soft-success">● Đang ở</span></td>
+                                <td>
+                                    @if($isExp)
+                                        <span class="badge-soft-warning">● Sắp chuyển đi</span>
+                                    @elseif($hasActive)
+                                        <span class="badge-soft-success">● Đang ở</span>
+                                    @else
+                                        <span class="badge-soft-secondary">● Đã chuyển đi</span>
+                                    @endif
+                                </td>
                                 <td class="text-end"><span class="text-muted small">—</span></td>
                             </tr>
                             @endforeach
@@ -305,38 +313,62 @@
 
     </div>
 
+    <script>
+        if (typeof window.initTenantManage === 'function') {
+            window.initTenantManage();
+        }
+    </script>
+
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function initTenantManage() {
         const searchInput = document.getElementById('tenantSearchInput');
+        const statusSelect = document.getElementById('tenantStatusSelect');
         const tabBtns = document.querySelectorAll('.segmented-tab');
-        const rows = document.querySelectorAll('.table-modern tbody tr.tenant-row');
         const noResults = document.getElementById('noTenantFilterResult');
+
+        function normalizeStr(v) {
+            return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').trim();
+        }
 
         let currentFilter = 'all';
         let currentQuery = '';
 
         function applyFilter() {
+            const rows = Array.from(document.querySelectorAll('.table-modern tbody tr.tenant-row'));
+            const selectedStatus = statusSelect ? statusSelect.value : '';
             let visibleCount = 0;
 
             rows.forEach(row => {
                 const isExpiring = row.getAttribute('data-expiring') === '1';
                 const hasActive = row.getAttribute('data-active-contract') === '1';
-                const text = row.textContent.toLowerCase();
+                const rowStatus = row.getAttribute('data-status') || '';
+                const text = normalizeStr(row.textContent);
 
                 let matchesFilter = false;
-                if (currentFilter === 'all' || currentFilter === 'staying') {
+                if (currentFilter === 'all') {
                     matchesFilter = true;
+                } else if (currentFilter === 'staying') {
+                    matchesFilter = (hasActive || rowStatus === 'active' || isExpiring);
                 } else if (currentFilter === 'expiring') {
                     matchesFilter = isExpiring;
                 } else if (currentFilter === 'active_contract') {
                     matchesFilter = hasActive;
                 }
 
+                let matchesSelect = true;
+                if (selectedStatus === 'active') {
+                    matchesSelect = (rowStatus === 'active' || (hasActive && !isExpiring));
+                } else if (selectedStatus === 'leaving') {
+                    matchesSelect = (rowStatus === 'leaving' || isExpiring);
+                } else if (selectedStatus === 'left') {
+                    matchesSelect = (rowStatus === 'left' || !hasActive);
+                }
+
                 const matchesSearch = !currentQuery || text.includes(currentQuery);
 
-                if (matchesFilter && matchesSearch) {
+                if (matchesFilter && matchesSelect && matchesSearch) {
                     row.style.display = '';
                     visibleCount++;
                 } else {
@@ -350,19 +382,25 @@
         }
 
         tabBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.onclick = function() {
                 tabBtns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 currentFilter = this.getAttribute('data-filter') || 'all';
                 applyFilter();
-            });
+            };
         });
 
         if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                currentQuery = this.value.toLowerCase().trim();
+            searchInput.oninput = function() {
+                currentQuery = normalizeStr(this.value);
                 applyFilter();
-            });
+            };
+        }
+
+        if (statusSelect) {
+            statusSelect.onchange = function() {
+                applyFilter();
+            };
         }
 
         // Đồng bộ dữ liệu tóm tắt hợp đồng trong Modal
@@ -396,7 +434,7 @@
         // Ràng buộc kiểm tra form thêm người ở cùng (CCCD 9 hoặc 12 số, SĐT 10 số bắt đầu bằng 0)
         var modalMemberForm = document.getElementById('modalMemberForm');
         if (modalMemberForm) {
-            modalMemberForm.addEventListener('submit', function(e) {
+            modalMemberForm.onsubmit = function(e) {
                 var cccdInput = modalMemberForm.querySelector('input[name="identity_card"]');
                 var phoneInput = modalMemberForm.querySelector('input[name="phone"]');
 
@@ -419,9 +457,17 @@
                         return false;
                     }
                 }
-            });
+            };
         }
-    });
+    }
+
+    window.initTenantManage = initTenantManage;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initTenantManage);
+    } else {
+        initTenantManage();
+    }
 </script>
 @endpush
 

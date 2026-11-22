@@ -1,15 +1,160 @@
+.page-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 3.5rem;
+}
 
-  .page-wrap{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem 3rem;}
-  .back-link{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;}
-  .back-link:hover{color:var(--green);}
-  .panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-bottom:1.2rem;}
-  .panel h5{color:var(--green-dark);font-weight:800;font-size:1rem;margin-bottom:1rem;}
-  .badge-status{display:inline-block;padding:.3rem .65rem;border-radius:99px;font-size:.74rem;font-weight:700;}
-  .badge-status.unpaid{background:var(--yellow-light);color:#9b6a00;}
-  .badge-status.pending{background:var(--yellow-light);color:#9b6a00;}
-  .badge-status.paid{background:var(--green-soft);color:var(--green);}
-  .badge-status.overdue{background:var(--red-soft);color:var(--red);}
-  .badge-status.cancelled{background:#f1f5f9;color:var(--muted);}
-  .data-table{width:100%;border-collapse:collapse;font-size:.88rem;}
-  .data-table thead th{font-size:.72rem;color:var(--muted);font-weight:700;padding:.6rem;border-bottom:1px solid var(--border);}
-  .data-table tbody td{padding:.7rem .6rem;border-bottom:1px dashed var(--border);}
+.back-link {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: #059669;
+}
+
+.invoice-panel {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 18px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.invoice-panel-header {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.info-item-box {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  padding: 14px 16px;
+  height: 100%;
+}
+
+.info-item-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.info-item-value {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.info-item-sub {
+  font-size: 12.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Status Badges */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-status.unpaid {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.badge-status.pending {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.badge-status.paid {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-status.overdue {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.badge-status.cancelled {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Invoice items table */
+.invoice-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.invoice-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.invoice-table th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.invoice-table th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.invoice-table td {
+  padding: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13.5px;
+  color: #1e293b;
+}
+
+.invoice-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Payment history item */
+.payment-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.payment-item:last-child {
+  margin-bottom: 0;
+}

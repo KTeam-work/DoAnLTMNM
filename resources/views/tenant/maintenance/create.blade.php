@@ -99,14 +99,15 @@
 
         <div class="col-12">
           <label class="form-label">Tài liệu đính kèm / Hình ảnh hiện trường (Tùy chọn)</label>
-          <div class="upload-zone" id="uploadZone">
+          <div class="upload-zone" id="uploadZone" style="cursor: pointer; transition: all 0.2s ease;">
             <div class="upload-icon"><i class="bi bi-cloud-arrow-up text-muted" style="font-size: 32px;"></i></div>
             <div>
               <div class="fw-bold text-dark" style="font-size: 15px;">Kéo thả file hoặc nhấn để tải lên</div>
-              <div class="text-muted mt-1" style="font-size: 13px;" id="uploadHint">Hỗ trợ định dạng: JPG, PNG (Tối đa 10MB)</div>
+              <div class="text-muted mt-1" style="font-size: 13px;" id="uploadHint">Hỗ trợ định dạng: JPG, PNG, WEBP (Tối đa 10MB/ảnh, có thể tải lên nhiều ảnh)</div>
             </div>
-            <input type="file" name="image" id="imageInput" accept="image/*" class="d-none">
+            <input type="file" name="images[]" id="imageInput" accept="image/*" multiple class="d-none">
           </div>
+          <div id="imagePreviewContainer" class="d-flex flex-wrap gap-3 mt-3" style="display: none !important;"></div>
         </div>
       </div>
 

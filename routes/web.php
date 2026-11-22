@@ -596,6 +596,11 @@ Route::get(
 )->name('owner.utilities.index');
 
 Route::get(
+    '/owner/utilities/export',
+    [OwnerUtilitiesController::class, 'export']
+)->name('owner.utilities.export');
+
+Route::get(
     '/owner/utilities/previous-reading',
     [OwnerUtilitiesController::class, 'getPreviousReading']
 )->name('owner.utilities.previous-reading');

@@ -111,7 +111,7 @@
                             <a
                                 class="dropdown-item {{ request()->routeIs('owner.services.*') ? 'active' : '' }}"
                                 href="{{ route('owner.services.index') }}">
-                                Dịch vụ
+                                Dịch vụ / Tiện ích
                             </a>
                         </li>
 

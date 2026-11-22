@@ -142,7 +142,7 @@
                     <div class="chat-header-title">
                         <div>
                             <h3>Trợ lý Trọ Ơi AI</h3>
-                            <p>Kết nối trực tiếp dữ liệu MySQL thực tế &bull; Sẵn sàng giải đáp 24/7</p>
+                            <p>Sẵn sàng giải đáp thắc mắc 24/7</p>
                         </div>
                     </div>
                     <div class="chat-header-actions">
@@ -225,7 +225,7 @@
                     </form>
 
                     <div class="chat-disclaimer">
-                        <span><i class="fa-solid fa-shield-halved"></i> Dữ liệu phòng thực tế từ MySQL &bull; Phân quyền an toàn theo tài khoản</span>
+                        <span><i class="fa-solid fa-shield-halved"></i> Phân quyền an toàn theo tài khoản</span>
                         <span>Nhấn <strong>Enter</strong> để gửi</span>
                     </div>
                 </div>

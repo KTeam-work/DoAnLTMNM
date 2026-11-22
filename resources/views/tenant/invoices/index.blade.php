@@ -112,13 +112,32 @@
             </td>
             <td>
               <div class="skeleton-box mb-1"><div class="hide-on-skeleton" style="font-weight: 600;{{ $isOverdue ? ' color: var(--red);' : '' }}">{{ $invoice->due_date->format('d/m/Y') }}</div></div>
-              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton" style="{{ $isOverdue ? 'color: var(--red);' : '' }}">{{ $isOverdue ? 'Đã quá hạn' : ($invoice->status === 'paid' ? 'Đã thanh toán' : 'Còn ' . now()->diffInDays($invoice->due_date) . ' ngày') }}</div></div>
+              <div class="skeleton-box"><div class="cell-sub hide-on-skeleton" style="{{ $isOverdue ? 'color: var(--red);' : '' }}">
+                @if($isOverdue)
+                  Đã quá hạn
+                @elseif($invoice->status === 'paid')
+                  Đã thanh toán
+                @else
+                  @php
+                    $diffDays = (int) ceil(now()->diffInDays($invoice->due_date, false));
+                  @endphp
+                  {{ $diffDays > 0 ? 'Còn ' . $diffDays . ' ngày' : ($diffDays === 0 ? 'Đến hạn hôm nay' : 'Đã quá hạn') }}
+                @endif
+              </div></div>
             </td>
             <td><div class="skeleton-box"><strong class="hide-on-skeleton" style="color: var(--green-dark); font-size: 15px;">{{ number_format((float) $invoice->total) }} đ</strong></div></td>
             <td><div class="skeleton-box rounded-pill"><span class="badge-status {{ $displayStatus }} hide-on-skeleton">{{ $statusLabels[$displayStatus] ?? $displayStatus }}</span></div></td>
             <td class="text-end" style="padding-right: 20px;">
               <div class="d-flex justify-content-end align-items-center gap-2 skeleton-box rounded">
-                @if(in_array($invoice->status, ['unpaid', 'pending', 'overdue']))
+                @php
+                  $hasPendingPayment = $invoice->status === 'pending' || ($invoice->relationLoaded('payments') ? $invoice->payments->where('status', 'pending')->count() > 0 : $invoice->payments()->where('status', 'pending')->exists());
+                @endphp
+                @if($hasPendingPayment)
+                  <span class="hide-on-skeleton badge bg-warning bg-opacity-10 text-warning-emphasis fw-bold" style="font-size: 12px; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3);">
+                    Chờ xác nhận
+                  </span>
+                  <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
+                @elseif(in_array($invoice->status, ['unpaid', 'overdue']))
                   <button type="button" class="btn-brand hide-on-skeleton btn-pay-qr border-0"
                           data-invoice-id="{{ $invoice->id }}"
                           data-invoice-code="{{ $invoice->invoice_code }}"
