@@ -3,264 +3,351 @@
 @section('title', 'Tổng quan hoạt động | Trọ Ơi')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/tv3/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/dashboard.css') }}?v={{ file_exists(public_path('css/tv3/dashboard.css')) ? filemtime(public_path('css/tv3/dashboard.css')) : time() }}">
 @endpush
 
 @section('content')
 
+@php
+    $defaultHouseImages = [
+        asset('storage/properties/10/lw3etjRSNWcSwEAYgEnixCkCbf4nQBLEF9GayCw9.jpg'),
+        asset('storage/properties/4/iaIpAyJBCO0AJgn145Uq7o4qJkIjnVA0hEp9Z40d.jpg'),
+        asset('storage/properties/9/GvV2Cfsd6U0ITc8zPTPHEQUSOwAerZ8fQaqQEYZK.jpg'),
+        asset('storage/properties/8/kcrbkQl9zfS0ctiCb2KNCf2t503z8GD9Yvv0Bmwn.jpg'),
+        asset('storage/properties/6/qpi5LJVByEtGr9ItwcUqHdgcQBxhgSREh4PSJSep.jpg'),
+    ];
+    $heroBgImage = asset('storage/properties/4/iaIpAyJBCO0AJgn145Uq7o4qJkIjnVA0hEp9Z40d.jpg');
+    $firstHouseImg = asset('storage/properties/10/lw3etjRSNWcSwEAYgEnixCkCbf4nQBLEF9GayCw9.jpg');
+@endphp
+
 <div class="owner-page">
     <div class="owner-main">
 
-        {{-- TIÊU ĐỀ --}}
-        <div class="page-heading">
-            <div>
-                <div class="eyebrow">Owner workspace</div>
-                <h1>Tổng quan hoạt động</h1>
-                <p>Xin chào <strong>{{ auth()->user()->name ?? 'Chủ trọ' }}</strong>, đây là tình hình cho thuê và kinh doanh của bạn.</p>
-            </div>
-
-            <a class="btn-owner" href="{{ route('owner.rooms.index') }}">
-                + Quản lý phòng
-            </a>
-        </div>
-
-        {{-- THỐNG KÊ --}}
-        <div class="stats-grid">
-            {{-- Tổng số phòng --}}
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Phòng trọ</span>
-                    <span class="stat-trend" style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Quản lý</span>
-                </div>
-                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ $totalRooms }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tổng số phòng quản lý</div>
-            </div>
-
-            {{-- Phòng đang thuê --}}
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Đang thuê</span>
-                    <span class="stat-trend" style="background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Có khách</span>
-                </div>
-                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ $rentedRooms }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Phòng có khách đang ở</div>
-            </div>
-
-            {{-- Phòng còn trống --}}
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Còn trống</span>
-                    <span class="stat-trend" style="background: {{ $availableRooms > 0 ? '#fef3c7' : '#f1f5f9' }}; color: {{ $availableRooms > 0 ? '#b45309' : '#64748b' }}; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">
-                        {{ $availableRooms > 0 ? $availableRooms . ' phòng' : 'Hết phòng' }}
-                    </span>
-                </div>
-                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 12px 0 5px 0;">{{ $availableRooms }}</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Phòng sẵn sàng đón khách</div>
-            </div>
-
-            {{-- Doanh thu tháng này --}}
-            <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border-left: 3px solid #16834b;">
-                <div class="stat-top d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 0.5px; color: #64748b;">Doanh thu</span>
-                    <span class="stat-trend" style="background: #f0fdf4; color: #16a34a; font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Tháng này</span>
-                </div>
-                <div class="stat-value" style="font-size: 30px; font-weight: 800; color: #16834b; line-height: 1.2; margin: 12px 0 5px 0;">{{ number_format((float) $monthlyRevenue, 0, ',', '.') }}đ</div>
-                <div class="stat-label" style="font-size: 12.5px; font-weight: 500; color: #64748b;">Tiền phòng đã thu trong tháng</div>
-            </div>
-        </div>
-
-        {{-- NỘI DUNG CHI TIẾT --}}
-        <div class="row g-4">
-            {{-- DANH SÁCH PHÒNG --}}
-            <div class="col-lg-7">
-                <section class="content-card">
-                    <div class="card-header-owner">
-                        <div>
-                            <h2>Danh sách phòng</h2>
-                            <p>Trạng thái các phòng cho thuê gần đây</p>
+        {{-- =========================================================
+             1. HERO CARD (DARK LUXURY ARCHITECTURAL HERO - NO ICONS)
+             ========================================================= --}}
+        <div class="dashboard-hero-card" style="background-image: linear-gradient(135deg, rgba(8, 15, 28, 0.94) 0%, rgba(13, 27, 46, 0.90) 55%, rgba(9, 17, 30, 0.88) 100%), url('{{ $heroBgImage }}');">
+            <div class="hero-inner">
+                <div class="row align-items-center g-4">
+                    
+                    {{-- CỘT TRÁI: TIÊU ĐỀ, MÔ TẢ & FLOATING ACTION PILL BAR --}}
+                    <div class="col-lg-7">
+                        <div class="hero-tag-pill">
+                            Không gian quản lý chủ trọ · Trọ Ơi Pro
                         </div>
-                        <a href="{{ route('owner.rooms.index') }}" class="btn-light-owner">
-                            Quản lý tất cả →
+
+                        <h1 class="hero-title">
+                            Khám Phá &amp; Tối Ưu Hóa<br>
+                            <span class="title-accent">Hệ Thống Cho Thuê</span>
+                        </h1>
+
+                        <p class="hero-desc">
+                            Xin chào <strong>{{ auth()->user()->name ?? 'Chủ trọ' }}</strong>. Theo dõi tỷ lệ lấp đầy, dòng tiền thực thu và tình trạng các khu nhà trọ theo thời gian thực.
+                        </p>
+
+                        {{-- FLOATING WHITE PILL ACTION BAR (NO ICONS) --}}
+                        <div class="hero-pill-bar">
+                            <div class="pill-item">
+                                <span class="pill-label">Nhà trọ</span>
+                                <span class="pill-value">{{ $propertiesCount ?? 1 }} khu</span>
+                            </div>
+                            <div class="pill-item">
+                                <span class="pill-label">Quy mô</span>
+                                <span class="pill-value">{{ $totalRooms }} phòng</span>
+                            </div>
+                            <div class="pill-item">
+                                <span class="pill-label">Còn trống</span>
+                                <span class="pill-value text-primary">{{ $availableRooms }} phòng</span>
+                            </div>
+                            <a href="{{ route('owner.rooms.create') }}" class="btn-pill-action">
+                                + Thêm phòng
+                            </a>
+                        </div>
+
+                        {{-- CÁC PHÍM TẮT THAO TÁC NHANH (NO ICONS) --}}
+                        <div class="hero-sublinks">
+                            <a href="{{ route('owner.rental-posts.create') }}" class="hero-sublink">
+                                Đăng tin cho thuê
+                            </a>
+                            <a href="{{ route('owner.utilities.create') }}" class="hero-sublink">
+                                Ghi điện nước
+                            </a>
+                            <a href="{{ route('owner.invoices.index') }}" class="hero-sublink">
+                                Lập hóa đơn
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- CỘT PHẢI: THẺ BẤT ĐỘNG SẢN TIÊU BIỂU (THAY THẾ TỶ LỆ LẤP ĐẦY & DOANH THU) --}}
+                    <div class="col-lg-5">
+                        <a href="{{ route('owner.rooms.index') }}" class="hero-featured-property">
+                            <div class="hero-featured-img-box">
+                                <img src="{{ $firstHouseImg }}" alt="Khu nhà trọ" class="hero-featured-img">
+                                <span class="hero-featured-badge">Đang vận hành</span>
+                            </div>
+                            <div class="hero-featured-title">
+                                {{ $properties->first()?->name ?? 'Khu trọ tiêu biểu' }}
+                            </div>
+                            <div class="hero-featured-desc">
+                                {{ $properties->first()?->district ?? 'Hồ Chí Minh' }} · Hệ thống nhà trọ cao cấp
+                            </div>
+                            <div class="hero-featured-footer">
+                                <span>Quy mô: <strong>{{ $totalRooms }} phòng</strong></span>
+                                <span>Đang ở: <strong>{{ $rentedRooms }} phòng</strong></span>
+                            </div>
                         </a>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Phòng</th>
-                                    <th>Người thuê</th>
-                                    <th>Giá thuê</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($rooms as $room)
-                                    @php
-                                        $activeContract = $room->contracts->first();
-                                        $tenantName = $activeContract?->tenant?->name;
-                                    @endphp
+                </div>
+            </div>
+        </div>
+
+        {{-- =========================================================
+             2. BOTTOM CRISP WHITE SECTION (KHU VỰC QUẢN LÝ DỮ LIỆU)
+             ========================================================= --}}
+        <div class="dashboard-white-section">
+            
+            {{-- DANH SÁCH CÁC NGÔI NHÀ / KHU TRỌ THỰC TẾ (HÌNH ẢNH NGÔI NHÀ) --}}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h3 class="box-title fs-5 fw-bold text-dark">Khu nhà trọ đang quản lý</h3>
+                    <p class="box-sub">Danh sách các bất động sản và tình trạng khai thác</p>
+                </div>
+                <a href="{{ route('owner.rooms.index') }}" class="box-link">
+                    Xem tất cả nhà trọ →
+                </a>
+            </div>
+
+            <div class="house-showcase-grid">
+                @forelse($properties as $idx => $property)
+                    @php
+                        $thumb = $property->thumbnail ?? $property->images->first();
+                        $houseImg = $thumb 
+                            ? asset('storage/' . $thumb->image_path) 
+                            : ($defaultHouseImages[$idx % count($defaultHouseImages)]);
+                        $pRoomsCount = $property->rooms->count();
+                        $pRentedCount = $property->rooms->where('status', 'rented')->count();
+                    @endphp
+                    <a href="{{ route('owner.rooms.index') }}" class="house-card">
+                        <div class="house-card-img-wrapper">
+                            <img src="{{ $houseImg }}" alt="{{ $property->name }}" class="house-card-img">
+                            <span class="house-card-badge">{{ $pRoomsCount }} phòng</span>
+                        </div>
+                        <div class="house-card-body">
+                            <div class="house-card-title">{{ $property->name }}</div>
+                            <div class="house-card-address">{{ $property->district ?? $property->city ?? 'Hồ Chí Minh' }}</div>
+                            <div class="house-card-footer">
+                                <span class="house-card-stats">{{ $pRentedCount }} phòng đang ở</span>
+                                <span class="house-card-status">Đang vận hành</span>
+                            </div>
+                        </div>
+                    </a>
+                @empty
+                    @for($i = 0; $i < 3; $i++)
+                        <a href="{{ route('owner.rooms.index') }}" class="house-card">
+                            <div class="house-card-img-wrapper">
+                                <img src="{{ $defaultHouseImages[$i] }}" alt="Khu trọ" class="house-card-img">
+                                <span class="house-card-badge">Đang hoạt động</span>
+                            </div>
+                            <div class="house-card-body">
+                                <div class="house-card-title">Khu trọ cao cấp {{ $i + 1 }}</div>
+                                <div class="house-card-address">Quận Bình Thạnh, TP. Hồ Chí Minh</div>
+                                <div class="house-card-footer">
+                                    <span class="house-card-stats">Quy mô nhiều phòng</span>
+                                    <span class="house-card-status">Đang vận hành</span>
+                                </div>
+                            </div>
+                        </a>
+                    @endfor
+                @endforelse
+            </div>
+
+            {{-- THANH ĐIỂM TIN PHÂN ĐOẠN (GIỐNG HÌNH 3 - SEGMENTED FILTER BAR) --}}
+            <div class="segmented-filter-wrapper mb-4">
+                <div class="segmented-filter-bar">
+                    <a href="{{ route('owner.rooms.index') }}" class="segmented-tab active">
+                        <span class="tab-label">Tổng số phòng</span>
+                        <span class="tab-count">{{ $totalRooms }}</span>
+                    </a>
+                    <a href="{{ route('owner.rooms.index', ['status' => 'rented']) }}" class="segmented-tab">
+                        <span class="tab-label">Phòng đang thuê</span>
+                        <span class="tab-count">{{ $rentedRooms }}</span>
+                    </a>
+                    <a href="{{ route('owner.rooms.index', ['status' => 'available']) }}" class="segmented-tab">
+                        <span class="tab-label">Phòng còn trống</span>
+                        <span class="tab-count">{{ $availableRooms }}</span>
+                    </a>
+                    <a href="{{ route('owner.appointments.index') }}" class="segmented-tab">
+                        <span class="tab-label">Lịch xem gần đây</span>
+                        <span class="tab-count">{{ $appointments->count() }}</span>
+                    </a>
+                </div>
+            </div>
+
+            {{-- NỘI DUNG CHI TIẾT: 2 CỘT BẢNG (NO ICONS) --}}
+            <div class="row g-4">
+                
+                {{-- CỘT TRÁI (7 COLS): DANH SÁCH PHÒNG GẦN ĐÂY --}}
+                <div class="col-lg-7">
+                    <div class="content-box">
+                        <div class="box-head">
+                            <div>
+                                <h3 class="box-title">Danh sách phòng</h3>
+                                <p class="box-sub">Trạng thái các phòng cho thuê gần đây</p>
+                            </div>
+                            <a href="{{ route('owner.rooms.index') }}" class="box-link">
+                                Quản lý tất cả →
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="data-table-modern">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <div class="cell-title">
-                                                {{ $room->name }}
-                                                @if ($room->property)
-                                                    <span style="color: #8a9691; font-weight: normal;">· {{ $room->property->name }}</span>
+                                        <th>Phòng</th>
+                                        <th>Người thuê</th>
+                                        <th>Giá thuê</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($rooms as $room)
+                                        @php
+                                            $activeContract = $room->contracts->first();
+                                            $tenantName = $activeContract?->tenant?->name;
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <div class="room-main-title">
+                                                    {{ $room->name }}
+                                                    @if ($room->property)
+                                                        <span class="text-muted fw-normal" style="font-size: 12px;">· {{ $room->property->name }}</span>
+                                                    @endif
+                                                </div>
+                                                <div class="room-sub-district">
+                                                    {{ $room->property?->district ?? 'Chưa cập nhật khu vực' }}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if ($tenantName)
+                                                    <span class="tenant-chip-name">{{ $tenantName }}</span>
+                                                @else
+                                                    <span class="text-muted small">—</span>
                                                 @endif
-                                            </div>
-                                            <div class="cell-sub">
-                                                {{ $room->property?->district ?? 'Chưa cập nhật quận/huyện' }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @if ($tenantName)
-                                                <div class="tenant-cell">
-                                                    <div class="avatar-sm">
-                                                        {{ strtoupper(mb_substr($tenantName, 0, 1)) }}
-                                                    </div>
-                                                    <span>{{ $tenantName }}</span>
-                                                </div>
-                                            @else
-                                                <span style="color: #a0aba5;">—</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="price-text">{{ number_format((float) $room->price, 0, ',', '.') }}đ</span>
-                                        </td>
-                                        <td>
-                                            @switch($room->status)
-                                                @case('rented')
-                                                    <span class="badge-status occupied">Đang thuê</span>
-                                                    @break
-                                                @case('available')
-                                                    <span class="badge-status vacant">Còn trống</span>
-                                                    @break
-                                                @case('pending')
-                                                    <span class="badge-status pending">Đang chờ</span>
-                                                    @break
-                                                @case('maintenance')
-                                                    <span class="badge-status maintenance">Bảo trì</span>
-                                                    @break
-                                                @case('hidden')
-                                                    <span class="badge-status">Đang ẩn</span>
-                                                    @break
-                                                @default
-                                                    <span class="badge-status">{{ $room->status }}</span>
-                                            @endswitch
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4">
-                                            <div class="empty-state">
-                                                <div class="cell-title">Chưa có phòng nào</div>
-                                                <div class="cell-sub">Hãy thêm phòng để dữ liệu hiển thị tại đây.</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-
-            {{-- LỊCH XEM PHÒNG GẦN NHẤT --}}
-            <div class="col-lg-5">
-                <section class="content-card">
-                    <div class="card-header-owner">
-                        <div>
-                            <h2>Lịch xem phòng</h2>
-                            <p>Lịch hẹn khách đăng ký mới nhất</p>
+                                            </td>
+                                            <td>
+                                                <span class="price-badge-num">{{ number_format((float) $room->price, 0, ',', '.') }}đ</span>
+                                            </td>
+                                            <td>
+                                                @switch($room->status)
+                                                    @case('rented')
+                                                        <span class="badge-pill-state rented">Đang thuê</span>
+                                                        @break
+                                                    @case('available')
+                                                        <span class="badge-pill-state available">Còn trống</span>
+                                                        @break
+                                                    @case('pending')
+                                                        <span class="badge-pill-state pending">Đang chờ</span>
+                                                        @break
+                                                    @case('maintenance')
+                                                        <span class="badge-pill-state maintenance">Bảo trì</span>
+                                                        @break
+                                                    @default
+                                                        <span class="badge-pill-state">{{ $room->status }}</span>
+                                                @endswitch
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-5">
+                                                Chưa có phòng nào. Hãy thêm phòng để bắt đầu quản lý.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
-                        <a href="{{ route('owner.appointments.index') }}" class="btn-light-owner">
-                            Xem tất cả →
-                        </a>
                     </div>
+                </div>
 
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Khách xem</th>
-                                    <th>Phòng</th>
-                                    <th>Thời gian</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($appointments as $appointment)
-                                    @php
-                                        $tName = $appointment->tenant?->name ?? 'Khách xem';
-                                    @endphp
+                {{-- CỘT PHẢI (5 COLS): LỊCH HẸN XEM PHÒNG GẦN ĐÂY --}}
+                <div class="col-lg-5">
+                    <div class="content-box">
+                        <div class="box-head">
+                            <div>
+                                <h3 class="box-title">Lịch xem phòng</h3>
+                                <p class="box-sub">Khách đăng ký lịch xem mới nhất</p>
+                            </div>
+                            <a href="{{ route('owner.appointments.index') }}" class="box-link">
+                                Xem tất cả →
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="data-table-modern">
+                                <thead>
                                     <tr>
-                                        <td>
-                                            <div class="tenant-cell">
-                                                <div class="avatar-sm">
-                                                    {{ strtoupper(mb_substr($tName, 0, 1)) }}
+                                        <th>Khách xem</th>
+                                        <th>Phòng</th>
+                                        <th>Thời gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($appointments as $appointment)
+                                        @php
+                                            $tName = $appointment->tenant?->name ?? 'Khách xem';
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <div class="tenant-chip-name">{{ $tName }}</div>
+                                                <div class="small mt-1">
+                                                    @switch($appointment->status)
+                                                        @case('pending')
+                                                            <span class="text-warning fw-semibold" style="font-size: 11px;">Chờ xác nhận</span>
+                                                            @break
+                                                        @case('confirmed')
+                                                            <span class="text-success fw-semibold" style="font-size: 11px;">Đã xác nhận</span>
+                                                            @break
+                                                        @case('rejected')
+                                                            <span class="text-danger fw-semibold" style="font-size: 11px;">Từ chối</span>
+                                                            @break
+                                                        @default
+                                                            <span class="text-muted fw-semibold" style="font-size: 11px;">{{ $appointment->status }}</span>
+                                                    @endswitch
                                                 </div>
-                                                <div>
-                                                    <div class="cell-title" style="font-size: 13px;">{{ $tName }}</div>
-                                                    <div class="cell-sub">
-                                                        @switch($appointment->status)
-                                                            @case('pending')
-                                                                <span style="color: #b7791f; font-weight: 600;">Chờ xác nhận</span>
-                                                                @break
-                                                            @case('confirmed')
-                                                                <span style="color: #1b8a5a; font-weight: 600;">Đã xác nhận</span>
-                                                                @break
-                                                            @case('rescheduled')
-                                                                <span style="color: #2b6cb0; font-weight: 600;">Đổi lịch</span>
-                                                                @break
-                                                            @case('rejected')
-                                                                <span style="color: #c53030; font-weight: 600;">Từ chối</span>
-                                                                @break
-                                                            @case('cancelled')
-                                                                <span style="color: #718096; font-weight: 600;">Đã hủy</span>
-                                                                @break
-                                                            @case('completed')
-                                                                <span style="color: #4a5568; font-weight: 600;">Hoàn thành</span>
-                                                                @break
-                                                            @default
-                                                                <span>{{ $appointment->status }}</span>
-                                                        @endswitch
+                                            </td>
+                                            <td>
+                                                <div class="room-main-title" style="font-size: 13px;">
+                                                    {{ $appointment->room?->name ?? 'Phòng không tồn tại' }}
+                                                </div>
+                                                @if ($appointment->room?->property)
+                                                    <div class="room-sub-district">
+                                                        {{ $appointment->room->property->name }}
                                                     </div>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="date-time-box">
+                                                    <span class="date-text">{{ $appointment->appointment_date ? $appointment->appointment_date->format('d/m/Y') : '—' }}</span>
+                                                    <span class="time-text">{{ substr((string) $appointment->appointment_time, 0, 5) }}</span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="cell-title" style="font-size: 13px;">
-                                                {{ $appointment->room?->name ?? 'Phòng không tồn tại' }}
-                                            </div>
-                                            @if ($appointment->room?->property)
-                                                <div class="cell-sub">
-                                                    {{ $appointment->room->property->name }}
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="appointment-date-badge">
-                                                {{ $appointment->appointment_date ? $appointment->appointment_date->format('d/m/Y') : 'Chưa có ngày' }}
-                                            </div>
-                                            <div class="appointment-time-badge">
-                                                {{ substr((string) $appointment->appointment_time, 0, 5) }}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3">
-                                            <div class="empty-state">
-                                                <div class="cell-title">Chưa có lịch xem phòng</div>
-                                                <div class="cell-sub">Lịch hẹn mới sẽ hiển thị tại đây.</div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-5">
+                                                Chưa có lịch xem phòng mới.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </section>
+                </div>
+
             </div>
+
         </div>
 
     </div>

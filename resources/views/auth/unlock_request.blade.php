@@ -6,102 +6,7 @@
     <title>Yêu cầu mở khóa tài khoản | Trọ Ơi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --brand-primary: #0c2340;
-            --brand-accent: #ef7d27;
-            --brand-bg: #f8fafc;
-        }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--brand-bg);
-            color: #1e293b;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 16px;
-        }
-        .unlock-card {
-            background: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(12, 35, 64, 0.06);
-            border: 1px solid #e2e8f0;
-            max-width: 520px;
-            width: 100%;
-            overflow: hidden;
-        }
-        .card-top-bar {
-            height: 6px;
-            background: linear-gradient(90deg, var(--brand-primary) 0%, var(--brand-accent) 100%);
-        }
-        .card-header-inner {
-            padding: 28px 28px 0 28px;
-            text-align: center;
-        }
-        .logo-text {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--brand-primary);
-            letter-spacing: -0.5px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .logo-text span {
-            color: var(--brand-accent);
-        }
-        .card-body-inner {
-            padding: 24px 28px 32px 28px;
-        }
-        .info-pill-box {
-            background: #f1f5f9;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            font-size: 13.5px;
-        }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 0;
-            border-bottom: 1px dashed #cbd5e1;
-        }
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        .btn-submit-unlock {
-            background: var(--brand-primary);
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 14.5px;
-            padding: 12px 20px;
-            border-radius: 10px;
-            border: none;
-            width: 100%;
-            transition: all 0.2s ease;
-        }
-        .btn-submit-unlock:hover {
-            background: #16365c;
-            color: #ffffff;
-            transform: translateY(-1px);
-        }
-        .btn-home {
-            background: #f1f5f9;
-            color: #334155;
-            font-weight: 600;
-            font-size: 13.5px;
-            padding: 10px 18px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-home:hover {
-            background: #e2e8f0;
-            color: #0f172a;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/auth/unlock_request.css') }}">
 </head>
 <body>
 
@@ -109,7 +14,7 @@
     <div class="card-top-bar"></div>
 
     <div class="card-header-inner">
-        <a href="{{ route('home') }}" class="logo-text">Trọ <span>Ơi</span></a>
+        <a href="{{ url('/') }}" class="logo-text">Trọ <span>Ơi</span></a>
     </div>
 
     <div class="card-body-inner">
@@ -119,7 +24,7 @@
                 <div style="font-size: 13px;">{{ session('success') }}</div>
             </div>
             <div class="text-center mt-3">
-                <a href="{{ route('home') }}" class="btn-home">Về trang chủ</a>
+                <a href="{{ url('/') }}" class="btn-home">Về trang chủ</a>
             </div>
 
         @elseif ($invalidToken)
@@ -129,7 +34,7 @@
                     Đường dẫn yêu cầu mở khóa này không tồn tại hoặc đã hết hạn sử dụng. Nếu tài khoản của bạn đã được kích hoạt lại hoặc cần hỗ trợ thêm, vui lòng liên hệ quản trị viên.
                 </p>
                 <div class="mt-4">
-                    <a href="{{ route('home') }}" class="btn-home">Về trang chủ</a>
+                    <a href="{{ url('/') }}" class="btn-home">Về trang chủ</a>
                     <a href="{{ route('login') }}" class="btn btn-dark btn-sm ms-2 px-3 py-2" style="border-radius: 8px;">Đăng nhập</a>
                 </div>
             </div>
@@ -161,7 +66,7 @@
                     </div>
                 @endif
                 <div class="mt-3">
-                    <a href="{{ route('home') }}" class="btn-home">Về trang chủ</a>
+                    <a href="{{ url('/') }}" class="btn-home">Về trang chủ</a>
                 </div>
             </div>
 
@@ -218,7 +123,7 @@
                 </form>
 
                 <div class="text-center mt-3">
-                    <a href="{{ route('home') }}" class="text-muted text-decoration-none" style="font-size: 12.5px;">
+                    <a href="{{ url('/') }}" class="text-muted text-decoration-none" style="font-size: 12.5px;">
                         Quay lại trang chủ
                     </a>
                 </div>

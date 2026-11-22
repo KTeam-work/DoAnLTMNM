@@ -75,11 +75,15 @@
           </div>
         </div>
 
-        @if($maintenance->image)
+        @if(!empty($maintenance->images))
         <div>
-          <div class="info-label mb-2">Ảnh đính kèm</div>
+          <div class="info-label mb-2">Ảnh đính kèm ({{ count($maintenance->images) }} ảnh)</div>
           <div class="img-gallery d-flex gap-3 flex-wrap">
-            <img src="{{ asset('storage/' . $maintenance->image) }}" alt="Ảnh hiện trường">
+            @foreach($maintenance->images as $img)
+              <a href="{{ asset('storage/' . $img) }}" target="_blank">
+                <img src="{{ asset('storage/' . $img) }}" alt="Ảnh hiện trường" style="max-height: 120px; border-radius: 8px; object-fit: cover;">
+              </a>
+            @endforeach
           </div>
         </div>
         @endif

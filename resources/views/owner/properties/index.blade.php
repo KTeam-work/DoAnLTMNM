@@ -551,47 +551,4 @@
     </script>
 @endpush
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const root = document.querySelector('.owner-page');
-        if (!root || root.dataset.propertyFiltersReady) return;
-        root.dataset.propertyFiltersReady = '1';
-
-        const tabs = root.querySelectorAll('.segmented-filter-bar .segmented-tab');
-        const cards = root.querySelectorAll('.property-card');
-        const search = root.querySelector('#propertySearch');
-        const empty = root.querySelector('#noPropertyFilter');
-        const count = root.querySelector('#propertyResultCount');
-        let filter = 'all';
-
-        const normalize = value => String(value || '').toLocaleLowerCase('vi')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\u0111/g, 'd').trim();
-
-        function applyFilter() {
-            const keyword = normalize(search?.value);
-            let visible = 0;
-            cards.forEach(card => {
-                const status = card.dataset.status || '';
-                const matchesTab = filter === 'all'
-                    || (filter === 'active' && status === 'active')
-                    || (filter === 'inactive' && status !== 'active')
-                    || (filter === 'has_available' && card.dataset.hasAvailable === '1');
-                const show = matchesTab && normalize(card.dataset.search).includes(keyword);
-                card.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-            if (empty) empty.style.display = cards.length && !visible ? '' : 'none';
-            if (count) count.textContent = `Đang hiển thị ${visible}/${cards.length} bất động sản`;
-        }
-
-        search?.addEventListener('input', applyFilter);
-        tabs.forEach(tab => tab.addEventListener('click', function() {
-            tabs.forEach(item => item.classList.remove('active'));
-            this.classList.add('active');
-            filter = this.dataset.filter || 'all';
-            applyFilter();
-        }));
-    });
-</script>
-
 @endsection

@@ -20,7 +20,17 @@
   </div>
 
   @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-dismissible fade show d-flex align-items-center gap-3 p-3 mb-4 shadow-sm border-0" 
+         style="background: #ecfdf5; border-left: 5px solid #10b981 !important; border-radius: 14px; color: #065f46;" role="alert">
+      <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 38px; height: 38px; background: #10b981; color: white; font-size: 18px;">
+        <i class="bi bi-check-lg"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div class="fw-bold" style="font-size: 14px;">Thành công!</div>
+        <div style="font-size: 13px; color: #047857;">{{ session('success') }}</div>
+      </div>
+      <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
   @endif
   @if($errors->any())
     <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
@@ -64,8 +74,17 @@
       @if($maintenance->description)
       <div class="col-12">Mô tả: {{ $maintenance->description }}</div>
       @endif
-      @if($maintenance->image)
-      <div class="col-12">Ảnh đính kèm:<br><img src="{{ asset('storage/' . $maintenance->image) }}" alt="Ảnh hiện trường" style="max-width: 320px; border-radius: 12px; border: 1px solid var(--border);"></div>
+      @if(!empty($maintenance->images))
+      <div class="col-12">
+        <span class="text-muted small fw-bold">Ảnh hiện trường ({{ count($maintenance->images) }} ảnh):</span>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          @foreach($maintenance->images as $img)
+            <a href="{{ asset('storage/' . $img) }}" target="_blank">
+              <img src="{{ asset('storage/' . $img) }}" alt="Ảnh hiện trường" style="width: 140px; height: 105px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border);">
+            </a>
+          @endforeach
+        </div>
+      </div>
       @endif
       @if($maintenance->owner_note)
       <div class="col-12">Ghi chú của bạn: {{ $maintenance->owner_note }}</div>
@@ -110,7 +129,7 @@
               <input class="form-check-input" type="radio" name="damage_type" id="damage_landlord" value="landlord" 
                 @checked(old('damage_type', $maintenance->damage_type ?? 'landlord') === 'landlord') onchange="toggleCostInput(false)">
               <label class="form-check-label fw-semibold" for="damage_landlord">
-                <i class="bi bi-shield-check text-success me-1"></i> Hao mòn tự nhiên / Thiết bị cũ (Chủ trọ chịu chi phí)
+                Hao mòn tự nhiên / Thiết bị cũ (Chủ trọ chịu chi phí)
                 <span class="d-block text-muted small fw-normal">Chi phí 0 đ đối với khách thuê, không tạo hóa đơn.</span>
               </label>
             </div>
@@ -118,7 +137,7 @@
               <input class="form-check-input" type="radio" name="damage_type" id="damage_tenant" value="tenant" 
                 @checked(old('damage_type', $maintenance->damage_type) === 'tenant') onchange="toggleCostInput(true)">
               <label class="form-check-label fw-semibold" for="damage_tenant">
-                <i class="bi bi-exclamation-triangle text-danger me-1"></i> Do người thuê làm hỏng (Khách thuê chi trả)
+                Do người thuê làm hỏng (Khách thuê chi trả)
                 <span class="d-block text-muted small fw-normal">Hệ thống sẽ tự động tạo hóa đơn riêng kèm mã QR để người thuê thanh toán ngay.</span>
               </label>
             </div>
@@ -139,9 +158,12 @@
         </div>
       </div>
 
-      <div class="col-12">
-        <button type="submit" class="btn btn-success px-4 fw-semibold">
-          {{ $maintenance->invoice_id ? 'Lưu cập nhật' : 'Lưu & Tạo hóa đơn (nếu do khách chịu)' }}
+      <div class="col-12 d-flex gap-2 align-items-center">
+        <button type="submit" name="action" value="save" class="btn btn-secondary px-4 fw-semibold" id="btnSave">
+          Lưu
+        </button>
+        <button type="submit" name="action" value="create_invoice" class="btn btn-success px-4 fw-semibold" id="btnCreateInvoice" style="display: {{ (old('status', $maintenance->status) === 'completed' && old('damage_type', $maintenance->damage_type) === 'tenant') ? 'inline-block' : 'none' }};">
+          Tạo hóa đơn
         </button>
       </div>
     </form>
@@ -150,24 +172,35 @@
   <script>
     function toggleDamageFlow(status) {
       const flow = document.getElementById('damageFlowSection');
-      if (status === 'completed') {
-        flow.style.display = 'block';
-      } else {
-        flow.style.display = 'none';
+      const isCompleted = (status === 'completed');
+      if (flow) {
+        flow.style.display = isCompleted ? 'block' : 'none';
       }
+      const tenantRadio = document.getElementById('damage_tenant');
+      const isTenant = tenantRadio ? tenantRadio.checked : false;
+      toggleCostInput(isCompleted && isTenant);
     }
+
     function toggleCostInput(show) {
       const costWrap = document.getElementById('costInputWrap');
       const costInput = document.getElementById('costInput');
-      if (show) {
-        costWrap.style.display = 'block';
-        costInput.setAttribute('required', 'required');
-      } else {
-        costWrap.style.display = 'none';
-        costInput.removeAttribute('required');
-        costInput.value = '';
+      const btnCreateInvoice = document.getElementById('btnCreateInvoice');
+      if (costWrap) {
+        costWrap.style.display = show ? 'block' : 'none';
+      }
+      if (costInput) {
+        if (show) {
+          costInput.setAttribute('required', 'required');
+        } else {
+          costInput.removeAttribute('required');
+          costInput.value = '';
+        }
+      }
+      if (btnCreateInvoice) {
+        btnCreateInvoice.style.display = show ? 'inline-block' : 'none';
       }
     }
+
     document.addEventListener('DOMContentLoaded', function() {
       const sel = document.getElementById('statusSelect');
       if (sel) toggleDamageFlow(sel.value);

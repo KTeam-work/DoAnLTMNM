@@ -1,419 +1,826 @@
 /* =========================================================
-   OWNER DASHBOARD - THEME TV3 (WARM CREAM & FOREST GREEN)
+   OWNER DASHBOARD - MODERN DARK LUXURY PROPTECH THEME
+   Inspired by Luxury Real Estate UI (Airbnb / Glassmorphism)
+   ZERO ICONS - CLEAN TYPOGRAPHY & REAL HOUSE IMAGERY
    ========================================================= */
 
 body {
-    background: #f8fafc !important;
+    background-color: #f1f5f9 !important;
     color: #0f172a;
     font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 .owner-page {
     width: 100%;
-    min-height: calc(100vh - 70px);
-    background: #f8fafc;
+    min-height: calc(100vh - 74px);
+    background: #f1f5f9;
 }
 
 .owner-main {
-    max-width: 1500px;
+    max-width: 1420px;
     margin: 0 auto;
-    padding: 35px 30px 60px;
+    padding: 24px 20px 60px;
 }
 
-/* ================= PAGE HEADING ================= */
-.page-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 20px;
+/* =========================================================
+   1. HERO CARD (DARK LUXURY ARCHITECTURE HERO)
+   ========================================================= */
+.dashboard-hero-card {
+    position: relative;
+    border-radius: 28px;
+    padding: 42px 48px;
+    color: #ffffff;
+    box-shadow: 0 25px 60px -15px rgba(9, 19, 34, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    margin-bottom: 24px;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Atmospheric light overlay */
+.dashboard-hero-card::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 1;
+}
+
+/* Eyebrow Pill Tag (No icon) */
+.hero-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #93c5fd;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+    margin-bottom: 18px;
+}
+
+/* Big Headline */
+.hero-title {
+    font-size: 2.35rem;
+    font-weight: 800;
+    line-height: 1.22;
+    letter-spacing: -0.03em;
+    color: #ffffff;
+    margin-bottom: 14px;
+}
+
+.hero-title .title-accent {
+    background: linear-gradient(135deg, #f5c84b 0%, #fef08a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 580px;
     margin-bottom: 28px;
 }
 
-.eyebrow {
-    color: #0c2340;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
-    margin-bottom: 7px;
+.hero-desc strong {
+    color: #ffffff;
 }
 
-.page-heading h1 {
-    font-size: 30px;
-    font-weight: 800;
-    margin: 0;
+/* Floating White Pill Action Bar */
+.hero-pill-bar {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 9999px;
+    padding: 6px 8px 6px 20px;
+    box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.35);
+    gap: 16px;
     color: #0f172a;
-    letter-spacing: -0.5px;
+    max-width: 100%;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
 }
 
-.page-heading p {
-    color: #64748b;
-    margin: 8px 0 0;
-    font-size: 14px;
+.pill-item {
+    display: flex;
+    flex-direction: column;
+    padding-right: 14px;
+    border-right: 1px solid #e2e8f0;
 }
 
-.btn-owner {
-    border: none;
-    background: #0c2340;
-    color: white;
-    border-radius: 14px;
-    padding: 12px 20px;
+.pill-item:last-of-type {
+    border-right: none;
+}
+
+.pill-item .pill-label {
+    font-size: 10.5px;
     font-weight: 700;
-    font-size: 14px;
-    transition: all .2s ease;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.5px;
+}
+
+.pill-item .pill-value {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0c2340;
+    white-space: nowrap;
+}
+
+.btn-pill-action {
+    background: #0c2340;
+    color: #ffffff !important;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 9999px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 14px rgba(12, 35, 64, .15);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(12, 35, 64, 0.25);
+    white-space: nowrap;
 }
 
-.btn-owner:hover {
-    background: #163b65;
-    color: white;
+.btn-pill-action:hover {
+    background: #163e70;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(12, 35, 64, .22);
+    box-shadow: 0 6px 16px rgba(12, 35, 64, 0.35);
 }
 
-/* ================= STATS GRID ================= */
-.stats-grid {
+/* Secondary Quick Links (No icons) */
+.hero-sublinks {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.hero-sublink {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+
+.hero-sublink:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+/* Hero Featured House Card */
+.hero-featured-property {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+    transition: transform 0.25s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.hero-featured-property:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.hero-featured-img-box {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.hero-featured-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-featured-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.hero-featured-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.hero-featured-desc {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    margin-bottom: 10px;
+}
+
+.hero-featured-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.hero-featured-footer strong {
+    color: #f5c84b;
+}
+
+/* Right Side: Floating Glass Cards & House Preview */
+.hero-glass-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    justify-content: center;
+}
+
+.glass-card {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 20px;
+    padding: 22px 24px;
+    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.glass-card:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(255, 255, 255, 0.28);
+    transform: translateY(-3px);
+}
+
+.glass-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.glass-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.glass-badge.green {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.glass-badge.amber {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fde047;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.glass-val {
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+}
+
+.glass-sub {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    font-weight: 500;
+}
+
+.glass-progress {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+.glass-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #34d399);
+    border-radius: 999px;
+    box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+}
+
+/* Hero House Preview Card (Inspired by bottom-left house card in image 2) */
+.hero-house-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(14px);
+    border-radius: 16px;
+    padding: 10px 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.hero-house-thumb {
+    width: 60px;
+    height: 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.hero-house-meta {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.hero-house-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hero-house-sub {
+    font-size: 11.5px;
+    color: #cbd5e1;
+}
+
+.hero-house-tag {
+    font-size: 11px;
+    font-weight: 700;
+    background: #dcfce7;
+    color: #15803d;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   2. BOTTOM CRISP WHITE SECTION
+   ========================================================= */
+.dashboard-white-section {
+    background: #ffffff;
+    border-radius: 26px;
+    padding: 34px 38px;
+    box-shadow: 0 10px 40px -5px rgba(15, 23, 42, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+/* House Showcase Cards Grid (Ảnh ngôi nhà thực tế theo yêu cầu) */
+.house-showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.house-card {
+    background: #f8fafc;
+    border: 1px solid #eef2f6;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+}
+
+.house-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px -5px rgba(15, 23, 42, 0.08);
+    border-color: #cbd5e1;
+}
+
+.house-card-img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 135px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.house-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.house-card:hover .house-card-img {
+    transform: scale(1.04);
+}
+
+.house-card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.75);
+    color: #ffffff;
+    backdrop-filter: blur(6px);
+}
+
+.house-card-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+}
+
+.house-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+}
+
+.house-card-address {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.house-card-footer {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid #edf2f7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+}
+
+.house-card-stats {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.house-card-status {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+/* Segmented Filter Bar (From Image 3) */
+.segmented-filter-wrapper {
+    display: flex !important;
+    width: 100% !important;
+    align-items: center !important;
+    margin-bottom: 2rem !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+}
+
+.segmented-filter-bar {
+    display: flex !important;
+    width: 100% !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px !important;
+    background: #f2efe9 !important;
+    border: 1px solid #e5e0d5 !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+.segmented-tab {
+    flex: 1 1 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 10px 16px !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 8px !important;
+    color: #555c58 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.18s ease !important;
+    text-decoration: none !important;
+    user-select: none !important;
+    text-align: center !important;
+}
+
+.segmented-tab:hover {
+    background: rgba(255, 255, 255, 0.6) !important;
+    color: #1a221e !important;
+}
+
+.segmented-tab.active {
+    background: #ffffff !important;
+    color: #162c21 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+}
+
+.tab-count {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    padding: 0 6px !important;
+    border-radius: 999px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    background: #ded7cb !important;
+    color: #525955 !important;
+    line-height: 1 !important;
+    transition: all 0.18s ease !important;
+}
+
+.segmented-tab.active .tab-count {
+    background: #e4efe7 !important;
+    color: #134e2c !important;
+}
+
+/* Metric Strip (NO ICONS - Clean typography) */
+.metrics-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    margin-bottom: 28px;
+    padding-bottom: 26px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.stat-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 22px 24px;
-    box-shadow: 0 10px 25px -5px rgba(12, 35, 64, .05);
-    transition: transform .2s ease, box-shadow .2s ease;
+.metric-strip-item {
     display: flex;
     flex-direction: column;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border: 1px solid #eef2f6;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.metric-strip-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+
+.metric-strip-lbl {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.metric-strip-num {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+/* Content cards inside white container */
+.content-box {
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 20px;
+    padding: 24px;
+    height: 100%;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+}
+
+.box-head {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    margin-bottom: 20px;
     gap: 12px;
 }
 
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 30px -5px rgba(12, 35, 64, .1);
-}
-
-.stat-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.stat-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    background: #eff6ff;
-    color: #2563eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.stat-icon.green {
-    background: #f0fdf4;
-    color: #10b981;
-}
-
-.stat-icon.blue {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.stat-icon.yellow {
-    background: #fefce8;
-    color: #ca8a04;
-}
-
-.stat-icon.gold {
-    background: #eafaf1;
-    color: #16834b;
-}
-
-.stat-trend {
-    font-size: 12px;
+.box-title {
+    font-size: 1.05rem;
     font-weight: 700;
-    color: #10b981;
-}
-
-.stat-trend.down {
-    color: #dc3545;
-}
-
-.stat-trend.warning {
-    color: #d97706;
-}
-
-.stat-trend.muted {
-    color: #64748b;
-}
-
-.stat-value,
-.stat-card strong {
-    display: block;
-    font-size: 28px;
-    font-weight: 800;
-    color: #0c2340;
-    letter-spacing: -0.6px;
-    line-height: 1.2;
-    margin: 0;
-}
-
-.stat-label,
-.stat-card span.stat-sub {
-    display: block;
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 600;
-    margin: 0;
-}
-
-/* ================= CONTENT CARD ================= */
-.content-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    box-shadow: 0 10px 32px rgba(12, 35, 64, .05);
-    overflow: hidden;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.card-header-owner {
-    padding: 20px 24px;
-    border-bottom: 1px solid #f1f5f9;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-}
-
-.card-header-owner h2 {
-    font-size: 18px;
-    font-weight: 800;
-    margin: 0;
     color: #0f172a;
+    margin: 0;
 }
 
-.card-header-owner p {
-    margin: 4px 0 0;
+.box-sub {
+    font-size: 12.5px;
     color: #64748b;
-    font-size: 13px;
+    margin: 3px 0 0;
 }
 
-.btn-light-owner {
-    background: #eff6ff;
-    color: #0c2340;
+.box-link {
     font-size: 13px;
     font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 12px;
+    color: #0c2340;
     text-decoration: none;
-    transition: all .2s ease;
     white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    transition: color 0.15s ease;
 }
 
-.btn-light-owner:hover {
-    background: #dbeafe;
-    color: #163b65;
-    transform: translateY(-1px);
+.box-link:hover {
+    color: #2563eb;
+    text-decoration: underline;
 }
 
-/* ================= TABLES ================= */
-.table-responsive {
-    flex: 1;
-    overflow-x: auto;
-}
-
-.data-table {
+/* Modern tables (NO ICONS) */
+.data-table-modern {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin-bottom: 0;
 }
 
-.data-table thead th {
-    color: #64748b;
+.data-table-modern thead th {
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .6px;
-    padding: 16px 20px 12px;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    padding: 10px 14px;
     border-bottom: 1px solid #f1f5f9;
     background: #f8fafc;
-    white-space: nowrap;
 }
 
-.data-table tbody td {
-    padding: 16px 20px;
+.data-table-modern thead th:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.data-table-modern thead th:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.data-table-modern tbody td {
+    padding: 14px;
     border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
-    color: #0f172a;
-    font-size: 13px;
+    font-size: 13.5px;
 }
 
-.data-table tbody tr:last-child td {
+.data-table-modern tbody tr:last-child td {
     border-bottom: none;
 }
 
-.data-table tbody tr {
-    transition: background-color .15s ease;
+.data-table-modern tbody tr {
+    transition: background 0.15s ease;
 }
 
-.data-table tbody tr:hover td {
+.data-table-modern tbody tr:hover {
     background: #f8fafc;
 }
 
-.cell-title {
+.room-main-title {
     font-weight: 700;
     color: #0f172a;
-    font-size: 14px;
-    margin-bottom: 2px;
+    font-size: 13.5px;
 }
 
-.cell-sub {
+.room-sub-district {
+    font-size: 11.5px;
     color: #64748b;
-    font-size: 12px;
 }
 
-.price-text {
-    font-weight: 800;
-    color: #0c2340;
-    font-size: 14px;
+.tenant-chip-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
 }
 
-/* ================= BADGES & AVATARS ================= */
-.badge-status {
+.price-badge-num {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* Status Badges */
+.badge-pill-state {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border-radius: 30px;
-    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 11.5px;
     font-weight: 700;
     white-space: nowrap;
-    background: #f1f2f2;
-    color: #64746e;
 }
 
-.badge-status::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
+.badge-pill-state.rented {
+    background: #dcfce7;
+    color: #15803d;
 }
 
-.badge-status.occupied {
-    background: #eaf8f1;
-    color: #1b8a5a;
+.badge-pill-state.available {
+    background: #dbeafe;
+    color: #1d4ed8;
 }
 
-.badge-status.vacant {
-    background: #e6f3ff;
-    color: #0b72c9;
+.badge-pill-state.pending {
+    background: #fef3c7;
+    color: #b45309;
 }
 
-.badge-status.pending {
-    background: #fef7e7;
-    color: #b7791f;
-}
-
-.badge-status.overdue,
-.badge-status.maintenance {
-    background: #feeceb;
-    color: #c53030;
-}
-
-.tenant-cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.avatar-sm {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: #eff6ff;
-    color: #0c2340;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 12px;
-    flex-shrink: 0;
-}
-
-.appointment-date-badge {
-    display: inline-block;
-    padding: 3px 9px;
-    border-radius: 8px;
+.badge-pill-state.maintenance {
     background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    font-size: 12px;
-    font-weight: 700;
-    color: #0c2340;
+    color: #475569;
 }
 
-.appointment-time-badge {
+.date-time-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.date-text {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 12.5px;
+}
+
+.time-text {
+    font-size: 11.5px;
     color: #64748b;
-    font-size: 11px;
-    margin-top: 3px;
 }
 
-.empty-state {
-    text-align: center;
-    padding: 45px 20px;
-    color: #64748b;
-}
-
-.empty-state-icon {
-    font-size: 40px;
-    margin-bottom: 10px;
-    opacity: 0.8;
-}
-
-/* ================= RESPONSIVE ================= */
-@media (max-width: 1100px) {
-    .stats-grid {
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .dashboard-hero-card {
+        padding: 30px 24px;
+    }
+    .hero-title {
+        font-size: 1.85rem;
+    }
+    .metrics-strip {
         grid-template-columns: repeat(2, 1fr);
     }
+    .hero-glass-cards {
+        margin-top: 28px;
+    }
 }
 
-@media (max-width: 768px) {
-    .owner-main {
-        padding: 24px 16px;
-    }
-
-    .stats-grid {
+@media (max-width: 576px) {
+    .metrics-strip {
         grid-template-columns: 1fr;
     }
-
-    .page-heading {
+    .hero-pill-bar {
+        border-radius: 16px;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 14px;
+        align-items: stretch;
+        padding: 16px;
     }
-
-    .card-header-owner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+    .pill-item {
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 8px;
     }
 }
-

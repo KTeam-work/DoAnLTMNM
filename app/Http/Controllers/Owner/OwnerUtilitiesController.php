@@ -87,6 +87,102 @@ class OwnerUtilitiesController extends Controller
         return response()->json(['data' => $readings]);
     }
 
+    public function export(Request $request)
+    {
+        $owner = $request->user() && $request->user()->role === 'owner'
+            ? $request->user()
+            : (config('app.demo_guest')
+                ? User::query()->where('role', 'owner')->orderBy('id')->first()
+                : $this->owner($request));
+
+        if (! $owner) {
+            abort(403);
+        }
+
+        $selectedRoomId = $request->input('room_id');
+        $month = $request->filled('month') ? $request->input('month') : null;
+
+        $readings = UtilityReading::query()
+            ->whereHas('room.property', fn ($query) => $query->where('owner_id', $owner->id))
+            ->when($selectedRoomId, fn ($query) => $query->where('room_id', $selectedRoomId))
+            ->when($month, fn ($query) => $query->whereDate('month', Carbon::parse($month)->startOfMonth()))
+            ->with(['room.property'])
+            ->orderByDesc('month')
+            ->orderBy('room_id')
+            ->get();
+
+        $filename = 'chi_so_dien_nuoc_' . ($month ? str_replace('-', '_', $month) : 'tat_ca_' . date('Ymd_His')) . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($readings) {
+            $handle = fopen('php://output', 'w');
+            // Ghi UTF-8 BOM để Excel đọc tiếng Việt có dấu chuẩn xác 100%
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'STT',
+                'Phòng',
+                'Mã phòng',
+                'Nhà trọ',
+                'Kỳ (Tháng)',
+                'Điện cũ (kWh)',
+                'Điện mới (kWh)',
+                'Tiêu thụ điện (kWh)',
+                'Đơn giá điện (đ/kWh)',
+                'Tiền điện (đ)',
+                'Nước cũ (m3)',
+                'Nước mới (m3)',
+                'Tiêu thụ nước (m3)',
+                'Đơn giá nước (đ/m3)',
+                'Tiền nước (đ)',
+                'Tổng tiền (đ)',
+                'Trạng thái',
+                'Ngày ghi',
+            ]);
+
+            $index = 1;
+            foreach ($readings as $r) {
+                $eUse = (float)$r->electricity_new - (float)$r->electricity_old;
+                $wUse = (float)$r->water_new - (float)$r->water_old;
+                $eMoney = $eUse * (float)$r->electricity_price;
+                $wMoney = $wUse * (float)$r->water_price;
+                $total = $eMoney + $wMoney;
+
+                fputcsv($handle, [
+                    $index++,
+                    $r->room->name ?? '',
+                    $r->room->room_code ?? '',
+                    $r->room->property->name ?? '',
+                    $r->month ? Carbon::parse($r->month)->format('m/Y') : '',
+                    $r->electricity_old,
+                    $r->electricity_new,
+                    $eUse,
+                    $r->electricity_price,
+                    $eMoney,
+                    $r->water_old,
+                    $r->water_new,
+                    $wUse,
+                    $r->water_price,
+                    $wMoney,
+                    $total,
+                    'Đã ghi',
+                    $r->created_at ? $r->created_at->format('d/m/Y H:i') : '',
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create(Request $request)
     {
         $owner = $request->user() && $request->user()->role === 'owner'

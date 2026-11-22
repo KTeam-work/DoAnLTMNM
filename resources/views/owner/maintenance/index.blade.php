@@ -21,10 +21,20 @@
   </div>
 
   @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-dismissible fade show d-flex align-items-center gap-3 p-3 mb-4 shadow-sm border-0" 
+         style="background: #ecfdf5; border-left: 5px solid #10b981 !important; border-radius: 14px; color: #065f46;" role="alert">
+      <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style="width: 38px; height: 38px; background: #10b981; color: white; font-size: 18px;">
+        <i class="bi bi-check-lg"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div class="fw-bold" style="font-size: 14px;">Thành công!</div>
+        <div style="font-size: 13px; color: #047857;">{{ session('success') }}</div>
+      </div>
+      <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
   @endif
   @if($errors->any())
-    <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+    <div class="alert alert-danger" style="border-radius: 14px;"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
   @endif
 
   <!-- ALERT STRIP -->
@@ -103,22 +113,22 @@
             <div class="ticket-actions">
               <a href="{{ route('owner.maintenance.show', $ticket->id) }}" class="btn-icon" data-bs-toggle="tooltip" title="Xem chi tiết & Cập nhật"><i class="bi bi-eye-fill"></i></a>
               @if($ticket->status === 'pending')
-                <form action="{{ route('owner.maintenance.status', $ticket->id) }}" method="POST" class="d-inline">
-                  @csrf
-                  @method('PUT')
-                  <input type="hidden" name="status" value="processing">
-                  <button type="submit" class="btn-icon success" data-bs-toggle="tooltip" title="Bắt đầu sửa" onclick="return confirm('Bắt đầu sửa yêu cầu này?')"><i class="bi bi-tools"></i></button>
-                </form>
+                <button type="button" class="btn-icon success btn-start-repair" 
+                        data-ticket-id="{{ $ticket->id }}"
+                        data-ticket-title="{{ $ticket->title }}"
+                        data-ticket-room="{{ $ticket->room->name ?? '—' }}"
+                        data-ticket-tenant="{{ $ticket->tenant->name ?? '—' }}"
+                        data-action="{{ route('owner.maintenance.status', $ticket->id) }}"
+                        data-bs-toggle="tooltip" title="Bắt đầu sửa"><i class="bi bi-tools"></i></button>
               @elseif($ticket->status === 'processing')
                 <a href="{{ route('owner.maintenance.show', $ticket->id) }}" class="btn-icon success" data-bs-toggle="tooltip" title="Hoàn thành & Phân loại chi phí"><i class="bi bi-check-lg"></i></a>
               @endif
               @if(in_array($ticket->status, ['pending', 'processing']))
-                <form action="{{ route('owner.maintenance.status', $ticket->id) }}" method="POST" class="d-inline">
-                  @csrf
-                  @method('PUT')
-                  <input type="hidden" name="status" value="rejected">
-                  <button type="submit" class="btn-icon danger" data-bs-toggle="tooltip" title="Từ chối" onclick="return confirm('Từ chối yêu cầu này?')"><i class="bi bi-x-lg"></i></button>
-                </form>
+                <button type="button" class="btn-icon danger btn-reject-repair" 
+                        data-ticket-id="{{ $ticket->id }}"
+                        data-ticket-title="{{ $ticket->title }}"
+                        data-action="{{ route('owner.maintenance.status', $ticket->id) }}"
+                        data-bs-toggle="tooltip" title="Từ chối"><i class="bi bi-x-lg"></i></button>
               @endif
             </div>
           </div>
@@ -132,6 +142,84 @@
   </div>
   <div class="mt-3">{{ $requests->links() }}</div>
 
+</div>
+
+<!-- MODAL XÁC NHẬN BẮT ĐẦU SỬA CHỮA (MODERN) -->
+<div class="modal fade" id="startRepairModal" tabindex="-1" aria-labelledby="startRepairModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+      <div class="modal-body p-4 text-center">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" 
+             style="width: 60px; height: 60px; background: #ecfdf5; color: #059669; font-size: 26px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);">
+          <i class="bi bi-tools"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-2" id="startRepairModalLabel" style="font-size: 18px;">Bắt đầu sửa chữa</h5>
+        <p class="text-muted small mb-3" style="line-height: 1.5;">
+          Bạn chuẩn bị tiếp nhận sự cố này. Hệ thống sẽ chuyển trạng thái sang <span class="badge bg-primary-subtle text-primary fw-bold">Đang sửa</span> và tự động gửi thông báo đến khách thuê.
+        </p>
+
+        <div class="p-3 mb-3 text-start rounded-3 border" style="background: #f8fafc; font-size: 13px;">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Mã yêu cầu:</span>
+            <span class="fw-bold text-dark" id="modalTicketCode">#TCK-—</span>
+          </div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Sự cố:</span>
+            <span class="fw-bold text-dark text-truncate" style="max-width: 220px;" id="modalTicketTitle">—</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Phòng / Khách:</span>
+            <span class="fw-semibold text-secondary text-truncate" style="max-width: 220px;" id="modalTicketRoom">—</span>
+          </div>
+        </div>
+
+        <form id="startRepairForm" method="POST" action="">
+          @csrf
+          @method('PUT')
+          <input type="hidden" name="status" value="processing">
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-light flex-grow-1 py-2 fw-semibold" data-bs-dismiss="modal" style="border-radius: 12px; font-size: 13.5px;">
+              Để sau
+            </button>
+            <button type="submit" class="btn flex-grow-1 py-2 fw-bold text-white" style="background: #059669; border-radius: 12px; font-size: 13.5px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
+              Bắt đầu sửa ngay
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL XÁC NHẬN TỪ CHỐI (MODERN) -->
+<div class="modal fade" id="rejectRepairModal" tabindex="-1" aria-labelledby="rejectRepairModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+      <div class="modal-body p-4 text-center">
+        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" 
+             style="width: 60px; height: 60px; background: #fef2f2; color: #dc2626; font-size: 26px;">
+          <i class="bi bi-x-circle"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-2" id="rejectRepairModalLabel" style="font-size: 18px;">Từ chối yêu cầu sửa chữa</h5>
+        <p class="text-muted small mb-3">
+          Bạn có chắc chắn muốn từ chối yêu cầu này? Trạng thái sẽ được đổi thành <span class="badge bg-danger-subtle text-danger fw-bold">Đã từ chối</span>.
+        </p>
+        <form id="rejectRepairForm" method="POST" action="">
+          @csrf
+          @method('PUT')
+          <input type="hidden" name="status" value="rejected">
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-light flex-grow-1 py-2 fw-semibold" data-bs-dismiss="modal" style="border-radius: 12px; font-size: 13.5px;">
+              Hủy bỏ
+            </button>
+            <button type="submit" class="btn btn-danger flex-grow-1 py-2 fw-bold" style="border-radius: 12px; font-size: 13.5px;">
+              Xác nhận từ chối
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 

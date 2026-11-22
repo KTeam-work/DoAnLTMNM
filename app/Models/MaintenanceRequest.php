@@ -29,6 +29,18 @@ class MaintenanceRequest extends Model
         return $this->belongsTo(Contract::class);
     }
 
+    public function getImagesAttribute(): array
+    {
+        if (empty($this->image)) {
+            return [];
+        }
+        $decoded = json_decode($this->image, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+        return [$this->image];
+    }
+
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);

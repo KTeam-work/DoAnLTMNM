@@ -255,6 +255,12 @@
                 </table>
             </div>
         </section>
+
+        <script>
+            if (typeof window.initRoomManage === 'function') {
+                window.initRoomManage();
+            }
+        </script>
     </main>
 
   
@@ -262,6 +268,11 @@
  
 @push('scripts')
     <script src="{{ asset('js/tv3/rooms/manage.js') }}"></script>
+    <script>
+        if (typeof window.initRoomManage === 'function') {
+            window.initRoomManage();
+        }
+    </script>
 @endpush
 
 

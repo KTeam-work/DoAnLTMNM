@@ -65,6 +65,8 @@ class MaintenanceController extends Controller
             'description' => ['required', 'string'],
             'priority' => ['required', 'in:low,medium,high,urgent'],
             'image' => ['nullable', 'image', 'max:10240'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['nullable', 'image', 'max:10240'],
         ]);
 
         // Chống gửi yêu cầu cho hợp đồng không thuộc tenant hoặc đã hết hiệu lực.
@@ -76,9 +78,23 @@ class MaintenanceController extends Controller
             abort(422, 'The contract does not belong to you or is no longer active.');
         }
 
-        $imagePath = null;
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                if ($file && $file->isValid()) {
+                    $imagePaths[] = $file->store('maintenance', 'public');
+                }
+            }
+        }
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('maintenance', 'public');
+            $imagePaths[] = $request->file('image')->store('maintenance', 'public');
+        }
+
+        $imageValue = null;
+        if (count($imagePaths) === 1) {
+            $imageValue = $imagePaths[0];
+        } elseif (count($imagePaths) > 1) {
+            $imageValue = json_encode($imagePaths);
         }
 
         $maintenance = MaintenanceRequest::query()->create([
@@ -91,7 +107,7 @@ class MaintenanceController extends Controller
             'description' => $data['description'],
             'priority' => $data['priority'],
             'status' => 'pending',
-            'image' => $imagePath,
+            'image' => $imageValue,
         ]);
 
         // Gửi thông báo trực tiếp đến Chủ trọ quản lý phòng

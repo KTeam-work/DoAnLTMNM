@@ -26,29 +26,23 @@
   @endif
 
   <!-- STAT CARDS -->
-  <div class="row g-3 mb-4 animate-up delay-2">
-    <div class="col-12 col-md-5">
+  <div class="row g-3 mb-4 animate-up delay-2" id="paymentStatCards">
+    <div class="col-12 col-md-6">
       <div class="stat-primary skeleton-box">
         <div class="hide-on-skeleton">
           <div class="stat-period"><i class="bi bi-calendar3 me-1"></i>Tổng đã thu</div>
-          <div class="stat-value mono-num">{{ number_format((float) $stats['collected']) }} ₫</div>
+          <div class="stat-value mono-num" id="statCollectedValue">{{ number_format((float) $stats['collected']) }} ₫</div>
           <div class="stat-label">Các giao dịch thành công</div>
         </div>
       </div>
     </div>
 
-    <div class="col-12 col-md-7">
-      <div class="row g-3 h-100">
-        <div class="col-12">
-          <div class="stat-secondary skeleton-box">
-            <div class="hide-on-skeleton d-flex align-items-center gap-3 w-100">
-              <div class="icon-chip" style="background: var(--bank-tint); color: var(--bank);"><i class="bi bi-clock"></i></div>
-              <div>
-                <div class="stat-value mono-num">{{ number_format((float) $stats['pending']) }} ₫</div>
-                <div class="stat-label">Đang chờ xác nhận</div>
-              </div>
-            </div>
-          </div>
+    <div class="col-12 col-md-6">
+      <div class="stat-secondary skeleton-box">
+        <div class="hide-on-skeleton">
+          <div class="stat-period"><i class="bi bi-clock-history me-1"></i>Đang chờ xác nhận</div>
+          <div class="stat-value mono-num" id="statPendingValue">{{ number_format((float) $stats['pending']) }} ₫</div>
+          <div class="stat-label">Các giao dịch chuyển khoản chờ duyệt</div>
         </div>
       </div>
     </div>
@@ -57,33 +51,35 @@
   <!-- BẢNG GIAO DỊCH -->
   <div class="panel animate-up delay-3 skeleton-box">
     @php
-      $methodLabels = ['cash' => 'Tiền mặt', 'bank_transfer' => 'Chuyển khoản', 'qr' => 'QR', 'online' => 'Online'];
+      $methodLabels = ['cash' => 'Tiền mặt', 'bank_transfer' => 'Chuyển khoản'];
       $payStatusLabels = ['pending' => 'Đang chờ', 'success' => 'Thành công', 'failed' => 'Thất bại', 'cancelled' => 'Đã hủy'];
     @endphp
     <div class="panel-head d-flex flex-wrap gap-3 justify-content-between align-items-center border-bottom pb-3 hide-on-skeleton">
       <h3 class="panel-title mb-0">Danh sách giao dịch</h3>
 
-      <form method="GET" action="{{ route('owner.payments.index') }}" class="d-flex flex-wrap gap-2">
-        <input type="month" name="month" class="form-control form-control-sm w-auto shadow-none" value="{{ $filters['month'] ?? '' }}" onchange="this.form.submit()">
-        <select name="method" class="form-select form-select-sm w-auto shadow-none fw-semibold" onchange="this.form.submit()">
+      <form id="paymentFilterForm" method="GET" action="{{ route('owner.payments.index') }}" class="d-flex flex-wrap gap-2">
+        <input type="month" name="month" id="filterMonth" class="form-control form-control-sm w-auto shadow-none" value="{{ $filters['month'] ?? '' }}">
+        <select name="method" id="filterMethod" class="form-select form-select-sm w-auto shadow-none fw-semibold">
           <option value="">Tất cả hình thức</option>
           @foreach($methodLabels as $value => $label)
             <option value="{{ $value }}" @selected(($filters['method'] ?? '') === $value)>{{ $label }}</option>
           @endforeach
         </select>
-        <select name="status" class="form-select form-select-sm w-auto shadow-none fw-semibold" onchange="this.form.submit()">
+        <select name="status" id="filterStatus" class="form-select form-select-sm w-auto shadow-none fw-semibold">
           <option value="">Tất cả trạng thái</option>
           @foreach($payStatusLabels as $value => $label)
             <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
           @endforeach
         </select>
-        @if(!empty($filters['month']) || !empty($filters['method']) || !empty($filters['status']))
-          <a href="{{ route('owner.payments.index') }}" class="btn btn-sm btn-light border">Xóa lọc</a>
-        @endif
+        <div id="paymentResetWrapper" class="d-inline-flex">
+          @if(!empty($filters['month']) || !empty($filters['method']) || !empty($filters['status']))
+            <a href="{{ route('owner.payments.index') }}" class="btn btn-sm btn-light border" id="resetPaymentFilterBtn">Xóa lọc</a>
+          @endif
+        </div>
       </form>
     </div>
 
-    <div class="table-responsive mt-3 hide-on-skeleton">
+    <div class="table-responsive mt-3 hide-on-skeleton" id="paymentTableWrapper">
       <table class="data-table" id="paymentTable">
         <thead>
           <tr>
@@ -143,17 +139,28 @@
       </table>
     </div>
 
-    <div class="panel-footer hide-on-skeleton">
+    <div class="panel-footer hide-on-skeleton" id="paymentFooterWrapper">
       <div>Tổng {{ $payments->total() }} giao dịch</div>
       <div>{{ $payments->links() }}</div>
     </div>
   </div>
+
+  <script>
+    if (typeof window.initPaymentAjaxFilters === 'function') {
+      window.initPaymentAjaxFilters();
+    }
+  </script>
 </div>
 
 
 
 @push('scripts')
     <script src="{{ asset('js/tv4/payments/index.js') }}"></script>
+    <script>
+      if (typeof window.initPaymentAjaxFilters === 'function') {
+        window.initPaymentAjaxFilters();
+      }
+    </script>
 @endpush
 
 

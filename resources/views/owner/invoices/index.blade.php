@@ -18,12 +18,9 @@
       <div class="page-desc">Kỳ thanh toán hiện tại: <strong>Tháng {{ \Carbon\Carbon::parse($currentMonth)->format('m/Y') }}</strong></div>
     </div>
     <div class="d-flex gap-2">
-      <form action="{{ route('owner.invoices.process-due-now') }}" method="POST" class="m-0" onsubmit="return confirm('Hệ thống sẽ quét ngày hết hạn của các hóa đơn, gửi thông báo nhắc nợ và cập nhật trạng thái Quá hạn. Tiếp tục?')">
-        @csrf
-        <button type="submit" class="btn btn-outline-success fw-bold" style="border-radius: 8px; padding: 8px 14px; font-size: 13px;" title="Kích hoạt kiểm tra hạn hóa đơn tự động">
-          Quét nợ &amp; Cập nhật quá hạn
-        </button>
-      </form>
+      <button type="button" class="btn btn-outline-success fw-bold" style="border-radius: 8px; padding: 8px 14px; font-size: 13px;" data-bs-toggle="modal" data-bs-target="#processDueModal" title="Kích hoạt kiểm tra hạn hóa đơn tự động">
+        Quét nợ &amp; Cập nhật quá hạn
+      </button>
       <button class="btn-brand" data-bs-toggle="modal" data-bs-target="#bulkCreateModal">
         Tạo hóa đơn tháng
       </button>
@@ -31,14 +28,21 @@
   </div>
 
   @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert" style="border-radius: 12px; font-size: 14px;">
+      <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+      <div>{{ session('success') }}</div>
+      <button type="button" class="btn-close ms-auto shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
   @endif
   @if($errors->any())
-    <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="border-radius: 12px; font-size: 14px;">
+      <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+      <button type="button" class="btn-close ms-auto shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
   @endif
 
   <!-- STAT CARDS -->
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-4" id="invoiceStatCards">
     <div class="col-12 col-md-4">
       <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <div class="stat-top d-flex justify-content-between align-items-center">
@@ -77,21 +81,23 @@
   <div class="panel">
     <div class="panel-head">
       <h3 class="fw-bold fs-5 mb-0">Danh sách Hóa đơn</h3>
-      <form method="GET" action="{{ route('owner.invoices.index') }}" class="d-flex flex-wrap gap-2">
-        <input type="month" name="month" class="form-control form-control-sm w-auto shadow-none" value="{{ $filters['month'] ?? '' }}" onchange="this.form.submit()">
-        <select name="status" class="form-select form-select-sm w-auto shadow-none" onchange="this.form.submit()">
+      <form id="invoiceFilterForm" method="GET" action="{{ route('owner.invoices.index') }}" class="d-flex flex-wrap gap-2">
+        <input type="month" name="month" class="form-control form-control-sm w-auto shadow-none" value="{{ $filters['month'] ?? '' }}">
+        <select name="status" class="form-select form-select-sm w-auto shadow-none">
           <option value="">Tất cả trạng thái</option>
           @foreach(['unpaid' => 'Chưa thanh toán', 'pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'overdue' => 'Quá hạn', 'cancelled' => 'Đã hủy'] as $value => $label)
             <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
           @endforeach
         </select>
-        @if(!empty($filters['month']) || !empty($filters['status']))
-          <a href="{{ route('owner.invoices.index') }}" class="btn btn-sm btn-light border">Xóa lọc</a>
-        @endif
+        <div id="invoiceResetWrapper" class="d-inline-flex">
+          @if(!empty($filters['month']) || !empty($filters['status']))
+            <a href="{{ route('owner.invoices.index') }}" class="btn btn-sm btn-light border" id="resetInvoiceFilterBtn">Xóa lọc</a>
+          @endif
+        </div>
       </form>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive" id="invoiceTableWrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -176,19 +182,6 @@
         <div class="mb-3">
           <label for="invoice-due-date" class="form-label small fw-bold">Hạn chót thanh toán (tùy chọn)</label>
           <input id="invoice-due-date" type="date" name="due_date" class="form-control" value="{{ now()->addDays(7)->toDateString() }}">
-          <div class="d-flex flex-wrap gap-1 mt-2">
-            <span class="small text-muted me-1" style="font-size: 11px;">Chọn nhanh để test:</span>
-            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 11px;" onclick="document.getElementById('invoice-due-date').value='{{ now()->addDays(7)->toDateString() }}'">
-              Bình thường (+7 ngày)
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="document.getElementById('invoice-due-date').value='{{ now()->addDays(2)->toDateString() }}'">
-              Test nhắc nợ (+2 ngày)
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 11px;" onclick="document.getElementById('invoice-due-date').value='{{ now()->subDays(2)->toDateString() }}'">
-              Test quá hạn (-2 ngày)
-            </button>
-          </div>
-          <div class="form-text" style="font-size: 11px;">Bấm <strong>"Test quá hạn"</strong> để tạo ngay hóa đơn quá hạn cho giáo viên xem demo.</div>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-bold">Giảm giá chung (đ, tùy chọn)</label>
@@ -203,5 +196,159 @@
     </form>
   </div>
 </div>
+
+<!-- MODAL QUÉT NỢ & CẬP NHẬT QUÁ HẠN -->
+<div class="modal fade" id="processDueModal" tabindex="-1" aria-labelledby="processDueModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden;">
+      <div class="modal-header border-0 pb-0 pt-4 px-4">
+        <h5 class="modal-title fw-bold text-dark" id="processDueModalLabel">
+          Quét nợ & Cập nhật quá hạn
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body px-4 py-3">
+        <p class="text-muted mb-3" style="font-size: 14px;">
+          Hệ thống sẽ tiến hành rà soát tự động tất cả các hóa đơn trong hệ thống:
+        </p>
+
+        <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+          <div class="d-flex align-items-start gap-2 mb-2">
+            <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1" style="font-size: 11px;">1. Quét hạn chót</span>
+            <span style="font-size: 13px; color: #334155;">Kiểm tra ngày đến hạn thanh toán của từng hóa đơn đang chờ thu.</span>
+          </div>
+          <div class="d-flex align-items-start gap-2 mb-2">
+            <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-2 py-1" style="font-size: 11px;">2. Gửi nhắc nợ</span>
+            <span style="font-size: 13px; color: #334155;">Tự động gửi thông báo đến người thuê cho các hóa đơn sắp đến hạn hoặc đến hạn hôm nay.</span>
+          </div>
+          <div class="d-flex align-items-start gap-2">
+            <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1" style="font-size: 11px;">3. Quá hạn</span>
+            <span style="font-size: 13px; color: #334155;">Chuyển trạng thái sang <strong>Quá hạn</strong> nếu đã vượt quá ngày thanh toán mà chưa trả.</span>
+          </div>
+        </div>
+
+        <div class="text-muted" style="font-size: 12.5px;">
+          Bạn có chắc chắn muốn tiến hành quét và cập nhật trạng thái ngay bây giờ?
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light px-4 py-3">
+        <button type="button" class="btn btn-light border fw-semibold px-4" data-bs-dismiss="modal">Hủy bỏ</button>
+        <form action="{{ route('owner.invoices.process-due-now') }}" method="POST" class="m-0">
+          @csrf
+          <button type="submit" class="btn btn-success fw-bold px-4">
+            Bắt đầu quét &amp; Cập nhật
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (typeof window.initInvoiceAjaxFilters === 'function') {
+    window.initInvoiceAjaxFilters();
+  }
+</script>
+
+@push('scripts')
+<script>
+function initInvoiceAjaxFilters() {
+  const form = document.getElementById('invoiceFilterForm');
+  if (!form || form.dataset.ajaxInitialized === 'true') return;
+  form.dataset.ajaxInitialized = 'true';
+
+  let isFetching = false;
+
+  async function applyInvoiceFilterAjax(url) {
+    if (isFetching) return;
+    isFetching = true;
+
+    const tableWrapper = document.getElementById('invoiceTableWrapper');
+    const statWrapper = document.getElementById('invoiceStatCards');
+
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'text/html'
+        }
+      });
+
+      if (!res.ok) {
+        window.location.href = url;
+        return;
+      }
+
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+
+      // 1. Cập nhật Stat Cards
+      const newStats = doc.getElementById('invoiceStatCards');
+      if (newStats && statWrapper) {
+        statWrapper.innerHTML = newStats.innerHTML;
+      }
+
+      // 2. Cập nhật Table
+      const newTable = doc.getElementById('invoiceTableWrapper');
+      if (newTable && tableWrapper) {
+        tableWrapper.innerHTML = newTable.innerHTML;
+      }
+
+      // 3. Cập nhật nút Xóa lọc
+      const resetWrapper = document.getElementById('invoiceResetWrapper');
+      const newReset = doc.getElementById('invoiceResetWrapper');
+      if (newReset && resetWrapper) {
+        resetWrapper.innerHTML = newReset.innerHTML;
+      }
+
+      // 4. Cập nhật URL trình duyệt
+      window.history.pushState({}, '', url);
+
+    } catch (e) {
+      console.error('Invoice AJAX filter error:', e);
+      window.location.href = url;
+    } finally {
+      isFetching = false;
+    }
+  }
+
+  function onInvoiceFilterChange() {
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      if (value) params.append(key, value);
+    }
+    const targetUrl = form.action + (params.toString() ? '?' + params.toString() : '');
+    applyInvoiceFilterAjax(targetUrl);
+  }
+
+  form.querySelectorAll('input, select').forEach(el => {
+    el.onchange = onInvoiceFilterChange;
+  });
+
+  form.onsubmit = function(e) {
+    e.preventDefault();
+    onInvoiceFilterChange();
+  };
+
+  document.addEventListener('click', function(e) {
+    const resetLink = e.target.closest('#resetInvoiceFilterBtn');
+    if (resetLink) {
+      e.preventDefault();
+      form.querySelectorAll('input, select').forEach(el => el.value = '');
+      applyInvoiceFilterAjax(resetLink.href);
+    }
+  });
+}
+
+window.initInvoiceAjaxFilters = initInvoiceAjaxFilters;
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initInvoiceAjaxFilters);
+} else {
+  initInvoiceAjaxFilters();
+}
+</script>
+@endpush
 
 @endsection

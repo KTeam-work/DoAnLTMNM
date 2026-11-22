@@ -17,7 +17,9 @@
       <div class="page-desc">Theo dõi mức tiêu thụ và chốt chỉ số cho các phòng trong tháng.</div>
     </div>
     <div class="d-flex gap-2">
-      <button class="btn-outline-brand">Xuất Excel</button>
+      <a href="{{ route('owner.utilities.export', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" id="utilitiesExcelLink" class="btn-outline-brand text-decoration-none d-inline-flex align-items-center gap-1" data-no-ajax="true">
+        Xuất Excel
+      </a>
       <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId])) }}" >Ghi chỉ số mới</a>
     </div>
   </div>
@@ -34,7 +36,7 @@
       $totalM3 = $displayedReadings->sum(fn($r) => (float)$r->water_new - (float)$r->water_old);
       $totalMoney = $displayedReadings->sum(fn($r) => ((float)$r->electricity_new - (float)$r->electricity_old) * (float)$r->electricity_price + ((float)$r->water_new - (float)$r->water_old) * (float)$r->water_price);
   @endphp
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-4" id="utilitiesStatCards">
     <div class="col-6 col-lg-3">
       <div class="stat-card" style="background: #ffffff; border: 1px solid #edf2f7; border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
         <div class="stat-top d-flex justify-content-between align-items-center">
@@ -97,10 +99,10 @@
     @endif
     
     <!-- FILTERS -->
-    <form method="GET" action="{{ route('owner.utilities.index') }}" class="row g-3 mb-3">
+    <form method="GET" action="{{ route('owner.utilities.index') }}" id="utilityFilterForm" class="row g-3 mb-3">
       <div class="col-md-4">
         <label class="filter-label">Phòng</label>
-        <select name="room_id" class="custom-input">
+        <select name="room_id" id="utilityRoomSelect" class="custom-input">
           <option value="">Tất cả phòng</option>
           @foreach($rooms as $room)
             <option value="{{ $room->id }}" @selected((string) $selectedRoomId === (string) $room->id)>{{ $room->name }} · {{ $room->property->name ?? '' }}</option>
@@ -109,16 +111,16 @@
       </div>
       <div class="col-md-4">
         <label class="filter-label">Tháng ghi chỉ số (để trống để xem tất cả)</label>
-        <input type="month" name="month" class="custom-input" value="{{ $month }}" lang="vi" title="Chọn tháng và năm ghi chỉ số">
+        <input type="month" name="month" id="utilityMonthInput" class="custom-input" value="{{ $month }}" lang="vi" title="Chọn tháng và năm ghi chỉ số">
       </div>
       <div class="col-md-4 d-flex align-items-end gap-2">
         <button type="submit" class="btn-brand flex-grow-1" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>
-        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none" style="height: 44px; display: inline-flex; align-items: center; white-space: nowrap;">Tất cả kỳ</a>
+        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none utility-ajax-link" style="height: 44px; display: inline-flex; align-items: center; white-space: nowrap;">Tất cả kỳ</a>
       </div>
     </form>
 
     <!-- STATUS BAR -->
-    <div class="d-flex align-items-center justify-content-between mb-4 px-1 flex-wrap gap-2">
+    <div id="utilitiesStatusBar" class="d-flex align-items-center justify-content-between mb-4 px-1 flex-wrap gap-2">
       <div class="text-muted small">
         @if($month)
           Đang xem kỳ: <strong class="text-dark">{{ \Carbon\Carbon::parse($month)->format('m/Y') }}</strong>
@@ -131,12 +133,12 @@
         &bull; Hiển thị: <strong class="text-dark">{{ $readings->count() }} bản ghi</strong>
       </div>
       @if($month)
-        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="small text-decoration-none" style="color: var(--brand-dark, #a85827); font-weight: 600;">Xem tất cả các tháng &rarr;</a>
+        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="small text-decoration-none utility-ajax-link" style="color: var(--brand-dark, #a85827); font-weight: 600;">Xem tất cả các tháng &rarr;</a>
       @endif
     </div>
 
     <!-- TABLE -->
-    <div class="table-responsive">
+    <div class="table-responsive" id="utilitiesTableWrapper">
       <table class="data-table">
         <thead>
           <tr>
@@ -206,7 +208,7 @@
               </div>
               @if($month)
                 <div class="mt-2">
-                  <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">Xem tất cả các kỳ khác</a>
+                  <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none utility-ajax-link" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">Xem tất cả các kỳ khác</a>
                 </div>
               @else
                 <div class="mt-2">
@@ -221,5 +223,108 @@
     </div>
   </div>
 </div>
+
+@push('scripts')
+<script>
+(function() {
+  function initUtilityAjax() {
+    const form = document.getElementById('utilityFilterForm');
+    if (!form || form.dataset.ajaxInitialized === 'true') return;
+    form.dataset.ajaxInitialized = 'true';
+
+    let isFetching = false;
+
+    async function applyUtilityFilter(url) {
+      if (isFetching) return;
+      isFetching = true;
+
+      try {
+        const res = await fetch(url, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'text/html'
+          }
+        });
+
+        if (!res.ok) {
+          window.location.href = url;
+          return;
+        }
+
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+
+        // 1. Cập nhật Stat Cards
+        const newStats = doc.getElementById('utilitiesStatCards');
+        const curStats = document.getElementById('utilitiesStatCards');
+        if (newStats && curStats) curStats.innerHTML = newStats.innerHTML;
+
+        // 2. Cập nhật Status Bar
+        const newStatusBar = doc.getElementById('utilitiesStatusBar');
+        const curStatusBar = document.getElementById('utilitiesStatusBar');
+        if (newStatusBar && curStatusBar) curStatusBar.innerHTML = newStatusBar.innerHTML;
+
+        // 3. Cập nhật Bảng dữ liệu
+        const newTable = doc.getElementById('utilitiesTableWrapper');
+        const curTable = document.getElementById('utilitiesTableWrapper');
+        if (newTable && curTable) curTable.innerHTML = newTable.innerHTML;
+
+        // 4. Cập nhật link Xuất Excel
+        const newExcel = doc.getElementById('utilitiesExcelLink');
+        const curExcel = document.getElementById('utilitiesExcelLink');
+        if (newExcel && curExcel) curExcel.href = newExcel.href;
+
+        // 5. Cập nhật URL trên thanh địa chỉ không tải lại trang
+        window.history.pushState({}, '', url);
+
+        // Rebind click events
+        bindAjaxLinks();
+      } catch (err) {
+        console.error('Lỗi lọc điện nước AJAX:', err);
+        window.location.href = url;
+      } finally {
+        isFetching = false;
+      }
+    }
+
+    function onFilterChange() {
+      const formData = new FormData(form);
+      const params = new URLSearchParams();
+      for (const [key, value] of formData.entries()) {
+        if (value) params.append(key, value);
+      }
+      const targetUrl = form.action + (params.toString() ? '?' + params.toString() : '');
+      applyUtilityFilter(targetUrl);
+    }
+
+    form.querySelectorAll('select, input').forEach(el => {
+      el.addEventListener('change', onFilterChange);
+    });
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      onFilterChange();
+    });
+
+    function bindAjaxLinks() {
+      document.querySelectorAll('.utility-ajax-link').forEach(link => {
+        link.onclick = function(e) {
+          e.preventDefault();
+          applyUtilityFilter(this.href);
+        };
+      });
+    }
+
+    bindAjaxLinks();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUtilityAjax);
+  } else {
+    initUtilityAjax();
+  }
+})();
+</script>
+@endpush
 
 @endsection
