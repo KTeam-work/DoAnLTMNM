@@ -254,9 +254,9 @@ class OwnerUtilitiesController extends Controller
         return view('owner.utilities.create', compact('rooms', 'properties', 'reading', 'prefillRoomId', 'prefillMonth', 'selectedPropertyId', 'initialPrevious'));
     }
 
-    /**
-     * AJAX: Lấy chỉ số điện nước kỳ trước liền kề (hoặc từ hợp đồng) khi chọn phòng/tháng.
-     */
+    
+     # JAX: Lấy chỉ số điện nước kỳ trước liền kề (hoặc từ hợp đồng) khi chọn phòng/tháng.
+    
     public function getPreviousReading(Request $request)
     {
         $owner = $this->actingOwner($request);
@@ -273,9 +273,9 @@ class OwnerUtilitiesController extends Controller
         return response()->json($info);
     }
 
-    /**
-     * AJAX: Nhận diện chỉ số từ ảnh chụp công tơ điện / đồng hồ nước.
-     */
+    
+     # AJAX: Nhận diện chỉ số từ ảnh chụp công tơ điện / đồng hồ nước.
+    
     public function scanMeter(Request $request, GeminiService $gemini)
     {
         $this->actingOwner($request);
@@ -666,7 +666,7 @@ class OwnerUtilitiesController extends Controller
         return $user;
     }
 
-    /**
+    /*
      * DEMO MODE: web (trình duyệt) chưa đăng nhập thì dùng owner đầu tiên
      * để test luồng ghi/sửa chỉ số. JSON API vẫn bắt buộc đăng nhập.
      * Muốn bật lại login: thay actingOwner() bằng owner() ở store/update.

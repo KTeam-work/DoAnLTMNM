@@ -10,13 +10,12 @@
 
 @php
     $defaultHouseImages = [
+        asset('images/hero-building.jpg'),
         asset('storage/properties/10/lw3etjRSNWcSwEAYgEnixCkCbf4nQBLEF9GayCw9.jpg'),
-        asset('storage/properties/4/iaIpAyJBCO0AJgn145Uq7o4qJkIjnVA0hEp9Z40d.jpg'),
         asset('storage/properties/9/GvV2Cfsd6U0ITc8zPTPHEQUSOwAerZ8fQaqQEYZK.jpg'),
-        asset('storage/properties/8/kcrbkQl9zfS0ctiCb2KNCf2t503z8GD9Yvv0Bmwn.jpg'),
-        asset('storage/properties/6/qpi5LJVByEtGr9ItwcUqHdgcQBxhgSREh4PSJSep.jpg'),
+        asset('storage/properties/10/S7x1ucRXbPFQ0FaHngKJC3YvD4O0iWb9HivqiUWa.jpg'),
     ];
-    $heroBgImage = asset('storage/properties/4/iaIpAyJBCO0AJgn145Uq7o4qJkIjnVA0hEp9Z40d.jpg');
+    $heroBgImage = asset('images/hero-building.jpg');
     $firstHouseImg = asset('storage/properties/10/lw3etjRSNWcSwEAYgEnixCkCbf4nQBLEF9GayCw9.jpg');
 @endphp
 

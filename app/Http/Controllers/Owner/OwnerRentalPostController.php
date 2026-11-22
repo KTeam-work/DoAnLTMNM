@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Storage;
 
 class OwnerRentalPostController extends Controller
 {
-    /**
-     * Danh sách tin đăng của chủ trọ đang đăng nhập.
-     */
+    
+    # danh sách tin đăng của chủ trọ đang đăng nhập.
+    
     public function index()
     {
         $ownerId = Auth::id() ?: (config('app.demo_guest') ? \App\Models\User::where('role', 'owner')->value('id') : null);

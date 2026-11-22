@@ -84,10 +84,10 @@
                             </td>
                             <td>
                                 {{ $req->room_name }}<br>
-                                <small class="text-muted">{{ $req->property_name }} · {{ number_format((float)$req->room_price) }} đ</small>
+                                <small class="text-muted">{{ $req->property_name }} · {{ number_format((float)($req->room_price ?? 0)) }} đ</small>
                             </td>
                             <td>{{ \Carbon\Carbon::parse($req->appointment_date)->format('d/m/Y') }}</td>
-                            <td>{{ $req->status === 'pending' ? 'Chờ duyệt' : 'Đã xác nhận' }}</td>
+                            <td>{{ ($req->status ?? $req->appointment_status ?? '') === 'pending' ? 'Chờ duyệt' : 'Đã xác nhận' }}</td>
                             <td><a href="{{ route('owner.contracts.create', ['tenant_id' => $req->tenant_id, 'room_id' => $req->room_id]) }}" class="btn btn-sm btn-outline-success">Dùng để tạo HĐ</a></td>
                         </tr>
                         @endforeach

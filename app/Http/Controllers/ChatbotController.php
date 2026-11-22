@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 
+
+// nhận request và bắt lỗi
 class ChatbotController extends Controller
 {
     protected $chatbot;
@@ -17,6 +19,7 @@ class ChatbotController extends Controller
         $this->chatbot = $chatbot;
     }
 
+    // láy thông tin người dùng hiển thỉ lên
     public function index()
     {
         $user = Auth::user();

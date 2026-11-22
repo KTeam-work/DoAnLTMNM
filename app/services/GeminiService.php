@@ -17,7 +17,7 @@ class GeminiService
             throw new Exception('Chưa cấu hình Gemini API Key. Vui lòng kiểm tra file .env (GEMINI_API_KEY).');
         }
 
-        // Danh sách các model thử nghiệm (tự động fallback nếu model chính bị 404 không khả dụng hoặc 503 quá tải)
+       
         $modelsToTry = array_values(array_unique(array_filter([
             $configuredModel,
             'gemini-flash-lite-latest',
