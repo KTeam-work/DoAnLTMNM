@@ -77,6 +77,18 @@
               <i class="bi bi-cash-stack"></i> Thu tiền mặt ({{ number_format((float) $invoice->total) }} đ)
             </button>
           </form>
+
+          <button type="button" class="btn btn-outline-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#editDueDateModal" style="border-radius: 12px; font-size: 13.5px; padding: 9px 18px;">
+            Đổi hạn thanh toán
+          </button>
+
+          <form action="{{ route('owner.invoices.destroy', $invoice->id) }}" method="POST" class="m-0" onsubmit="return confirm('Xác nhận chuyển trạng thái hóa đơn này sang Đã hủy? Hệ thống sẽ vô hiệu hóa thanh toán, gửi thông báo đến người thuê và mở khóa kỳ này để bạn có thể lập hóa đơn mới.')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-outline-danger fw-bold shadow-sm" style="border-radius: 12px; font-size: 13.5px; padding: 9px 18px;">
+              Hủy hóa đơn
+            </button>
+          </form>
         @endif
 
         <a href="{{ route('owner.invoices.print', $invoice->id) }}" target="_blank" 
@@ -87,6 +99,12 @@
       </div>
     </div>
   </div>
+
+  @if($invoice->status === 'cancelled')
+    <div class="alert alert-secondary d-flex align-items-center gap-2 mb-4 p-3 border-0 shadow-sm" style="border-radius: 12px; background: #f1f5f9; border-left: 4px solid #64748b !important; color: #475569; font-size: 13.5px;">
+      <div>Hóa đơn này đã được chuyển sang trạng thái <strong>Đã hủy</strong> (vô hiệu hóa thanh toán). Bạn có thể quay lại danh sách để tạo hóa đơn mới thay thế cho phòng này.</div>
+    </div>
+  @endif
 
   @php
     $pendingPayment = $invoice->payments->firstWhere('status', 'pending');
@@ -116,7 +134,7 @@
           <button type="submit" class="btn btn-success fw-bold px-3 py-2 shadow-sm" 
                   style="border-radius: 10px; font-size: 13px; background: #059669; border: none;" 
                   onclick="return confirm('Xác nhận đã nhận đủ {{ number_format((float) $pendingPayment->amount) }} đ và gạch nợ hóa đơn?')">
-            ✓ Xác nhận đã nhận tiền
+            Xác nhận đã nhận tiền
           </button>
         </form>
         <form action="{{ route('owner.payments.reject', $pendingPayment->id) }}" method="POST" class="m-0">
@@ -169,13 +187,20 @@
       <!-- Cột 4: Hạn thanh toán -->
       <div class="col-md-3 col-6">
         <div class="info-item-box">
-          <div class="info-item-label">Hạn thanh toán</div>
+          <div class="info-item-label d-flex justify-content-between align-items-center">
+            <span>Hạn thanh toán</span>
+            @if($invoice->status !== 'paid' && $invoice->status !== 'cancelled')
+              <a href="#" data-bs-toggle="modal" data-bs-target="#editDueDateModal" class="small text-decoration-none" style="font-size: 11.5px; color: #0284c7; font-weight: 600;">Đổi hạn</a>
+            @endif
+          </div>
           <div class="info-item-value {{ $isOverdue ? 'text-danger' : 'text-dark' }}">
             {{ $invoice->due_date->format('d/m/Y') }}
           </div>
           <div class="info-item-sub">
             @if($invoice->status === 'paid')
               <span class="text-success fw-bold">Đã hoàn tất</span>
+            @elseif($invoice->status === 'cancelled')
+              <span class="text-muted fw-bold">Đã hủy hóa đơn</span>
             @elseif($isOverdue)
               <span class="text-danger fw-bold">Đã quá hạn thanh toán</span>
             @else
@@ -285,7 +310,7 @@
                 @csrf
                 @method('PUT')
                 <button type="submit" class="btn btn-sm btn-success fw-bold px-3 py-1" style="border-radius: 8px;" onclick="return confirm('Xác nhận đã nhận {{ number_format((float) $payment->amount) }} đ?')">
-                  ✓ Xác nhận
+                  Xác nhận
                 </button>
               </form>
               <form action="{{ route('owner.payments.reject', $payment->id) }}" method="POST" class="d-inline m-0">
@@ -306,5 +331,50 @@
     @endforelse
   </div>
 </main>
+
+@if($invoice->status !== 'paid' && $invoice->status !== 'cancelled')
+<div class="modal fade" id="editDueDateModal" tabindex="-1" aria-labelledby="editDueDateModalLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{{ route('owner.invoices.update-due-date', $invoice->id) }}" class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+      @csrf
+      @method('PUT')
+      <div class="modal-header bg-light border-0 py-3 px-4">
+        <h5 class="modal-title fw-bold text-dark m-0" id="editDueDateModalLabel">Đổi hạn thanh toán</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Hạn thanh toán hiện tại</label>
+          <input type="text" class="form-control bg-light" value="{{ $invoice->due_date->format('d/m/Y') }}" disabled>
+        </div>
+        <div class="mb-3">
+          <label for="new_due_date" class="form-label small fw-bold text-secondary">Hạn thanh toán mới</label>
+          <input type="date" id="new_due_date" name="due_date" class="form-control" value="{{ $invoice->due_date->toDateString() }}" required>
+          <div class="form-text mt-1 text-muted">Hệ thống sẽ cập nhật và tự động gửi thông báo đến tài khoản người thuê.</div>
+        </div>
+      </div>
+      <div class="modal-footer bg-light border-0 py-3 px-4">
+        <button type="button" class="btn btn-light border fw-bold px-4" data-bs-dismiss="modal">Đóng</button>
+        <button type="submit" class="btn btn-primary fw-bold px-4" style="background: #20584f; border-color: #20584f;">Lưu thay đổi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modalEl = document.getElementById('editDueDateModal');
+    if (modalEl && typeof bootstrap !== 'undefined') {
+        const myModal = new bootstrap.Modal(modalEl);
+        document.querySelectorAll('[data-bs-target="#editDueDateModal"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                myModal.show();
+            });
+        });
+    }
+});
+</script>
+@endif
 
 @endsection

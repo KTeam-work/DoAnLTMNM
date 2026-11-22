@@ -693,6 +693,11 @@ Route::get(
 )->name('owner.invoices.index');
 
 Route::get(
+    '/owner/invoices/eligible-contracts',
+    [OwnerInvoiceController::class, 'eligibleContracts']
+)->name('owner.invoices.eligible-contracts');
+
+Route::get(
     '/owner/invoices/{invoice}',
     [OwnerInvoiceController::class, 'show']
 )->name('owner.invoices.show');
@@ -701,6 +706,16 @@ Route::get(
     '/owner/invoices/{invoice}/print',
     [OwnerInvoiceController::class, 'print']
 )->name('owner.invoices.print');
+
+Route::put(
+    '/owner/invoices/{invoice}/update-due-date',
+    [OwnerInvoiceController::class, 'updateDueDate']
+)->name('owner.invoices.update-due-date');
+
+Route::delete(
+    '/owner/invoices/{invoice}',
+    [OwnerInvoiceController::class, 'destroy']
+)->name('owner.invoices.destroy');
 
 Route::post(
     '/owner/invoices',

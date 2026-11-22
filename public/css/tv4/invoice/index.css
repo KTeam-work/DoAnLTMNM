@@ -156,6 +156,8 @@
   .badge-status.pending{background:var(--yellow-light);color:#9b6a00;}
   .badge-status.paid{background:var(--green-soft);color:var(--green);}
   .badge-status.overdue{background:var(--red-soft);color:var(--red);}
+  .badge-status.unpaid{background:#e0f2fe;color:#0369a1;}
+  .badge-status.cancelled{background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;}
 
   /* --- Table --- */
   .data-table{width:100%;border-collapse:collapse;}

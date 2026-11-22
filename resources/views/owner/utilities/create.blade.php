@@ -72,14 +72,17 @@
     <div class="page-header">
         <div>
             <h2 class="page-title">{{ $reading ? 'Cập nhật chỉ số điện nước' : 'Ghi chỉ số điện nước' }}</h2>
-            <div class="page-desc">Chủ nhà <span> / Điện nước / {{ $reading ? 'Cập nhật' : 'Ghi mới' }}</span></div>
+            <div class="page-desc">
+                <a href="{{ route('owner.utilities.index') }}" style="color: var(--green, #20584f); text-decoration: none; font-weight: 600;">Điện nước</a>
+                <span> / {{ $reading ? 'Cập nhật' : 'Ghi mới' }}</span>
+            </div>
         </div>
 
         <div class="header-actions d-flex gap-2">
             <a href="{{ route('owner.utilities.index', array_filter(['month' => $prefillMonth])) }}" class="btn-outline-brand">
                 Quay lại
             </a>
-            <button type="submit" form="readingForm" class="btn-brand">
+            <button type="button" id="btn-submit-reading" class="btn-brand" {{ $rooms->isEmpty() && !$reading ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' }} onclick="document.getElementById('readingForm').submit()">
                 {{ $reading ? 'Cập nhật' : 'Lưu chỉ số' }}
             </button>
         </div>
@@ -117,31 +120,76 @@
                         Phòng &amp; kỳ ghi
                     </div>
 
-                    <div class="row-2">
-                        <div class="form-group">
-                            <label>Phòng đang thuê <span>*</span></label>
-                            @if($reading)
-                                <input type="text" class="custom-input" value="{{ $reading->room->name ?? '' }} ({{ $reading->room->room_code ?? '' }})" disabled>
-                            @else
-                                <select name="room_id" id="select-room" class="custom-input" required>
-                                    <option value="">-- Chọn phòng đang thuê --</option>
-                                    @foreach($rooms as $room)
-                                        @php
-                                            $activeContract = $room->contracts->first();
-                                            $tenantName = $activeContract?->tenant?->name ?? 'Đang thuê';
-                                        @endphp
-                                        <option value="{{ $room->id }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>
-                                            {{ $room->name }} · {{ $room->property->name ?? '' }} (Khách: {{ $tenantName }})
-                                        </option>
+                    @if($reading)
+                        <div class="row-2">
+                            <div class="form-group">
+                                <label>Phòng đang thuê <span>*</span></label>
+                                <input type="text" class="custom-input" value="{{ $reading->room->name ?? '' }} · {{ $reading->room->property->name ?? '' }} (Khách: {{ $reading->room->contracts->first()?->tenant?->name ?? 'Đang thuê' }})" disabled style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;" title="Cố định phòng khi chỉnh sửa">
+                                <input type="hidden" name="room_id" value="{{ $reading->room_id }}">
+                                <input type="hidden" name="id" value="{{ $reading->id }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Tháng ghi chỉ số <span>*</span></label>
+                                <input type="text" class="custom-input" value="Tháng {{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}" readonly tabindex="-1" style="background-color: #f1f5f9; cursor: not-allowed; color: #475569; font-weight: 600;" title="Cố định kỳ tháng khi chỉnh sửa">
+                                <input type="hidden" name="month" value="{{ \Carbon\Carbon::parse($reading->month)->format('Y-m') }}">
+                            </div>
+                        </div>
+                    @else
+                        <div class="row-3">
+                            <div class="form-group">
+                                <label>Khu trọ / Nhà trọ</label>
+                                <select id="filter-property" class="custom-input">
+                                    <option value="">-- Tất cả khu trọ ({{ $properties->count() }}) --</option>
+                                    @foreach($properties as $property)
+                                        <option value="{{ $property->id }}" @selected((string)$selectedPropertyId === (string)$property->id)>{{ $property->name }}</option>
                                     @endforeach
                                 </select>
-                            @endif
+                            </div>
+                            <div class="form-group">
+                                <label>Phòng đang thuê <span>*</span></label>
+                                <select name="room_id" id="select-room" class="custom-input" required {{ $rooms->isEmpty() ? 'disabled' : '' }}>
+                                    @if($rooms->isEmpty())
+                                        <option value="" disabled selected>-- Tất cả phòng đã được ghi chỉ số tháng này --</option>
+                                    @else
+                                        <option value="">-- Chọn phòng đang thuê ({{ $rooms->count() }} phòng chưa ghi) --</option>
+                                        @php
+                                            $groupedRooms = $rooms->groupBy(fn($r) => $r->property->name ?? 'Khác');
+                                        @endphp
+                                        @foreach($groupedRooms as $propName => $propRooms)
+                                            <optgroup label="Khu: {{ $propName }}" data-prop-id="{{ $propRooms->first()->property_id }}">
+                                                @foreach($propRooms as $room)
+                                                    @php
+                                                        $activeContract = $room->contracts->first();
+                                                        $tenantName = $activeContract?->tenant?->name ?? 'Đang thuê';
+                                                    @endphp
+                                                    <option value="{{ $room->id }}" data-property-id="{{ $room->property_id }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>
+                                                        {{ $room->name }} · {{ $room->property->name ?? '' }} (Khách: {{ $tenantName }})
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tháng ghi chỉ số <span>*</span></label>
+                                <input type="month" name="month" id="input-month" class="custom-input" value="{{ old('month', $prefillMonth) }}" lang="vi" title="Chọn tháng và năm ghi chỉ số" required>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Tháng ghi chỉ số <span>*</span></label>
-                            <input type="month" name="month" id="input-month" class="custom-input" value="{{ old('month', $prefillMonth) }}" lang="vi" title="Chọn tháng và năm ghi chỉ số" required>
+                    @endif
+
+                    @if($reading && $reading->invoice()->exists())
+                        <div class="alert alert-warning align-items-center mt-2 mb-0" style="background: #fff8e6; border: 1px solid #ffd591; color: #873800; border-radius: 12px; padding: 10px 14px; font-size: 12px;">
+                            Lưu ý: Chỉ số này đã được dùng để lập Hóa đơn <strong>#{{ $reading->invoice->invoice_code }}</strong>.
                         </div>
-                    </div>
+                    @endif
+
+                    @if($rooms->isEmpty() && !$reading)
+                        <div class="alert alert-success align-items-center mt-3 mb-0" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; border-radius: 12px; padding: 12px 16px;">
+                            <strong>Đã hoàn thành!</strong> Tất cả các phòng đang thuê đã được ghi chỉ số cho tháng <strong>{{ \Carbon\Carbon::parse($prefillMonth)->format('m/Y') }}</strong>.
+                            Bạn có thể xem hoặc sửa lại tại <a href="{{ route('owner.utilities.index', ['month' => $prefillMonth]) }}" style="font-weight: 700; color: #15803d; text-decoration: underline;">Danh sách chỉ số</a>.
+                        </div>
+                    @endif
 
                     <!-- CANH BAO TRUNG KY -->
                     <div id="duplicate-warning" class="alert alert-warning align-items-center justify-content-between mt-2 mb-0" style="display: {{ $alreadyExists ? 'flex' : 'none' }}; background: #fff8e6; border: 1px solid #ffd591; color: #873800; border-radius: 12px; padding: 12px 16px;">
@@ -202,6 +250,15 @@
                             <input type="number" step="0.01" min="0" name="water_price" id="water_price" class="custom-input" value="{{ $wPriceVal }}" required readonly tabindex="-1" style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;">
                         </div>
                     </div>
+                </div>
+
+                <div class="mt-3 d-flex justify-content-end gap-2">
+                    <a href="{{ route('owner.utilities.index', array_filter(['month' => $prefillMonth])) }}" class="btn-outline-brand">
+                        Quay lại
+                    </a>
+                    <button type="submit" class="btn-brand">
+                        {{ $reading ? 'Cập nhật' : 'Lưu chỉ số' }}
+                    </button>
                 </div>
 
             </div>
@@ -451,8 +508,62 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(err => console.error('Error fetching previous readings:', err));
     }
 
+    const filterProperty = document.getElementById('filter-property');
+    if (filterProperty && selectRoom) {
+        filterProperty.addEventListener('change', function() {
+            const selectedPropId = this.value;
+            const optgroups = selectRoom.querySelectorAll('optgroup');
+            const options = selectRoom.querySelectorAll('option[data-property-id]');
+
+            optgroups.forEach(og => {
+                const propId = og.getAttribute('data-prop-id');
+                if (!selectedPropId || propId === selectedPropId) {
+                    og.style.display = '';
+                } else {
+                    og.style.display = 'none';
+                }
+            });
+
+            let firstVisibleRoom = null;
+            options.forEach(opt => {
+                const propId = opt.getAttribute('data-property-id');
+                if (!selectedPropId || propId === selectedPropId) {
+                    opt.style.display = '';
+                    opt.disabled = false;
+                    if (!firstVisibleRoom) firstVisibleRoom = opt.value;
+                } else {
+                    opt.style.display = 'none';
+                    opt.disabled = true;
+                }
+            });
+
+            const currentSelectedOpt = selectRoom.options[selectRoom.selectedIndex];
+            if (currentSelectedOpt && currentSelectedOpt.disabled) {
+                selectRoom.value = firstVisibleRoom || '';
+            } else if (!selectRoom.value && firstVisibleRoom) {
+                selectRoom.value = firstVisibleRoom;
+            }
+
+            fetchPrevious();
+        });
+    }
+
     if (selectRoom) selectRoom.addEventListener('change', fetchPrevious);
-    if (inputMonth) inputMonth.addEventListener('change', fetchPrevious);
+    if (inputMonth) {
+        inputMonth.addEventListener('change', () => {
+            if (!isEditing) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('month', inputMonth.value);
+                if (filterProperty && filterProperty.value) {
+                    currentUrl.searchParams.set('property_id', filterProperty.value);
+                }
+                currentUrl.searchParams.delete('room_id');
+                window.location.href = currentUrl.toString();
+            } else {
+                fetchPrevious();
+            }
+        });
+    }
 
     function normalizePrice(input) {
         if (!input) return;
@@ -601,12 +712,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (scanResultAlert) {
                     scanResultAlert.className = 'mt-3 p-2 rounded-2 alert alert-success d-block mb-0';
-                    scanResultAlert.innerHTML = `<strong>✓ Đã nhận diện thành công:</strong> ${val} ${unit}<br><span class="small text-muted">Đã tự động điền vào ô Chỉ số mới. Vui lòng kiểm tra lại trước khi lưu.</span>`;
+                    scanResultAlert.innerHTML = `<strong>Đã nhận diện thành công:</strong> ${val} ${unit}<br><span class="small text-muted">Đã tự động điền vào ô Chỉ số mới. Vui lòng kiểm tra lại trước khi lưu.</span>`;
                 }
             } else {
                 if (scanResultAlert) {
                     scanResultAlert.className = 'mt-3 p-2 rounded-2 alert alert-warning d-block mb-0';
-                    scanResultAlert.innerHTML = `⚠️ ${data.message || 'Không thể đọc được số từ ảnh này. Vui lòng thử ảnh nét hơn hoặc nhập tay.'}`;
+                    scanResultAlert.innerHTML = `${data.message || 'Không thể đọc được số từ ảnh này. Vui lòng thử ảnh nét hơn hoặc nhập tay.'}`;
                 }
             }
         })
@@ -616,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (dropzonePreview) dropzonePreview.classList.remove('d-none');
             if (scanResultAlert) {
                 scanResultAlert.className = 'mt-3 p-2 rounded-2 alert alert-danger d-block mb-0';
-                scanResultAlert.innerHTML = `⚠️ ${err.message || 'Lỗi khi gửi ảnh lên server. Vui lòng kiểm tra lại kết nối.'}`;
+                scanResultAlert.innerHTML = `${err.message || 'Lỗi khi gửi ảnh lên server. Vui lòng kiểm tra lại kết nối.'}`;
             }
         });
     };

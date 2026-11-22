@@ -18,48 +18,105 @@ use Illuminate\Support\Str;
 
 class InvoiceController extends Controller
 {
+    //hiển thị trang quản lý hóa đơn
     public function index(Request $request)
     {
         $owner = $this->actingOwner($request);
 
+        $selectedPropertyId = $request->input('property_id');
+        $selectedRoomId = $request->input('room_id');
+
         $query = Invoice::query()
             ->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id))
-            ->with(['contract.room:id,name', 'contract.tenant:id,name'])
+            ->when($selectedPropertyId, fn ($q) => $q->whereHas('contract.room', fn ($rq) => $rq->where('property_id', $selectedPropertyId)))
+            ->when($selectedRoomId, fn ($q) => $q->whereHas('contract', fn ($cq) => $cq->where('room_id', $selectedRoomId)))
+            ->with(['contract.room:id,name,property_id', 'contract.room.property:id,name', 'contract.tenant:id,name'])
             ->latest('billing_month');
-
+        
+        // lọc theo tháng
         if ($request->filled('month')) {
             $query->whereDate('billing_month', Carbon::parse($request->input('month'))->startOfMonth());
         }
+
+        // lọc theo trạng thái
         if ($request->filled('status') && in_array($request->input('status'), ['unpaid', 'pending', 'paid', 'overdue', 'cancelled'], true)) {
             $query->where('status', $request->input('status'));
         }
 
+        // chia trang kết quả
         $invoices = $query->paginate(15)->withQueryString();
-        $filters = $request->only(['month', 'status']);
+        $filters = $request->only(['month', 'status', 'property_id', 'room_id']);
+
+        $properties = \App\Models\Property::query()->where('owner_id', $owner->id)->orderBy('name')->get();
+
         $currentMonth = $request->input('month', now()->format('Y-m'));
-        $activeContracts = Contract::query()
+        $billingMonth = Carbon::parse($currentMonth)->startOfMonth();
+
+        $allContracts = Contract::query()
             ->where('owner_id', $owner->id)
             ->where('status', 'active')
-            ->with(['room:id,name', 'tenant:id,name'])
+            ->whereDate('start_date', '<=', $billingMonth->copy()->endOfMonth())
+            ->when($selectedPropertyId, fn ($q) => $q->whereHas('room', fn ($rq) => $rq->where('property_id', $selectedPropertyId)))
+            ->with(['room:id,name,property_id', 'room.property:id,name', 'tenant:id,name'])
             ->orderBy('room_id')
             ->get();
 
+        // CHỈ HIỆN CÁC PHÒNG ĐÃ GHI ĐIỆN NƯỚC VÀ CHƯA CÓ HÓA ĐƠN TRONG THÁNG NÀY (HÓA ĐƠN HỦY COI NHƯ ĐƯỢC MỞ KHÓA)
+        $activeContracts = $allContracts->filter(function ($contract) use ($billingMonth) {
+            $hasInvoice = Invoice::query()->where('contract_id', $contract->id)->whereDate('billing_month', $billingMonth)->where('status', '!=', 'cancelled')->exists();
+            if ($hasInvoice) return false;
+            return UtilityReading::query()->where('room_id', $contract->room_id)->whereDate('month', $billingMonth)->exists();
+        });
+
+        $missingReadingsContracts = $allContracts->filter(function ($contract) use ($billingMonth) {
+            $hasInvoice = Invoice::query()->where('contract_id', $contract->id)->whereDate('billing_month', $billingMonth)->where('status', '!=', 'cancelled')->exists();
+            if ($hasInvoice) return false;
+            return ! UtilityReading::query()->where('room_id', $contract->room_id)->whereDate('month', $billingMonth)->exists();
+        });
+
+        $initialSummary = [
+            'total' => $allContracts->count(),
+            'eligible' => $activeContracts->count(),
+            'missing' => $missingReadingsContracts->count(),
+            'missing_names' => $missingReadingsContracts->map(fn($c) => $c->room->name ?? '')->filter()->values()->all(),
+        ];
+
+        // Tính ngày hạn thanh toán gợi ý ban đầu
+        $initialDefaultDueDate = null;
+        if ($activeContracts->isNotEmpty()) {
+            $firstC = $activeContracts->first();
+            $cDay = Carbon::parse($firstC->start_date)->day;
+            $tDay = min($cDay, $billingMonth->daysInMonth);
+            $tDate = $billingMonth->copy()->day($tDay);
+            if (now()->format('Y-m') === $billingMonth->format('Y-m') && now()->day > $tDay) {
+                $initialDefaultDueDate = now()->addDays(3)->toDateString();
+            } else {
+                $initialDefaultDueDate = $tDate->toDateString();
+            }
+        } else {
+            $initialDefaultDueDate = now()->addDays(3)->toDateString();
+        }
+
         $base = Invoice::query()->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id));
-        $monthBase = (clone $base)->whereDate('billing_month', Carbon::parse($currentMonth)->startOfMonth());
+        if ($selectedPropertyId) {
+            $base->whereHas('contract.room', fn ($q) => $q->where('property_id', $selectedPropertyId));
+        }
+        $monthBase = (clone $base)->whereDate('billing_month', $billingMonth);
         $stats = [
-            'expected' => (clone $monthBase)->sum('total'),
+            'expected' => (clone $monthBase)->where('status', '!=', 'cancelled')->sum('total'),
             'collected' => (clone $monthBase)->where('status', 'paid')->sum('total'),
-            'outstanding' => (clone $monthBase)->whereIn('status', ['unpaid', 'pending'])->sum('total'),
-            'outstanding_count' => (clone $monthBase)->whereIn('status', ['unpaid', 'pending'])->count(),
+            'outstanding' => (clone $monthBase)->whereIn('status', ['unpaid', 'pending', 'overdue'])->sum('total'),
+            'outstanding_count' => (clone $monthBase)->whereIn('status', ['unpaid', 'pending', 'overdue'])->count(),
         ];
 
         if (! $request->expectsJson()) {
-            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth', 'activeContracts'));
+            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth', 'activeContracts', 'properties', 'selectedPropertyId', 'initialSummary', 'initialDefaultDueDate'));
         }
 
         return response()->json(['data' => $invoices]);
     }
 
+    // xem chi tiết hóa đơn
     public function show(Request $request, int $id)
     {
         $owner = $this->actingOwner($request);
@@ -76,9 +133,7 @@ class InvoiceController extends Controller
         return response()->json(['data' => $invoice]);
     }
 
-    /**
-     * Mẫu in hóa đơn và xuất PDF chuẩn A4.
-     */
+    // mẫu in pdf
     public function print(Request $request, int $id)
     {
         $owner = $this->actingOwner($request);
@@ -102,9 +157,103 @@ class InvoiceController extends Controller
         ]);
     }
 
-    /**
-     * Kích hoạt quét nợ và cập nhật quá hạn thủ công từ Web UI (phục vụ Demo & Vận hành).
-     */
+    // Cập nhật hạn thanh toán cho hóa đơn
+    public function updateDueDate(Request $request, int $id)
+    {
+        $owner = $this->actingOwner($request);
+
+        $invoice = Invoice::query()
+            ->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id))
+            ->with(['contract.tenant', 'contract.room'])
+            ->findOrFail($id);
+
+        if (in_array($invoice->status, ['paid', 'cancelled'], true)) {
+            return back()->with('error', 'Không thể đổi hạn thanh toán cho hóa đơn đã thanh toán hoặc đã hủy.');
+        }
+
+        $data = $request->validate([
+            'due_date' => ['required', 'date'],
+        ]);
+
+        $oldDueDate = Carbon::parse($invoice->due_date)->format('d/m/Y');
+        $newDueDate = Carbon::parse($data['due_date'])->toDateString();
+        $newDueDateFormatted = Carbon::parse($data['due_date'])->format('d/m/Y');
+
+        $invoice->update([
+            'due_date' => $newDueDate,
+            'status' => ($invoice->status === 'overdue' && $newDueDate >= now()->toDateString()) ? 'unpaid' : $invoice->status,
+        ]);
+
+        // Gửi thông báo cho người thuê (không dùng icon)
+        if ($invoice->contract && $invoice->contract->tenant_id) {
+            $billingMonthStr = Carbon::parse($invoice->billing_month)->format('m/Y');
+            Notification::notify(
+                $invoice->contract->tenant_id,
+                'Cập nhật hạn thanh toán',
+                "Chủ nhà đã cập nhật hạn thanh toán cho hóa đơn {$invoice->invoice_code} (kỳ {$billingMonthStr}, phòng {$invoice->contract->room->name}) từ ngày {$oldDueDate} sang ngày {$newDueDateFormatted}.",
+                'invoice',
+                'invoice',
+                $invoice->id
+            );
+        }
+
+        return back()->with('success', 'Đã cập nhật hạn thanh toán thành công sang ngày ' . $newDueDateFormatted . '. Hệ thống đã gửi thông báo đến người thuê.');
+    }
+
+    // Hủy hóa đơn tạo sai khi chưa thanh toán (chuyển sang trạng thái Đã hủy, mở khóa kỳ hóa đơn)
+    public function destroy(Request $request, int $id)
+    {
+        $owner = $this->actingOwner($request);
+
+        $invoice = Invoice::query()
+            ->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id))
+            ->with(['contract.tenant', 'contract.room'])
+            ->findOrFail($id);
+
+        if ($invoice->status === 'paid') {
+            return back()->with('error', 'Không thể hủy hóa đơn đã thanh toán tiền.');
+        }
+
+        if ($invoice->status === 'cancelled') {
+            return back()->with('error', 'Hóa đơn này đã ở trạng thái đã hủy trước đó.');
+        }
+
+        if ($invoice->payments()->where('status', 'pending')->exists()) {
+            return back()->with('error', 'Không thể hủy hóa đơn đang có giao dịch thanh toán chờ xác nhận.');
+        }
+
+        $invoiceCode = $invoice->invoice_code;
+        $tenantId = $invoice->contract->tenant_id ?? null;
+        $roomName = $invoice->contract->room->name ?? '';
+        $billingMonthStr = Carbon::parse($invoice->billing_month)->format('m/Y');
+
+        // Chuyển trạng thái sang cancelled (vô hiệu hóa thanh toán, giữ lại lịch sử đối soát)
+        $invoice->update([
+            'status' => 'cancelled',
+        ]);
+
+        // Cập nhật các giao dịch dở dang sang đã hủy
+        $invoice->payments()->whereIn('status', ['pending', 'failed'])->update([
+            'status' => 'cancelled',
+        ]);
+
+        // Gửi thông báo cho người thuê (không dùng icon)
+        if ($tenantId) {
+            Notification::notify(
+                $tenantId,
+                'Hóa đơn đã được hủy',
+                "Hóa đơn {$invoiceCode} kỳ {$billingMonthStr} (phòng {$roomName}) đã được chủ nhà hủy để điều chỉnh lại. Bạn không cần thanh toán hóa đơn này.",
+                'invoice',
+                'invoices',
+                $invoice->id
+            );
+        }
+
+        return redirect()->route('owner.invoices.show', $invoice->id)
+            ->with('success', 'Đã chuyển trạng thái hóa đơn #' . $invoiceCode . ' sang Đã hủy. Kỳ này đã được mở khóa để bạn có thể tạo lại hóa đơn mới.');
+    }
+
+    // cái quét nợ
     public function processDueNow(Request $request)
     {
         $owner = $this->actingOwner($request);
@@ -119,15 +268,97 @@ class InvoiceController extends Controller
         return back()->with('success', $summary);
     }
 
-    /**
-     * Tạo hóa đơn tháng: 1 hợp đồng (contract_id) hoặc hàng loạt.
-     */
+    // AJAX: Lấy danh sách các phòng ĐÃ GHI ĐIỆN NƯỚC và CHƯA CÓ HÓA ĐƠN trong tháng
+    public function eligibleContracts(Request $request)
+    {
+        $owner = $this->actingOwner($request);
+        $month = $request->input('month', now()->format('Y-m'));
+        $billingMonth = Carbon::parse($month)->startOfMonth();
+        $propertyId = $request->input('property_id');
+
+        $allContracts = Contract::query()
+            ->where('owner_id', $owner->id)
+            ->where('status', 'active')
+            ->whereDate('start_date', '<=', $billingMonth->copy()->endOfMonth())
+            ->when($propertyId, fn ($q) => $q->whereHas('room', fn ($rq) => $rq->where('property_id', $propertyId)))
+            ->with(['room.property:id,name', 'tenant:id,name'])
+            ->orderBy('room_id')
+            ->get();
+
+        $eligibleContracts = [];
+        $missingReadings = [];
+        $alreadyInvoiced = [];
+
+        foreach ($allContracts as $contract) {
+            $hasInvoice = Invoice::query()
+                ->where('contract_id', $contract->id)
+                ->whereDate('billing_month', $billingMonth)
+                ->where('status', '!=', 'cancelled')
+                ->exists();
+
+            if ($hasInvoice) {
+                $alreadyInvoiced[] = [
+                    'id' => $contract->id,
+                    'room_name' => $contract->room->name ?? '',
+                    'property_name' => $contract->room->property->name ?? '',
+                ];
+                continue;
+            }
+
+            $reading = UtilityReading::query()
+                ->where('room_id', $contract->room_id)
+                ->whereDate('month', $billingMonth)
+                ->first();
+
+            if (! $reading) {
+                $missingReadings[] = [
+                    'id' => $contract->id,
+                    'room_name' => $contract->room->name ?? '',
+                    'property_name' => $contract->room->property->name ?? '',
+                ];
+                continue;
+            }
+
+            $cDay = Carbon::parse($contract->start_date)->day;
+            $tDay = min($cDay, $billingMonth->daysInMonth);
+            $tDate = $billingMonth->copy()->day($tDay);
+            if (now()->format('Y-m') === $billingMonth->format('Y-m') && now()->day > $tDay) {
+                $suggestedDue = now()->addDays(3)->toDateString();
+            } else {
+                $suggestedDue = $tDate->toDateString();
+            }
+
+            $eligibleContracts[] = [
+                'id' => $contract->id,
+                'room_id' => $contract->room_id,
+                'room_name' => $contract->room->name ?? '',
+                'property_id' => $contract->room->property_id ?? null,
+                'property_name' => $contract->room->property->name ?? '',
+                'tenant_name' => $contract->tenant->name ?? '',
+                'contract_day' => $cDay,
+                'suggested_due_date' => $suggestedDue,
+            ];
+        }
+
+        return response()->json([
+            'month' => $billingMonth->format('m/Y'),
+            'total_rooms' => $allContracts->count(),
+            'eligible_contracts' => $eligibleContracts,
+            'eligible_count' => count($eligibleContracts),
+            'missing_readings_count' => count($missingReadings),
+            'missing_readings' => $missingReadings,
+            'already_invoiced_count' => count($alreadyInvoiced),
+        ]);
+    }
+
+    // tạo hóa đơn tháng
     public function store(Request $request)
     {
         $owner = $this->actingOwner($request);
 
         $data = $request->validate([
             'month' => ['required', 'date'],
+            'property_id' => ['nullable', 'integer', 'exists:properties,id'],
             'contract_id' => ['nullable', 'integer', 'exists:contracts,id'],
             'discount' => ['nullable', 'numeric', 'min:0'],
             'due_date' => ['nullable', 'date'],
@@ -140,6 +371,7 @@ class InvoiceController extends Controller
             ->where('status', 'active')
             ->whereDate('start_date', '<=', $billingMonth->copy()->endOfMonth())
             ->when($data['contract_id'] ?? null, fn ($q, $id) => $q->where('id', $id))
+            ->when($data['property_id'] ?? null, fn ($q, $pid) => $q->whereHas('room', fn ($rq) => $rq->where('property_id', $pid)))
             ->with(['room.property', 'tenant'])
             ->get();
 
@@ -154,7 +386,7 @@ class InvoiceController extends Controller
         $created = [];
         $skipped = [];
         foreach ($contracts as $contract) {
-            if (Invoice::query()->where('contract_id', $contract->id)->whereDate('billing_month', $billingMonth)->exists()) {
+            if (Invoice::query()->where('contract_id', $contract->id)->whereDate('billing_month', $billingMonth)->where('status', '!=', 'cancelled')->exists()) {
                 $skipped[] = $contract->room->name . ' (đã có hóa đơn kỳ này)';
                 continue;
             }
@@ -218,7 +450,18 @@ class InvoiceController extends Controller
 
             $subtotal = array_sum(array_column($items, 'amount'));
             $discount = min($discount, $subtotal);
-            $invoiceDueDate = $dueDate ?: now()->addDays(7)->toDateString();
+            if (!empty($dueDate)) {
+                $invoiceDueDate = $dueDate;
+            } else {
+                $cDay = Carbon::parse($contract->start_date)->day;
+                $tDay = min($cDay, $billingMonth->daysInMonth);
+                $tDate = $billingMonth->copy()->day($tDay);
+                if (now()->format('Y-m') === $billingMonth->format('Y-m') && now()->day > $tDay) {
+                    $invoiceDueDate = now()->addDays(3)->toDateString();
+                } else {
+                    $invoiceDueDate = $tDate->toDateString();
+                }
+            }
 
             $invoice = Invoice::query()->create([
                 'invoice_code' => $this->invoiceCode($billingMonth),
