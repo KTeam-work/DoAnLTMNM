@@ -12,6 +12,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 
 class OwnerRoomController extends Controller
@@ -46,7 +47,10 @@ class OwnerRoomController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'district']);
 
-        $amenities = Amenity::where('status', 'active')->orderBy('name')->get();
+        $amenities = Amenity::query()
+            ->when(\Illuminate\Support\Facades\Schema::hasColumn('amenities', 'status'), fn ($q) => $q->where('status', 'active'))
+            ->orderBy('name')
+            ->get();
 
         $existingCodes = Room::query()->whereNotNull('room_code')->pluck('room_code');
         foreach ($properties as $property) {
@@ -62,18 +66,61 @@ class OwnerRoomController extends Controller
     public function store(Request $request)
     {
         $owner = $this->actingOwner($request);
+
+        // Chuẩn hóa tiền tệ trước khi validate (loại bỏ ký tự không phải số như dấu chấm, phẩy phân cách)
+        $cleanPrice = preg_replace('/[^\d]/', '', (string) $request->input('price'));
+        $cleanDeposit = preg_replace('/[^\d]/', '', (string) $request->input('deposit'));
+        $request->merge([
+            'price' => $cleanPrice !== '' ? $cleanPrice : null,
+            'deposit' => $cleanDeposit !== '' ? $cleanDeposit : null,
+        ]);
+
+        $propertyId = $request->input('property_id');
+        $floor = $request->input('floor');
+
+        $duplicateMsg = ($floor !== null && $floor !== '')
+            ? "Tên phòng này đã tồn tại ở tầng {$floor} trong khu trọ này. Vui lòng đặt tên khác."
+            : "Tên phòng này đã tồn tại trong khu trọ này. Vui lòng đặt tên khác.";
+
         $data = $request->validate([
             'property_id' => ['required', 'integer', 'exists:properties,id'],
-            'name' => ['required', 'string', 'max:100'],
+            'floor' => ['nullable', 'integer', 'min:0'],
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('rooms', 'name')->where(function ($query) use ($propertyId, $floor) {
+                    $query->where('property_id', $propertyId);
+                    if ($floor !== null && $floor !== '') {
+                        $query->where('floor', $floor);
+                    } else {
+                        $query->whereNull('floor');
+                    }
+                }),
+            ],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
             'deposit' => ['required', 'numeric', 'min:0'],
             'max_people' => ['required', 'integer', 'min:1'],
-            'floor' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'in:available,pending,rented,maintenance,hidden'],
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['integer', 'exists:amenities,id'],
+        ], [
+            'property_id.required' => 'Vui lòng chọn khu trọ.',
+            'property_id.exists' => 'Khu trọ không tồn tại trong hệ thống.',
+            'name.required' => 'Vui lòng nhập tên phòng.',
+            'name.unique' => $duplicateMsg,
+            'price.required' => 'Vui lòng nhập giá thuê phòng.',
+            'price.numeric' => 'Giá thuê phải là một số hợp lệ.',
+            'price.min' => 'Giá thuê không được nhỏ hơn 0.',
+            'deposit.required' => 'Vui lòng nhập tiền đặt cọc.',
+            'deposit.numeric' => 'Tiền đặt cọc phải là một số hợp lệ.',
+            'deposit.min' => 'Tiền đặt cọc không được nhỏ hơn 0.',
+            'area.required' => 'Vui lòng nhập diện tích phòng.',
+            'area.numeric' => 'Diện tích phòng phải là một số.',
+            'max_people.required' => 'Vui lòng nhập sức chứa.',
+            'max_people.min' => 'Sức chứa tối thiểu là 1 người.',
         ]);
 
         $amenityIds = $request->input('amenities', []);
@@ -170,7 +217,10 @@ class OwnerRoomController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        $amenities = Amenity::where('status', 'active')->orderBy('name')->get();
+        $amenities = Amenity::query()
+            ->when(\Illuminate\Support\Facades\Schema::hasColumn('amenities', 'status'), fn ($q) => $q->where('status', 'active'))
+            ->orderBy('name')
+            ->get();
         $room->load('amenities');
 
         return view('owner.rooms.edit', compact('room', 'properties', 'amenities'));
@@ -185,14 +235,43 @@ class OwnerRoomController extends Controller
 
         $this->authorizeRoomOwner($room, $owner);
 
+        // Chuẩn hóa tiền tệ trước khi validate
+        $cleanPrice = preg_replace('/[^\d]/', '', (string) $request->input('price'));
+        $cleanDeposit = preg_replace('/[^\d]/', '', (string) $request->input('deposit'));
+        $request->merge([
+            'price' => $cleanPrice !== '' ? $cleanPrice : null,
+            'deposit' => $cleanDeposit !== '' ? $cleanDeposit : null,
+        ]);
+
+        $propertyId = $request->input('property_id');
+        $floor = $request->input('floor');
+
+        $duplicateMsg = ($floor !== null && $floor !== '')
+            ? "Tên phòng này đã tồn tại ở tầng {$floor} trong khu trọ này. Vui lòng đặt tên khác."
+            : "Tên phòng này đã tồn tại trong khu trọ này. Vui lòng đặt tên khác.";
+
         $data = $request->validate([
             'property_id' => ['required', 'integer', 'exists:properties,id'],
-            'name' => ['required', 'string', 'max:100'],
+            'floor' => ['nullable', 'integer', 'min:0'],
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('rooms', 'name')
+                    ->where(function ($query) use ($propertyId, $floor) {
+                        $query->where('property_id', $propertyId);
+                        if ($floor !== null && $floor !== '') {
+                            $query->where('floor', $floor);
+                        } else {
+                            $query->whereNull('floor');
+                        }
+                    })
+                    ->ignore($room->id),
+            ],
             'area' => ['required', 'numeric', 'min:0.01'],
             'price' => ['required', 'numeric', 'min:0'],
             'deposit' => ['required', 'numeric', 'min:0'],
             'max_people' => ['required', 'integer', 'min:1'],
-            'floor' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string'],
             'status' => [
                 'required',
@@ -200,6 +279,13 @@ class OwnerRoomController extends Controller
             ],
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['integer', 'exists:amenities,id'],
+        ], [
+            'name.required' => 'Vui lòng nhập tên phòng.',
+            'name.unique' => $duplicateMsg,
+            'price.required' => 'Vui lòng nhập giá thuê phòng.',
+            'price.numeric' => 'Giá thuê phải là một số hợp lệ.',
+            'deposit.required' => 'Vui lòng nhập tiền đặt cọc.',
+            'deposit.numeric' => 'Tiền đặt cọc phải là một số hợp lệ.',
         ]);
 
         $amenityIds = $request->input('amenities', []);

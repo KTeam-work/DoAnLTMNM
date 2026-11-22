@@ -26,6 +26,29 @@
             transition: transform 0.2s;
         }
         .evidence-thumb:hover { transform: scale(1.1); }
+        .btn-report-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.35;
+            border-radius: 6px;
+            border: 1px solid #b6d4fe;
+            background-color: #f0f7ff;
+            color: #0a58ca;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+        .btn-report-action:hover {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(13, 110, 253, 0.25);
+        }
     </style>
 @endpush
 
@@ -131,6 +154,11 @@
                             'dismissed' => 'badge-dismissed',
                             default => '',
                         };
+                        $ownerId = $owner?->id;
+                        $ownerStat = $ownerId && isset($ownerStats[$ownerId]) ? $ownerStats[$ownerId] : null;
+                        $resolvedCount = (int) ($ownerStat['resolved_count'] ?? 0);
+                        $pendingCount = (int) ($ownerStat['pending_count'] ?? 0);
+                        $totalReports = (int) ($ownerStat['total_reports'] ?? 0);
                     @endphp
                     <tr>
                         <td>
@@ -143,6 +171,19 @@
                                 <div class="fw-bold text-dark">{{ $post->title }}</div>
                                 <small class="text-muted">Phòng: {{ $post->room->name ?? '—' }} ({{ $post->room->property->name ?? '' }})</small><br>
                                 <small class="text-muted">Chủ trọ: <strong>{{ $owner->name ?? 'Chưa rõ' }}</strong> ({{ $owner->phone ?? '—' }})</small><br>
+                                @if($resolvedCount >= 3)
+                                    <span class="badge bg-danger text-white mt-1" title="Chủ trọ này đã có {{ $resolvedCount }} lần xác nhận vi phạm (Tái phạm nguy hiểm)">
+                                        🚨 Tái phạm {{ $resolvedCount }} lần
+                                    </span>
+                                @elseif($resolvedCount >= 1)
+                                    <span class="badge bg-warning text-dark mt-1" title="Chủ trọ này đã có {{ $resolvedCount }} lần xác nhận vi phạm">
+                                        ⚠️ Vi phạm {{ $resolvedCount }} lần
+                                    </span>
+                                @endif
+                                @if($owner && $owner->status === 'inactive')
+                                    <span class="badge bg-dark text-white mt-1">🚫 Đã khóa TK</span>
+                                @endif
+                                <br>
                                 <span class="badge bg-light text-dark border mt-1" style="font-size: 10px;">Trạng thái tin: {{ $post->status }}</span>
                             @else
                                 <span class="text-danger small">Tin đăng đã bị xóa</span>
@@ -188,10 +229,10 @@
                             @endif
                         </td>
 
-                        <td class="text-end">
+                        <td class="text-end" style="vertical-align: middle;">
                             <button
                                 type="button"
-                                class="rp-btn rp-btn-primary rp-btn-sm"
+                                class="btn-report-action"
                                 data-bs-toggle="modal"
                                 data-bs-target="#modalReport{{ $report->id }}"
                             >
@@ -199,100 +240,6 @@
                             </button>
                         </td>
                     </tr>
-
-                    {{-- MODAL XỬ LÝ CHO TỪNG BÁO CÁO --}}
-                    <div class="modal fade" id="modalReport{{ $report->id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg modal-dialog-centered">
-                            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
-                                <div class="modal-header bg-light" style="border-top-left-radius: 16px; border-top-right-radius: 16px;">
-                                    <h5 class="modal-title fw-bold fs-6">
-                                        Xử lý báo cáo vi phạm #{{ $report->report_code }}
-                                    </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                                </div>
-                                <form action="{{ route('admin.reports.update', $report->id) }}" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="modal-body p-4 text-start">
-                                        <div class="row g-3 mb-4">
-                                            <div class="col-md-6 border-end">
-                                                <h6 class="fw-bold text-danger mb-2">Thông tin khiếu nại</h6>
-                                                <p class="mb-1 small"><strong>Lý do:</strong> {{ $report->reason_label }}</p>
-                                                <p class="mb-1 small"><strong>Người gửi:</strong> {{ $report->reporter->name ?? '—' }} ({{ $report->reporter->email ?? '' }} / {{ $report->reporter->phone ?? '' }})</p>
-                                                <p class="mb-2 small"><strong>Thời gian:</strong> {{ $report->created_at->format('d/m/Y H:i:s') }}</p>
-                                                <div class="p-2 bg-light rounded small border">
-                                                    <strong>Mô tả chi tiết từ khách:</strong><br>
-                                                    {{ $report->description }}
-                                                </div>
-                                                @if($report->evidence_image)
-                                                    <div class="mt-3">
-                                                        <strong class="small d-block mb-1">Ảnh bằng chứng đính kèm:</strong>
-                                                        <a href="{{ asset('storage/' . $report->evidence_image) }}" target="_blank">
-                                                            <img src="{{ asset('storage/' . $report->evidence_image) }}" alt="Ảnh bằng chứng" class="img-fluid rounded border" style="max-height: 180px;">
-                                                        </a>
-                                                    </div>
-                                                @endif
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <h6 class="fw-bold text-dark mb-2">Tin đăng bị khiếu nại</h6>
-                                                @if($post)
-                                                    <p class="mb-1 small"><strong>Tiêu đề tin:</strong> {{ $post->title }}</p>
-                                                    <p class="mb-1 small"><strong>Phòng:</strong> {{ $post->room->name ?? '' }} · {{ $post->room->property->name ?? '' }}</p>
-                                                    <p class="mb-1 small"><strong>Chủ trọ:</strong> {{ $owner->name ?? 'Chưa rõ' }} ({{ $owner->phone ?? '—' }})</p>
-                                                    <p class="mb-1 small"><strong>Trạng thái tin hiện tại:</strong> <span class="badge bg-secondary">{{ $post->status }}</span></p>
-
-                                                    <div class="mt-3">
-                                                        <a href="{{ route('rooms.show', $post->room_id) }}" target="_blank" class="btn btn-sm btn-outline-info">
-                                                            Xem trang tin đăng thực tế
-                                                        </a>
-                                                    </div>
-                                                @else
-                                                    <p class="text-danger small">Tin đăng này đã bị xóa khỏi hệ thống.</p>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <hr>
-
-                                        {{-- KHUNG HÀNH ĐỘNG CỦA ADMIN --}}
-                                        <h6 class="fw-bold text-primary mb-3">Quyết định xử lý của Admin</h6>
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold small">Trạng thái báo cáo <span class="text-danger">*</span></label>
-                                                <select name="status" class="form-select form-select-sm" required>
-                                                    <option value="pending" @selected($report->status === 'pending')>Chờ xử lý</option>
-                                                    <option value="investigating" @selected($report->status === 'investigating')>Đang xác minh thông tin</option>
-                                                    <option value="resolved" @selected($report->status === 'resolved')>Đã xử lý (Xác nhận có vi phạm)</option>
-                                                    <option value="dismissed" @selected($report->status === 'dismissed')>Bác bỏ (Tố cáo sai sự thật)</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold small">Biện pháp chế tài áp dụng</label>
-                                                <select name="action_taken" class="form-select form-select-sm" required>
-                                                    <option value="none" @selected($report->action_taken === 'none')>Không áp dụng chế tài</option>
-                                                    <option value="post_hidden" @selected($report->action_taken === 'post_hidden')>Ẩn tin đăng vi phạm ngay</option>
-                                                    <option value="owner_warned" @selected($report->action_taken === 'owner_warned')>Ghi nhận cảnh cáo chủ trọ</option>
-                                                    <option value="owner_banned" @selected($report->action_taken === 'owner_banned')>Khóa tài khoản chủ trọ & Ẩn bài</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="col-12">
-                                                <label class="form-label fw-semibold small">Ghi chú xử lý của Quản trị viên</label>
-                                                <textarea name="admin_note" class="form-control form-control-sm" rows="3" placeholder="Nhập lý do xử lý hoặc căn cứ xác minh...">{{ old('admin_note', $report->admin_note) }}</textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-                                        <button type="submit" class="btn btn-sm btn-primary px-3">Lưu kết quả xử lý</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                 @empty
                     <tr>
                         <td colspan="7" class="text-center text-muted py-5">
@@ -303,6 +250,175 @@
             </tbody>
         </table>
     </div>
+
+    {{-- MODAL XỬ LÝ CHO TỪNG BÁO CÁO (ĐẶT NGOÀI TABLE ĐỂ ĐẢM BẢO HOẠT ĐỘNG FORM & CLICK EVENT) --}}
+    @foreach ($reports as $report)
+        @php
+            $post = $report->rentalPost;
+            $owner = $post?->room?->property?->owner;
+            $ownerId = $owner?->id;
+            $ownerStat = $ownerId && isset($ownerStats[$ownerId]) ? $ownerStats[$ownerId] : null;
+            $resolvedCount = (int) ($ownerStat['resolved_count'] ?? 0);
+            $pendingCount = (int) ($ownerStat['pending_count'] ?? 0);
+            $totalReports = (int) ($ownerStat['total_reports'] ?? 0);
+        @endphp
+        <div class="modal fade" id="modalReport{{ $report->id }}" tabindex="-1" aria-labelledby="modalReportLabel{{ $report->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+                    <div class="modal-header bg-light" style="border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                        <h5 class="modal-title fw-bold fs-6" id="modalReportLabel{{ $report->id }}">
+                            Xử lý báo cáo vi phạm #{{ $report->report_code }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <form action="{{ route('admin.reports.update', $report->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body p-4 text-start">
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6 border-end">
+                                    <h6 class="fw-bold text-danger mb-2">Thông tin khiếu nại</h6>
+                                    <p class="mb-1 small"><strong>Lý do:</strong> {{ $report->reason_label }}</p>
+                                    <p class="mb-1 small"><strong>Người gửi:</strong> {{ $report->reporter->name ?? '—' }} ({{ $report->reporter->email ?? '' }} / {{ $report->reporter->phone ?? '' }})</p>
+                                    <p class="mb-2 small"><strong>Thời gian:</strong> {{ $report->created_at->format('d/m/Y H:i:s') }}</p>
+                                    <div class="p-2 bg-light rounded small border">
+                                        <strong>Mô tả chi tiết từ khách:</strong><br>
+                                        {{ $report->description }}
+                                    </div>
+                                    @if($report->evidence_image)
+                                        <div class="mt-3">
+                                            <strong class="small d-block mb-1">Ảnh bằng chứng đính kèm:</strong>
+                                            <a href="{{ asset('storage/' . $report->evidence_image) }}" target="_blank">
+                                                <img src="{{ asset('storage/' . $report->evidence_image) }}" alt="Ảnh bằng chứng" class="img-fluid rounded border" style="max-height: 180px;">
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-dark mb-2">Tin đăng bị khiếu nại</h6>
+                                    @if($post)
+                                        <p class="mb-1 small"><strong>Tiêu đề tin:</strong> {{ $post->title }}</p>
+                                        <p class="mb-1 small"><strong>Phòng:</strong> {{ $post->room->name ?? '' }} · {{ $post->room->property->name ?? '' }}</p>
+                                        <p class="mb-1 small">
+                                            <strong>Chủ trọ:</strong> {{ $owner->name ?? 'Chưa rõ' }} ({{ $owner->phone ?? '—' }})
+                                            @if($owner && $owner->status === 'inactive')
+                                                <span class="badge bg-danger ms-1">Đã khóa tài khoản</span>
+                                            @endif
+                                        </p>
+                                        <p class="mb-1 small"><strong>Trạng thái tin hiện tại:</strong> <span class="badge bg-secondary">{{ $post->status }}</span></p>
+
+                                        <div class="mt-2 mb-3">
+                                            <a href="{{ route('rooms.show', $post->room_id) }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                                Xem trang tin đăng thực tế
+                                            </a>
+                                        </div>
+
+                                        {{-- THẺ THEO DÕI LỊCH SỬ VI PHẠM CỦA CHỦ TRỌ --}}
+                                        <div class="card border {{ $resolvedCount >= 3 ? 'border-danger bg-danger-subtle' : ($resolvedCount >= 1 ? 'border-warning bg-warning-subtle' : 'border-light bg-light') }} p-2 rounded-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <strong class="small {{ $resolvedCount >= 3 ? 'text-danger' : ($resolvedCount >= 1 ? 'text-warning-emphasis' : 'text-secondary') }}">
+                                                    📊 Lịch sử vi phạm của chủ trọ này
+                                                </strong>
+                                                @if($owner)
+                                                    <a href="{{ route('admin.reports.index', ['q' => $owner->name]) }}" target="_blank" class="text-decoration-none small" style="font-size: 11px;">
+                                                        Xem tất cả &rarr;
+                                                    </a>
+                                                @endif
+                                            </div>
+                                            <div class="row g-1 text-center small mb-2">
+                                                <div class="col-4">
+                                                    <div class="p-1 bg-white rounded border">
+                                                        <div class="text-muted" style="font-size: 10px;">Tổng báo cáo</div>
+                                                        <div class="fw-bold">{{ $totalReports }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="p-1 bg-white rounded border">
+                                                        <div class="text-muted" style="font-size: 10px;">Đã vi phạm</div>
+                                                        <div class="fw-bold text-danger">{{ $resolvedCount }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="p-1 bg-white rounded border">
+                                                        <div class="text-muted" style="font-size: 10px;">Chờ xử lý</div>
+                                                        <div class="fw-bold text-warning">{{ $pendingCount }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @if($resolvedCount >= 3)
+                                                <div class="alert alert-danger py-1 px-2 mb-0 small border-danger" style="font-size: 11px; line-height: 1.4;">
+                                                    <strong>🚨 TÁI PHẠM NGUY HIỂM (Đã có {{ $resolvedCount }} lần vi phạm):</strong><br>
+                                                    Khi xác nhận <em>"Đã xử lý"</em>, hệ thống sẽ <strong>TỰ ĐỘNG KHÓA VĨNH VIỄN TÀI KHOẢN</strong> và <strong>ẨN TOÀN BỘ TIN ĐĂNG</strong> của chủ trọ này.
+                                                </div>
+                                            @elseif($resolvedCount == 2)
+                                                <div class="alert alert-warning py-1 px-2 mb-0 small border-warning" style="font-size: 11px; line-height: 1.4;">
+                                                    <strong>⚠️ CẢNH BÁO TÁI PHẠM (Lần 2):</strong><br>
+                                                    Chủ trọ đã có 2 lần vi phạm. Nếu tiếp tục vi phạm lần này (đạt 3 lần), tài khoản sẽ kích hoạt tự động khóa toàn diện.
+                                                </div>
+                                            @elseif($resolvedCount == 1)
+                                                <div class="text-muted small" style="font-size: 11px;">
+                                                    ℹ️ Chủ trọ này từng có 1 lần vi phạm trước đây.
+                                                </div>
+                                            @else
+                                                <div class="text-success small" style="font-size: 11px;">
+                                                    ✅ Chủ trọ này chưa từng có tiền sử vi phạm nào.
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <p class="text-danger small">Tin đăng này đã bị xóa khỏi hệ thống.</p>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            {{-- KHUNG HÀNH ĐỘNG CỦA ADMIN --}}
+                            <h6 class="fw-bold text-primary mb-3">Quyết định xử lý của Admin</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Trạng thái báo cáo <span class="text-danger">*</span></label>
+                                    <select name="status" class="form-select form-select-sm" required>
+                                        <option value="pending" @selected($report->status === 'pending')>Chờ xử lý</option>
+                                        <option value="investigating" @selected($report->status === 'investigating')>Đang xác minh thông tin</option>
+                                        <option value="resolved" @selected($report->status === 'resolved')>Đã xử lý (Xác nhận có vi phạm)</option>
+                                        <option value="dismissed" @selected($report->status === 'dismissed')>Bác bỏ (Tố cáo sai sự thật)</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Biện pháp chế tài áp dụng</label>
+                                    <select name="action_taken" class="form-select form-select-sm" required>
+                                        <option value="none" @selected($report->action_taken === 'none')>Không áp dụng chế tài</option>
+                                        <option value="post_hidden" @selected($report->action_taken === 'post_hidden')>Ẩn tin đăng vi phạm này</option>
+                                        <option value="owner_warned" @selected($report->action_taken === 'owner_warned')>Ghi nhận cảnh cáo chủ trọ</option>
+                                        <option value="owner_banned" @selected($report->action_taken === 'owner_banned')>Khóa tài khoản chủ trọ & Ẩn TOÀN BỘ tin</option>
+                                    </select>
+                                    @if($resolvedCount >= 2)
+                                        <div class="text-danger small mt-1" style="font-size: 11px;">
+                                            * Chủ trọ đã có {{ $resolvedCount }} lần vi phạm. Hệ thống sẽ tự động khóa tài khoản và gỡ sạch tin đăng nếu vi phạm đạt ngưỡng 3 lần.
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold small">Ghi chú xử lý của Quản trị viên</label>
+                                    <textarea name="admin_note" class="form-control form-control-sm" rows="3" placeholder="Nhập lý do xử lý hoặc căn cứ xác minh...">{{ old('admin_note', $report->admin_note) }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer bg-light p-3" style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-sm btn-primary px-3">Lưu kết quả xử lý</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     {{-- PHÂN TRANG --}}
     @if ($reports->hasPages())

@@ -32,6 +32,7 @@ class OwnerApptionmentController extends Controller
             'confirmed',
             'rescheduled',
             'completed',
+            'rejected',
             'cancelled',
         ];
 
@@ -54,7 +55,7 @@ class OwnerApptionmentController extends Controller
             'completed' => (clone $baseQuery)
                 ->where('status', 'completed')->count(),
             'cancelled' => (clone $baseQuery)
-                ->where('status', 'cancelled')->count(),
+                ->whereIn('status', ['cancelled', 'rejected'])->count(),
         ];
 
         // Chuẩn bị dữ liệu riêng cho FullCalendar tại controller.
@@ -76,6 +77,7 @@ class OwnerApptionmentController extends Controller
                 'confirmed' => 'Đã xác nhận',
                 'rescheduled' => 'Đã đề xuất giờ mới',
                 'completed' => 'Hoàn thành',
+                'rejected' => 'Đã từ chối',
                 'cancelled' => 'Đã hủy',
             ];
 
@@ -92,6 +94,7 @@ class OwnerApptionmentController extends Controller
                     'address' => optional($room->property)->address ?? '—',
                     'phone' => $appointment->phone ?? '—',
                     'message' => $appointment->message ?? 'Không có lời nhắn',
+                    'owner_note' => $appointment->owner_note ?? '',
                     'date' => $date,
                     'time' => $time,
                     'status' => $appointment->status ?? 'pending',
@@ -123,11 +126,19 @@ class OwnerApptionmentController extends Controller
 
     public function reject(Request $request, int $id)
     {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ], [
+            'rejection_reason.required' => 'Vui lòng nhập lý do từ chối lịch xem phòng.',
+            'rejection_reason.max' => 'Lý do từ chối không được vượt quá 500 ký tự.',
+        ]);
+
         return $this->updateStatus(
             $request,
             $id,
-            'cancelled',
-            'Đã từ chối lịch xem phòng.'
+            'rejected',
+            'Đã từ chối lịch xem phòng.',
+            $validated['rejection_reason']
         );
     }
 
@@ -191,11 +202,13 @@ class OwnerApptionmentController extends Controller
         Request $request,
         int $id,
         string $status,
-        string $message
+        string $message,
+        ?string $reason = null
     ) {
         $ownerId = Auth::id();
 
         $appointment = ViewingAppointment::query()
+            ->with(['room', 'tenant'])
             ->whereHas('room.property', function ($query) use ($ownerId) {
                 $query->where('owner_id', $ownerId);
             })
@@ -213,8 +226,11 @@ class OwnerApptionmentController extends Controller
 
         if ($status === 'confirmed') {
             $data['confirmed_at'] = now();
-        } elseif ($status === 'cancelled') {
+        } elseif (in_array($status, ['rejected', 'cancelled'])) {
             $data['cancelled_at'] = now();
+            if ($reason) {
+                $data['owner_note'] = $reason;
+            }
         }
 
         $appointment->update($data);
@@ -226,16 +242,17 @@ class OwnerApptionmentController extends Controller
                 Notification::notify(
                     $appointment->tenant_id,
                     'Lịch xem phòng đã được xác nhận',
-                    "Chủ trọ đã xác nhận lịch hẹn xem phòng {$roomName} của bạn.",
+                    "Chủ trọ đã xác nhận lịch hẹn xem phòng \"{$roomName}\" của bạn.",
                     'appointment',
                     'appointment',
                     $appointment->id
                 );
-            } elseif ($status === 'cancelled') {
+            } elseif (in_array($status, ['rejected', 'cancelled'])) {
+                $reasonText = $reason ? " Lý do: {$reason}" : '';
                 Notification::notify(
                     $appointment->tenant_id,
                     'Lịch xem phòng bị từ chối',
-                    "Rất tiếc, chủ trọ đã từ chối lịch xem phòng {$roomName}.",
+                    "Rất tiếc, chủ trọ đã từ chối lịch xem phòng \"{$roomName}\".{$reasonText}",
                     'appointment',
                     'appointment',
                     $appointment->id

@@ -91,7 +91,7 @@ class ProcessDueInvoicesCommand extends Command
                     if (!$dryRun) {
                         Notification::notify(
                             $tenant->id,
-                            "🔔 Nhắc nợ: Hóa đơn phòng {$roomName} sắp đến hạn",
+                            "Nhắc nợ: Hóa đơn phòng {$roomName} sắp đến hạn",
                             "Hóa đơn #{$invoice->invoice_code} kỳ {$invoice->billing_month->format('m/Y')} (" . number_format((float)$invoice->total) . " đ) sẽ đến hạn thanh toán trong {$diffInDays} ngày tới (Hạn nộp: {$dueDate->format('d/m/Y')}). Quý khách vui lòng thanh toán đúng hạn.",
                             'invoice',
                             'invoice',
@@ -108,7 +108,7 @@ class ProcessDueInvoicesCommand extends Command
                     if (!$dryRun) {
                         Notification::notify(
                             $tenant->id,
-                            "⏰ Hôm nay là hạn chót thanh toán tiền phòng {$roomName}",
+                            "Hôm nay là hạn chót thanh toán tiền phòng {$roomName}",
                             "Hôm nay ({$dueDate->format('d/m/Y')}) là hạn chót thanh toán hóa đơn #{$invoice->invoice_code} (" . number_format((float)$invoice->total) . " đ). Quý khách vui lòng thanh toán ngay để tránh phát sinh trạng thái quá hạn.",
                             'invoice',
                             'invoice',
@@ -135,7 +135,7 @@ class ProcessDueInvoicesCommand extends Command
                     if (!$dryRun) {
                         Notification::notify(
                             $tenant->id,
-                            "⚠️ Hóa đơn tiền phòng {$roomName} đã quá hạn",
+                            "Hóa đơn tiền phòng {$roomName} đã quá hạn",
                             "Hóa đơn #{$invoice->invoice_code} (" . number_format((float)$invoice->total) . " đ) đã quá hạn thanh toán {$daysOverdue} ngày (Hạn chót: {$dueDate->format('d/m/Y')}). Quý khách vui lòng nộp tiền ngay để đảm bảo quyền lợi thuê phòng.",
                             'warning',
                             'invoice',
@@ -150,7 +150,7 @@ class ProcessDueInvoicesCommand extends Command
                     if (!$dryRun) {
                         Notification::notify(
                             $owner->id,
-                            "⚠️ Phòng {$roomName} nợ tiền quá hạn ({$daysOverdue} ngày)",
+                            "Phòng {$roomName} nợ tiền quá hạn ({$daysOverdue} ngày)",
                             "Khách thuê {$tenant?->name} ({$roomName}) chưa đóng tiền hóa đơn #{$invoice->invoice_code} (" . number_format((float)$invoice->total) . " đ). Đã quá hạn {$daysOverdue} ngày kể từ ngày {$dueDate->format('d/m/Y')}.",
                             'warning',
                             'invoice',

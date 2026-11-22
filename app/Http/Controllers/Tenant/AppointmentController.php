@@ -126,7 +126,7 @@ class AppointmentController extends Controller
                 ->withErrors(['room_id' => 'Phòng hiện không còn được đăng cho thuê.']);
         }
 
-        ViewingAppointment::create([
+        $appointment = ViewingAppointment::create([
             'room_id' => $room->id,
             'tenant_id' => Auth::id(),
             'appointment_date' => $validated['appointment_date'],
@@ -136,31 +136,116 @@ class AppointmentController extends Controller
             'status' => 'pending',
         ]);
 
+        $formattedDate = \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y');
+        $timeStr = substr((string) $appointment->appointment_time, 0, 5);
+        $roomName = $room->name ?? 'phòng trọ';
+        $user = Auth::user();
+
+        // 1. Gửi thông báo cho người thuê xác nhận đã gửi lịch hẹn thành công
+        Notification::notify(
+            $user->id,
+            'Đặt lịch xem phòng thành công',
+            "Bạn đã gửi yêu cầu hẹn xem phòng \"{$roomName}\" vào lúc {$timeStr} ngày {$formattedDate}. Vui lòng chờ chủ trọ xác nhận.",
+            'appointment',
+            'appointment',
+            $appointment->id
+        );
+
+        // 2. Gửi thông báo cho chủ trọ có khách đặt lịch xem phòng
+        $owner = $room->property?->owner;
+        if ($owner) {
+            Notification::notify(
+                $owner->id,
+                'Có yêu cầu đặt lịch xem phòng mới',
+                "Khách thuê {$user->name} đã đặt lịch xem phòng \"{$roomName}\" vào lúc {$timeStr} ngày {$formattedDate}. Vui lòng kiểm tra và xác nhận.",
+                'appointment',
+                'appointment',
+                $appointment->id
+            );
+        }
+
         return redirect()->route('appointments.index')
             ->with('success', 'Đặt lịch xem phòng thành công. Vui lòng chờ chủ trọ xác nhận.');
     }
 
-    // Hủy lịch xem phòng của chính người thuê
-    public function destroy(int $id)
+    // Hủy hoặc từ chối lịch xem phòng của chính người thuê
+    public function destroy(Request $request, int $id)
     {
         if (!Auth::check()) {
             return redirect()->route('login')
                 ->with('error', 'Vui lòng đăng nhập để thực hiện thao tác.');
         }
 
-        $appointment = ViewingAppointment::where('tenant_id', Auth::id())
+        $appointment = ViewingAppointment::with(['room.property.owner', 'tenant'])
+            ->where('tenant_id', Auth::id())
             ->findOrFail($id);
 
-        if (!in_array($appointment->status, ['pending', 'confirmed'], true)) {
+        if (!in_array($appointment->status, ['pending', 'confirmed', 'rescheduled'], true)) {
             return back()->with('error', 'Lịch hẹn này không thể hủy.');
         }
 
-        $appointment->update([
+        $isRescheduled = $appointment->status === 'rescheduled';
+        $cancelReason = trim($request->input('cancel_reason', ''));
+
+        $updateData = [
             'status' => 'cancelled',
             'cancelled_at' => now(),
-        ]);
+        ];
+        if ($cancelReason !== '') {
+            $updateData['owner_note'] = 'Khách từ chối: ' . $cancelReason;
+        }
 
-        return back()->with('success', 'Đã hủy lịch xem phòng.');
+        $appointment->update($updateData);
+
+        $formattedDate = \Carbon\Carbon::parse($appointment->appointment_date)->format('d/m/Y');
+        $timeStr = substr((string) $appointment->appointment_time, 0, 5);
+        $roomName = $appointment->room?->name ?? 'phòng trọ';
+        $tenantName = $appointment->tenant?->name ?? 'Khách thuê';
+
+        // 1. Gửi thông báo cho chủ trọ
+        $owner = $appointment->room?->property?->owner;
+        if ($owner) {
+            $reasonDesc = $cancelReason !== '' ? " Lý do: \"{$cancelReason}\"." : '';
+            $ownerTitle = $isRescheduled
+                ? 'Khách thuê từ chối giờ hẹn đề xuất'
+                : 'Khách thuê đã hủy lịch xem phòng';
+            $ownerMsg = $isRescheduled
+                ? "Khách thuê {$tenantName} đã từ chối giờ đề xuất mới cho phòng \"{$roomName}\" ({$timeStr} ngày {$formattedDate}).{$reasonDesc}"
+                : "Khách thuê {$tenantName} đã hủy lịch xem phòng \"{$roomName}\" (lịch hẹn: {$timeStr} ngày {$formattedDate}).{$reasonDesc}";
+
+            Notification::notify(
+                $owner->id,
+                $ownerTitle,
+                $ownerMsg,
+                'appointment',
+                'appointment',
+                $appointment->id
+            );
+        }
+
+        // 2. Gửi thông báo xác nhận cho người thuê
+        $tenantReasonDesc = $cancelReason !== '' ? " Lý do: \"{$cancelReason}\"." : '';
+        $tenantTitle = $isRescheduled
+            ? 'Bạn đã từ chối giờ hẹn đề xuất'
+            : 'Bạn đã hủy lịch xem phòng';
+        $tenantMsg = $isRescheduled
+            ? "Bạn đã từ chối giờ đề xuất mới cho phòng \"{$roomName}\" ({$timeStr} ngày {$formattedDate}).{$tenantReasonDesc}"
+            : "Bạn đã hủy lịch xem phòng \"{$roomName}\" thành công.{$tenantReasonDesc}";
+
+        Notification::notify(
+            Auth::id(),
+            $tenantTitle,
+            $tenantMsg,
+            'appointment',
+            'appointment',
+            $appointment->id
+        );
+
+        $successMsg = $isRescheduled
+            ? 'Đã từ chối giờ đề xuất mới thành công.'
+            : 'Đã hủy lịch xem phòng thành công.';
+
+        return back()->with('success', $successMsg);
     }
 
     // Người thuê đồng ý giờ mới mà chủ trọ đã đề xuất

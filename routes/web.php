@@ -339,6 +339,10 @@ Route::get('/rooms/{id}', [RoomController::class, 'show'])
 Route::post('/rental-posts/{post}/report', [\App\Http\Controllers\Tenant\PostReportController::class, 'store'])
     ->name('tenant.reports.store');
 
+Route::get('/tenant/reports', [\App\Http\Controllers\Tenant\PostReportController::class, 'index'])
+    ->middleware('auth')
+    ->name('tenant.reports.index');
+
 
 Route::get('/favorites', [FavoriteController::class, 'index'])
     ->name('favorites.index');
@@ -865,3 +869,25 @@ Route::post('/reset-password', [
     ForgotPasswordController::class,
     'resetPassword'
 ])->middleware('guest')->name('password.update');
+
+// Fallback phục vụ file/ảnh từ storage/app/public nếu môi trường Windows chưa tạo được symlink public/storage
+Route::get('/storage/{path}', function (string $path) {
+    $storagePublic = realpath(storage_path('app/public'));
+    $targetFile = realpath(storage_path('app/public/' . $path));
+
+    if (!$storagePublic || !$targetFile || !str_starts_with($targetFile, $storagePublic) || !file_exists($targetFile)) {
+        abort(404);
+    }
+
+    $mime = mime_content_type($targetFile) ?: 'image/jpeg';
+    return response(file_get_contents($targetFile), 200, [
+        'Content-Type' => $mime,
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->where('path', '.*')
+  ->withoutMiddleware([
+      \Illuminate\Session\Middleware\StartSession::class,
+      \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+      \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+  ])
+  ->name('storage.local_fallback');

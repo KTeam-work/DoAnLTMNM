@@ -33,5 +33,5 @@
   .icon-appointment { background: #fdf0ed; color: var(--red); } /* type: viewing_appointment */
 
   .notify-time { font-size: 12px; color: #aaa; margin-top: 8px; font-weight: 600; }
-  .mark-read-btn { font-size: 13px; font-weight: 700; color: var(--green); cursor: pointer; text-decoration: none; transition: 0.2s; }
+  .mark-read-btn { font-size: 13px; font-weight: 700; color: var(--green); cursor: pointer; text-decoration: none; transition: 0.2s; white-space: nowrap; display: inline-block; }
   .mark-read-btn:hover { color: var(--green-dark); text-decoration: underline; }
