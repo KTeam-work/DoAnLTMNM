@@ -95,9 +95,11 @@ class OwnerContractController extends Controller{
                 'u.email as tenant_email',
                 'r.id as room_id',
                 'r.name as room_name',
+                'r.price as room_price',
                 'p.name as property_name',
                 'va.appointment_date',
                 'va.status as appointment_status',
+                'va.status',
                 'va.message',
             ])
             ->get();

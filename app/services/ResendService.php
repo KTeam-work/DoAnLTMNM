@@ -9,17 +9,13 @@ use RuntimeException;
 
 class ResendService
 {
-    /**
-     * Gửi email chung qua SMTP hoặc Resend API.
-     * Tự động ưu tiên SMTP (nếu cấu hình Gmail SMTP để gửi tới bất kỳ email nào),
-     * hoặc dùng Resend API (có cơ chế sandbox khi chạy thử nghiệm).
-     */
+
     public function sendEmail(
         string $to,
         string $subject,
         string $html
     ): void {
-        // 1. Nếu hệ thống đã cấu hình SMTP (như Gmail SMTP), ưu tiên gửi trực tiếp tới đúng người nhận:
+        //  Nếu hệ thống đã cấu hình SMTP (như Gmail SMTP), ưu tiên gửi trực tiếp tới đúng người nhận:
         if (config('mail.default') === 'smtp' && !empty(config('mail.mailers.smtp.username')) && !empty(config('mail.mailers.smtp.password'))) {
             try {
                 Mail::html($html, function ($message) use ($to, $subject) {
@@ -31,7 +27,7 @@ class ResendService
             }
         }
 
-        // 2. Gửi qua Resend API
+        //  Gửi qua Resend API
         $apiKey = config('services.resend.key');
         $fromEmail = config('services.resend.from_email');
         $fromName = config('services.resend.from_name');
@@ -80,9 +76,9 @@ class ResendService
         }
     }
 
-    /**
-     * Gửi email thông báo hợp đồng mới và thông tin tài khoản cho khách vãng lai.
-     */
+    
+     #gửi email thông báo hợp đồng mới và thông tin tài khoản cho khách vãng lai.
+    
     public function sendWalkInContractEmail(
         string $toEmail,
         string $tenantName,
@@ -137,9 +133,9 @@ class ResendService
         $this->sendEmail($toEmail, $subject, $html);
     }
 
-    /**
-     * Gửi email thông báo hóa đơn mới kèm tài khoản đăng nhập và 2 cách thanh toán.
-     */
+    
+    #gửi email thông báo hóa đơn mới kèm tài khoản đăng nhập và 2 cách thanh toán.
+     
     public function sendInvoiceEmail(
         string $toEmail,
         string $tenantName,
@@ -232,9 +228,9 @@ class ResendService
         $this->sendEmail($toEmail, $subject, $html);
     }
 
-    /**
-     * Gửi email thông báo tài khoản bị khóa kèm liên kết xin mở khóa.
-     */
+    
+     #Gửi email thông báo tài khoản bị khóa kèm liên kết xin mở khóa.
+     
     public function sendAccountLockedEmail(
         string $toEmail,
         string $userName,
@@ -277,9 +273,9 @@ class ResendService
         $this->sendEmail($toEmail, $subject, $html);
     }
 
-    /**
-     * Gửi email thông báo tài khoản đã được Admin duyệt mở khóa thành công.
-     */
+    
+     #Gửi email thông báo tài khoản đã được Admin duyệt mở khóa thành công.
+     
     public function sendAccountUnlockedEmail(
         string $toEmail,
         string $userName

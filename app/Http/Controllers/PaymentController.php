@@ -13,8 +13,10 @@ use Illuminate\Support\Facades\Log;
 class PaymentController extends Controller
 {
     
+
     // webhook nhận thông báo biến động số dư từ SePay.
     // xác minh giao dịch, kiểm tra số tiền và cập nhật trạng thái hóa đơn.
+
     public function webhook(Request $request)
     {
         Log::info('SePay Webhook Received:', $request->all());
@@ -133,7 +135,8 @@ class PaymentController extends Controller
                 ], 404);
             }
 
-            //nếu payment đã thành công trước đó (idempotent)
+
+            // nếu payment đã thành công trước đó (idempotent)
             if ($payment->status === 'success') {
                 Log::info('SePay Webhook: Payment is already marked as success', ['payment_code' => $paymentCode]);
                 return response()->json([
@@ -152,6 +155,7 @@ class PaymentController extends Controller
                 ], 422);
             }
 
+
             //so sánh số tiền (tránh lỗi làm tròn float)
             $expectedAmount = round((float) $payment->amount, 2);
             if ($paidAmount < $expectedAmount) {
@@ -166,6 +170,7 @@ class PaymentController extends Controller
                 ], 422);
             }
 
+
             //thời gian thanh toán
             $txDate = $request->input('transactionDate');
             $paidAt = null;
@@ -179,7 +184,8 @@ class PaymentController extends Controller
                 $paidAt = now();
             }
 
-            //cập nhật Payment: status = 'success', method = 'qr'
+
+            // cập nhật Payment: status = 'success', method = 'qr'
             $payment->update([
                 'status' => 'success',
                 'method' => 'qr',
@@ -187,7 +193,9 @@ class PaymentController extends Controller
                 'paid_at' => $paidAt,
             ]);
 
+
             //cập nhật Invoice: status = 'paid'
+
             /** @var Invoice|null $invoice */
             $invoice = $payment->invoice()->lockForUpdate()->first();
             if ($invoice && $invoice->status !== 'cancelled') {
@@ -196,7 +204,9 @@ class PaymentController extends Controller
                 ]);
             }
 
+
             //gửi thông báo hệ thống nếu có Notification model
+
             if ($invoice && $invoice->contract) {
                 try {
                     Notification::notify(
