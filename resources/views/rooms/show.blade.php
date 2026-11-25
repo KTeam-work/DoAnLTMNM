@@ -280,7 +280,14 @@
                                     {{ $room['title'] }}
                                 </h1>
 
-
+                                @if(isset($totalReviews) && $totalReviews > 0)
+                                    <div class="mb-2" style="font-size: 13.5px;">
+                                        <a href="#reviewsSection" class="text-decoration-none d-inline-flex align-items-center gap-1" style="color: #b45309; font-weight: 700;">
+                                            <span>★ {{ $avgRating }}</span>
+                                            <span class="text-muted fw-normal" style="font-size: 12.5px;">({{ $totalReviews }} đánh giá thực tế từ khách thuê trước)</span>
+                                        </a>
+                                    </div>
+                                @endif
 
                                 <div class="room-address">
                                     <span>{{ $room['address'] }}</span>
@@ -423,6 +430,108 @@
                                 referrerpolicy="no-referrer-when-downgrade"
                             ></iframe>
                         </div>
+                    </section>
+
+                    <!-- =========================================================
+                         ĐÁNH GIÁ & NHẬN XÉT TỪ KHÁCH THUÊ TRƯỚC (HỢP ĐỒNG ĐÃ THANH LÝ)
+                         ========================================================= -->
+                    <section class="room-content-card" id="reviewsSection">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <h2 style="margin: 0;">
+                                Đánh giá từ khách thuê trước
+                            </h2>
+                            @if(isset($totalReviews) && $totalReviews > 0)
+                                <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: #fefce8; border: 1px solid #fef08a; border-radius: 999px;">
+                                    <span style="color: #f59e0b; font-size: 16px;">★</span>
+                                    <span style="font-weight: 800; color: #854d0e; font-size: 15px;">{{ $avgRating }}</span>
+                                    <span style="font-size: 12.5px; color: #a16207;">/ 5.0 ({{ $totalReviews }} đánh giá)</span>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="section-line"></div>
+
+                        @if(isset($totalReviews) && $totalReviews > 0)
+                            {{-- BẢNG TỔNG QUAN ĐIỂM ĐÁNH GIÁ --}}
+                            <div class="p-3 mb-4 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                <div class="row align-items-center g-3">
+                                    <div class="col-md-4 text-center border-md-end">
+                                        <div style="font-size: 40px; font-weight: 800; color: #0c2340; line-height: 1;">
+                                            {{ $avgRating }}
+                                        </div>
+                                        <div class="mt-1" style="color: #f59e0b; font-size: 18px; letter-spacing: 2px;">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                {{ $i <= round($avgRating) ? '★' : '☆' }}
+                                            @endfor
+                                        </div>
+                                        <div class="small text-muted mt-1">Dựa trên {{ $totalReviews }} lượt đánh giá thực tế</div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        @foreach([5, 4, 3, 2, 1] as $star)
+                                            @php
+                                                $count = $ratingCounts[$star] ?? 0;
+                                                $pct = $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0;
+                                            @endphp
+                                            <div class="d-flex align-items-center gap-2 mb-1" style="font-size: 12.5px;">
+                                                <span style="width: 42px; font-weight: 600; color: #475569;">{{ $star }} sao</span>
+                                                <div class="progress flex-grow-1" style="height: 7px; background: #e2e8f0; border-radius: 99px;">
+                                                    <div class="progress-bar" role="progressbar" style="width: {{ $pct }}%; background: #f59e0b; border-radius: 99px;" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <span class="text-muted" style="width: 32px; text-align: right;">{{ $count }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                <div class="mt-2 pt-2 border-top text-center" style="font-size: 11.5px; color: #15803d; font-weight: 600;">
+                                    ✓ 100% đánh giá minh bạch từ những người thuê đã ký hợp đồng và từng ở tại phòng trọ này.
+                                </div>
+                            </div>
+
+                            {{-- DANH SÁCH CHI TIẾT CÁC ĐÁNH GIÁ --}}
+                            <div class="reviews-list d-flex flex-column gap-3">
+                                @foreach($reviews as $review)
+                                    <div class="p-3 rounded-3 bg-white border shadow-sm">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 38px; height: 38px; background: #0c2340; font-size: 14px;">
+                                                    {{ strtoupper(substr($review->tenant->name ?? 'K', 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 14px;">
+                                                        {{ $review->tenant->name ?? 'Khách thuê trọ' }}
+                                                    </div>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0" style="font-size: 10.5px; border-radius: 4px;">
+                                                        ✓ Đã từng thuê phòng này
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div style="color: #f59e0b; font-size: 14px; letter-spacing: 1px;">
+                                                    @for($s = 1; $s <= 5; $s++)
+                                                        {{ $s <= $review->rating ? '★' : '☆' }}
+                                                    @endfor
+                                                </div>
+                                                <div class="text-muted mt-1" style="font-size: 11px;">
+                                                    {{ $review->created_at?->format('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @if($review->comment)
+                                            <p class="mb-0 text-dark" style="font-size: 13.5px; line-height: 1.6; background: #f8fafc; padding: 10px 14px; border-radius: 8px;">
+                                                "{{ $review->comment }}"
+                                            </p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-4 px-3 rounded-3 bg-light border">
+                                <div style="font-size: 32px; margin-bottom: 6px;">💬</div>
+                                <div class="fw-bold text-dark" style="font-size: 14px;">Chưa có đánh giá nào cho phòng trọ này</div>
+                                <div class="text-muted mt-1" style="font-size: 12.5px; max-width: 460px; margin: 0 auto; line-height: 1.5;">
+                                    Đánh giá sẽ được hiển thị công khai khi những người thuê trước hoàn tất thời gian thuê hoặc thanh lý hợp đồng và chia sẻ cảm nhận trải nghiệm thực tế.
+                                </div>
+                            </div>
+                        @endif
                     </section>
 
                     <!-- =========================

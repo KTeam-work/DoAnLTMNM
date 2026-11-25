@@ -164,6 +164,11 @@ class RoomController extends Controller
                         })
                         ->with('images');
                 },
+                'reviews' => function ($query) {
+                    $query->where('status', 'visible')
+                        ->with('tenant:id,name,avatar')
+                        ->latest();
+                },
             ])
             ->where('status', 'available')
             ->whereHas('rentalPosts', function (Builder $query) {
@@ -175,6 +180,17 @@ class RoomController extends Controller
             })
             ->findOrFail($id);
 
-        return view('rooms.show', compact('room'));
+        $reviews = $room->reviews;
+        $totalReviews = $reviews->count();
+        $avgRating = $totalReviews > 0 ? round($reviews->avg('rating'), 1) : 0;
+        $ratingCounts = [
+            5 => $reviews->where('rating', 5)->count(),
+            4 => $reviews->where('rating', 4)->count(),
+            3 => $reviews->where('rating', 3)->count(),
+            2 => $reviews->where('rating', 2)->count(),
+            1 => $reviews->where('rating', 1)->count(),
+        ];
+
+        return view('rooms.show', compact('room', 'reviews', 'totalReviews', 'avgRating', 'ratingCounts'));
     }
 }

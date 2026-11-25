@@ -593,9 +593,10 @@ class OwnerContractController extends Controller{
         // Bắn thông báo chuông cho người thuê khi thanh lý / chấm dứt hợp đồng
         if ($contract->tenant_id) {
             $roomName = $contract->room?->name ?? 'phòng trọ';
+            $reviewSuffix = " Bạn có thể vào mục 'Đánh giá' để chia sẻ trải nghiệm thực tế về phòng trọ cho các bạn thuê sau tham khảo nhé!";
             $msgNotice = $terminationType === 'early'
-                ? "Hợp đồng thuê {$roomName} (#{$contract->contract_code}) đã được thanh lý do chấm dứt trước hạn vào ngày " . \Carbon\Carbon::parse($data['return_date'])->format('d/m/Y') . ". Tiền cọc được giữ lại theo điều khoản hợp đồng."
-                : "Hợp đồng thuê {$roomName} (#{$contract->contract_code}) đã được thanh lý vào ngày " . \Carbon\Carbon::parse($data['return_date'])->format('d/m/Y') . ". Tiền hoàn cọc: " . number_format($termination->refund_amount) . " đ.";
+                ? "Hợp đồng thuê {$roomName} (#{$contract->contract_code}) đã được thanh lý do chấm dứt trước hạn vào ngày " . \Carbon\Carbon::parse($data['return_date'])->format('d/m/Y') . ". Tiền cọc được giữ lại theo điều khoản hợp đồng.{$reviewSuffix}"
+                : "Hợp đồng thuê {$roomName} (#{$contract->contract_code}) đã được thanh lý vào ngày " . \Carbon\Carbon::parse($data['return_date'])->format('d/m/Y') . ". Tiền hoàn cọc: " . number_format($termination->refund_amount) . " đ.{$reviewSuffix}";
 
             Notification::notify(
                 $contract->tenant_id,

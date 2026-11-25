@@ -45,4 +45,9 @@ class Room extends Model
         return $this->belongsToMany(Amenity::class, 'room_amenities')
             ->withTimestamps();
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 }
