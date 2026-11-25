@@ -30,13 +30,22 @@
           <h4 class="fw-bold mb-4" style="color: var(--green-dark); font-size: 18px;">Viết đánh giá mới</h4>
           
           <div class="mb-4">
-            <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Phòng đang thuê</label>
+            <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Phòng đã thuê / Hợp đồng đã thanh lý</label>
             @if($rooms->isEmpty())
-              <div class="alert alert-warning mb-0">Bạn chưa có phòng nào để đánh giá.</div>
+              <div class="alert alert-warning mb-0" style="font-size: 13px; line-height: 1.5; border-radius: 10px;">
+                <strong>Bạn chưa có phòng nào để đánh giá.</strong><br>
+                Hệ thống chỉ cho phép gửi đánh giá cho những phòng mà bạn đã từng ký hợp đồng thuê hoặc hợp đồng đã thanh lý.
+              </div>
             @else
               <select name="room_id" class="form-select fw-bold text-dark" required>
                 @foreach($rooms as $room)
-                  <option value="{{ $room->id }}">{{ $room->name }} — {{ $room->property->name ?? '' }}</option>
+                  @php
+                    $contract = $room->related_contract ?? null;
+                    $statusLabel = $contract ? ($contract->status === 'terminated' ? 'HĐ đã thanh lý' : ($contract->status === 'active' ? 'HĐ đang hiệu lực' : 'HĐ ' . $contract->status)) : 'Hợp đồng thuê';
+                  @endphp
+                  <option value="{{ $room->id }}">
+                    {{ $room->name }} — {{ $room->property->name ?? '' }} ({{ $statusLabel }})
+                  </option>
                 @endforeach
               </select>
             @endif

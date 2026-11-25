@@ -444,11 +444,11 @@
                         </div>
 
                         <!-- Vùng chọn ảnh kéo thả hoặc click -->
-                        <div class="p-3 border border-2 border-dashed rounded-3 text-center bg-light" id="dropzoneBox" style="cursor: pointer; border-color: #cbd5e1 !important; transition: all 0.2s;">
+                        <label for="property_images" class="p-3 border border-2 border-dashed rounded-3 text-center bg-light w-100 d-block" id="dropzoneBox" style="cursor: pointer; border-color: #cbd5e1 !important; transition: all 0.2s;">
                             <div style="font-size: 28px;">📸</div>
                             <div class="fw-bold text-dark mt-1" style="font-size: 13.5px;">Bấm vào đây để chọn ảnh hoặc kéo thả ảnh vào</div>
                             <div class="small text-muted mt-1">Hỗ trợ JPG, PNG, WEBP (tối đa 5MB/ảnh). Bạn có thể chọn nhiều lần để gom nhiều ảnh!</div>
-                        </div>
+                        </label>
 
                         <input
                             type="file"
@@ -489,7 +489,7 @@
 {{-- SCRIPT BẢN ĐỒ OPENSTREETMAP (LEAFLET) VÀ QUẢN LÝ ẢNH --}}
 @push('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="{{ asset('js/tv3/properties/index.js') }}"></script>
+    <script src="{{ asset('js/tv3/properties/index.js') }}?v={{ time() }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tabBtns = document.querySelectorAll('.segmented-tab');

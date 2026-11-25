@@ -15,20 +15,33 @@ class ReviewController extends Controller
     {
         $tenant = $this->actingTenant($request);
 
-        $roomIds = Contract::query()->where('tenant_id', $tenant->id)->pluck('room_id');
+        // Lấy danh sách tất cả hợp đồng của người thuê (gồm hợp đồng đang hiệu lực và đã thanh lý)
+        $contracts = Contract::query()
+            ->where('tenant_id', $tenant->id)
+            ->with(['room.property'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $roomIds = $contracts->pluck('room_id')->unique()->filter()->values();
+
         $reviews = Review::query()
             ->where('tenant_id', $tenant->id)
-            ->with('room:id,name')
+            ->with(['room.property'])
             ->latest()
             ->get();
+
         $rooms = \App\Models\Room::query()
             ->whereIn('id', $roomIds)
             ->with('property:id,name')
             ->orderBy('name')
             ->get();
 
+        foreach ($rooms as $r) {
+            $r->related_contract = $contracts->firstWhere('room_id', $r->id);
+        }
+
         if (! $request->expectsJson()) {
-            return view('tenant.reviews.index', compact('reviews', 'rooms', 'tenant'));
+            return view('tenant.reviews.index', compact('reviews', 'rooms', 'contracts', 'tenant'));
         }
 
         return response()->json(['data' => $reviews]);
@@ -45,16 +58,19 @@ class ReviewController extends Controller
             'comment' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        // Chỉ đánh giá phòng mình đã/đang thuê, room_id suy từ hợp đồng.
-        $allowed = Contract::query()
+        // Chỉ được đánh giá phòng mà người thuê đã từng có hợp đồng thuê (đang thuê hoặc đã thanh lý)
+        $contract = Contract::query()
             ->where('tenant_id', $tenant->id)
             ->where('room_id', $data['room_id'])
-            ->exists();
-        if (! $allowed) {
+            ->latest()
+            ->first();
+
+        if (! $contract) {
+            $msg = 'Bạn chỉ được đánh giá phòng mà bạn đã từng có hợp đồng thuê hoặc hợp đồng đã thanh lý.';
             if (! $request->expectsJson()) {
-                return back()->withErrors(['room_id' => 'Bạn chỉ được đánh giá phòng mình đã thuê.'])->withInput();
+                return back()->withErrors(['room_id' => $msg])->withInput();
             }
-            abort(422, 'You can only review rooms you have rented.');
+            abort(422, $msg);
         }
 
         $review = Review::query()->updateOrCreate(

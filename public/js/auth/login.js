@@ -43,11 +43,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | BẬT / TẮT BÓNG ĐÈN TƯƠNG TÁC
-    |--------------------------------------------------------------------------
-    */
+    //BẬT / TẮT BÓNG ĐÈN TƯƠNG TÁC
+  
     const hangingLamp = document.getElementById("hangingLamp");
     const lampBulb = document.getElementById("lampBulb");
     const pullChain = document.getElementById("pullChain");
