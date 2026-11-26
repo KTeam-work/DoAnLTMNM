@@ -6,7 +6,7 @@
 
 @push('styles')
      <link rel="stylesheet"
-          href="{{ asset('css/tv3/tenant/invoices/index.css') }}">
+          href="{{ asset('css/tv3/tenant/invoices/index.css') }}?v={{ filemtime(public_path('css/tv3/tenant/invoices/index.css')) }}">
 @endpush
 
 @section('content')
@@ -16,18 +16,14 @@
 
 
 
-<div class="page-wrap" id="invoices" style="padding-top: 30px;">
+<div class="page-wrap invoice-page" id="invoices">
   
   <!-- Header -->
   <div class="page-header d-flex justify-content-between align-items-end flex-wrap gap-3 animate-up delay-1">
     <div>
+      <div class="invoice-eyebrow">KHÔNG GIAN CỦA BẠN</div>
       <h2 class="page-title skeleton-box"><span class="hide-on-skeleton">Quản lý Hóa đơn</span></h2>
       <div class="page-desc skeleton-box mt-2"><span class="hide-on-skeleton">Theo dõi công nợ, lịch sử thanh toán và biên lai phòng trọ của bạn.</span></div>
-    </div>
-    <div class="skeleton-box rounded">
-      <button class="btn-outline-brand d-flex align-items-center gap-2 hide-on-skeleton">
-        Tải sao kê năm
-      </button>
     </div>
   </div>
 
@@ -35,23 +31,26 @@
   <div class="row g-3 mb-4 animate-up delay-2">
     <!-- Card 1 -->
     <div class="col-md-4">
-      <div class="stat-card p-3 rounded-4" style="border-left: 3px solid var(--red);">
+      <div class="stat-card invoice-stat invoice-stat-overdue">
+        <span class="invoice-stat-icon" aria-hidden="true">!</span>
         <div class="stat-label hide-on-skeleton mb-2">Tổng nợ quá hạn</div>
-        <div class="stat-value hide-on-skeleton" style="color: var(--red); font-size: 26px;">{{ number_format((float) $stats['overdue']) }} đ</div>
+        <div class="stat-value hide-on-skeleton">{{ number_format((float) $stats['overdue'], 0, ',', '.') }} đ</div>
       </div>
     </div>
     <!-- Card 2 -->
     <div class="col-md-4">
-      <div class="stat-card p-3 rounded-4">
+      <div class="stat-card invoice-stat invoice-stat-unpaid">
+        <span class="invoice-stat-icon" aria-hidden="true">₫</span>
         <div class="stat-label hide-on-skeleton mb-2">Chưa thanh toán</div>
-        <div class="stat-value hide-on-skeleton" style="font-size: 26px; color: #0c2340;">{{ number_format((float) $stats['unpaid']) }} đ</div>
+        <div class="stat-value hide-on-skeleton">{{ number_format((float) $stats['unpaid'], 0, ',', '.') }} đ</div>
       </div>
     </div>
     <!-- Card 3 -->
     <div class="col-md-4">
-      <div class="stat-card p-3 rounded-4">
+      <div class="stat-card invoice-stat invoice-stat-paid">
+        <span class="invoice-stat-icon" aria-hidden="true">✓</span>
         <div class="stat-label hide-on-skeleton mb-2">Đã thanh toán (Năm nay)</div>
-        <div class="stat-value hide-on-skeleton" style="color: var(--green); font-size: 26px;">{{ number_format((float) $stats['paid_year']) }} đ</div>
+        <div class="stat-value hide-on-skeleton">{{ number_format((float) $stats['paid_year'], 0, ',', '.') }} đ</div>
       </div>
     </div>
   </div>
@@ -62,17 +61,18 @@
       $statusLabels = ['unpaid' => 'Chưa thanh toán', 'pending' => 'Chờ xác nhận', 'paid' => 'Đã thanh toán', 'overdue' => 'Quá hạn', 'cancelled' => 'Đã hủy'];
     @endphp
     <!-- Thanh Filter -->
-    <form method="GET" action="{{ route('tenant.invoices.index') }}" class="enterprise-filter-bar d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 border-0 bg-white rounded-4 p-3 skeleton-box" style="box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
-      <div class="d-flex flex-wrap gap-2 hide-on-skeleton">
-        <select name="status" class="form-select form-select-sm border-0 bg-light shadow-none fw-bold" style="border-radius: 8px;" onchange="this.form.submit()">
+    <form method="GET" action="{{ route('tenant.invoices.index') }}" id="invoice-filter-form" class="enterprise-filter-bar invoice-filter mb-3 skeleton-box">
+      <div class="invoice-filter-heading hide-on-skeleton"><strong>Danh sách hóa đơn</strong><span>Lọc theo trạng thái hoặc kỳ thanh toán</span></div>
+      <div class="invoice-filter-controls hide-on-skeleton">
+        <label class="visually-hidden" for="invoice-status">Trạng thái hóa đơn</label>
+        <select id="invoice-status" name="status" class="form-select" onchange="this.form.requestSubmit()">
           <option value="">Tất cả trạng thái</option>
           @foreach($statusLabels as $value => $label)
             <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
           @endforeach
         </select>
-        <input type="month" name="month" class="form-control form-control-sm border-0 bg-light shadow-none fw-bold" style="border-radius: 8px;" value="{{ $filters['month'] ?? '' }}" onchange="this.form.submit()">
-      </div>
-      <div class="hide-on-skeleton">
+        <label class="visually-hidden" for="invoice-month">Tháng hóa đơn</label>
+        <input id="invoice-month" type="month" name="month" class="form-control" value="{{ $filters['month'] ?? '' }}" onchange="this.form.requestSubmit()">
         @if(!empty($filters['status']) || !empty($filters['month']))
           <a href="{{ route('tenant.invoices.index') }}" class="btn btn-sm btn-light fw-bold">Xóa lọc</a>
         @endif
@@ -83,6 +83,7 @@
       <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    <div id="invoice-results" aria-live="polite" aria-busy="false">
     <div class="table-responsive" style="min-height: 300px;">
       <table class="data-table align-middle w-100">
         <thead>
@@ -146,7 +147,6 @@
                   </button>
                   <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
                 @elseif($invoice->status === 'paid')
-                  <span class="hide-on-skeleton badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 12px; padding: 6px 10px; border-radius: 6px;">Đã thanh toán</span>
                   <a href="{{ route('tenant.invoices.show', $invoice->id) }}" class="btn btn-sm btn-light hide-on-skeleton text-decoration-none" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; font-weight: 600;">Chi tiết</a>
                 @else
                   <span class="hide-on-skeleton" style="font-size: 12px; color: var(--muted); padding-right: 8px; font-weight: 600;">{{ $statusLabels[$invoice->status] ?? $invoice->status }}</span>
@@ -171,6 +171,8 @@
       </table>
     </div>
     <div class="mt-3">{{ $invoices->links() }}</div>
+    </div>
+    <div id="invoice-filter-error" role="alert" class="text-danger small mt-2" hidden>Không thể tải danh sách. Vui lòng thử lại.</div>
   </div>
 </div>
 
@@ -178,8 +180,8 @@
 @include('tenant.invoices.partials.qr_modal')
 
 @push('scripts')
-    <script src="{{ asset('js/tv3/tenant/invoices/index.js') }}"></script>
-    <script src="{{ asset('js/tv3/tenant/invoices/sepay_qr.js') }}"></script>
+    <script src="{{ asset('js/tv3/tenant/invoices/index.js') }}?v={{ filemtime(public_path('js/tv3/tenant/invoices/index.js')) }}"></script>
+    <script src="{{ asset('js/tv3/tenant/invoices/sepay_qr.js') }}?v={{ filemtime(public_path('js/tv3/tenant/invoices/sepay_qr.js')) }}"></script>
 @endpush
 
 

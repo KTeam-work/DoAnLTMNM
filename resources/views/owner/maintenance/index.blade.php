@@ -225,7 +225,7 @@
 
 
 @push('scripts')
-    <script src="{{ asset('js/tv4/maintenance/index.js') }}"></script>
+    <script src="{{ asset('js/tv4/maintenance/index.js') }}?v={{ filemtime(public_path('js/tv4/maintenance/index.js')) }}"></script>
 @endpush
 
 

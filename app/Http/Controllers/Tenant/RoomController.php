@@ -89,9 +89,15 @@ class RoomController extends Controller
                 ->values();
 
             foreach ($amenityIds as $amenityId) {
-                $query->whereHas('amenities', function (Builder $amenityQuery) use ($amenityId) {
-                    $amenityQuery->where('amenities.id', $amenityId)
-                        ->where('amenities.status', 'active');
+                $query->whereExists(function ($amenityQuery) use ($amenityId) {
+                    $amenityQuery->selectRaw('1')->from('room_amenities')
+                        ->join('property_amenities', function ($join) {
+                            $join->on('property_amenities.amenity_id', '=', 'room_amenities.amenity_id');
+                        })
+                        ->whereColumn('room_amenities.room_id', 'rooms.id')
+                        ->whereColumn('property_amenities.property_id', 'rooms.property_id')
+                        ->where('property_amenities.status', 'active')
+                        ->where('room_amenities.amenity_id', $amenityId);
                 });
             }
         }
@@ -121,7 +127,9 @@ class RoomController extends Controller
             ->pluck('district');
 
         $amenities = Amenity::query()
-            ->where('status', 'active')
+            ->whereExists(fn ($query) => $query->selectRaw('1')->from('property_amenities')
+                ->whereColumn('property_amenities.amenity_id', 'amenities.id')
+                ->where('property_amenities.status', 'active'))
             ->orderBy('name')
             ->get();
 

@@ -261,16 +261,12 @@
     };
 
     // Dừng polling khi đóng modal
-    document.addEventListener('DOMContentLoaded', function () {
-        const modalEl = document.getElementById('sepayQrModal');
-        if (modalEl) {
-            modalEl.addEventListener('hidden.bs.modal', function () {
-                stopSepayPolling();
-            });
-        }
+    document.addEventListener('hidden.bs.modal', function (event) {
+        if (event.target.id === 'sepayQrModal') stopSepayPolling();
+    });
 
-        // Tự động gán sự kiện cho các nút có class .btn-pay-qr
-        document.addEventListener('click', function (e) {
+    // Delegation also handles invoice rows replaced by AJAX.
+    document.addEventListener('click', function (e) {
             const btn = e.target.closest('.btn-pay-qr');
             if (btn) {
                 e.preventDefault();
@@ -280,7 +276,6 @@
                     window.openSepayQrModal(invoiceId, invoiceCode);
                 }
             }
-        });
     });
 })();
 

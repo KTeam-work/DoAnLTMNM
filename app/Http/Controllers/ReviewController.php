@@ -101,13 +101,17 @@ class ReviewController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Cảm ơn bạn! Đánh giá đã được hệ thống ghi nhận.',
+            'created' => $review->wasRecentlyCreated,
+            'total' => Review::query()->where('tenant_id', $tenant->id)->count(),
             'review' => [
+                'id' => $review->id,
+                'room_id' => $review->room_id,
                 'rating' => $review->rating,
                 'room_name' => $review->room->name ?? '',
                 'comment' => $review->comment,
                 'created_at' => $review->created_at->format('d/m/Y'),
             ]
-        ], 201);
+        ], $review->wasRecentlyCreated ? 201 : 200);
     }
 
     private function actingTenant(Request $request): User

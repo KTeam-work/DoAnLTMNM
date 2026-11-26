@@ -30,8 +30,12 @@ class FavoriteController extends Controller
         }
 
         $favorites = Favorite::with([
-            'room.property',
+            'room.property.images',
             'room.amenities',
+            'room.rentalPosts' => fn ($query) => $query->where('status', 'published')
+                ->where(fn ($q) => $q->whereNull('published_at')->orWhere('published_at', '<=', now()))
+                ->where(fn ($q) => $q->whereNull('expired_at')->orWhere('expired_at', '>', now()))
+                ->latest('id')->with('images'),
         ])
             ->where('user_id', Auth::id())
             ->latest()

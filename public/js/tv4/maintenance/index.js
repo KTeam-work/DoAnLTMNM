@@ -1,61 +1,34 @@
-setTimeout(function () { document.body.classList.remove('skeleton-mode'); }, 2500);
+(() => {
+  if (window.ownerMaintenanceActionsInitialized) return;
+  window.ownerMaintenanceActionsInitialized = true;
 
-document.addEventListener("DOMContentLoaded", function() {
-  setTimeout(() => { document.body.classList.remove('skeleton-mode'); }, 500);
+  // Delegation works for both direct loads and pages inserted by AJAX.
+  document.addEventListener('click', event => {
+    const start = event.target.closest('.btn-start-repair');
+    const reject = event.target.closest('.btn-reject-repair');
+    if (!start && !reject) return;
 
-  // Tooltips
-  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    const button = start || reject;
+    const modal = document.getElementById(start ? 'startRepairModal' : 'rejectRepairModal');
+    const form = document.getElementById(start ? 'startRepairForm' : 'rejectRepairForm');
+    if (!modal || !form || !window.bootstrap) return;
 
-  // Modal Bắt đầu sửa chữa
-  const startModalEl = document.getElementById('startRepairModal');
-  const startForm = document.getElementById('startRepairForm');
-  const modalTicketCode = document.getElementById('modalTicketCode');
-  const modalTicketTitle = document.getElementById('modalTicketTitle');
-  const modalTicketRoom = document.getElementById('modalTicketRoom');
-  let startModalInstance = null;
-
-  if (startModalEl && window.bootstrap) {
-    startModalInstance = new bootstrap.Modal(startModalEl);
-  }
-
-  document.querySelectorAll('.btn-start-repair').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      const ticketId = this.dataset.ticketId || '';
-      const ticketTitle = this.dataset.ticketTitle || '';
-      const room = this.dataset.ticketRoom || '—';
-      const tenant = this.dataset.ticketTenant || '—';
-      const action = this.dataset.action || '';
-
-      if (modalTicketCode) modalTicketCode.textContent = '#TCK-' + ticketId;
-      if (modalTicketTitle) modalTicketTitle.textContent = ticketTitle;
-      if (modalTicketRoom) modalTicketRoom.textContent = room + ' · ' + tenant;
-      if (startForm) startForm.action = action;
-
-      if (startModalInstance) {
-        startModalInstance.show();
-      }
-    });
+    event.preventDefault();
+    form.action = button.dataset.action;
+    if (start) {
+      document.getElementById('modalTicketCode').textContent = '#TCK-' + (button.dataset.ticketId || '');
+      document.getElementById('modalTicketTitle').textContent = button.dataset.ticketTitle || '';
+      document.getElementById('modalTicketRoom').textContent = (button.dataset.ticketRoom || '—') + ' · ' + (button.dataset.ticketTenant || '—');
+    }
+    bootstrap.Modal.getOrCreateInstance(modal).show();
   });
 
-  // Modal Từ chối yêu cầu
-  const rejectModalEl = document.getElementById('rejectRepairModal');
-  const rejectForm = document.getElementById('rejectRepairForm');
-  let rejectModalInstance = null;
-
-  if (rejectModalEl && window.bootstrap) {
-    rejectModalInstance = new bootstrap.Modal(rejectModalEl);
+  function initMaintenanceTooltips() {
+    if (!document.getElementById('startRepairModal') || !window.bootstrap) return;
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => bootstrap.Tooltip.getOrCreateInstance(el));
   }
 
-  document.querySelectorAll('.btn-reject-repair').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      const action = this.dataset.action || '';
-      if (rejectForm) rejectForm.action = action;
-
-      if (rejectModalInstance) {
-        rejectModalInstance.show();
-      }
-    });
-  });
-});
+  document.addEventListener('DOMContentLoaded', initMaintenanceTooltips);
+  initMaintenanceTooltips();
+  setTimeout(() => document.body.classList.remove('skeleton-mode'), 500);
+})();

@@ -1,84 +1,61 @@
-  document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(() => { document.body.classList.remove('skeleton-mode'); }, 600); 
+(() => {
+  if (window.tenantReviewSubmitInitialized) return;
+  window.tenantReviewSubmitInitialized = true;
+
+  function createReviewCard(review) {
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    card.dataset.reviewId = String(review.id);
+    card.innerHTML = '<div class="d-flex justify-content-between align-items-start mb-2"><div><div class="static-stars"></div><div class="fw-bold mt-1 text-dark review-room-name"></div></div><div class="text-end"><span class="badge-visible mb-1 d-inline-block">Đang hiển thị</span><div class="text-muted review-date"></div></div></div>';
+    card.querySelector('.static-stars').textContent = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+    card.querySelector('.review-room-name').textContent = review.room_name || '';
+    card.querySelector('.review-date').textContent = review.created_at || '';
+    if (review.comment) {
+      const comment = document.createElement('p');
+      comment.className = 'text-muted mb-0 mt-2 review-comment';
+      comment.textContent = `“${review.comment}”`;
+      card.appendChild(comment);
+    }
+    return card;
+  }
+
+  document.addEventListener('submit', async event => {
+    const form = event.target;
+    if (form.id !== 'review-form') return;
+    event.preventDefault();
+    const button = form.querySelector('button[type="submit"]');
+    const feedback = form.querySelector('#review-feedback');
+    button.disabled = true;
+    button.textContent = 'Đang gửi...';
+    feedback.textContent = '';
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        body: new FormData(form),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || 'Không thể gửi đánh giá.');
+      if (!form.isConnected) return;
+      const list = document.getElementById('review-list');
+      const oldCard = Array.from(list.querySelectorAll('[data-review-id]')).find(card => card.dataset.reviewId === String(data.review.id));
+      const card = createReviewCard(data.review);
+      if (oldCard) oldCard.replaceWith(card);
+      else list.prepend(card);
+      document.getElementById('no-review-text')?.remove();
+      document.getElementById('review-count').textContent = `Tổng: ${data.total} lượt`;
+      feedback.textContent = data.created ? 'Đã gửi đánh giá.' : 'Đã cập nhật đánh giá.';
+      feedback.className = 'small mt-2 text-success';
+      form.reset();
+    } catch (error) {
+      if (form.isConnected) {
+        feedback.textContent = error.message || 'Không thể gửi đánh giá. Vui lòng thử lại.';
+        feedback.className = 'small mt-2 text-danger';
+      }
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Gửi đánh giá';
+    }
   });
-  
-  document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('review-form');
-    if (!form) return;
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Chặn load lại trang
-
-        const formData = new FormData(form);
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Đang gửi...';
-
-        fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-            },
-            body: formData
-        })
-        .then(response => response.json().then(data => ({ status: response.status, body: data })))
-        .then(({ status, body }) => {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Gửi đánh giá';
-
-            // Chấp nhận status 200 hoặc 201 (vì Controller trả về 201 Created)
-            if ((status === 200 || status === 201) && body.success) {
-                // 1. Reset form
-                form.reset();
-
-                // 2. Xóa thông báo "Bạn chưa có đánh giá nào" nếu có
-                const noReviewText = document.getElementById('no-review-text');
-                if (noReviewText) {
-                    noReviewText.remove();
-                }
-
-                // 3. Lấy dữ liệu review từ JSON trả về và tự vẽ HTML
-                const r = body.review;
-                const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-
-                const newCardHtml = `
-                    <div class="review-card">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <div class="static-stars">${stars}</div>
-                                <div class="fw-bold mt-1 text-dark" style="font-size: 15px;">${r.room_name}</div>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge-visible mb-1 d-inline-block">Đang hiển thị</span>
-                                <div class="text-muted" style="font-size: 11px;">${r.created_at}</div>
-                            </div>
-                        </div>
-                        ${r.comment ? `<p class="text-muted mb-0 mt-2" style="font-size: 13.5px; line-height: 1.6;">"${r.comment}"</p>` : ''}
-                    </div>
-                `;
-
-                // 4. Chèn review mới lên đầu danh sách
-                const reviewList = document.getElementById('review-list');
-                reviewList.insertAdjacentHTML('afterbegin', newCardHtml);
-
-                // 5. Cập nhật lại tổng số lượng lượt đánh giá
-                const countSpan = document.getElementById('review-count');
-                if (countSpan) {
-                    let currentCountText = countSpan.innerText.replace(/\D/g, '');
-                    let newCount = parseInt(currentCountText || 0) + 1;
-                    countSpan.innerText = `Tổng: ${newCount} lượt`;
-                }
-
-                alert(body.message);
-            } else {
-                alert(body.message || 'Có lỗi xảy ra, vui lòng kiểm tra lại.');
-            }
-        })
-        .catch(error => {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Gửi đánh giá';
-            console.error('Lỗi AJAX:', error);
-        });
-    });
-});
+})();

@@ -705,3 +705,58 @@
             }
 
         }
+
+/* Room showcase inspired by an editorial property gallery. */
+.room-detail-page { background: #eef3f6; }
+.detail-showcase { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, .8fr); gap: 16px; margin: 20px 0 28px; }
+.detail-showcase-gallery { min-width: 0; }
+.detail-showcase-gallery .room-gallery-single,
+.detail-showcase-gallery .room-gallery-two,
+.detail-showcase-gallery .room-gallery-grid { height: 470px; margin: 0; }
+.detail-showcase-gallery .room-gallery-grid { grid-template-columns: minmax(0, 2fr) minmax(130px, 1fr); gap: 10px; }
+.detail-showcase-gallery .room-gallery-two { grid-template-columns: 1.6fr 1fr; gap: 10px; }
+.detail-showcase-gallery .gallery-thumbs-col { gap: 10px; }
+.detail-showcase-gallery .gallery-thumb-item { padding: 0; border: 0; background: #dce7ea; }
+.detail-showcase-gallery .gallery-thumb-item:focus-visible { outline: 3px solid #1d8795; outline-offset: -4px; }
+.detail-showcase-summary { display: flex; flex-direction: column; padding: 30px; border: 1px solid #e0eaef; border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(12,35,64,.06); }
+.showcase-eyebrow { color: #167a84; font-size: .75rem; font-weight: 800; letter-spacing: .1em; }
+.showcase-summary-top h1 { margin: 12px 0 10px; color: #102a43; font-size: clamp(1.65rem, 2.4vw, 2.25rem); font-weight: 800; line-height: 1.3; overflow-wrap: anywhere; }
+.showcase-summary-top p { color: #63798b; font-size: .9rem; line-height: 1.6; }
+.showcase-summary-price { display: flex; flex-direction: column; gap: 5px; margin-top: auto; padding: 18px 0; border-top: 1px solid #e8eff2; }
+.showcase-summary-price > span, .showcase-summary-facts span { color: #718595; font-size: .8rem; }
+.showcase-summary-price strong { color: #0c3452; font-size: 1.55rem; }
+.showcase-summary-price small { color: #718595; font-size: .8rem; font-weight: 500; }
+.showcase-summary-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.showcase-summary-facts div { display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 12px; background: #f2f7f8; }
+.showcase-summary-facts strong { color: #163b50; font-size: .9rem; }
+.showcase-appointment { display: block; padding: 14px; border-radius: 12px; background: #0c3452; color: #fff; font-size: .9rem; font-weight: 700; text-align: center; text-decoration: none; }
+.showcase-appointment:hover { background: #165a6b; color: #fff; }
+.showcase-details-link { display: block; padding-top: 13px; color: #176e7c; text-align: center; font-size: .85rem; font-weight: 700; text-decoration: none; }
+.detail-room-name { margin: 0 0 8px; color: #102a43; font-size: 1.45rem; font-weight: 800; }
+.detail-showcase a:focus-visible { outline: 3px solid #168497; outline-offset: 3px; }
+/* Compact details beneath the main room showcase. */
+.room-title-section, .room-content-card { padding: 20px 22px; margin-bottom: 14px; border-radius: 16px; }
+.detail-facts-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.detail-facts-heading h2 { margin: 0; color: #102a43; font-size: 1.05rem; font-weight: 800; }
+.detail-facts-heading a { color: #a56616; font-size: .85rem; font-weight: 700; text-decoration: none; }
+.room-info-box { gap: 8px; margin-top: 14px; }
+.room-info-item { padding: 10px 12px; border-radius: 10px; background: #f3f8f9; }
+.room-info-item .label { font-size: .75rem; margin-bottom: 3px; }
+.room-info-item .value { font-size: .875rem; }
+.room-content-card h2 { margin-bottom: 8px; font-size: 1.05rem; }
+.room-content-card .section-line { width: 30px; height: 2px; margin-bottom: 12px; background: #21828a; }
+.room-content-card p { line-height: 1.6; }
+.amenities { gap: 8px; }
+.amenities-empty { grid-column: 1 / -1; color: #718595 !important; }
+.booking-card { padding: 22px; border-radius: 16px; }
+@media (max-width: 991px) {
+    .detail-showcase { grid-template-columns: 1fr; }
+    .detail-showcase-gallery .room-gallery-single, .detail-showcase-gallery .room-gallery-two, .detail-showcase-gallery .room-gallery-grid { height: 380px; }
+    .showcase-summary-price { margin-top: 18px; }
+}
+@media (max-width: 575px) {
+    .detail-showcase-gallery .room-gallery-single, .detail-showcase-gallery .room-gallery-two, .detail-showcase-gallery .room-gallery-grid { height: 280px; }
+    .detail-showcase-gallery .room-gallery-grid { grid-template-columns: minmax(0, 1.7fr) minmax(85px, 1fr); }
+    .detail-showcase-gallery .gallery-thumbs-col { grid-template-columns: 1fr; grid-auto-rows: 1fr; overflow: hidden; }
+    .detail-showcase-summary { padding: 22px; }
+}

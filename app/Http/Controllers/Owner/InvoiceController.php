@@ -65,13 +65,15 @@ class InvoiceController extends Controller
         $activeContracts = $allContracts->filter(function ($contract) use ($billingMonth) {
             $hasInvoice = Invoice::query()->where('contract_id', $contract->id)->whereDate('billing_month', $billingMonth)->where('status', '!=', 'cancelled')->exists();
             if ($hasInvoice) return false;
-            return UtilityReading::query()->where('room_id', $contract->room_id)->whereDate('month', $billingMonth)->exists();
+            return UtilityReading::query()->where('room_id', $contract->room_id)->whereDate('month', $billingMonth)
+                ->where(fn ($q) => $q->whereNull('contract_id')->orWhere('contract_id', $contract->id))->exists();
         });
 
         $missingReadingsContracts = $allContracts->filter(function ($contract) use ($billingMonth) {
             $hasInvoice = Invoice::query()->where('contract_id', $contract->id)->whereDate('billing_month', $billingMonth)->where('status', '!=', 'cancelled')->exists();
             if ($hasInvoice) return false;
-            return ! UtilityReading::query()->where('room_id', $contract->room_id)->whereDate('month', $billingMonth)->exists();
+            return ! UtilityReading::query()->where('room_id', $contract->room_id)->whereDate('month', $billingMonth)
+                ->where(fn ($q) => $q->whereNull('contract_id')->orWhere('contract_id', $contract->id))->exists();
         });
 
         $initialSummary = [
@@ -80,22 +82,6 @@ class InvoiceController extends Controller
             'missing' => $missingReadingsContracts->count(),
             'missing_names' => $missingReadingsContracts->map(fn($c) => $c->room->name ?? '')->filter()->values()->all(),
         ];
-
-        // Tính ngày hạn thanh toán gợi ý ban đầu
-        $initialDefaultDueDate = null;
-        if ($activeContracts->isNotEmpty()) {
-            $firstC = $activeContracts->first();
-            $cDay = Carbon::parse($firstC->start_date)->day;
-            $tDay = min($cDay, $billingMonth->daysInMonth);
-            $tDate = $billingMonth->copy()->day($tDay);
-            if (now()->format('Y-m') === $billingMonth->format('Y-m') && now()->day > $tDay) {
-                $initialDefaultDueDate = now()->addDays(3)->toDateString();
-            } else {
-                $initialDefaultDueDate = $tDate->toDateString();
-            }
-        } else {
-            $initialDefaultDueDate = now()->addDays(3)->toDateString();
-        }
 
         $base = Invoice::query()->whereHas('contract', fn ($q) => $q->where('owner_id', $owner->id));
         if ($selectedPropertyId) {
@@ -110,7 +96,7 @@ class InvoiceController extends Controller
         ];
 
         if (! $request->expectsJson()) {
-            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth', 'activeContracts', 'properties', 'selectedPropertyId', 'initialSummary', 'initialDefaultDueDate'));
+            return view('owner.invoices.index', compact('invoices', 'filters', 'stats', 'currentMonth', 'activeContracts', 'properties', 'selectedPropertyId', 'initialSummary'));
         }
 
         return response()->json(['data' => $invoices]);
@@ -308,6 +294,7 @@ class InvoiceController extends Controller
             $reading = UtilityReading::query()
                 ->where('room_id', $contract->room_id)
                 ->whereDate('month', $billingMonth)
+                ->where(fn ($q) => $q->whereNull('contract_id')->orWhere('contract_id', $contract->id))
                 ->first();
 
             if (! $reading) {
@@ -320,13 +307,7 @@ class InvoiceController extends Controller
             }
 
             $cDay = Carbon::parse($contract->start_date)->day;
-            $tDay = min($cDay, $billingMonth->daysInMonth);
-            $tDate = $billingMonth->copy()->day($tDay);
-            if (now()->format('Y-m') === $billingMonth->format('Y-m') && now()->day > $tDay) {
-                $suggestedDue = now()->addDays(3)->toDateString();
-            } else {
-                $suggestedDue = $tDate->toDateString();
-            }
+            $suggestedDue = now('Asia/Ho_Chi_Minh')->addDays(5)->toDateString();
 
             $eligibleContracts[] = [
                 'id' => $contract->id,
@@ -361,10 +342,9 @@ class InvoiceController extends Controller
             'property_id' => ['nullable', 'integer', 'exists:properties,id'],
             'contract_id' => ['nullable', 'integer', 'exists:contracts,id'],
             'discount' => ['nullable', 'numeric', 'min:0'],
-            'due_date' => ['nullable', 'date'],
         ]);
         $billingMonth = Carbon::parse($data['month'])->startOfMonth();
-        $dueDate = !empty($data['due_date']) ? Carbon::parse($data['due_date'])->toDateString() : null;
+        $issueDate = now('Asia/Ho_Chi_Minh')->startOfDay();
 
         $contracts = Contract::query()
             ->where('owner_id', $owner->id)
@@ -393,12 +373,13 @@ class InvoiceController extends Controller
             $reading = UtilityReading::query()
                 ->where('room_id', $contract->room_id)
                 ->whereDate('month', $billingMonth)
+                ->where(fn ($q) => $q->whereNull('contract_id')->orWhere('contract_id', $contract->id))
                 ->first();
             if (! $reading) {
                 $skipped[] = $contract->room->name . ' (thiếu chỉ số điện nước)';
                 continue;
             }
-            $created[] = $this->buildInvoice($contract, $reading, $billingMonth, (float) ($data['discount'] ?? 0), $dueDate);
+            $created[] = $this->buildInvoice($contract, $reading, $billingMonth, (float) ($data['discount'] ?? 0), $issueDate);
         }
 
         if ($created === []) {
@@ -423,9 +404,9 @@ class InvoiceController extends Controller
         ], 201);
     }
 
-    private function buildInvoice(Contract $contract, UtilityReading $reading, Carbon $billingMonth, float $discount, ?string $dueDate = null): int
+    private function buildInvoice(Contract $contract, UtilityReading $reading, Carbon $billingMonth, float $discount, Carbon $issueDate): int
     {
-        return DB::transaction(function () use ($contract, $reading, $billingMonth, $discount, $dueDate) {
+        return DB::transaction(function () use ($contract, $reading, $billingMonth, $discount, $issueDate) {
             $eUse = (float) $reading->electricity_new - (float) $reading->electricity_old;
             $wUse = (float) $reading->water_new - (float) $reading->water_old;
 
@@ -450,25 +431,14 @@ class InvoiceController extends Controller
 
             $subtotal = array_sum(array_column($items, 'amount'));
             $discount = min($discount, $subtotal);
-            if (!empty($dueDate)) {
-                $invoiceDueDate = $dueDate;
-            } else {
-                $cDay = Carbon::parse($contract->start_date)->day;
-                $tDay = min($cDay, $billingMonth->daysInMonth);
-                $tDate = $billingMonth->copy()->day($tDay);
-                if (now()->format('Y-m') === $billingMonth->format('Y-m') && now()->day > $tDay) {
-                    $invoiceDueDate = now()->addDays(3)->toDateString();
-                } else {
-                    $invoiceDueDate = $tDate->toDateString();
-                }
-            }
+            $invoiceDueDate = $issueDate->copy()->addDays(5)->toDateString();
 
             $invoice = Invoice::query()->create([
                 'invoice_code' => $this->invoiceCode($billingMonth),
                 'contract_id' => $contract->id,
                 'utility_reading_id' => $reading->id,
                 'billing_month' => $billingMonth->toDateString(),
-                'issue_date' => now()->toDateString(),
+                'issue_date' => $issueDate->toDateString(),
                 'due_date' => $invoiceDueDate,
                 'subtotal' => $subtotal,
                 'discount' => $discount,

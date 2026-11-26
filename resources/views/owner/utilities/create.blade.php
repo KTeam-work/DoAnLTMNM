@@ -82,7 +82,7 @@
             <a href="{{ route('owner.utilities.index', array_filter(['month' => $prefillMonth])) }}" class="btn-outline-brand">
                 Quay lại
             </a>
-            <button type="button" id="btn-submit-reading" class="btn-brand" {{ $rooms->isEmpty() && !$reading ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '' }} onclick="document.getElementById('readingForm').submit()">
+            <button type="button" id="btn-submit-reading" class="btn-brand" {{ !$reading && ($rooms->isEmpty() || $alreadyExists || !empty($initialPrevious['cycle_error'])) ? 'disabled' : '' }} onclick="document.getElementById('readingForm').requestSubmit()">
                 {{ $reading ? 'Cập nhật' : 'Lưu chỉ số' }}
             </button>
         </div>
@@ -149,9 +149,9 @@
                                 <label>Phòng đang thuê <span>*</span></label>
                                 <select name="room_id" id="select-room" class="custom-input" required {{ $rooms->isEmpty() ? 'disabled' : '' }}>
                                     @if($rooms->isEmpty())
-                                        <option value="" disabled selected>-- Tất cả phòng đã được ghi chỉ số tháng này --</option>
+                                        <option value="" disabled selected>-- Không có phòng có hợp đồng hiệu lực --</option>
                                     @else
-                                        <option value="">-- Chọn phòng đang thuê ({{ $rooms->count() }} phòng chưa ghi) --</option>
+                                        <option value="">-- Chọn phòng đang thuê ({{ $rooms->count() }} phòng) --</option>
                                         @php
                                             $groupedRooms = $rooms->groupBy(fn($r) => $r->property->name ?? 'Khác');
                                         @endphp
@@ -163,7 +163,7 @@
                                                         $tenantName = $activeContract?->tenant?->name ?? 'Đang thuê';
                                                     @endphp
                                                     <option value="{{ $room->id }}" data-property-id="{{ $room->property_id }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>
-                                                        {{ $room->name }} · {{ $room->property->name ?? '' }} (Khách: {{ $tenantName }})
+                                                        {{ $room->name }} · {{ $room->property->name ?? '' }} (Khách: {{ $tenantName }}) — {{ in_array($room->id, $recordedRoomIds, true) ? 'Đã ghi kỳ này' : 'Chưa ghi kỳ này' }}
                                                     </option>
                                                 @endforeach
                                             </optgroup>
@@ -186,10 +186,18 @@
 
                     @if($rooms->isEmpty() && !$reading)
                         <div class="alert alert-success align-items-center mt-3 mb-0" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; border-radius: 12px; padding: 12px 16px;">
-                            <strong>Đã hoàn thành!</strong> Tất cả các phòng đang thuê đã được ghi chỉ số cho tháng <strong>{{ \Carbon\Carbon::parse($prefillMonth)->format('m/Y') }}</strong>.
-                            Bạn có thể xem hoặc sửa lại tại <a href="{{ route('owner.utilities.index', ['month' => $prefillMonth]) }}" style="font-weight: 700; color: #15803d; text-decoration: underline;">Danh sách chỉ số</a>.
+                            Chưa có phòng nào có hợp đồng đang hiệu lực trong nhà trọ đã chọn.
                         </div>
                     @endif
+
+                    <div id="cycle-period" class="form-text mt-2" {{ empty($initialPrevious['period_start']) && !$reading?->period_start ? 'hidden' : '' }}>
+                        @if($reading?->period_start && $reading?->period_end)
+                            Kỳ sử dụng: {{ $reading->period_start->format('d/m/Y') }} – {{ $reading->period_end->format('d/m/Y') }}
+                        @elseif(!empty($initialPrevious['period_start']))
+                            Kỳ sử dụng: {{ \Carbon\Carbon::parse($initialPrevious['period_start'])->format('d/m/Y') }} – {{ \Carbon\Carbon::parse($initialPrevious['period_end'])->format('d/m/Y') }}
+                        @endif
+                    </div>
+                    <div id="cycle-error" class="alert alert-warning mt-2 mb-0" {{ empty($initialPrevious['cycle_error']) ? 'hidden' : '' }}>{{ $initialPrevious['cycle_error'] ?? '' }}</div>
 
                     <!-- CANH BAO TRUNG KY -->
                     <div id="duplicate-warning" class="alert alert-warning align-items-center justify-content-between mt-2 mb-0" style="display: {{ $alreadyExists ? 'flex' : 'none' }}; background: #fff8e6; border: 1px solid #ffd591; color: #873800; border-radius: 12px; padding: 12px 16px;">
@@ -390,6 +398,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputWPrice = document.getElementById('water_price');
 
     const duplicateWarning = document.getElementById('duplicate-warning');
+    const cyclePeriod = document.getElementById('cycle-period');
+    const cycleError = document.getElementById('cycle-error');
+    const submitReading = document.getElementById('btn-submit-reading');
+    let previousRequest = null;
     const duplicateMonthSpan = document.getElementById('duplicate-month');
     const duplicateEditLink = document.getElementById('duplicate-edit-link');
 
@@ -472,9 +484,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const month = inputMonth.value;
         if (!roomId || !month) return;
 
-        fetch(`{{ route('owner.utilities.previous-reading') }}?room_id=${roomId}&month=${month}`)
-            .then(res => res.json())
+        if (previousRequest) previousRequest.abort();
+        previousRequest = new AbortController();
+        if (submitReading) submitReading.disabled = true;
+
+        fetch(`{{ route('owner.utilities.previous-reading') }}?room_id=${roomId}&month=${month}`, { signal: previousRequest.signal })
+            .then(res => { if (!res.ok) throw new Error('Không tải được kỳ điện nước'); return res.json(); })
             .then(data => {
+                if (cyclePeriod) {
+                    cyclePeriod.hidden = !data.period_start || !data.period_end;
+                    const formatDate = value => value.split('-').reverse().join('/');
+                    if (!cyclePeriod.hidden) cyclePeriod.textContent = `Kỳ sử dụng: ${formatDate(data.period_start)} – ${formatDate(data.period_end)}`;
+                }
+                if (cycleError) { cycleError.hidden = !data.cycle_error; cycleError.textContent = data.cycle_error || ''; }
+                if (submitReading) submitReading.disabled = Boolean(data.cycle_error || data.already_exists);
                 if (data.electricity_old !== undefined) {
                     if (inputEOld) inputEOld.value = data.electricity_old;
                     if (inputWOld) inputWOld.value = data.water_old;
@@ -505,7 +528,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 calculate();
             })
-            .catch(err => console.error('Error fetching previous readings:', err));
+            .catch(err => {
+                if (err.name === 'AbortError') return;
+                if (cycleError) { cycleError.hidden = false; cycleError.textContent = 'Không thể tải kỳ điện nước. Vui lòng thử lại.'; }
+            });
     }
 
     const filterProperty = document.getElementById('filter-property');

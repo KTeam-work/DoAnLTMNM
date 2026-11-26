@@ -82,11 +82,18 @@
             'area' => number_format((float) $room->area, 0, ',', '.') . ' m²',
             'people' => $room->max_people . ' người',
             'bathroom' => 'WC riêng',
-            'type' => ucfirst($room->status ?? 'Phòng trọ'),
+            'type' => match ($room->status) {
+                'available' => 'Còn trống',
+                'rented' => 'Đang thuê',
+                'pending' => 'Đang chờ',
+                'maintenance' => 'Bảo trì',
+                default => 'Chưa cập nhật',
+            },
             'images' => $finalImages,
             'description' => $room->description ?? 'Không có mô tả chi tiết.',
-            'amenities' => optional($room->amenities)->pluck('name')->toArray()
-                ?? ['WC riêng', 'Wi-Fi', 'Chỗ để xe'],
+            'amenities' => $property
+                ? $room->amenities->whereIn('id', $property->amenities()->wherePivot('status', 'active')->pluck('amenities.id'))->pluck('name')->toArray()
+                : [],
             'services' => optional(optional($property)->owner)->services ?? collect(),
             'landlord' => optional($owner)->name ?? 'Chủ trọ',
             'phone' => optional($owner)->phone ?? '',
@@ -108,7 +115,7 @@
 
 @push('styles')
          <link rel="stylesheet"
-          href="{{ asset('css/tv2/rooms/show.css') }}">
+          href="{{ asset('css/tv2/rooms/show.css') }}?v={{ filemtime(public_path('css/tv2/rooms/show.css')) }}">
 @endpush 
 
 @section('content')
@@ -191,6 +198,8 @@
                 $imageCount = count($room['images']);
             @endphp
 
+            <div class="detail-showcase">
+              <div class="detail-showcase-gallery">
             @if($imageCount <= 1)
                 <div class="room-gallery-single">
                     <img
@@ -237,18 +246,31 @@
                     </div>
                     <div class="gallery-thumbs-col">
                         @foreach(array_slice($room['images'], 1, 4) as $subIdx => $subImg)
-                            <div class="gallery-thumb-item" onclick="document.getElementById('mainGalleryImg').src = '{{ $subImg }}'">
+                            <button type="button" class="gallery-thumb-item" data-gallery-src="{{ $subImg }}" onclick="document.getElementById('mainGalleryImg').src = this.dataset.gallerySrc" aria-label="Xem ảnh chi tiết {{ $subIdx + 1 }}">
                                 <img
                                     src="{{ $subImg }}"
                                     alt="Ảnh chi tiết {{ $subIdx + 1 }}"
                                     loading="lazy"
                                     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80';"
                                 >
-                            </div>
+                            </button>
                         @endforeach
                     </div>
                 </div>
             @endif
+              </div>
+              <aside class="detail-showcase-summary" aria-label="Thông tin phòng">
+                <div class="showcase-summary-top">
+                    <span class="showcase-eyebrow">KHÁM PHÁ NƠI Ở</span>
+                    <h1>{{ $room['title'] }}</h1>
+                    <p>{{ $room['address'] }}</p>
+                </div>
+                <div class="showcase-summary-price"><span>Giá thuê mỗi tháng</span><strong>{{ $room['price'] }} <small>/ tháng</small></strong></div>
+                <div class="showcase-summary-facts"><div><span>Diện tích</span><strong>{{ $room['area'] }}</strong></div><div><span>Sức chứa</span><strong>{{ $room['people'] }}</strong></div></div>
+                <a href="{{ route('appointments.create', ['id' => $room['id']]) }}" class="showcase-appointment">Đặt lịch xem phòng</a>
+                <a href="#room-information" class="showcase-details-link">Xem thông tin chi tiết</a>
+              </aside>
+            </div>
 
 
 
@@ -268,43 +290,13 @@
                          THÔNG TIN CHÍNH
                     ========================== -->
 
-                    <section class="room-title-section">
+                    <section class="room-title-section" id="room-information">
 
-                        <div class="room-title-top">
-
-
-
-                            <div>
-
-                                <h1>
-                                    {{ $room['title'] }}
-                                </h1>
-
-                                @if(isset($totalReviews) && $totalReviews > 0)
-                                    <div class="mb-2" style="font-size: 13.5px;">
-                                        <a href="#reviewsSection" class="text-decoration-none d-inline-flex align-items-center gap-1" style="color: #b45309; font-weight: 700;">
-                                            <span>★ {{ $avgRating }}</span>
-                                            <span class="text-muted fw-normal" style="font-size: 12.5px;">({{ $totalReviews }} đánh giá thực tế từ khách thuê trước)</span>
-                                        </a>
-                                    </div>
-                                @endif
-
-                                <div class="room-address">
-                                    <span>{{ $room['address'] }}</span>
-                                </div>
-                            </div>
-
-                            <div class="room-price-box">
-                                <div class="room-price">
-                                    {{ $room['price'] }}
-                                    <span>/ tháng</span>
-                                </div>
-
-                                <div class="available-badge">
-                                    <span class="available-dot"></span>
-                                    Còn phòng
-                                </div>
-                            </div>
+                        <div class="detail-facts-heading">
+                            <h2>Thông tin phòng</h2>
+                            @if(isset($totalReviews) && $totalReviews > 0)
+                                <a href="#reviewsSection">★ {{ $avgRating }} · {{ $totalReviews }} đánh giá</a>
+                            @endif
                         </div>
 
                         <div class="room-info-box">
@@ -324,7 +316,7 @@
                             </div>
 
                             <div class="room-info-item">
-                                <div class="label">Loại phòng</div>
+                                <div class="label">Trạng thái</div>
                                 <div class="value">{{ $room['type'] }}</div>
                             </div>
                         </div>
@@ -347,11 +339,13 @@
                         <div class="section-line"></div>
 
                         <div class="amenities">
-                            @foreach($room['amenities'] as $amenity)
+                            @forelse($room['amenities'] as $amenity)
                                 <div class="amenity-item">
                                     {{ $amenity }}
                                 </div>
-                            @endforeach
+                            @empty
+                                <p class="amenities-empty">Chưa có thông tin tiện ích.</p>
+                            @endforelse
                         </div>
                     </section>
 
@@ -676,4 +670,3 @@
 @endif
 
 @endsection
-  

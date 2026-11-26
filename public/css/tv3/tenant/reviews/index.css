@@ -27,3 +27,43 @@
   /* Status Badges */
   .badge-visible { background: rgba(12, 35, 64, 0.1); color: var(--green-dark); padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; }
   .badge-hidden { background: var(--red-soft); color: var(--red); padding: 6px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; }
+
+  /* Tenant reviews: restrained, readable surfaces. */
+  .tenant-review-page { max-width: 1120px; margin: 0 auto; padding: 48px 24px 72px; }
+  .review-page-header { margin-bottom: 30px; }
+  .review-breadcrumb { display: block; margin-bottom: 12px; color: #748798; font-size: .72rem; font-weight: 700; letter-spacing: .08em; }
+  .tenant-review-page .page-title { margin: 0; color: #102a43; font-size: clamp(1.8rem, 3vw, 2.35rem); font-weight: 800; letter-spacing: -.035em; }
+  .review-page-header p { margin: 10px 0 0; color: #64788b; font-size: .95rem; line-height: 1.6; }
+  .tenant-review-page .review-panel { height: auto; padding: 28px; border: 1px solid #e0e8ed; border-radius: 14px; box-shadow: 0 5px 22px rgba(16,42,67,.04); }
+  .review-section-heading { margin-bottom: 24px; }
+  .review-section-heading h2 { margin: 0; color: #102a43; font-size: 1.1rem; font-weight: 800; }
+  .review-section-heading p { margin: 7px 0 0; color: #708292; font-size: .85rem; line-height: 1.5; }
+  .tenant-review-page .form-label { margin-bottom: 9px; color: #344e62; font-size: .85rem; font-weight: 700; }
+  .tenant-review-page .form-select, .tenant-review-page .form-control { width: 100%; min-height: 48px; padding: 11px 14px; border: 1px solid #d8e2e8; border-radius: 9px; background-color: #fff; color: #183449; font-size: .9rem; }
+  .tenant-review-page .form-select { padding-right: 38px; }
+  .tenant-review-page textarea.form-control { min-height: 120px; resize: vertical; line-height: 1.6; }
+  .tenant-review-page .form-select:focus, .tenant-review-page .form-control:focus { border-color: #378b95; box-shadow: 0 0 0 3px rgba(55,139,149,.14); }
+  .review-optional { color: #8596a3; font-weight: 400; }
+  .rating-hint, .review-input-hint { margin-top: 7px; color: #8293a0; font-size: .78rem; }
+  .review-input-hint { text-align: right; }
+  .tenant-review-page .star-rating { gap: 7px; }
+  .tenant-review-page .star-rating input { display: block; position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .tenant-review-page .star-rating label { color: #d7e0e5; font-size: 32px; }
+  .tenant-review-page .star-rating input:checked ~ label, .tenant-review-page .star-rating label:hover, .tenant-review-page .star-rating label:hover ~ label { color: #d69b31; }
+  .tenant-review-page .star-rating input:focus-visible + label { outline: 2px solid #218491; outline-offset: 3px; border-radius: 3px; }
+  .tenant-review-page .review-submit { min-height: 48px; border: 0; border-radius: 9px; background: #10344d; color: #fff; font-size: .9rem; font-weight: 700; box-shadow: none; }
+  .tenant-review-page .review-submit:hover { background: #19556b; }
+  .tenant-review-page .review-submit:disabled { opacity: .55; }
+  .review-history-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .review-count { padding: 5px 10px; border-radius: 6px; background: #f0f5f7; color: #637b8b; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+  .tenant-review-page .review-card { padding: 19px 0; margin: 0; border: 0; border-top: 1px solid #e9eff2; border-radius: 0; background: transparent; box-shadow: none; }
+  .tenant-review-page .review-card:hover { background: transparent; box-shadow: none; }
+  .tenant-review-page .static-stars { color: #c18a24; font-size: 1rem; letter-spacing: 2px; }
+  .tenant-review-page .badge-visible { background: #edf6f2; color: #34735c; font-size: .72rem; font-weight: 700; }
+  .tenant-review-page #no-review-text { padding: 30px 12px !important; border-top: 1px solid #e9eff2; color: #748798 !important; font-size: .9rem; }
+  .tenant-review-page button:focus-visible, .tenant-review-page select:focus-visible, .tenant-review-page textarea:focus-visible { outline: 2px solid #218491; outline-offset: 2px; }
+  @media (max-width: 575px) {
+    .tenant-review-page { padding: 32px 16px 50px; }
+    .tenant-review-page .review-panel { padding: 22px; }
+    .review-history-heading { flex-wrap: wrap; }
+  }

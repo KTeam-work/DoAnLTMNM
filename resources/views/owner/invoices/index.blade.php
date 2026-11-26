@@ -211,14 +211,7 @@
               @foreach($groupedContracts as $propName => $cList)
                 <optgroup label="Khu: {{ $propName }}" data-prop-id="{{ $cList->first()->room->property_id ?? '' }}">
                   @foreach($cList as $contract)
-                    @php
-                      $cDay = \Carbon\Carbon::parse($contract->start_date)->day;
-                      $bMonth = \Carbon\Carbon::parse($currentMonth)->startOfMonth();
-                      $tDay = min($cDay, $bMonth->daysInMonth);
-                      $tDate = $bMonth->copy()->day($tDay);
-                      $sDueDate = (now()->format('Y-m') === $bMonth->format('Y-m') && now()->day > $tDay) ? now()->addDays(3)->toDateString() : $tDate->toDateString();
-                    @endphp
-                    <option value="{{ $contract->id }}" data-property-id="{{ $contract->room->property_id ?? '' }}" data-suggested-due="{{ $sDueDate }}">
+                    <option value="{{ $contract->id }}" data-property-id="{{ $contract->room->property_id ?? '' }}">
                       {{ $contract->room->name ?? 'Phòng chưa xác định' }} — {{ $contract->tenant->name ?? 'Người thuê chưa xác định' }}
                     </option>
                   @endforeach
@@ -229,9 +222,9 @@
           <div class="form-text">Chỉ hiển thị các phòng <strong>đã chốt điện nước</strong> và <strong>chưa lập hóa đơn</strong> kỳ này.</div>
         </div>
         <div class="mb-3">
-          <label for="invoice-due-date" class="form-label small fw-bold">Hạn thanh toán</label>
-          <input id="invoice-due-date" type="date" name="due_date" class="form-control" value="{{ $initialDefaultDueDate ?? now()->addDays(3)->toDateString() }}">
-          <div class="form-text" id="invoice-due-date-help">Tự động gợi ý theo ngày hợp đồng. Bạn có thể tự chọn ngày khác để gia hạn thêm cho khách.</div>
+          <div class="form-label small fw-bold">Hạn thanh toán</div>
+          <div class="form-control bg-light">Tự động sau 5 ngày kể từ ngày phát hành</div>
+          <div class="form-text">Hạn được tính theo ngày phát hành hóa đơn, giờ Việt Nam.</div>
         </div>
         <div class="mb-3">
           <label class="form-label small fw-bold">Giảm giá chung (đ, tùy chọn)</label>
@@ -396,7 +389,6 @@ function initInvoiceAjaxFilters() {
   const modalContractSelect = document.getElementById('invoice-contract');
   const modalStatusBanner = document.getElementById('invoice-status-banner');
   const modalSubmitBtn = document.getElementById('btn-submit-invoice');
-  const modalDueDateInput = document.getElementById('invoice-due-date');
 
   function refreshModalEligibleContracts() {
     if (!modalMonthInput || !modalContractSelect) return;
@@ -462,32 +454,16 @@ function initInvoiceAjaxFilters() {
               const opt = document.createElement('option');
               opt.value = c.id;
               opt.textContent = `${c.room_name} — ${c.tenant_name || 'Đang thuê'}`;
-              if (c.suggested_due_date) {
-                opt.setAttribute('data-suggested-due', c.suggested_due_date);
-              }
               optgroup.appendChild(opt);
             });
             modalContractSelect.appendChild(optgroup);
           }
 
-          if (modalDueDateInput && data.eligible_contracts.length > 0) {
-            modalDueDateInput.value = data.eligible_contracts[0].suggested_due_date;
-          }
         }
       })
       .catch(err => {
         console.error('Lỗi kiểm tra hợp đồng hợp lệ:', err);
       });
-  }
-
-  if (modalContractSelect && modalDueDateInput) {
-    modalContractSelect.addEventListener('change', function() {
-      const selectedOption = this.options[this.selectedIndex];
-      const suggestedDue = selectedOption ? selectedOption.getAttribute('data-suggested-due') : null;
-      if (suggestedDue) {
-        modalDueDateInput.value = suggestedDue;
-      }
-    });
   }
 
   if (modalMonthInput) modalMonthInput.addEventListener('change', refreshModalEligibleContracts);
