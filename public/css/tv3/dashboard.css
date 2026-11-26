@@ -824,3 +824,93 @@ body {
         padding-bottom: 8px;
     }
 }
+
+/* Owner overview refresh */
+.owner-page { background: #f2f6fa; }
+.dashboard-hero-card { border-radius: 26px; box-shadow: 0 20px 45px rgba(12, 35, 64, .16); }
+.hero-tag-pill { color: #bce9ef; font-size: .8rem; letter-spacing: .06em; }
+.hero-title { font-size: clamp(2rem, 3.5vw, 3.25rem); line-height: 1.18; }
+.hero-title .title-accent { background: none; color: #86e2d3; -webkit-text-fill-color: #86e2d3; }
+.hero-desc { font-size: 1rem; }
+.hero-pill-bar { border-radius: 18px; padding: 12px 14px 12px 20px; }
+.pill-item .pill-label { font-size: .75rem; }
+.pill-item .pill-value, .hero-sublink { font-size: .875rem; }
+.hero-overview { padding: 24px; border: 1px solid rgba(255,255,255,.2); border-radius: 22px; color: #fff; background: rgba(10, 33, 51, .76); box-shadow: 0 18px 40px rgba(0,0,0,.16); }
+.overview-heading { display: flex; justify-content: space-between; gap: 12px; font-weight: 700; margin-bottom: 28px; }
+.overview-heading span, .overview-label, .overview-caption, .overview-revenue span { color: #c4d9e2; font-size: .875rem; font-weight: 500; }
+.overview-rate { font-size: 3.5rem; font-weight: 800; line-height: 1.2; letter-spacing: -.05em; }
+.overview-rate span { font-size: 1.5rem; color: #86e2d3; }
+.overview-progress { height: 8px; margin: 16px 0 10px; background: rgba(255,255,255,.14); border-radius: 999px; overflow: hidden; }
+.overview-progress span { display: block; height: 100%; background: #75dec9; border-radius: inherit; }
+.overview-revenue { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px solid rgba(255,255,255,.15); margin-top: 24px; padding-top: 20px; }
+.overview-revenue strong { color: #fff; }
+.dashboard-white-section {
+    background: #f1f5f9;
+    border-color: #dfe8f0;
+    border-radius: 24px;
+    box-shadow: 0 10px 35px rgba(15, 38, 64, .06);
+}
+.house-card { background: #fff; border-color: #e3eaf0; }
+.house-card-img-wrapper { height: 160px; }
+.house-card-title { font-size: 1rem; }
+.house-card-address, .box-sub { font-size: .875rem; }
+.dashboard-empty { grid-column: 1 / -1; padding: 32px; color: #52677c; background: #f5f9fc; border: 1px dashed #c6d6e2; border-radius: 16px; text-align: center; }
+.segmented-filter-bar { background: #edf3f8 !important; border-color: #dce7ef !important; }
+.segmented-tab { color: #405970 !important; }
+.segmented-tab.active { color: #0c4260 !important; }
+.tab-count, .segmented-tab.active .tab-count { background: #dcecf3 !important; color: #145472 !important; }
+.content-box { border-color: #e3eaf0; box-shadow: 0 8px 24px rgba(12,35,64,.04); }
+.owner-page a:focus-visible { outline: 3px solid #2989b7; outline-offset: 3px; }
+
+/* Editorial hero with the owner's properties as the backdrop. */
+.owner-showcase { padding: 0; background: #102b49; isolation: isolate; }
+.owner-showcase::before { display: none; }
+.owner-showcase-slides { position: absolute; inset: 0 0 84px; z-index: 0; }
+.owner-showcase-slides .carousel-inner, .owner-showcase-slides .carousel-item { height: 100%; }
+.owner-showcase-slides .carousel-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #0b2038 0%, rgba(11,32,56,.96) 30%, rgba(11,32,56,.65) 57%, rgba(11,32,56,.13) 100%), linear-gradient(0deg, rgba(8,25,42,.6), transparent 50%); }
+.owner-showcase-slides img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.owner-showcase .hero-inner { min-height: 430px; display: flex; align-items: center; padding: 55px 48px 60px; pointer-events: none; }
+.owner-showcase .hero-inner > .row { width: 100%; }
+.showcase-copy { pointer-events: auto; }
+.owner-showcase .hero-title { font-size: clamp(2.1rem, 3.8vw, 3.5rem); }
+.showcase-property { position: absolute; right: 48px; bottom: 36px; z-index: 2; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; max-width: 35%; color: white; text-align: right; text-shadow: 0 2px 12px rgba(0,0,0,.7); }
+.showcase-property span { color: #b7e6f4; font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+.showcase-property strong { font-size: 1.3rem; }
+.showcase-property small { font-size: .875rem; }
+.showcase-controls { position: absolute; right: 48px; top: 28px; z-index: 3; display: flex; gap: 8px; }
+.showcase-controls button { width: 40px; height: 40px; border: 1px solid rgba(255,255,255,.55); border-radius: 50%; color: white; background: rgba(8,25,42,.45); }
+.showcase-controls button:hover, .showcase-controls button:focus-visible { background: #25638a; outline: 2px solid white; outline-offset: 2px; }
+.showcase-summary { position: relative; z-index: 2; min-height: 84px; display: grid; grid-template-columns: repeat(3, 1fr); background: #0a1d32; border-top: 1px solid rgba(255,255,255,.12); }
+.showcase-summary div { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 16px 32px; border-right: 1px solid rgba(255,255,255,.12); }
+.showcase-summary div:last-child { border-right: 0; }
+.showcase-summary span { color: #adc5d5; font-size: .8rem; }
+.showcase-summary strong { color: #fff; font-size: 1.1rem; }
+/* Keep the property photo clear and separate from the introduction. */
+.owner-showcase-slides { left: 52%; }
+.owner-showcase-slides .carousel-item::after { background: linear-gradient(0deg, rgba(8,25,42,.72), transparent 38%); }
+.owner-showcase .showcase-copy { width: 52%; }
+.owner-showcase .hero-inner { position: relative; }
+.showcase-property { max-width: 80%; }
+@media (max-width: 991px) {
+    .owner-showcase .hero-inner { min-height: 450px; padding: 48px 28px 105px; }
+    .owner-showcase-slides .carousel-item::after { background: linear-gradient(0deg, rgba(8,25,42,.72), transparent 45%); }
+    .showcase-property { right: 28px; bottom: 24px; max-width: 60%; }
+    .showcase-controls { right: 24px; top: 20px; }
+}
+@media (max-width: 576px) {
+    .owner-showcase { display: flex; flex-direction: column; }
+    .owner-showcase .hero-inner { order: 0; min-height: 0; padding: 30px 20px; }
+    .owner-showcase .showcase-copy { width: 100%; }
+    .owner-showcase-slides { order: 1; position: relative; inset: auto; height: 260px; }
+    .showcase-property { right: 20px; bottom: 20px; max-width: 80%; }
+    .showcase-summary { grid-template-columns: 1fr; }
+    .showcase-summary { order: 2; }
+    .showcase-summary div { padding: 12px 20px; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+}
+@media (max-width: 576px) {
+    .dashboard-white-section { padding: 22px 16px; }
+    .hero-pill-bar { width: 100%; }
+    .overview-heading { flex-wrap: wrap; }
+    .house-showcase-grid { grid-template-columns: 1fr; }
+    .box-head { align-items: flex-start; flex-wrap: wrap; }
+}

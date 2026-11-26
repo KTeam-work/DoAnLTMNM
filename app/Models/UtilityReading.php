@@ -13,6 +13,8 @@ class UtilityReading extends Model
     {
         return [
             'month' => 'date',
+            'period_start' => 'date',
+            'period_end' => 'date',
             'electricity_old' => 'decimal:2',
             'electricity_new' => 'decimal:2',
             'electricity_price' => 'decimal:2',

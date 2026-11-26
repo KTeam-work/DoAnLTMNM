@@ -37,6 +37,60 @@
     --pill-radius: 999px;
 }
 
+/* Shared navigation polish across the tenant, owner and admin areas. */
+.app-navbar {
+    background: linear-gradient(110deg, #081a30 0%, #102f52 70%, #123f61 100%);
+    border-bottom: 1px solid rgba(125, 211, 252, .16);
+    box-shadow: 0 8px 28px rgba(7, 21, 38, .18);
+}
+
+.app-navbar .logo {
+    letter-spacing: -.06em;
+}
+
+.app-navbar .app-nav-link {
+    transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.app-navbar .app-nav-link:focus-visible,
+.app-navbar a:focus-visible,
+.app-navbar button:focus-visible {
+    outline: 3px solid #7dd3fc;
+    outline-offset: 3px;
+}
+
+.app-navbar .dropdown-menu {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, .16);
+}
+
+.app-navbar .dropdown-item {
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.app-navbar .dropdown-item:hover,
+.app-navbar .dropdown-item:focus-visible {
+    background: #eff6ff;
+    color: #174578;
+}
+
+@media (max-width: 991.98px) {
+    .app-navbar .navbar-collapse {
+        margin-top: 10px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 16px;
+        background: rgba(7, 21, 38, .5);
+    }
+
+    .app-navbar .app-nav-link {
+        justify-content: flex-start;
+    }
+}
+
 /* ========================================
    2. RESET VÀ CƠ BẢN
 ======================================== */

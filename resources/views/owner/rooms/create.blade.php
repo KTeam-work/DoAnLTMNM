@@ -141,7 +141,7 @@
               @if(isset($amenities) && $amenities->isNotEmpty())
                 <div class="p-3 bg-light rounded border d-flex flex-wrap gap-3">
                   @foreach($amenities as $amenity)
-                    <div class="form-check me-2">
+                    <div class="form-check me-2 property-amenity-choice" data-properties="{{ $amenityProperties[$amenity->id]->pluck('property_id')->implode(',') }}">
                       <input class="form-check-input" type="checkbox" name="amenities[]" value="{{ $amenity->id }}" id="amenity_{{ $amenity->id }}" @checked(is_array(old('amenities')) && in_array($amenity->id, old('amenities')))>
                       <label class="form-check-label" for="amenity_{{ $amenity->id }}" style="cursor: pointer;">
                         {{ $amenity->name }}
@@ -149,6 +149,8 @@
                     </div>
                   @endforeach
                 </div>
+                <div id="property-amenity-empty" class="text-muted small mt-2" hidden>Chọn nhà trọ có tiện ích hoặc thêm tiện ích cho nhà trọ này.</div>
+                @error('amenities') <div class="text-danger small mt-2">{{ $message }}</div> @enderror
               @else
                 <div class="text-muted small">
                   Chưa có tiện ích nào trong danh mục. Bạn có thể thêm trong mục <a href="{{ route('owner.amenities.index') }}" target="_blank">Quản lý tiện ích</a>.
@@ -186,6 +188,21 @@
       if (propertySelect) {
         propertySelect.addEventListener('change', updateRoomCodePreview);
         updateRoomCodePreview();
+        const updateAmenities = () => {
+          let visible = 0;
+          document.querySelectorAll('.property-amenity-choice').forEach(choice => {
+            const matches = choice.dataset.properties.split(',').includes(propertySelect.value);
+            choice.classList.toggle('d-none', !matches);
+            const input = choice.querySelector('input');
+            input.disabled = !matches;
+            if (!matches) input.checked = false;
+            if (matches) visible++;
+          });
+          const empty = document.getElementById('property-amenity-empty');
+          if (empty) empty.hidden = visible > 0;
+        };
+        propertySelect.addEventListener('change', updateAmenities);
+        updateAmenities();
       }
 
       // Tự động định dạng tiền tệ và hiển thị chữ tiếng Việt

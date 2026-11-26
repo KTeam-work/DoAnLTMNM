@@ -45,25 +45,25 @@
   </div>
 
   <!-- BỘ LỌC -->
-  <form method="GET" action="{{ route('owner.reviews.index') }}" class="filter-row d-flex flex-wrap justify-content-between align-items-center gap-3">
+  <form method="GET" action="{{ route('owner.reviews.index') }}" class="filter-row d-flex flex-wrap justify-content-between align-items-center gap-3" data-ajax-filter>
     <div class="d-flex align-items-center gap-2 flex-wrap">
       <span class="fw-bold" style="font-size:.95rem;">Danh sách phản hồi</span>
       <span class="filter-count">— hiển thị <strong>{{ $reviews->count() }}</strong>/{{ $reviews->total() }}</span>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-      <select name="room_id" class="form-select form-select-sm shadow-none" style="width: 170px;" onchange="this.form.submit()">
+      <select name="room_id" class="form-select form-select-sm shadow-none" style="width: 170px;" onchange="this.form.requestSubmit()">
         <option value="">Tất cả phòng</option>
         @foreach($rooms as $room)
           <option value="{{ $room->id }}" @selected((string) ($filters['room_id'] ?? '') === (string) $room->id)>{{ $room->name }}</option>
         @endforeach
       </select>
-      <select name="rating" class="form-select form-select-sm shadow-none" style="width: 150px;" onchange="this.form.submit()">
+      <select name="rating" class="form-select form-select-sm shadow-none" style="width: 150px;" onchange="this.form.requestSubmit()">
         <option value="">Tất cả số sao</option>
         @foreach([5, 4, 3, 2, 1] as $star)
           <option value="{{ $star }}" @selected((string) ($filters['rating'] ?? '') === (string) $star)>{{ $star }} sao</option>
         @endforeach
       </select>
-      <select name="status" class="form-select form-select-sm shadow-none" style="width: 150px;" onchange="this.form.submit()">
+      <select name="status" class="form-select form-select-sm shadow-none" style="width: 150px;" onchange="this.form.requestSubmit()">
         <option value="">Mọi trạng thái</option>
         <option value="visible" @selected(($filters['status'] ?? '') === 'visible')>Đang hiển thị</option>
         <option value="hidden" @selected(($filters['status'] ?? '') === 'hidden')>Đang ẩn</option>

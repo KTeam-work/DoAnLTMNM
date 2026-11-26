@@ -80,6 +80,24 @@ class TV4InvoicePaymentReviewNotificationTest extends TestCase
         ]);
     }
 
+    public function test_new_monthly_invoice_is_due_five_days_after_issue(): void
+    {
+        $this->travelTo(\Carbon\Carbon::parse('2026-09-30 23:30:00', 'Asia/Ho_Chi_Minh'));
+        [$owner, , $room] = $this->makeOwner();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $this->makeContract($owner, $tenant, $room);
+        $this->makeReading($room);
+
+        $this->actingAs($owner)->postJson('/owner/invoices', [
+            'month' => '2026-09-01', 'due_date' => '2099-01-01',
+        ])->assertCreated();
+
+        $invoice = Invoice::query()->firstOrFail();
+        $this->assertSame('2026-09-30', $invoice->issue_date->format('Y-m-d'));
+        $this->assertSame('2026-10-05', $invoice->due_date->format('Y-m-d'));
+        $this->travelBack();
+    }
+
     public function test_tenant_payment_flow_and_owner_confirm(): void
     {
         [$owner, , $room] = $this->makeOwner();
@@ -124,6 +142,36 @@ class TV4InvoicePaymentReviewNotificationTest extends TestCase
         $this->actingAs($tenant)->post('/tenant/payment', [
             'invoice_id' => $invoiceId, 'method' => 'cash',
         ])->assertSessionHasErrors('invoice_id');
+    }
+
+    public function test_invoice_page_distinguishes_pending_qr_from_cash(): void
+    {
+        [$owner, , $room] = $this->makeOwner();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $contract = $this->makeContract($owner, $tenant, $room);
+        $invoice = Invoice::create([
+            'invoice_code' => 'INV-QR-TEST', 'contract_id' => $contract->id,
+            'billing_month' => '2026-09-01', 'issue_date' => '2026-09-01',
+            'due_date' => '2026-09-30', 'subtotal' => 3000000, 'discount' => 0,
+            'total' => 3000000, 'status' => 'unpaid',
+        ]);
+
+        $this->actingAs($tenant)->postJson("/tenant/invoices/{$invoice->id}/pay-qr")->assertOk();
+        $payment = $invoice->payments()->firstOrFail();
+        $this->assertSame('qr', $payment->method);
+        $this->get(route('tenant.invoices.show', $invoice->id))
+            ->assertOk()->assertSee('Giao dịch QR đang chờ thanh toán')
+            ->assertSee('Mở lại mã QR')->assertDontSee('Đã gửi báo nộp tiền mặt');
+
+        $payment->update(['method' => 'cash']);
+        $this->get(route('tenant.invoices.show', $invoice->id))
+            ->assertOk()->assertSee('Đã gửi báo nộp tiền mặt')
+            ->assertDontSee('Giao dịch QR đang chờ thanh toán');
+
+        $invoice->update(['status' => 'paid']);
+        $this->get(route('tenant.invoices.show', $invoice->id))
+            ->assertOk()->assertSee('Hóa đơn đã được thanh toán thành công')
+            ->assertDontSee('Đã gửi báo nộp tiền mặt');
     }
 
     public function test_payment_callback_idempotent(): void
@@ -239,6 +287,24 @@ class TV4InvoicePaymentReviewNotificationTest extends TestCase
         $this->actingAs($ownerB)->put("/owner/maintenance/{$ticket->id}/status", [
             'status' => 'rejected',
         ])->assertNotFound();
+    }
+
+    public function test_owner_can_start_a_tenant_maintenance_request(): void
+    {
+        [$owner, , $room] = $this->makeOwner();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $contract = $this->makeContract($owner, $tenant, $room);
+
+        $this->actingAs($tenant)->post('/tenant/maintenance/store', [
+            'contract_id' => $contract->id, 'title' => 'Hỏng đèn',
+            'description' => 'Đèn không sáng', 'priority' => 'low',
+        ])->assertRedirect();
+        $ticket = \App\Models\MaintenanceRequest::query()->firstOrFail();
+
+        $this->actingAs($owner)->get('/owner/maintenance')->assertOk()->assertSee('btn-start-repair');
+        $this->put(route('owner.maintenance.status', $ticket->id), ['status' => 'processing'])->assertRedirect();
+        $this->assertSame('processing', $ticket->fresh()->status);
+        $this->assertDatabaseHas('notifications', ['user_id' => $tenant->id, 'type' => 'maintenance']);
     }
 
     public function test_tenant_notifications_read_flow(): void

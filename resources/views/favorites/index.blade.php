@@ -3,19 +3,21 @@
 @section('title', 'Tổng quan | Trọ Ơi')
 
 @push('styles')
-    
+    <link rel="stylesheet" href="{{ asset('css/tv2/favorites/index.css') }}?v={{ filemtime(public_path('css/tv2/favorites/index.css')) }}">
 @endpush
 
 @section('content')
 
 
-    <div class="page-wrap">
+    <div class="page-wrap favorites-page">
 
 
 
         <div class="page-header">
 
             <div>
+
+                <span class="favorites-eyebrow">BỘ SƯU TẬP CỦA BẠN</span>
 
                 <h1 class="page-title">
                     Phòng yêu thích
@@ -42,13 +44,14 @@
          TOP SUMMARY
     ====================================================== -->
 
-        <div class="row g-3 mb-4">
+        <div class="row g-3 mb-4 favorite-stats">
 
 
             <!-- SỐ PHÒNG -->
             <div class="col-md-4">
 
-                <div class="stat-card">
+                <div class="stat-card stat-favorites">
+                    <span class="stat-icon" aria-hidden="true">♡</span>
 
                     <div class="stat-top">
 
@@ -76,7 +79,8 @@
             <!-- KHU VỰC -->
             <div class="col-md-4">
 
-                <div class="stat-card">
+                <div class="stat-card stat-areas">
+                    <span class="stat-icon" aria-hidden="true">⌖</span>
 
                     <div class="stat-top">
 
@@ -104,7 +108,8 @@
             <!-- GIÁ -->
             <div class="col-md-4">
 
-                <div class="stat-card">
+                <div class="stat-card stat-prices">
+                    <span class="stat-icon" aria-hidden="true">₫</span>
 
                     <div class="stat-top">
 
@@ -140,7 +145,7 @@
          FILTER / SORT
     ====================================================== -->
 
-        <div class="panel mb-4">
+        <div class="panel favorites-toolbar mb-4">
 
             <div
                 class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -162,27 +167,27 @@
 
                     <button
                         type="button"
-                        class="btn-outline-brand">
+                        class="btn-outline-brand active" data-favorite-sort="newest" aria-pressed="true">
                         Tất cả
                     </button>
 
 
                     <button
                         type="button"
-                        class="btn-outline-brand">
+                        class="btn-outline-brand" data-favorite-sort="price-asc" aria-pressed="false">
                         Giá thấp
                     </button>
 
 
                     <button
                         type="button"
-                        class="btn-outline-brand">
+                        class="btn-outline-brand" data-favorite-sort="newest" aria-pressed="false">
                         Mới lưu
                     </button>
 
 
                     <select
-                        class="form-select"
+                        class="form-select" id="favorites-sort" aria-label="Sắp xếp phòng yêu thích"
                         style="
                         width:auto;
                         min-width:175px;
@@ -192,19 +197,19 @@
                         font-weight:600;
                     ">
 
-                        <option selected>
+                        <option value="newest" selected>
                             Sắp xếp: Mới nhất
                         </option>
 
-                        <option>
+                        <option value="price-asc">
                             Giá thấp → cao
                         </option>
 
-                        <option>
+                        <option value="price-desc">
                             Giá cao → thấp
                         </option>
 
-                        <option>
+                        <option value="area-desc">
                             Diện tích lớn → nhỏ
                         </option>
 
@@ -229,10 +234,26 @@
             @forelse ($favorites as $favorite)
             @php
             $room = $favorite->room;
+            $roomImage = null;
+            if ($room) {
+                foreach ($room->rentalPosts as $post) {
+                    $image = $post->images->firstWhere('is_thumbnail', true) ?? $post->images->first();
+                    if ($image?->image_path) { $roomImage = $image->image_path; break; }
+                }
+                $roomImages = is_array($room->images) ? $room->images : (json_decode($room->images ?? '[]', true) ?: []);
+                $roomImage = $roomImage ?: ($roomImages[0] ?? null);
+                $propertyImages = $room->property?->images;
+                $propertyImage = $propertyImages?->firstWhere('is_thumbnail', true) ?? $propertyImages?->first();
+                $roomImage = $roomImage ?: $propertyImage?->image_path;
+                if ($roomImage && !\Illuminate\Support\Str::startsWith($roomImage, ['http://', 'https://', '//'])) {
+                    $roomImage = \Illuminate\Support\Str::startsWith($roomImage, ['storage/', '/storage/'])
+                        ? asset(ltrim($roomImage, '/')) : asset('storage/' . ltrim($roomImage, '/'));
+                }
+            }
             @endphp
 
             @if ($room)
-            <div class="col-md-6 col-lg-4 favorite-card-column">
+            <div class="col-md-6 col-lg-4 favorite-card-column" data-price="{{ (float) $room->price }}" data-area="{{ (float) $room->area }}" data-order="{{ $loop->index }}">
                 <div class="room-card">
                     <form action="{{ route('favorites.destroy', $favorite->id) }}"
                         method="POST"
@@ -248,9 +269,11 @@
                             style="color: #e53935;">♥</button>
                     </form>
 
-                    <img class="room-img"
-                        src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80"
-                        alt="{{ $room->name ?? 'Phòng trọ' }}">
+                    @if($roomImage)
+                        <img class="room-img" src="{{ $roomImage }}" alt="{{ $room->name ?? 'Phòng trọ' }}" loading="lazy"
+                            onerror="this.style.display='none';this.nextElementSibling.hidden=false;">
+                    @endif
+                    <div class="favorite-image-placeholder" {{ $roomImage ? 'hidden' : '' }}>Chưa có ảnh phòng</div>
 
                     <div class="room-body">
                         <div class="room-badges">
@@ -293,9 +316,11 @@
             @endif
             @empty
             <div class="col-12">
-                <div class="panel text-center py-5">
-                    <h5>Chưa có phòng yêu thích</h5>
-                    <p>Hãy tìm phòng và bấm trái tim để lưu lại nhé.</p>
+                <div class="panel favorite-empty text-center">
+                    <div class="favorite-empty-icon" aria-hidden="true">♡</div>
+                    <span class="favorite-empty-kicker">BẮT ĐẦU BỘ SƯU TẬP</span>
+                    <h2>Chưa có phòng yêu thích</h2>
+                    <p>Một nơi ở phù hợp đang chờ bạn khám phá.<br>Nhấn trái tim để lưu phòng và xem lại bất cứ lúc nào.</p>
                     <a href="{{ route('rooms.index') }}"
                         class="btn-brand text-decoration-none">
                         Tìm phòng trọ
@@ -312,10 +337,11 @@
          BOTTOM INFO
     ====================================================== -->
 
-        <div class="panel mt-4">
+        <div class="panel favorites-tip mt-4">
 
             <div class="d-flex align-items-center gap-3">
 
+                <span class="favorites-tip-icon" aria-hidden="true">♡</span>
                 <div>
 
                     <div class="cell-title">
@@ -340,4 +366,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/favorite-toggle.js') }}"></script>
+    <script src="{{ asset('js/favorites-sort.js') }}"></script>
 @endpush

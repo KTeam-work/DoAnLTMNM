@@ -184,9 +184,7 @@
             startTopLoader();
 
             const res = await fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'Accept': 'text/html' }
             });
 
             if (!res.ok) {
@@ -279,6 +277,7 @@
 
     // Xử lý khi SUBMIT FORM LỌC GET (tìm kiếm, dropdown lọc)
     document.addEventListener('submit', function (e) {
+        if (e.defaultPrevented) return;
         const form = e.target.closest('form');
         if (!form || form.hasAttribute('data-no-ajax') || form.id === 'chatForm') return;
 

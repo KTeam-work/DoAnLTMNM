@@ -380,8 +380,8 @@
                                 <div style="font-size: 11px; color: var(--adm-muted); margin-top: 2px;">12 tháng trong năm {{ $selectedYear }}</div>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <form method="GET" action="{{ route('admin.statistics') }}" class="d-inline-flex align-items-center m-0">
-                                    <select name="year" class="form-select form-select-sm py-0 ps-2 pe-3" style="font-size: 11px; height: 26px; border-radius: 99px; font-weight: 700; color: var(--adm-navy);" onchange="this.form.submit()">
+                                <form method="GET" action="{{ route('admin.statistics') }}" class="d-inline-flex align-items-center m-0" data-ajax-filter>
+                                    <select name="year" class="form-select form-select-sm py-0 ps-2 pe-3" style="font-size: 11px; height: 26px; border-radius: 99px; font-weight: 700; color: var(--adm-navy);" onchange="this.form.requestSubmit()">
                                         @foreach($availableYears as $y)
                                             <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>Năm {{ $y }}</option>
                                         @endforeach

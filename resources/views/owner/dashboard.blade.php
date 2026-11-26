@@ -9,14 +9,8 @@
 @section('content')
 
 @php
-    $defaultHouseImages = [
-        asset('images/hero-building.jpg'),
-        asset('storage/properties/10/lw3etjRSNWcSwEAYgEnixCkCbf4nQBLEF9GayCw9.jpg'),
-        asset('storage/properties/9/GvV2Cfsd6U0ITc8zPTPHEQUSOwAerZ8fQaqQEYZK.jpg'),
-        asset('storage/properties/10/S7x1ucRXbPFQ0FaHngKJC3YvD4O0iWb9HivqiUWa.jpg'),
-    ];
-    $heroBgImage = asset('images/hero-building.jpg');
-    $firstHouseImg = asset('storage/properties/10/lw3etjRSNWcSwEAYgEnixCkCbf4nQBLEF9GayCw9.jpg');
+    $defaultHouseImages = [asset('images/owner-showcase-apartment-1.png')];
+    $heroBgImage = asset('images/owner-showcase-apartment-1.png');
 @endphp
 
 <div class="owner-page">
@@ -25,30 +19,50 @@
         {{-- =========================================================
              1. HERO CARD (DARK LUXURY ARCHITECTURAL HERO - NO ICONS)
              ========================================================= --}}
-        <div class="dashboard-hero-card" style="background-image: linear-gradient(135deg, rgba(8, 15, 28, 0.94) 0%, rgba(13, 27, 46, 0.90) 55%, rgba(9, 17, 30, 0.88) 100%), url('{{ $heroBgImage }}');">
+        <div class="dashboard-hero-card owner-showcase">
+            <div id="ownerPropertyCarousel" class="carousel slide owner-showcase-slides" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" aria-label="Ảnh khu trọ">
+                <div class="carousel-inner">
+                    <div class="carousel-item active"><img src="{{ asset('images/owner-showcase-apartment-1.png') }}" alt="Ảnh minh họa chung cư hiện đại"><div class="showcase-property"><span>Ảnh minh họa</span><strong>Không gian sống hiện đại</strong></div></div>
+                    <div class="carousel-item"><img src="{{ asset('images/owner-showcase-apartment-2.png') }}" alt="Ảnh minh họa nhà trọ hiện đại"><div class="showcase-property"><span>Ảnh minh họa</span><strong>Không gian sống tiện nghi</strong></div></div>
+                    @foreach ($properties as $property)
+                        @php
+                            $heroImage = $property->thumbnail ?? $property->images->first();
+                            $heroImageUrl = $heroImage ? asset('storage/' . $heroImage->image_path) : $heroBgImage;
+                        @endphp
+                        <div class="carousel-item">
+                            <img src="{{ $heroImageUrl }}" alt="{{ $property->name }}">
+                            <div class="showcase-property"><span>Khu trọ của bạn</span><strong>{{ $property->name }}</strong><small>{{ $property->district ?? $property->city ?? 'Chưa cập nhật địa chỉ' }}</small></div>
+                        </div>
+                    @endforeach
+                </div>
+                    <div class="showcase-controls" aria-label="Điều khiển ảnh khu trọ">
+                        <button type="button" data-bs-target="#ownerPropertyCarousel" data-bs-slide="prev" aria-label="Khu trọ trước"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                        <button type="button" data-bs-target="#ownerPropertyCarousel" data-bs-slide="next" aria-label="Khu trọ tiếp theo"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                    </div>
+            </div>
             <div class="hero-inner">
                 <div class="row align-items-center g-4">
                     
                     {{-- CỘT TRÁI: TIÊU ĐỀ, MÔ TẢ & FLOATING ACTION PILL BAR --}}
-                    <div class="col-lg-7">
+                    <div class="col-lg-7 showcase-copy">
                         <div class="hero-tag-pill">
-                            Không gian quản lý chủ trọ · Trọ Ơi Pro
+                            Không gian của chủ trọ
                         </div>
 
                         <h1 class="hero-title">
-                            Khám Phá &amp; Tối Ưu Hóa<br>
-                            <span class="title-accent">Hệ Thống Cho Thuê</span>
+                            Quản lý nhà trọ<br>
+                            <span class="title-accent">vận hành trong tầm tay.</span>
                         </h1>
 
                         <p class="hero-desc">
-                            Xin chào <strong>{{ auth()->user()->name ?? 'Chủ trọ' }}</strong>. Theo dõi tỷ lệ lấp đầy, dòng tiền thực thu và tình trạng các khu nhà trọ theo thời gian thực.
+                            Theo dõi tình hình cho thuê và xử lý công việc hằng ngày ngay tại đây.
                         </p>
 
                         {{-- FLOATING WHITE PILL ACTION BAR (NO ICONS) --}}
                         <div class="hero-pill-bar">
                             <div class="pill-item">
                                 <span class="pill-label">Nhà trọ</span>
-                                <span class="pill-value">{{ $propertiesCount ?? 1 }} khu</span>
+                                <span class="pill-value">{{ $propertiesCount }} khu</span>
                             </div>
                             <div class="pill-item">
                                 <span class="pill-label">Quy mô</span>
@@ -78,26 +92,12 @@
                     </div>
 
                     {{-- CỘT PHẢI: THẺ BẤT ĐỘNG SẢN TIÊU BIỂU (THAY THẾ TỶ LỆ LẤP ĐẦY & DOANH THU) --}}
-                    <div class="col-lg-5">
-                        <a href="{{ route('owner.rooms.index') }}" class="hero-featured-property">
-                            <div class="hero-featured-img-box">
-                                <img src="{{ $firstHouseImg }}" alt="Khu nhà trọ" class="hero-featured-img">
-                                <span class="hero-featured-badge">Đang vận hành</span>
-                            </div>
-                            <div class="hero-featured-title">
-                                {{ $properties->first()?->name ?? 'Khu trọ tiêu biểu' }}
-                            </div>
-                            <div class="hero-featured-desc">
-                                {{ $properties->first()?->district ?? 'Hồ Chí Minh' }} · Hệ thống nhà trọ cao cấp
-                            </div>
-                            <div class="hero-featured-footer">
-                                <span>Quy mô: <strong>{{ $totalRooms }} phòng</strong></span>
-                                <span>Đang ở: <strong>{{ $rentedRooms }} phòng</strong></span>
-                            </div>
-                        </a>
-                    </div>
-
                 </div>
+            </div>
+            <div class="showcase-summary">
+                <div><span>Tỷ lệ lấp đầy</span><strong>{{ $occupancyRate }}%</strong></div>
+                <div><span>Phòng đang thuê</span><strong>{{ $rentedRooms }} / {{ $totalRooms }}</strong></div>
+                <div><span>Thực thu tháng {{ now()->format('m/Y') }}</span><strong>{{ number_format((float) $monthlyRevenue, 0, ',', '.') }} ₫</strong></div>
             </div>
         </div>
 
@@ -142,22 +142,7 @@
                         </div>
                     </a>
                 @empty
-                    @for($i = 0; $i < 3; $i++)
-                        <a href="{{ route('owner.rooms.index') }}" class="house-card">
-                            <div class="house-card-img-wrapper">
-                                <img src="{{ $defaultHouseImages[$i] }}" alt="Khu trọ" class="house-card-img">
-                                <span class="house-card-badge">Đang hoạt động</span>
-                            </div>
-                            <div class="house-card-body">
-                                <div class="house-card-title">Khu trọ cao cấp {{ $i + 1 }}</div>
-                                <div class="house-card-address">Quận Bình Thạnh, TP. Hồ Chí Minh</div>
-                                <div class="house-card-footer">
-                                    <span class="house-card-stats">Quy mô nhiều phòng</span>
-                                    <span class="house-card-status">Đang vận hành</span>
-                                </div>
-                            </div>
-                        </a>
-                    @endfor
+                    <div class="dashboard-empty">Chưa có khu trọ nào. Hãy thêm khu trọ để bắt đầu quản lý.</div>
                 @endforelse
             </div>
 

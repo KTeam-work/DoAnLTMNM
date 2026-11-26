@@ -47,10 +47,10 @@ class OwnerRoomController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'district']);
 
-        $amenities = Amenity::query()
-            ->when(\Illuminate\Support\Facades\Schema::hasColumn('amenities', 'status'), fn ($q) => $q->where('status', 'active'))
-            ->orderBy('name')
-            ->get();
+        $amenityProperties = DB::table('property_amenities')->join('properties', 'properties.id', '=', 'property_amenities.property_id')
+            ->where('properties.owner_id', $owner->id)->where('property_amenities.status', 'active')
+            ->get(['property_amenities.amenity_id', 'property_amenities.property_id'])->groupBy('amenity_id');
+        $amenities = Amenity::whereIn('id', $amenityProperties->keys())->orderBy('name')->get();
 
         $existingCodes = Room::query()->whereNotNull('room_code')->pluck('room_code');
         foreach ($properties as $property) {
@@ -60,7 +60,7 @@ class OwnerRoomController extends Controller
             );
         }
 
-        return view('owner.rooms.create', compact('properties', 'amenities'));
+        return view('owner.rooms.create', compact('properties', 'amenities', 'amenityProperties'));
     }
 
     public function store(Request $request)
@@ -131,6 +131,8 @@ class OwnerRoomController extends Controller
             ->whereKey($data['property_id'])
             ->where('owner_id', $owner->id)
             ->firstOrFail();
+
+        $this->validatePropertyAmenities($property, $amenityIds);
 
         DB::transaction(function () use ($property, $data, $amenityIds): void {
             // Serialize generation for properties in the same district.
@@ -220,11 +222,11 @@ class OwnerRoomController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        $amenities = Amenity::query()
-            ->when(\Illuminate\Support\Facades\Schema::hasColumn('amenities', 'status'), fn ($q) => $q->where('status', 'active'))
-            ->orderBy('name')
-            ->get();
         $room->load('amenities');
+        $amenities = $room->property->amenities()->where(function ($query) use ($room) {
+            $query->where('property_amenities.status', 'active')
+                ->orWhereIn('amenities.id', $room->amenities->pluck('id'));
+        })->orderBy('name')->get();
 
         return view('owner.rooms.edit', compact('room', 'properties', 'amenities', 'hasActiveContract'));
     }
@@ -326,12 +328,25 @@ class OwnerRoomController extends Controller
             404
         );
 
+        $this->validatePropertyAmenities($room->property, $amenityIds, $room);
+
         $room->update($data);
         $room->amenities()->sync($amenityIds);
 
         return redirect()
             ->route('owner.rooms.index')
             ->with('success', 'Cập nhật phòng thành công.');
+    }
+
+    private function validatePropertyAmenities(Property $property, array $ids, ?Room $room = null): void
+    {
+        $allowed = $property->amenities()->where(function ($query) use ($room) {
+            $query->where('property_amenities.status', 'active');
+            if ($room) $query->orWhereIn('amenities.id', $room->amenities()->select('amenities.id'));
+        })->pluck('amenities.id')->map(fn ($id) => (int) $id)->all();
+        if (array_diff(array_map('intval', $ids), $allowed)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['amenities' => 'Tiện ích không thuộc nhà trọ đã chọn hoặc đang tạm ngưng.']);
+        }
     }
 
     /**

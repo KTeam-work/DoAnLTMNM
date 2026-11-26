@@ -166,14 +166,26 @@
           <!-- 2 Phương thức thanh toán -->
           <div id="pay">
             @php
-              $isPendingCash = ($invoice->status === 'pending' || $invoice->payments->where('status', 'pending')->count() > 0);
+              $pendingPayment = $invoice->payments->where('status', 'pending')->sortByDesc('id')->first();
             @endphp
 
-            @if($isPendingCash)
+            @if($invoice->status === 'paid')
+              <div class="alert alert-success mb-0 text-center fw-bold">Hóa đơn đã được thanh toán thành công. Cảm ơn bạn!</div>
+            @elseif($invoice->status === 'cancelled')
+              <div class="alert alert-secondary mb-0 text-center">Hóa đơn này đã bị hủy.</div>
+            @elseif($pendingPayment && $pendingPayment->method === 'cash')
               <div class="p-3 rounded-3 text-center border" style="background: #fffbeb; border-color: #fde68a !important;">
                 <div class="fw-bold text-dark mb-1" style="font-size: 13.5px; color: #92400e !important;">Đã gửi báo nộp tiền mặt</div>
                 <div class="text-muted mb-0" style="font-size: 12px; line-height: 1.5;">Bạn đã gửi yêu cầu xác nhận nộp tiền mặt cho chủ trọ. Vui lòng chờ chủ trọ kiểm tra và duyệt hóa đơn.</div>
               </div>
+            @elseif($pendingPayment && $pendingPayment->method === 'qr')
+              <div class="p-3 rounded-3 border bg-light">
+                <div class="fw-bold mb-1">Giao dịch QR đang chờ thanh toán</div>
+                <p class="text-muted small mb-3">Việc mở mã QR chưa xác nhận bạn đã chuyển tiền. Bạn có thể mở lại mã để thanh toán.</p>
+                <button type="button" class="btn btn-dark w-100 btn-pay-qr" data-invoice-id="{{ $invoice->id }}" data-invoice-code="{{ $invoice->invoice_code }}">Mở lại mã QR</button>
+              </div>
+            @elseif($pendingPayment || $invoice->status === 'pending')
+              <div class="alert alert-info mb-0">Hóa đơn đang có giao dịch chờ xử lý. Vui lòng kiểm tra lịch sử thanh toán hoặc liên hệ chủ trọ.</div>
             @elseif($canPayQr)
               <div class="fw-bold mb-2 text-dark" style="font-size: 13px;">Chọn phương thức thanh toán:</div>
 
@@ -236,10 +248,6 @@
                   </div>
                 </div>
               </div>
-            @elseif($invoice->status === 'paid')
-              <div class="alert alert-success mb-0 text-center fw-bold">Hóa đơn đã được thanh toán thành công. Cảm ơn bạn!</div>
-            @elseif($invoice->status === 'cancelled')
-              <div class="alert alert-secondary mb-0 text-center">Hóa đơn này đã bị hủy.</div>
             @else
               <div class="alert alert-info mb-0 text-center">Hóa đơn đang được xử lý.</div>
             @endif

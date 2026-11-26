@@ -191,6 +191,9 @@
             </td>
             <td>
               <div style="font-weight: 700; color: #4b3621;">Tháng {{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</div>
+              @if($reading->period_start && $reading->period_end)
+                <div class="cell-sub">Kỳ: {{ $reading->period_start->format('d/m/Y') }} – {{ $reading->period_end->format('d/m/Y') }}</div>
+              @endif
               <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
                 Ngày ghi: <span style="font-weight: 600; color: #0c2340;">{{ $reading->created_at ? $reading->created_at->format('d/m/Y') : \Carbon\Carbon::parse($reading->month)->format('d/m/Y') }}</span>
               </div>

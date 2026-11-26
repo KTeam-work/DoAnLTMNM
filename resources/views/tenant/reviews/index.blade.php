@@ -7,17 +7,18 @@
 
 @push('styles')
      <link rel="stylesheet"
-          href="{{ asset('css/tv3/tenant/reviews/index.css') }}">
+          href="{{ asset('css/tv3/tenant/reviews/index.css') }}?v={{ filemtime(public_path('css/tv3/tenant/reviews/index.css')) }}">
 @endpush
 
 @section('content')
 
 
-<div class="page-wrap" style="padding-top: 40px; max-width: 1100px;">
+<div class="page-wrap tenant-review-page">
   
-  <div class="mb-4">
-    <h2 class="page-title">Đánh giá & Nhận xét</h2>
-    <div class="text-muted mt-2">Chia sẻ trải nghiệm của bạn về phòng thuê để giúp cộng đồng có cái nhìn khách quan.</div>
+  <div class="review-page-header">
+    <span class="review-breadcrumb">TÀI KHOẢN / ĐÁNH GIÁ</span>
+    <h1 class="page-title">Đánh giá &amp; nhận xét</h1>
+    <p>Chia sẻ trải nghiệm thực tế để giúp người khác tìm được nơi ở phù hợp.</p>
   </div>
 
   <div class="row g-4">
@@ -27,17 +28,17 @@
         <!-- 1. THÊM id="review-form" -->
         <form id="review-form" action="{{ route('tenant.reviews.store') }}" method="POST">
           @csrf
-          <h4 class="fw-bold mb-4" style="color: var(--green-dark); font-size: 18px;">Viết đánh giá mới</h4>
+          <div class="review-section-heading"><h2>Viết đánh giá</h2><p>Trải nghiệm của bạn có thể giúp ích cho người thuê sau.</p></div>
           
           <div class="mb-4">
-            <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Phòng đã thuê / Hợp đồng đã thanh lý</label>
+            <label class="form-label" for="review-room">Phòng đã thuê</label>
             @if($rooms->isEmpty())
               <div class="alert alert-warning mb-0" style="font-size: 13px; line-height: 1.5; border-radius: 10px;">
                 <strong>Bạn chưa có phòng nào để đánh giá.</strong><br>
                 Hệ thống chỉ cho phép gửi đánh giá cho những phòng mà bạn đã từng ký hợp đồng thuê hoặc hợp đồng đã thanh lý.
               </div>
             @else
-              <select name="room_id" class="form-select fw-bold text-dark" required>
+              <select id="review-room" name="room_id" class="form-select" required>
                 @foreach($rooms as $room)
                   @php
                     $contract = $room->related_contract ?? null;
@@ -52,24 +53,27 @@
           </div>
 
           <div class="mb-4">
-            <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Chất lượng phòng (1-5 Sao) <span class="text-danger">*</span></label>
-            <div class="star-rating">
+            <div class="form-label" id="rating-label">Chất lượng phòng <span class="text-danger">*</span></div>
+            <div class="star-rating" role="radiogroup" aria-labelledby="rating-label">
               <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 sao">★</label>
               <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 sao">★</label>
               <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 sao">★</label>
               <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 sao">★</label>
               <input type="radio" id="star1" name="rating" value="1" required><label for="star1" title="1 sao">★</label>
             </div>
+            <div class="rating-hint">Chọn từ 1 đến 5 sao</div>
           </div>
 
           <div class="mb-4">
-            <label class="form-label" style="font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Nhận xét chi tiết</label>
-            <textarea name="comment" class="form-control" rows="4" placeholder="Phòng có ồn không?... (tối đa 1000 ký tự)" maxlength="1000" style="resize: none;"></textarea>
+            <label class="form-label" for="review-comment">Nhận xét chi tiết <span class="review-optional">(không bắt buộc)</span></label>
+            <textarea id="review-comment" name="comment" class="form-control" rows="4" placeholder="Chia sẻ điều bạn thích hoặc điều cần cải thiện..." maxlength="1000"></textarea>
+            <div class="review-input-hint">Tối đa 1.000 ký tự</div>
           </div>
 
-          <button type="submit" class="btn btn-brand w-100 py-3 mt-2" style="font-size: 14px; box-shadow: 0 4px 15px rgba(245,200,75,0.4);">
+          <button type="submit" class="btn btn-brand review-submit w-100" @disabled($rooms->isEmpty())>
             Gửi đánh giá
           </button>
+          <div id="review-feedback" class="small mt-2" role="status" aria-live="polite"></div>
         </form>
       </div>
     </div>
@@ -77,23 +81,23 @@
     <!-- Cột Phải: Lịch sử đã đánh giá -->
     <div class="col-lg-7">
       <div class="review-panel">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="fw-bold mb-0" style="color: var(--green-dark); font-size: 18px;">Lịch sử đánh giá của bạn</h4>
+        <div class="review-history-heading">
+          <div class="review-section-heading"><h2>Đánh giá của bạn</h2><p>Những trải nghiệm bạn đã chia sẻ.</p></div>
           <!-- 2. THÊM id="review-count" -->
-          <span id="review-count" class="text-muted" style="font-size: 13px; font-weight: 600;">Tổng: {{ $reviews->count() }} lượt</span>
+          <span id="review-count" class="review-count">Tổng: {{ $reviews->count() }} lượt</span>
         </div>
 
         <!-- 3. THÊM id="review-list" bọc danh sách review -->
         <div id="review-list">
           @forelse($reviews as $review)
-          <div class="review-card">
+          <div class="review-card" data-review-id="{{ $review->id }}">
             <div class="d-flex justify-content-between align-items-start mb-2">
               <div>
                 <div class="static-stars">{{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}</div>
                 <div class="fw-bold mt-1 text-dark" style="font-size: 15px;">{{ $review->room->name ?? '' }}</div>
               </div>
               <div class="text-end">
-                <span class="badge-visible mb-1 d-inline-block">Đang hiển thị</span>
+                <span class="{{ $review->status === 'visible' ? 'badge-visible' : 'badge-hidden' }} mb-1 d-inline-block">{{ $review->status === 'visible' ? 'Đang hiển thị' : 'Đang ẩn' }}</span>
                 <div class="text-muted" style="font-size: 11px;">{{ $review->created_at->format('d/m/Y') }}</div>
               </div>
             </div>
@@ -114,7 +118,7 @@
 </div>
 
 @push('scripts')
-    <script src="{{ asset('js/tv3/tenant/reivews/index.js') }}"></script>
+    <script src="{{ asset('js/tv3/tenant/reivews/index.js') }}?v={{ filemtime(public_path('js/tv3/tenant/reivews/index.js')) }}"></script>
 @endpush
 
 

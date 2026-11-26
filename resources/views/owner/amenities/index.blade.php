@@ -110,7 +110,7 @@
                 <div class="page-desc">Danh mục tiện ích trang thiết bị sẵn có trong phòng trọ</div>
             </div>
             <div>
-                <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#createAmenityModal">
+                <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#createAmenityModal" {{ $selectedProperty ? '' : 'disabled' }}>
                     <span>＋</span> Thêm tiện ích mới
                 </button>
             </div>
@@ -126,11 +126,31 @@
             </a>
         </div>
 
+        <div class="property-box">
+            <div class="row align-items-center g-3">
+                <div class="col-md-7">
+                    <div class="property-label">Nhà trọ đang xem</div>
+                    <div class="property-name">{{ $selectedProperty?->name ?? 'Chưa có nhà trọ nào' }}</div>
+                    <div class="property-address">{{ $selectedProperty?->address ?? 'Hãy thêm nhà trọ trước khi cấu hình tiện ích.' }}</div>
+                </div>
+                <div class="col-md-5 text-md-end">
+                    @if($properties->isNotEmpty())
+                        <label for="amenity-property" class="visually-hidden">Chọn nhà trọ</label>
+                        <select id="amenity-property" class="property-select" onchange="window.location.href = '{{ route('owner.amenities.index') }}?property_id=' + encodeURIComponent(this.value)">
+                            @foreach($properties as $property)
+                                <option value="{{ $property->id }}" @selected($selectedProperty?->id === $property->id)>{{ $property->name }}</option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         {{-- BỘ LỌC TRẠNG THÁI --}}
         @php
             $totalAmenities = $amenities->count();
-            $activeAmenities = $amenities->where('status', 'active')->count();
-            $inactiveAmenities = $amenities->where('status', 'inactive')->count();
+            $activeAmenities = $amenities->filter(fn($item) => $item->pivot->status === 'active')->count();
+            $inactiveAmenities = $amenities->filter(fn($item) => $item->pivot->status === 'inactive')->count();
         @endphp
         <div class="segmented-filter-wrapper mb-4">
             <div class="segmented-filter-bar" role="tablist">
@@ -153,30 +173,31 @@
         @if($amenities->isNotEmpty())
             <div class="amenity-card-grid" id="amenityCardGrid">
                 @foreach($amenities as $amenity)
-                    <div class="amenity-card" data-status="{{ $amenity->status }}">
+                    <div class="amenity-card" data-status="{{ $amenity->pivot->status }}">
                         <div>
                             <div class="amenity-title">
                                 {{ $amenity->name }}
                             </div>
-                            <span class="amenity-badge {{ $amenity->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
-                                {{ $amenity->status === 'active' ? 'Đang hoạt động' : 'Tạm ngưng' }}
+                            <span class="amenity-badge {{ $amenity->pivot->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
+                                {{ $amenity->pivot->status === 'active' ? 'Đang hoạt động' : 'Tạm ngưng' }}
                             </span>
-                            @if($amenity->description)
-                                <div class="amenity-desc">{{ $amenity->description }}</div>
+                            @if($amenity->pivot->description)
+                                <div class="amenity-desc">{{ $amenity->pivot->description }}</div>
                             @endif
                             <div style="margin-top: 10px; font-size: 12px; color: #94a3b8;">
-                                Áp dụng cho: <strong>{{ $amenity->rooms()->count() }}</strong> phòng trọ
+                                Áp dụng cho: <strong>{{ $amenity->property_rooms_count }}</strong> phòng trọ
                             </div>
                         </div>
 
                         <div class="amenity-actions">
-                            <button type="button" class="action-btn-sm" 
-                                onclick="openEditModal({{ $amenity->id }}, '{{ addslashes($amenity->name) }}', '{{ addslashes($amenity->description ?? '') }}', '{{ $amenity->status }}')">
+                            <button type="button" class="action-btn-sm" data-bs-toggle="modal" data-bs-target="#editAmenityModal"
+                                data-action="{{ route('owner.amenities.update', $amenity) }}" data-name="{{ $amenity->name }}" data-description="{{ $amenity->pivot->description }}" data-status="{{ $amenity->pivot->status }}">
                                 Sửa
                             </button>
-                            <form action="{{ route('owner.amenities.destroy', $amenity->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tiện ích này?');" style="display: inline;">
+                            <form action="{{ route('owner.amenities.destroy', $amenity->id) }}" method="POST" onsubmit="return confirm('Xóa tiện ích này khỏi nhà trọ và các phòng thuộc nhà này?');" style="display: inline;">
                                 @csrf
                                 @method('DELETE')
+                                <input type="hidden" name="property_id" value="{{ $selectedProperty->id }}">
                                 <button type="submit" class="action-btn-sm delete">Xóa</button>
                             </form>
                         </div>
@@ -187,7 +208,7 @@
             <div class="empty-state" style="text-align: center; padding: 48px 20px; background: #fff; border: 1px dashed #cbd5e1; border-radius: 14px; margin-top: 20px;">
                 <div style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Chưa có tiện ích nào trong danh mục</div>
                 <div style="color: #64748b; font-size: 14px; margin-bottom: 18px;">Thêm các tiện ích như Máy lạnh, Tủ lạnh, Gác lửng để gán cho các phòng trọ của bạn.</div>
-                <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#createAmenityModal">
+                <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#createAmenityModal" {{ $selectedProperty ? '' : 'disabled' }}>
                     ＋ Thêm tiện ích đầu tiên
                 </button>
             </div>
@@ -201,6 +222,7 @@
             <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
                 <form action="{{ route('owner.amenities.store') }}" method="POST">
                     @csrf
+                    <input type="hidden" name="property_id" value="{{ $selectedProperty?->id }}">
                     <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 20px 24px;">
                         <h5 class="modal-title font-weight-bold" id="createAmenityModalLabel" style="font-weight: 700; color: #0c2340;">
                             Thêm tiện ích mới
@@ -240,6 +262,7 @@
                 <form id="editAmenityForm" method="POST">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="property_id" value="{{ $selectedProperty?->id }}">
                     <div class="modal-header" style="border-bottom: 1px solid #f1f5f9; padding: 20px 24px;">
                         <h5 class="modal-title font-weight-bold" id="editAmenityModalLabel" style="font-weight: 700; color: #0c2340;">
                             Cập nhật tiện ích
@@ -274,18 +297,17 @@
 
     @push('scripts')
         <script>
-            function openEditModal(id, name, description, status) {
-                var form = document.getElementById('editAmenityForm');
-                form.action = '/owner/amenities/' + id;
-                document.getElementById('editName').value = name;
-                document.getElementById('editDescription').value = description;
-                document.getElementById('editStatus').value = status;
-                
-                var modal = new bootstrap.Modal(document.getElementById('editAmenityModal'));
-                modal.show();
-            }
+            if (!window.amenityEditListenerInstalled) document.addEventListener('show.bs.modal', function(event) {
+                if (event.target.id !== 'editAmenityModal' || !event.relatedTarget) return;
+                var button = event.relatedTarget;
+                document.getElementById('editAmenityForm').action = button.dataset.action;
+                document.getElementById('editName').value = button.dataset.name;
+                document.getElementById('editDescription').value = button.dataset.description;
+                document.getElementById('editStatus').value = button.dataset.status;
+            });
+            window.amenityEditListenerInstalled = true;
 
-            function filterAmenities(status) {
+            window.filterAmenities = function(status) {
                 // Đổi active tab
                 document.querySelectorAll('.segmented-tab').forEach(function(tab) {
                     if (tab.getAttribute('data-status') === status) {
@@ -304,7 +326,7 @@
                         card.style.display = 'none';
                     }
                 });
-            }
+            };
         </script>
     @endpush
 
