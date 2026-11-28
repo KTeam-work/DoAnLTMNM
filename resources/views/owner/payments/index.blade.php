@@ -52,7 +52,7 @@
   <!-- BẢNG GIAO DỊCH -->
   <div class="panel animate-up delay-3 skeleton-box">
     @php
-      $methodLabels = ['cash' => 'Tiền mặt', 'bank_transfer' => 'Chuyển khoản'];
+      $methodLabels = ['cash' => 'Tiền mặt', 'qr' => 'QR', 'bank_transfer' => 'Chuyển khoản (cũ)', 'online' => 'Online (cũ)'];
       $payStatusLabels = ['pending' => 'Đang chờ', 'success' => 'Thành công', 'failed' => 'Thất bại', 'cancelled' => 'Đã hủy'];
     @endphp
     <div class="panel-head d-flex flex-wrap gap-3 justify-content-between align-items-center border-bottom pb-3 hide-on-skeleton">
@@ -116,6 +116,7 @@
             <td><span class="badge-status {{ $payment->status }}">{{ $payStatusLabels[$payment->status] ?? $payment->status }}</span></td>
             <td class="text-end pe-2">
               @if($payment->status === 'pending')
+                @if($payment->method !== 'qr')
                 <button type="button" class="btn-icon success btn-open-confirm-modal" 
                         data-bs-toggle="tooltip" title="Xác nhận đã nhận tiền"
                         data-action="{{ route('owner.payments.confirm', $payment->id) }}"
@@ -126,6 +127,7 @@
                         data-paymethod="{{ $methodLabels[$payment->method] ?? $payment->method }}">
                   <i class="bi bi-check-lg"></i>
                 </button>
+                @endif
                 <button type="button" class="btn-icon danger btn-open-reject-modal" 
                         data-bs-toggle="tooltip" title="Từ chối giao dịch"
                         data-action="{{ route('owner.payments.reject', $payment->id) }}"

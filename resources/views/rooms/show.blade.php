@@ -7,6 +7,7 @@
     if (isset($room) && $room instanceof \App\Models\Room) {
         $property = $room->property;
         $owner = optional($property)->owner;
+        $panoramaUrl = $room->panorama_path ? asset('storage/' . ltrim($room->panorama_path, '/')) : null;
         $activePost = $room->rentalPosts->first() ?? \App\Models\RentalPost::where('room_id', $room->id)->latest()->first();
 
         $lat = optional($property)->latitude;
@@ -116,6 +117,8 @@
 @push('styles')
          <link rel="stylesheet"
           href="{{ asset('css/tv2/rooms/show.css') }}?v={{ filemtime(public_path('css/tv2/rooms/show.css')) }}">
+         <link rel="stylesheet" href="{{ asset('css/tv2/rooms/compare.css') }}">
+         @if($panoramaUrl ?? false)<link rel="stylesheet" href="{{ asset('vendor/pannellum/pannellum.css') }}">@endif
 @endpush 
 
 @section('content')
@@ -167,6 +170,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
+            @if(session('compare_message'))<div class="alert alert-success">{{ session('compare_message') }} <a href="{{ route('rooms.compare') }}" data-no-ajax="true">Xem so sánh</a></div>@endif
+            @if(session('compare_error'))<div class="alert alert-warning">{{ session('compare_error') }} <a href="{{ route('rooms.compare') }}" data-no-ajax="true">Xem danh sách</a></div>@endif
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
                     {{ session('error') }}
@@ -267,10 +272,26 @@
                 </div>
                 <div class="showcase-summary-price"><span>Giá thuê mỗi tháng</span><strong>{{ $room['price'] }} <small>/ tháng</small></strong></div>
                 <div class="showcase-summary-facts"><div><span>Diện tích</span><strong>{{ $room['area'] }}</strong></div><div><span>Sức chứa</span><strong>{{ $room['people'] }}</strong></div></div>
+                <form action="{{ route('rooms.compare.store', $room['id']) }}" method="POST" data-no-ajax="true" class="compare-detail-form">@csrf<button class="compare-add-btn" type="submit">{{ in_array($room['id'], session('compare_rooms', [])) ? 'Đã thêm vào so sánh' : '+ Thêm vào so sánh' }}</button><a href="{{ route('rooms.compare') }}" data-no-ajax="true">Xem danh sách ({{ count(session('compare_rooms', [])) }}/3)</a></form>
                 <a href="{{ route('appointments.create', ['id' => $room['id']]) }}" class="showcase-appointment">Đặt lịch xem phòng</a>
+                @if(!auth()->check() || auth()->user()->role === 'tenant')
+                    @auth
+                        <form action="{{ route('chat.start', $room['id']) }}" method="POST" class="showcase-chat-form" data-no-ajax="true">
+                            @csrf
+                            <button type="submit" class="showcase-chat">Nhắn tin cho chủ trọ</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="showcase-chat">Nhắn tin cho chủ trọ</a>
+                    @endauth
+                @endif
                 <a href="#room-information" class="showcase-details-link">Xem thông tin chi tiết</a>
               </aside>
             </div>
+
+            @if($panoramaUrl ?? false)
+              <section class="panorama-section" aria-labelledby="panorama-title"><div><span class="panorama-kicker">KHÁM PHÁ KHÔNG GIAN</span><h2 id="panorama-title">Xem phòng 360°</h2><p>Kéo chuột hoặc vuốt để nhìn quanh. Dùng nút + / − để phóng to, thu nhỏ.</p></div><div id="room-panorama-viewer" data-panorama-url="{{ $panoramaUrl }}" data-library-url="{{ asset('vendor/pannellum/pannellum.js') }}" aria-label="Ảnh toàn cảnh phòng 360 độ"></div><p id="panorama-error" class="panorama-error" hidden>Không thể tải ảnh 360°. Vui lòng thử tải lại trang.</p></section>
+              <script src="{{ asset('js/room-panorama.js') }}" defer></script>
+            @endif
 
 
 
@@ -282,7 +303,7 @@
                      LEFT
                 ================================================== -->
 
-                <div class="col-lg-8">
+                <div class="col-12">
 
 
 
@@ -558,43 +579,8 @@
                                 <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill" style="font-size: 12px;">Chủ trọ đã xác minh</span>
                             </div>
                         </div>
-                    </section>
-                </div>
-
-                <!-- =================================================
-                     RIGHT
-                ================================================== -->
-                <div class="col-lg-4">
-                    <div class="booking-card">
-                        <div class="booking-top">
-                            <h2>
-                                Đặt lịch xem phòng
-                            </h2>
-
-                            <div class="booking-note">
-                                Chọn thời gian phù hợp để đến xem phòng.
-                                Chủ trọ sẽ xác nhận lịch hẹn của bạn.
-                            </div>
-
-                            <div class="booking-room-price">
-                                {{ $room['price'] }}
-                                <span>/ tháng</span>
-                            </div>
-                        </div>
-
-                        <a
-                            href="{{ route('appointments.create', ['id' => $room['id'] ?? 0]) }}"
-                            class="btn-booking text-decoration-none d-flex align-items-center justify-content-center"
-                        >
-                            Đặt lịch xem phòng
-                        </a>
-
-                        <div class="booking-secure-note">
-                            Thông tin của bạn được bảo mật
-                        </div>
-
                         @if(isset($activePost) && $activePost)
-                            <div class="mt-3 text-center border-top pt-2">
+                            <div class="mt-3 border-top pt-3">
                                 @auth
                                     <button type="button" class="btn btn-link text-muted text-decoration-none small p-0" data-bs-toggle="modal" data-bs-target="#reportModal" style="font-size: 12.5px;">
                                         Báo cáo tin đăng vi phạm
@@ -606,7 +592,7 @@
                                 @endauth
                             </div>
                         @endif
-                    </div>
+                    </section>
                 </div>
 
             </div>

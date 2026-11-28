@@ -72,6 +72,7 @@ class AppointmentController extends Controller
 
         $rooms = Room::with(['property.images', 'rentalPosts.images'])
             ->where('status', 'available')
+            ->whereHas('property', fn ($query) => $query->where('status', 'active'))
             ->whereHas('rentalPosts', function ($query) {
                 $query->where('status', 'published')
                     ->where(function ($query) {
@@ -119,6 +120,7 @@ class AppointmentController extends Controller
         ]);
 
         $room = Room::where('status', 'available')
+            ->whereHas('property', fn ($query) => $query->where('status', 'active'))
             ->whereHas('rentalPosts', function ($query) {
                 $query->where('status', 'published')
                     ->where(function ($query) {

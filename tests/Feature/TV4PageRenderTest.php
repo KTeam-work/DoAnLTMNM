@@ -20,9 +20,9 @@ class TV4PageRenderTest extends TestCase
         $this->get('/owner/maintenance')->assertSuccessful()->assertSee('Vòi nước lavabo');
         $this->get('/owner/invoices')->assertSuccessful()->assertSee('INV-202609-12A01');
 
-        // Fallback chống kẹt skeleton: JS luôn gỡ lớp ẩn nội dung.
-        $this->get('/owner/payments')->assertSee("remove('skeleton-mode'); }, 2500);", false);
-        $this->get('/owner/maintenance')->assertSee("remove('skeleton-mode'); }, 2500);", false);
+        // The skeleton fallback is loaded from external page scripts.
+        $this->get('/owner/payments')->assertSee(asset('js/tv4/payments/index.js'), false);
+        $this->get('/owner/maintenance')->assertSee(asset('js/tv4/maintenance/index.js'), false);
 
         // Chi tiết HĐ bên chủ có nút Xác nhận cho giao dịch đang chờ.
         $pendingInvoice = \App\Models\Invoice::where('invoice_code', 'INV-202609-12A01')->first();
@@ -45,7 +45,7 @@ class TV4PageRenderTest extends TestCase
             'billing_month' => '2026-10-01', 'issue_date' => '2026-10-05', 'due_date' => '2026-10-15',
             'subtotal' => 100000, 'discount' => 0, 'total' => 100000, 'status' => 'unpaid',
         ]);
-        $this->get("/tenant/invoices/{$inv->id}")->assertSuccessful()->assertSee('Tôi đã chuyển khoản');
+        $this->get("/tenant/invoices/{$inv->id}")->assertSuccessful()->assertSee('Gửi yêu cầu xác nhận');
 
         $this->post('/tenant/payment', ['invoice_id' => $inv->id, 'method' => 'cash'])
             ->assertRedirect(route('tenant.invoices.show', $inv->id));

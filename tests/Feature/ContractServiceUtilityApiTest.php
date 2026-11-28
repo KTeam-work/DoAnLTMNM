@@ -19,13 +19,43 @@ class ContractServiceUtilityApiTest extends TestCase
         $this->get('/owner/tenants')->assertSuccessful();
         $this->get('/owner/contracts')->assertSuccessful();
         $owner = User::factory()->create(['role' => 'owner']);
+        $tenant = User::factory()->create(['role' => 'tenant']);
+        $property = Property::query()->create([
+            'owner_id' => $owner->id,
+            'name' => 'Nha tro A',
+            'type' => 'rooming_house',
+            'address' => '1 Duong A',
+            'district' => 'Quan 1',
+            'ward' => 'Phuong 1',
+        ]);
+        $room = Room::query()->create([
+            'property_id' => $property->id,
+            'name' => 'Phong 101',
+            'area' => 25,
+            'price' => 3000000,
+            'deposit' => 3000000,
+            'max_people' => 2,
+        ]);
+        $contract = \App\Models\Contract::query()->create([
+            'contract_code' => 'HD-BROWSER-' . $tenant->id,
+            'room_id' => $room->id,
+            'owner_id' => $owner->id,
+            'tenant_id' => $tenant->id,
+            'start_date' => now()->subDay()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'rent' => 3000000,
+            'deposit' => 3000000,
+            'payment_cycle' => 'monthly',
+            'status' => 'active',
+            'signed_at' => now(),
+        ]);
 
         foreach ([
             '/tenant/contracts',
             '/owner/tenants',
             '/owner/tenants/create',
-            '/owner/tenants/edit',
-            '/owner/tenants/1',
+            "/owner/tenants/{$tenant->id}/edit",
+            "/owner/tenants/{$tenant->id}",
             '/owner/contracts',
             '/owner/contracts/create',
             '/owner/services',
@@ -39,6 +69,8 @@ class ContractServiceUtilityApiTest extends TestCase
 
     public function test_owner_and_tenant_can_use_the_assigned_contract_service_and_utility_endpoints(): void
     {
+        $this->travelTo(\Carbon\Carbon::parse('2025-12-31 09:00:00'));
+
         $owner = User::factory()->create(['role' => 'owner']);
         $tenant = User::factory()->create(['role' => 'tenant']);
         $property = Property::query()->create([
@@ -56,6 +88,17 @@ class ContractServiceUtilityApiTest extends TestCase
             'price' => 3000000,
             'deposit' => 3000000,
             'max_people' => 2,
+        ]);
+        \Illuminate\Support\Facades\DB::table('viewing_appointments')->insert([
+            'room_id' => $room->id,
+            'tenant_id' => $tenant->id,
+            'appointment_date' => '2026-01-01',
+            'appointment_time' => '09:00:00',
+            'phone' => '0900000000',
+            'message' => 'Muon thue',
+            'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $contract = $this->actingAs($owner)->postJson('/owner/contracts', [
@@ -75,7 +118,7 @@ class ContractServiceUtilityApiTest extends TestCase
 
         $member = $this->postJson("/owner/contracts/{$contract['id']}/members", [
             'name' => 'Nguoi o cung',
-            'identity_card' => '0123456789',
+            'identity_card' => '012345678901',
         ])->assertCreated()->json('data');
         $this->postJson("/owner/contracts/{$contract['id']}/members", [
             'action' => 'remove',
@@ -86,13 +129,19 @@ class ContractServiceUtilityApiTest extends TestCase
             'name' => 'Internet',
             'unit' => 'thang',
             'price' => 100000,
+            'property_id' => $property->id,
         ])->assertCreated()->json('data');
-        $this->putJson('/owner/services', ['id' => $service['id'], 'price' => 120000])->assertOk();
+        $this->putJson('/owner/services', [
+            'id' => $service['id'],
+            'property_id' => $property->id,
+            'price' => 120000,
+        ])->assertOk();
         $this->getJson('/owner/services')->assertOk()->assertJsonCount(1, 'data');
 
         $reading = $this->postJson('/owner/utilities', [
             'room_id' => $room->id,
             'month' => '2026-02-01',
+            'reading_date' => '2026-02-01',
             'electricity_new' => 25,
             'electricity_price' => 3500,
             'water_new' => 8,
@@ -105,9 +154,14 @@ class ContractServiceUtilityApiTest extends TestCase
         $this->actingAs($tenant)->getJson('/tenant/contracts')->assertOk()->assertJsonPath('data.0.id', $contract['id']);
         $this->getJson("/tenant/contracts/{$contract['id']}")->assertOk();
 
+        $this->travelTo(\Carbon\Carbon::parse('2026-12-31 09:00:00'));
         $this->actingAs($owner)->putJson("/owner/contracts/{$contract['id']}/terminate", [
             'deduction_amount' => 500000,
             'return_date' => '2026-12-31',
+            'electricity_new' => 30,
+            'electricity_price' => 3500,
+            'water_new' => 8,
+            'water_price' => 15000,
         ])->assertOk()->assertJsonPath('data.refund_amount', '2500000.00');
     }
 

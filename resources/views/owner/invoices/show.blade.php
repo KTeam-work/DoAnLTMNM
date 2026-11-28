@@ -5,11 +5,12 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv4/invoice/show.css') }}">
     <link rel="stylesheet" href="{{ asset('css/tv3/modal_premium.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv4/invoice/owner-detail.css') }}">
 @endpush
 
 @section('content')
 
-<main class="page-wrap">
+<main class="page-wrap owner-invoice-detail">
   @if(session('success'))
     <div class="alert alert-dismissible fade show d-flex align-items-center gap-3 p-3 mb-4 shadow-sm border-0" 
          style="background: #ecfdf5; border-left: 5px solid #10b981 !important; border-radius: 14px; color: #065f46;" role="alert">
@@ -44,8 +45,10 @@
       <i class="bi bi-arrow-left"></i> Quay lại danh sách hóa đơn
     </a>
 
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-1">
-      <div class="d-flex align-items-center gap-2 flex-wrap">
+    <div class="invoice-hero d-flex justify-content-between align-items-center flex-wrap gap-3 mt-2">
+      <div class="invoice-hero-main">
+        <div class="invoice-eyebrow">CHI TIẾT HÓA ĐƠN</div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
         <h1 class="h3 fw-bold mb-0 text-dark" style="letter-spacing: -0.5px;">#{{ $invoice->invoice_code }}</h1>
         @php
           $statusLabels = [
@@ -66,6 +69,8 @@
           @endif
           {{ $statusLabels[$displayStatus] ?? $displayStatus }}
         </span>
+        </div>
+        <div class="invoice-hero-meta"><i class="bi bi-house-door" aria-hidden="true"></i> {{ $invoice->contract->room->name ?? 'Phòng chưa cập nhật' }} <span>·</span> {{ $invoice->contract->tenant->name ?? 'Khách thuê' }}</div>
       </div>
 
       <!-- Action Buttons -->
@@ -157,7 +162,7 @@
   <!-- Thông tin chung (4 Cột Thẻ) -->
   <div class="invoice-panel mb-4">
     <div class="invoice-panel-header">
-      <span>Thông tin chung</span>
+      <span class="invoice-section-title"><span class="invoice-section-icon"><i class="bi bi-card-text" aria-hidden="true"></i></span> Thông tin chung</span>
       <span class="text-muted fw-normal small">Hợp đồng: <strong>#{{ $invoice->contract->contract_code ?? '—' }}</strong></span>
     </div>
     <div class="row g-3">
@@ -222,7 +227,7 @@
   <!-- Chi tiết các khoản -->
   <div class="invoice-panel mb-4">
     <div class="invoice-panel-header">
-      <span>Chi tiết các khoản phí</span>
+      <span class="invoice-section-title"><span class="invoice-section-icon"><i class="bi bi-receipt" aria-hidden="true"></i></span> Chi tiết các khoản phí</span>
       <span class="text-muted fw-normal small">{{ count($invoice->items) }} hạng mục</span>
     </div>
 
@@ -252,7 +257,7 @@
     </div>
 
     <!-- Tổng tiền -->
-    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+    <div class="invoice-total-row d-flex justify-content-end mt-4 pt-3 border-top">
       <div style="min-width: 260px;">
         <div class="d-flex justify-content-between text-muted mb-2" style="font-size: 13.5px;">
           <span>Tạm tính:</span>
@@ -275,7 +280,7 @@
   <!-- Lịch sử giao dịch -->
   <div class="invoice-panel">
     <div class="invoice-panel-header">
-      <span>Lịch sử thanh toán & Giao dịch</span>
+      <span class="invoice-section-title"><span class="invoice-section-icon"><i class="bi bi-clock-history" aria-hidden="true"></i></span> Lịch sử thanh toán &amp; giao dịch</span>
       <span class="text-muted fw-normal small">{{ count($invoice->payments) }} giao dịch</span>
     </div>
 
@@ -299,6 +304,9 @@
                 · Mã GD: <code>{{ $payment->transaction_code }}</code>
               @endif
             </div>
+            @if($payment->status === 'success' && $payment->method === 'cash' && $payment->fee_payment_status !== null)
+              <div class="small mt-1">Phí nền tảng: {{ number_format((float) $payment->platform_fee) }} đ · {{ $payment->fee_payment_status !== 'paid' ? 'Cần nộp' : ($payment->fee_payment_source === 'demo' ? 'Đã nộp (mô phỏng)' : 'Đã nộp') }} · <a href="{{ route('owner.platform-fees.index') }}">Xem phí</a></div>
+            @endif
           </div>
         </div>
 
@@ -310,6 +318,7 @@
 
           @if($payment->status === 'pending')
             <div class="d-flex gap-1">
+              @if($payment->method !== 'qr')
               <form action="{{ route('owner.payments.confirm', $payment->id) }}" method="POST" class="d-inline m-0">
                 @csrf
                 @method('PUT')
@@ -317,6 +326,7 @@
                   Xác nhận
                 </button>
               </form>
+              @endif
               <form action="{{ route('owner.payments.reject', $payment->id) }}" method="POST" class="d-inline m-0">
                 @csrf
                 @method('PUT')

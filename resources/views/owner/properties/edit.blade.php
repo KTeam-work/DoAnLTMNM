@@ -447,6 +447,7 @@
                                     Tạm ngưng
                                 </option>
                             </select>
+                            <div class="form-text">Khi tạm ngưng, không thể thêm phòng hoặc nhận khách mới; hợp đồng hiện tại vẫn được quản lý bình thường.</div>
 
                             @error('status')
                                 <div class="invalid-feedback">{{ $message }}</div>

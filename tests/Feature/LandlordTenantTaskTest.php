@@ -31,12 +31,12 @@ class LandlordTenantTaskTest extends TestCase
         return [$owner, $property, $room];
     }
 
-    private function makeContract(User $owner, User $tenant, Room $room): Contract
+    private function makeContract(User $owner, User $tenant, Room $room, string $startDate = '2026-01-01'): Contract
     {
         return Contract::query()->create([
             'contract_code' => 'HD-' . $room->id . '-' . $tenant->id,
             'room_id' => $room->id, 'owner_id' => $owner->id, 'tenant_id' => $tenant->id,
-            'start_date' => '2026-01-01', 'end_date' => '2026-12-31',
+            'start_date' => $startDate, 'end_date' => '2026-12-31',
             'rent' => 3000000, 'deposit' => 3000000, 'payment_cycle' => 'monthly',
             'status' => 'active', 'signed_at' => now(),
         ]);
@@ -51,7 +51,7 @@ class LandlordTenantTaskTest extends TestCase
 
         // Ghi chỉ số cho phòng của owner khác -> 404.
         $this->postJson('/owner/utilities', [
-            'room_id' => $roomB->id, 'month' => '2026-09-01',
+            'room_id' => $roomB->id, 'month' => '2026-09-01', 'reading_date' => '2026-09-01',
             'electricity_new' => 10, 'electricity_price' => 3500,
             'water_new' => 5, 'water_price' => 15000,
         ])->assertNotFound();
@@ -170,15 +170,17 @@ class LandlordTenantTaskTest extends TestCase
     {
         config()->set('app.demo_guest', true);
         [$owner, , $room] = $this->makeOwnerProperty();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $this->makeContract($owner, $tenant, $room, '2026-07-01');
         $this->actingAs($owner);
 
         $this->postJson('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-08-01',
+            'room_id' => $room->id, 'month' => '2026-08-01', 'reading_date' => '2026-08-01',
             'electricity_new' => 50, 'electricity_price' => 3500,
             'water_new' => 5, 'water_price' => 15000,
         ])->assertCreated();
         $this->postJson('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-09-01',
+            'room_id' => $room->id, 'month' => '2026-09-01', 'reading_date' => '2026-09-01',
             'electricity_new' => 60, 'electricity_price' => 3500,
             'water_new' => 6, 'water_price' => 15000,
         ])->assertCreated();
@@ -190,11 +192,17 @@ class LandlordTenantTaskTest extends TestCase
     public function test_utility_validation_errors_return_to_form(): void
     {
         [$owner, , $room] = $this->makeOwnerProperty();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $contract = $this->makeContract($owner, $tenant, $room);
+        $contract->update([
+            'initial_electricity_reading' => 100,
+            'initial_water_reading' => 1,
+        ]);
         $this->actingAs($owner);
 
         // Chỉ số mới < cũ -> quay về form kèm lỗi.
         $this->post('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-09-01',
+            'room_id' => $room->id, 'month' => '2026-02-01', 'reading_date' => '2026-02-01',
             'electricity_old' => 100, 'electricity_new' => 50,
             'electricity_price' => 3500,
             'water_old' => 1, 'water_new' => 2, 'water_price' => 15000,
@@ -206,10 +214,10 @@ class LandlordTenantTaskTest extends TestCase
         config()->set('app.demo_guest', true);
         [$owner] = $this->makeOwnerProperty();
 
-        // Link Tổng quan trên trang owner trỏ đúng /owner/home (không còn 404 /landlord).
+        // Link Tổng quan trỏ đến trang dashboard hiện tại.
         $this->get('/owner/services')
             ->assertSuccessful()
-            ->assertSee('/owner/home', false);
+            ->assertSee(route('landlord.dashboard'), false);
 
         // Guest vào quản lý nhà/phòng không cần login (demo mode).
         $this->get('/owner/properties')->assertSuccessful();

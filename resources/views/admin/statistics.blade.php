@@ -112,9 +112,30 @@
         ]);
     }
     $sortedEvents = $events->sortByDesc('created_at')->values()->take(4);
+    $splitPayments = \App\Models\Payment::where('status', 'success')->whereNotNull('platform_fee');
+    $totalPlatformFees = (clone $splitPayments)->where('fee_payment_status', 'paid')->sum('platform_fee');
+    $pendingPlatformFees = (clone $splitPayments)->where('fee_payment_status', 'pending')->sum('platform_fee');
+    $recentSplitPayments = (clone $splitPayments)->whereNotNull('fee_payment_status')->with('invoice.contract.owner')->latest('paid_at')->limit(10)->get();
 @endphp
 
 <div class="admin-stats-wrapper">
+    <section style="background:#fff;border:1px solid #dce6ed;border-radius:16px;padding:24px;margin-bottom:20px;">
+        <h2 style="font-size:20px;font-weight:700;margin:0 0 8px;">Phí nền tảng từ thanh toán</h2>
+        <p style="color:#5b6b7a;margin-bottom:14px;">Phí đã nhận: <strong>{{ number_format((float) $totalPlatformFees) }} đ</strong> · Phí tiền mặt chủ trọ cần nộp: <strong>{{ number_format((float) $pendingPlatformFees) }} đ</strong></p>
+        <p style="color:#5b6b7a;font-size:13px;">Tổng phí đã ghi nhận có thể bao gồm giao dịch mô phỏng. Phí tiền mặt chỉ được cộng sau khi nộp phí thành công; dữ liệu cũ chưa có trạng thái phí không được tính.</p>
+        <div style="overflow-x:auto;">
+            <table class="table table-sm align-middle">
+                <thead><tr><th>Giao dịch</th><th>Chủ trọ</th><th>Hóa đơn</th><th>Phí nền tảng</th><th>Trạng thái phí</th></tr></thead>
+                <tbody>
+                @forelse($recentSplitPayments as $payment)
+                    <tr><td>{{ $payment->payment_code }}</td><td>{{ $payment->invoice?->contract?->owner?->name ?? '—' }}</td><td>{{ number_format((float) $payment->amount) }} đ</td><td>{{ number_format((float) $payment->platform_fee) }} đ</td><td>{{ $payment->fee_payment_status !== 'paid' ? 'Chờ chủ trọ nộp' : ($payment->fee_payment_source === 'demo' ? 'Đã nộp (mô phỏng)' : ($payment->fee_payment_source === 'sepay' ? 'Đã nộp qua SePay' : 'Đã ghi nhận')) }}</td></tr>
+                @empty
+                    <tr><td colspan="5">Chưa có giao dịch được tính phí.</td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
     <div class="stats-master-card">
 
         {{-- ========================================================

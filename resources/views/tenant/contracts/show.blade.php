@@ -279,6 +279,12 @@
                             {{ $contract->owner->email ?? '—' }}
                         </span>
                     </div>
+                    @if(auth()->check() && auth()->user()->role === 'tenant' && auth()->id() === $contract->tenant_id)
+                        <form action="{{ route('chat.start-contract', $contract) }}" method="POST" class="mt-3" data-no-ajax="true">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary w-100 fw-bold py-2">Nhắn tin cho chủ trọ</button>
+                        </form>
+                    @endif
                 </div>
             </div>
 

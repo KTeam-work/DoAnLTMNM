@@ -15,6 +15,8 @@ class TV3NegativeRulesTest extends TestCase
 
     public function test_tv3_negative_business_rules(): void
     {
+        $this->travelTo(\Carbon\Carbon::parse('2025-12-31 09:00:00'));
+
         $owner = User::factory()->create(['role' => 'owner', 'status' => 'active']);
         $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
         $property = Property::query()->create([
@@ -25,6 +27,12 @@ class TV3NegativeRulesTest extends TestCase
             'property_id' => $property->id, 'name' => 'Phong 101',
             'area' => 25, 'price' => 3000000, 'deposit' => 3000000, 'max_people' => 2,
         ]);
+        \Illuminate\Support\Facades\DB::table('viewing_appointments')->insert([
+            'room_id' => $room->id, 'tenant_id' => $tenant->id,
+            'appointment_date' => '2026-01-01', 'appointment_time' => '09:00:00',
+            'phone' => '0900000000', 'message' => 'Muon thue', 'status' => 'pending',
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
 
         $this->actingAs($owner);
 
@@ -33,6 +41,10 @@ class TV3NegativeRulesTest extends TestCase
             'start_date' => '2026-01-01', 'end_date' => '2026-12-31',
             'rent' => 3000000, 'deposit' => 3000000, 'status' => 'active',
         ])->assertCreated()->json('data');
+        Contract::query()->findOrFail($contract['id'])->update([
+            'initial_electricity_reading' => 100,
+            'initial_water_reading' => 10,
+        ]);
 
         // Phòng đã có HĐ active -> tạo nữa phải 422
         $this->postJson('/owner/contracts', [
@@ -43,20 +55,20 @@ class TV3NegativeRulesTest extends TestCase
 
         // max_people = 2 -> chỉ thêm được 1 người ở cùng
         $this->postJson("/owner/contracts/{$contract['id']}/members", [
-            'name' => 'Nguoi 1', 'identity_card' => 'ID-001',
+            'name' => 'Nguoi 1', 'identity_card' => '012345678901',
         ])->assertCreated();
         $this->postJson("/owner/contracts/{$contract['id']}/members", [
-            'name' => 'Nguoi 2', 'identity_card' => 'ID-002',
+            'name' => 'Nguoi 2', 'identity_card' => '012345678902',
         ])->assertStatus(422);
 
         // Trùng CCCD -> 422
         $this->postJson("/owner/contracts/{$contract['id']}/members", [
-            'name' => 'Nguoi 1 copy', 'identity_card' => 'ID-001',
+            'name' => 'Nguoi 1 copy', 'identity_card' => '012345678901',
         ])->assertStatus(422);
 
         // Chỉ số mới < cũ -> 422
         $this->postJson('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-02-01',
+            'room_id' => $room->id, 'month' => '2026-02-01', 'reading_date' => '2026-02-01',
             'electricity_old' => 100, 'electricity_new' => 50,
             'electricity_price' => 3500,
             'water_old' => 10, 'water_new' => 12, 'water_price' => 15000,
@@ -64,12 +76,12 @@ class TV3NegativeRulesTest extends TestCase
 
         // Trùng room+month -> 422
         $this->postJson('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-03-01',
+            'room_id' => $room->id, 'month' => '2026-02-01', 'reading_date' => '2026-02-01',
             'electricity_new' => 120, 'electricity_price' => 3500,
             'water_new' => 15, 'water_price' => 15000,
         ])->assertCreated();
         $this->postJson('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-03-01',
+            'room_id' => $room->id, 'month' => '2026-02-01', 'reading_date' => '2026-02-01',
             'electricity_new' => 130, 'electricity_price' => 3500,
             'water_new' => 16, 'water_price' => 15000,
         ])->assertStatus(422);
@@ -78,6 +90,36 @@ class TV3NegativeRulesTest extends TestCase
         $this->putJson("/owner/contracts/{$contract['id']}/terminate", [
             'deduction_amount' => 99999999, 'return_date' => '2026-12-31',
         ])->assertStatus(422);
+    }
+
+    public function test_contract_start_date_must_be_today_or_later(): void
+    {
+        $this->travelTo(\Carbon\Carbon::parse('2026-11-27 09:00:00'));
+
+        $owner = User::factory()->create(['role' => 'owner', 'status' => 'active']);
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $property = Property::query()->create([
+            'owner_id' => $owner->id, 'name' => 'Nha tro A', 'type' => 'rooming_house',
+            'address' => '1 Duong A', 'district' => 'Quan 1', 'ward' => 'Phuong 1',
+        ]);
+        $room = Room::query()->create([
+            'property_id' => $property->id, 'name' => 'Phong 101',
+            'area' => 25, 'price' => 3000000, 'deposit' => 3000000, 'max_people' => 2,
+        ]);
+        $this->actingAs($owner)
+            ->get(route('owner.contracts.create'))
+            ->assertOk()
+            ->assertSee('min="2026-11-27"', false);
+
+        $this->postJson(route('owner.contracts.store'), [
+            'room_id' => $room->id,
+            'tenant_id' => $tenant->id,
+            'start_date' => '2026-11-26',
+            'end_date' => '2027-11-26',
+            'rent' => 3000000,
+            'deposit' => 3000000,
+            'status' => 'active',
+        ])->assertUnprocessable()->assertJsonValidationErrors('start_date');
     }
 
     public function test_tv3_web_forms_create_and_update(): void
@@ -92,6 +134,14 @@ class TV3NegativeRulesTest extends TestCase
             'property_id' => $property->id, 'name' => 'Phong 101',
             'area' => 25, 'price' => 3000000, 'deposit' => 3000000, 'max_people' => 2,
         ]);
+        $demoTenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        Contract::query()->create([
+            'contract_code' => 'HD-WEB-DEMO-' . $demoTenant->id, 'room_id' => $room->id,
+            'owner_id' => $owner->id, 'tenant_id' => $demoTenant->id,
+            'start_date' => '2026-08-01', 'end_date' => '2027-08-01',
+            'rent' => 3000000, 'deposit' => 3000000, 'payment_cycle' => 'monthly',
+            'status' => 'active', 'signed_at' => now(),
+        ]);
 
         // DEMO MODE: chưa đăng nhập vẫn Lưu được trên web (dùng owner đầu tiên).
         $this->post('/owner/services', [
@@ -99,10 +149,10 @@ class TV3NegativeRulesTest extends TestCase
         ])->assertRedirect(route('owner.services.index'));
         $this->assertDatabaseHas('services', ['owner_id' => $owner->id, 'name' => 'Dịch vụ demo']);
         $this->post('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-09-01',
+            'room_id' => $room->id, 'month' => '2026-09-01', 'reading_date' => '2026-09-01',
             'electricity_new' => 100, 'electricity_price' => 3500,
             'water_new' => 20, 'water_price' => 15000,
-        ])->assertRedirect(route('owner.utilities.index'));
+        ])->assertRedirect(route('owner.utilities.index', ['all' => 1]));
         $this->assertDatabaseHas('utility_readings', ['room_id' => $room->id]);
 
         // JSON không đăng nhập vẫn 401.
@@ -112,7 +162,7 @@ class TV3NegativeRulesTest extends TestCase
 
         // Login bằng form thật rồi Lưu phải thành công.
         $this->post('/login', ['email' => $owner->email, 'password' => 'password'])
-            ->assertRedirect(route('landlord.home'));
+            ->assertRedirect(route('landlord.dashboard'));
         $this->assertAuthenticatedAs($owner);
 
         // Trang Thêm dịch vụ mở được (trước đây route không tồn tại)
@@ -142,19 +192,29 @@ class TV3NegativeRulesTest extends TestCase
             'property_id' => $property->id, 'name' => 'Phong 101',
             'area' => 25, 'price' => 3000000, 'deposit' => 3000000, 'max_people' => 2,
         ]);
+        $webTenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        Contract::query()->create([
+            'contract_code' => 'HD-WEB-FORM-' . $webTenant->id, 'room_id' => $room->id,
+            'owner_id' => $owner->id, 'tenant_id' => $webTenant->id,
+            'start_date' => '2026-08-01', 'end_date' => '2027-08-01',
+            'rent' => 3000000, 'deposit' => 3000000, 'payment_cycle' => 'monthly',
+            'status' => 'active', 'signed_at' => now(),
+        ]);
         $this->get('/owner/utilities/create')->assertSuccessful()->assertSee('Phong 101');
 
         // Submit form web ghi chỉ số -> redirect về index
         $this->post('/owner/utilities', [
-            'room_id' => $room->id, 'month' => '2026-09-01',
+            'room_id' => $room->id, 'month' => '2026-09-01', 'reading_date' => '2026-09-01',
             'electricity_new' => 100, 'electricity_price' => 3500,
             'water_new' => 20, 'water_price' => 15000,
-        ])->assertRedirect(route('owner.utilities.index'));
+        ])->assertRedirect(route('owner.utilities.index', ['all' => 1]));
         $this->assertDatabaseHas('utility_readings', ['room_id' => $room->id]);
     }
 
     public function test_tv3_web_contract_store_and_members(): void
     {
+        $this->travelTo(\Carbon\Carbon::parse('2025-12-31 09:00:00'));
+
         $owner = User::factory()->create(['role' => 'owner', 'status' => 'active']);
         $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
         $property = Property::query()->create([
@@ -196,17 +256,17 @@ class TV3NegativeRulesTest extends TestCase
 
         // Thêm người ở cùng qua web -> quay về chi tiết.
         $this->post("/owner/contracts/{$contract->id}/members", [
-            'name' => 'Nguoi o cung', 'identity_card' => 'ID-001', 'phone' => '0911111111',
+            'name' => 'Nguoi o cung', 'identity_card' => '012345678901', 'phone' => '0911111111',
         ])->assertRedirect(route('owner.contracts.show', $contract));
-        $this->assertDatabaseHas('contract_members', ['contract_id' => $contract->id, 'identity_card' => 'ID-001']);
+        $this->assertDatabaseHas('contract_members', ['contract_id' => $contract->id, 'identity_card' => '012345678901']);
         $member = \App\Models\ContractMember::query()->where('contract_id', $contract->id)->first();
 
         // Vượt quá số người -> quay về kèm lỗi (không 500).
         $this->post("/owner/contracts/{$contract->id}/members", [
-            'name' => 'Nguoi 2', 'identity_card' => 'ID-002',
+            'name' => 'Nguoi 2', 'identity_card' => '012345678902',
         ]);
         $this->post("/owner/contracts/{$contract->id}/members", [
-            'name' => 'Nguoi 3', 'identity_card' => 'ID-003',
+            'name' => 'Nguoi 3', 'identity_card' => '012345678903',
         ])->assertSessionHasErrors('member');
 
         // Xóa người ở cùng qua web.
@@ -223,8 +283,8 @@ class TV3NegativeRulesTest extends TestCase
             ->assertSee('Tổng quan');
         $this->post("/owner/contracts/{$contract->id}/members", [
             'contract_id' => $contract->id,
-            'name' => 'Nguoi tu trang them', 'identity_card' => 'ID-999',
-        ])->assertRedirect(route('owner.contracts.show', $contract));
-        $this->assertDatabaseHas('contract_members', ['contract_id' => $contract->id, 'identity_card' => 'ID-999']);
+            'name' => 'Nguoi tu trang them', 'identity_card' => '012345678999',
+        ])->assertRedirect('/owner/tenants/create');
+        $this->assertDatabaseHas('contract_members', ['contract_id' => $contract->id, 'identity_card' => '012345678999']);
     }
 }

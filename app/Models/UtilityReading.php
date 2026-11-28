@@ -15,6 +15,7 @@ class UtilityReading extends Model
             'month' => 'date',
             'period_start' => 'date',
             'period_end' => 'date',
+            'reading_date_confirmed' => 'boolean',
             'electricity_old' => 'decimal:2',
             'electricity_new' => 'decimal:2',
             'electricity_price' => 'decimal:2',

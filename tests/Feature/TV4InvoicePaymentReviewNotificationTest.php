@@ -15,6 +15,99 @@ class TV4InvoicePaymentReviewNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_sepay_webhook_processes_cash_fee_securely_and_idempotently(): void
+    {
+        [$owner, , $room] = $this->makeOwner();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $other = User::factory()->create(['role' => 'owner', 'status' => 'active']);
+        $contract = $this->makeContract($owner, $tenant, $room);
+        $invoice = Invoice::create(['invoice_code' => 'INV-FEE-WEBHOOK', 'contract_id' => $contract->id, 'billing_month' => '2026-09-01', 'issue_date' => '2026-09-01', 'due_date' => '2026-09-05', 'subtotal' => 4000000, 'total' => 4000000, 'status' => 'paid']);
+        $payment = \App\Models\Payment::create(['payment_code' => 'PAY-FEE-WEBHOOK', 'invoice_id' => $invoice->id, 'payer_id' => $tenant->id, 'amount' => 4000000, 'method' => 'cash', 'status' => 'success', 'paid_at' => now()]);
+        $payload = ['id' => 'SEPAY-FEE-001', 'content' => 'FEE'.$payment->id, 'accountNumber' => '123456', 'transferType' => 'in', 'transferAmount' => 200000];
+        config(['services.sepay.webhook_token' => null, 'services.sepay.bank_account' => '123456']);
+        $this->postJson('/api/sepay/webhook', $payload)->assertUnauthorized();
+        config(['services.sepay.webhook_token' => 'test-key']);
+        $this->postJson('/api/sepay/webhook', $payload)->assertUnauthorized();
+        $headers = ['Authorization' => 'Apikey test-key'];
+        $this->withHeaders($headers)->postJson('/api/sepay/webhook', array_merge($payload, ['accountNumber' => '999']))->assertUnprocessable();
+        $this->withHeaders($headers)->postJson('/api/sepay/webhook', array_merge($payload, ['transferAmount' => 199999]))->assertUnprocessable();
+        $this->assertSame('pending', $payment->fresh()->fee_payment_status);
+        $this->withHeaders($headers)->postJson('/api/sepay/webhook', $payload)->assertOk();
+        $this->assertSame('paid', $payment->fresh()->fee_payment_status);
+        $this->assertSame('sepay', $payment->fresh()->fee_payment_source);
+        $this->assertSame('SEPAY-FEE-001', $payment->fresh()->fee_transaction_code);
+        $this->withHeaders($headers)->postJson('/api/sepay/webhook', $payload)->assertOk();
+        $this->assertDatabaseCount('sepay_receipts', 1);
+        $this->assertSame(1, \App\Models\Notification::where('user_id', $owner->id)->where('title', 'Đã nộp phí nền tảng')->count());
+        $qrPayment = \App\Models\Payment::create(['payment_code' => 'TROOITEST123', 'invoice_id' => $invoice->id, 'payer_id' => $tenant->id, 'amount' => 200000, 'method' => 'qr', 'status' => 'pending']);
+        $this->withHeaders($headers)->postJson('/api/sepay/webhook', array_merge($payload, ['content' => $qrPayment->payment_code]))->assertOk();
+        $this->assertSame('pending', $qrPayment->fresh()->status);
+        $this->withHeaders($headers)->postJson('/api/sepay/webhook', array_merge($payload, ['id' => 'SEPAY-FEE-002']))->assertStatus(409);
+        $this->actingAs($other)->getJson(route('owner.platform-fees.status', $payment))->assertNotFound();
+        $this->actingAs($owner)->getJson(route('owner.platform-fees.status', $payment))->assertOk()->assertJsonPath('status', 'paid');
+    }
+
+    public function test_qr_payment_counts_fee_only_after_success_and_direct_transfer_is_rejected(): void
+    {
+        [$owner, , $room] = $this->makeOwner();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $contract = $this->makeContract($owner, $tenant, $room);
+        $invoice = Invoice::create(['invoice_code' => 'INV-QR-FEE', 'contract_id' => $contract->id, 'billing_month' => '2026-09-01', 'issue_date' => '2026-09-01', 'due_date' => '2026-09-05', 'subtotal' => 4000000, 'total' => 4000000, 'status' => 'unpaid']);
+        $this->actingAs($tenant)->postJson(route('tenant.payment.store'), ['invoice_id' => $invoice->id, 'method' => 'bank_transfer'])->assertUnprocessable();
+        $this->postJson(route('tenant.invoices.pay_qr', $invoice))->assertOk();
+        $payment = $invoice->payments()->firstOrFail();
+        $this->assertNull($payment->fee_payment_status);
+        $this->actingAs($owner)->putJson(route('owner.payments.confirm', $payment))->assertUnprocessable();
+        $this->actingAs($tenant)->postJson(route('tenant.invoices.simulate_sepay', $invoice))->assertOk();
+        $this->assertSame('paid', $payment->fresh()->fee_payment_status);
+        $this->assertSame('200000.00', $payment->fresh()->platform_fee);
+        $this->actingAs($admin)->get(route('admin.statistics'))->assertOk()->assertSee('Phí đã nhận: <strong>200,000 đ', false);
+    }
+
+    public function test_successful_payment_records_five_percent_split_once(): void
+    {
+        [$owner, , $room] = $this->makeOwner();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $contract = $this->makeContract($owner, $tenant, $room);
+        $invoice = Invoice::create(['invoice_code' => 'INV-SPLIT', 'contract_id' => $contract->id, 'billing_month' => '2026-09-01', 'issue_date' => '2026-09-01', 'due_date' => '2026-09-05', 'subtotal' => 4000000, 'total' => 4000000, 'status' => 'unpaid']);
+        $payment = \App\Models\Payment::create(['payment_code' => 'PAY-SPLIT', 'invoice_id' => $invoice->id, 'payer_id' => $tenant->id, 'amount' => 4000000, 'method' => 'cash', 'status' => 'pending']);
+        $this->assertNull($payment->platform_fee);
+        $this->actingAs($owner)->put("/owner/payments/{$payment->id}/confirm")->assertRedirect();
+        $payment->refresh();
+        $this->assertSame('200000.00', $payment->platform_fee);
+        $this->assertSame('3800000.00', $payment->owner_amount);
+        $this->assertSame('pending', $payment->fee_payment_status);
+        $this->assertDatabaseHas('notifications', ['user_id' => $owner->id, 'reference_type' => 'platform_fee', 'reference_id' => $payment->id, 'title' => 'Phí nền tảng cần nộp']);
+        $this->get(route('owner.notifications.index'))->assertOk()->assertSee('Phí nền tảng cần nộp')->assertSee(route('owner.platform-fees.index'), false);
+        $this->put("/owner/payments/{$payment->id}/confirm")->assertSessionHasErrors('payment');
+        $this->assertSame('200000.00', $payment->fresh()->platform_fee);
+        $this->get(route('owner.invoices.show', $invoice))->assertOk()->assertDontSee('Chờ chuyển');
+        $this->get(route('owner.platform-fees.index'))->assertOk()->assertSee('200.000')->assertSee('Cần nộp');
+        $other = User::factory()->create(['role' => 'owner', 'status' => 'active']);
+        $this->actingAs($other)->post(route('owner.platform-fees.simulate', $payment))->assertNotFound();
+        $this->actingAs($admin)->get(route('admin.statistics'))->assertOk()->assertSee('Phí đã nhận: <strong>0 đ', false)->assertSee('200,000')->assertSee('Chờ chủ trọ nộp');
+        $this->actingAs($owner)->post(route('owner.platform-fees.simulate', $payment), ['amount' => 1])->assertRedirect();
+        $this->assertSame('paid', $payment->fresh()->fee_payment_status);
+        $this->post(route('owner.platform-fees.simulate', $payment))->assertRedirect();
+        $this->assertSame(1, \App\Models\Notification::where('user_id', $owner->id)->where('reference_type', 'platform_fee')->where('title', 'Đã nộp phí nền tảng')->count());
+        $this->actingAs($admin)->get(route('admin.statistics'))->assertOk()->assertSee('Phí đã nhận: <strong>200,000 đ', false)->assertSee('PAY-SPLIT')->assertSee('mô phỏng');
+    }
+
+    public function test_owner_receives_fee_notification_when_recording_cash_directly(): void
+    {
+        [$owner, , $room] = $this->makeOwner();
+        $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
+        $contract = $this->makeContract($owner, $tenant, $room);
+        $invoice = Invoice::create(['invoice_code' => 'INV-CASH-NOTICE', 'contract_id' => $contract->id, 'billing_month' => '2026-09-01', 'issue_date' => '2026-09-01', 'due_date' => '2026-09-05', 'subtotal' => 4000000, 'total' => 4000000, 'status' => 'unpaid']);
+        $this->actingAs($owner)->post(route('owner.invoices.record-cash', $invoice))->assertRedirect();
+        $payment = $invoice->payments()->firstOrFail();
+        $this->assertDatabaseHas('notifications', ['user_id' => $owner->id, 'reference_type' => 'platform_fee', 'reference_id' => $payment->id, 'title' => 'Phí nền tảng cần nộp']);
+        $this->post(route('owner.invoices.record-cash', $invoice))->assertRedirect();
+        $this->assertSame(1, \App\Models\Notification::where('user_id', $owner->id)->where('reference_type', 'platform_fee')->count());
+    }
+
     private function makeOwner(string $suffix = 'A'): array
     {
         $owner = User::factory()->create(['role' => 'owner', 'status' => 'active']);
@@ -55,9 +148,14 @@ class TV4InvoicePaymentReviewNotificationTest extends TestCase
     {
         [$owner, , $room] = $this->makeOwner();
         $tenant = User::factory()->create(['role' => 'tenant', 'status' => 'active']);
-        $this->makeContract($owner, $tenant, $room);
+        $contract = $this->makeContract($owner, $tenant, $room);
         $this->makeReading($room);
-        $owner->services()->create(['name' => 'Internet', 'unit' => 'tháng', 'price' => 100000, 'status' => 'active']);
+        $service = $owner->services()->create(['name' => 'Internet', 'unit' => 'tháng', 'price' => 100000, 'status' => 'active']);
+        $contract->services()->attach($service->id, [
+            'quantity' => 1,
+            'unit_price' => 100000,
+            'status' => 'active',
+        ]);
 
         $this->actingAs($owner);
 
@@ -115,7 +213,7 @@ class TV4InvoicePaymentReviewNotificationTest extends TestCase
 
         // Tenant tạo thanh toán: số tiền lấy từ hóa đơn.
         $this->actingAs($tenant)->post('/tenant/payment', [
-            'invoice_id' => $invoiceId, 'method' => 'bank_transfer', 'transaction_code' => 'MB123',
+            'invoice_id' => $invoiceId, 'method' => 'cash',
             'amount' => 1, // số tiền fake từ form phải bị bỏ qua
         ])->assertRedirect(route('tenant.invoices.show', $invoiceId));
         $payment = \App\Models\Payment::query()->first();
@@ -183,8 +281,7 @@ class TV4InvoicePaymentReviewNotificationTest extends TestCase
         $this->actingAs($owner);
         $invoiceId = $this->postJson('/owner/invoices', ['month' => '2026-09-01'])->json('data.0.id');
         $total = (float) Invoice::find($invoiceId)->total;
-        $this->actingAs($tenant)->post('/tenant/payment', ['invoice_id' => $invoiceId, 'method' => 'online']);
-        $payment = \App\Models\Payment::query()->first();
+        $payment = \App\Models\Payment::create(['payment_code' => 'PAY-LEGACY', 'invoice_id' => $invoiceId, 'payer_id' => $tenant->id, 'amount' => $total, 'method' => 'online', 'status' => 'pending']);
 
         // Callback thành công lần 1 -> paid.
         $this->postJson('/tenant/payment/callback', [

@@ -57,3 +57,15 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Chat real-time giữa khách thuê và chủ trọ
+
+Sau khi cập nhật mã nguồn, chạy `composer install`, `npm install`, `npm run build` và `php artisan migrate`. Trong `.env`, đặt `BROADCAST_CONNECTION=reverb`, tạo giá trị riêng cho `REVERB_APP_ID`, `REVERB_APP_KEY`, `REVERB_APP_SECRET`, và cấu hình `REVERB_HOST`, `REVERB_PORT`, `REVERB_SCHEME` theo địa chỉ mà trình duyệt có thể truy cập. Không dùng khóa mẫu khi triển khai.
+
+Chạy ứng dụng Laravel như bình thường, đồng thời chạy `php artisan reverb:start` ở một terminal khác. Để demo trên cùng máy, địa chỉ `127.0.0.1:8080` là đủ. Đăng nhập khách thuê và chủ trọ trong hai trình duyệt riêng, mở một phòng đang đăng công khai rồi bấm **Nhắn tin cho chủ trọ**. Tin trong trang chat được nhận ngay qua WebSocket; số tin chưa đọc trên thanh điều hướng cập nhật khi tải lại trang.
+
+## Nộp phí tiền mặt qua SePay
+
+Cấu hình `SEPAY_BANK_NAME`, `SEPAY_BANK_ACCOUNT`, `SEPAY_ACCOUNT_NAME` và đặt `SEPAY_WEBHOOK_TOKEN` thành một khóa bí mật riêng trong `.env`. Trong SePay, tạo webhook cho tài khoản nhận tiền, dùng xác thực API Key trùng với `SEPAY_WEBHOOK_TOKEN`, và trỏ tới địa chỉ HTTPS công khai của ứng dụng theo dạng `https://ten-mien-cua-ban/api/sepay/webhook`. Bảo đảm webhook nhận giao dịch tiền vào có nội dung `FEE...`; không giới hạn webhook chỉ nhận các mã hóa đơn khác. Địa chỉ `localhost` chỉ chạy trên máy cá nhân nên SePay không thể tự gọi tới; cần triển khai hoặc dùng đường hầm HTTPS phù hợp.
+
+Chủ trọ mở Tài chính → Phí nền tảng → Nộp phí, chuyển đúng số tiền và nội dung QR. Webhook hợp lệ cập nhật trạng thái; trang tự kiểm tra trong khi mở mã QR. Thử bằng SePay Test Mode khi có thể. Nút giả lập nội bộ chỉ xuất hiện ở môi trường local/testing và được đánh dấu là mô phỏng, không chứng minh có tiền thật. Không đưa webhook token vào mã nguồn hoặc chia sẻ công khai.

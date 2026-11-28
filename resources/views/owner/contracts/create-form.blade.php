@@ -114,7 +114,7 @@
                         <select name="room_id" id="roomSelect" class="form-select" required>
                             <option value="">Chọn phòng trống</option>
                             @foreach($rooms as $room)
-                                <option value="{{ $room->id }}" data-price="{{ $room->price }}" data-deposit="{{ $room->deposit }}" @selected((string) old('room_id', request('room_id')) === (string) $room->id)>{{ $room->name }} — {{ $room->property->name }}</option>
+                                <option value="{{ $room->id }}" data-property-id="{{ $room->property_id }}" data-price="{{ $room->price }}" data-deposit="{{ $room->deposit }}" @selected((string) old('room_id', request('room_id')) === (string) $room->id)>{{ $room->name }} — {{ $room->property->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -202,7 +202,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                        <input type="date" name="start_date" id="startDateInput" value="{{ old('start_date') }}" class="form-control" required>
+                        <input type="date" name="start_date" id="startDateInput" value="{{ old('start_date', now()->toDateString()) }}" min="{{ now()->toDateString() }}" class="form-control" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
@@ -231,9 +231,18 @@
                     </div>
                     <div class="col-12">
                         <label class="form-label">Dịch vụ áp dụng cho hợp đồng</label>
-                        <div class="form-text mb-2">Chỉ hiển thị dịch vụ đang hoạt động của bạn. Điện, nước sẽ được tính theo chỉ số hàng tháng.</div>
+                        <div class="form-text mb-2">Chọn phòng để xem các dịch vụ đang hoạt động tại nhà trọ đó. Điện, nước sẽ được tính theo chỉ số hàng tháng.</div>
+                        @php
+                            $hasSelectedPropertyServices = $selectedPropertyId && $services->contains(
+                                fn ($service) => (int) $service->property_id === (int) $selectedPropertyId
+                            );
+                        @endphp
+                        <div id="contractServiceEmptyState" class="alert alert-light border mb-2 {{ $hasSelectedPropertyServices ? 'd-none' : '' }}">
+                            {{ $selectedPropertyId ? 'Nhà trọ này chưa có dịch vụ nào đang hoạt động.' : 'Chọn phòng để xem dịch vụ áp dụng tại nhà trọ.' }}
+                        </div>
                         @forelse($services as $service)
                             @php
+                                $isApplicable = $selectedPropertyId && (int) $service->property_id === (int) $selectedPropertyId;
                                 $unitLower = mb_strtolower(trim($service->unit));
                                 $nameLower = mb_strtolower(trim($service->name));
                                 // Chỉ dịch vụ gửi xe / phương tiện mới cần tăng số lượng chiếc
@@ -242,11 +251,11 @@
                                     || str_contains($nameLower, 'gửi xe') 
                                     || str_contains($nameLower, 'đỗ xe');
                             @endphp
-                            <div class="border rounded-3 p-3 mb-2 bg-light">
+                            <div class="contract-service-option border rounded-3 p-3 mb-2 bg-light {{ $isApplicable ? '' : 'd-none' }}" data-property-id="{{ $service->property_id }}">
                                 <div class="row align-items-center g-2">
                                     <div class="{{ $needsQuantity ? 'col-md-7' : 'col-12' }}">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="service_ids[]" value="{{ $service->id }}" id="service-{{ $service->id }}" @checked(in_array((string) $service->id, array_map('strval', old('service_ids', [])), true))>
+                                            <input class="form-check-input" type="checkbox" name="service_ids[]" value="{{ $service->id }}" id="service-{{ $service->id }}" @disabled(!$isApplicable) @checked(in_array((string) $service->id, array_map('strval', old('service_ids', [])), true))>
                                             <label class="form-check-label fw-semibold" for="service-{{ $service->id }}">
                                                 {{ $service->name }} <span class="text-muted fw-normal">— {{ number_format((float) $service->price) }} đ/{{ $service->unit }}</span>
                                             </label>
@@ -256,12 +265,12 @@
                                         <div class="col-md-5">
                                             <div class="input-group input-group-sm">
                                                 <span class="input-group-text">Số lượng</span>
-                                                <input type="number" name="service_quantities[{{ $service->id }}]" min="1" step="1" class="form-control text-center" value="{{ max(1, (int) old('service_quantities.' . $service->id, 1)) }}" aria-label="Số lượng {{ $service->name }}">
+                                                <input type="number" name="service_quantities[{{ $service->id }}]" min="1" step="1" class="form-control text-center" value="{{ max(1, (int) old('service_quantities.' . $service->id, 1)) }}" aria-label="Số lượng {{ $service->name }}" @disabled(!$isApplicable)>
                                                 <span class="input-group-text">{{ $service->unit }}</span>
                                             </div>
                                         </div>
                                     @else
-                                        <input type="hidden" name="service_quantities[{{ $service->id }}]" value="1">
+                                        <input type="hidden" name="service_quantities[{{ $service->id }}]" value="1" @disabled(!$isApplicable)>
                                     @endif
                                 </div>
                             </div>
@@ -288,6 +297,8 @@
 
             // Giá phòng tự động điền khi chọn phòng
             var roomSelect = document.getElementById('roomSelect');
+            var serviceOptions = document.querySelectorAll('.contract-service-option');
+            var serviceEmptyState = document.getElementById('contractServiceEmptyState');
             var rentInput = document.getElementById('rentInput');
             var depositInput = document.getElementById('depositInput');
             var priceBox = document.getElementById('roomPriceBox');
@@ -316,6 +327,30 @@
                 if (!depositInput.value) depositInput.value = deposit;
                 priceBox.textContent = 'Giá phòng: ' + fmt(price) + ' đ/tháng · Cọc gợi ý: ' + fmt(deposit) + ' đ';
                 priceBox.classList.remove('d-none');
+            }
+
+            function updateServices() {
+                if (!roomSelect) return;
+                var selectedOption = roomSelect.options[roomSelect.selectedIndex];
+                var propertyId = selectedOption ? selectedOption.dataset.propertyId : '';
+                var visibleCount = 0;
+
+                serviceOptions.forEach(function (serviceOption) {
+                    var matches = Boolean(propertyId) && serviceOption.dataset.propertyId === propertyId;
+                    serviceOption.classList.toggle('d-none', !matches);
+                    serviceOption.querySelectorAll('input').forEach(function (input) {
+                        if (!matches && input.type === 'checkbox') input.checked = false;
+                        input.disabled = !matches;
+                    });
+                    if (matches) visibleCount++;
+                });
+
+                if (serviceEmptyState) {
+                    serviceEmptyState.textContent = propertyId
+                        ? 'Nhà trọ này chưa có dịch vụ nào đang hoạt động.'
+                        : 'Chọn phòng để xem dịch vụ áp dụng tại nhà trọ.';
+                    serviceEmptyState.classList.toggle('d-none', visibleCount > 0);
+                }
             }
 
             // Tự động tải & cập nhật danh sách người thuê theo phòng đã chọn
@@ -398,15 +433,20 @@
                 roomSelect.addEventListener('change', function () {
                     updatePrice();
                     updateTenantList();
+                    updateServices();
                 });
                 updatePrice();
                 updateTenantList();
+                updateServices();
             }
 
             // Tự động tính Ngày kết thúc là 1 năm sau Ngày bắt đầu
             var startDateInput = document.getElementById('startDateInput');
             var endDateInput = document.getElementById('endDateInput');
             if (startDateInput && endDateInput) {
+                if (startDateInput.value < startDateInput.min) {
+                    startDateInput.value = startDateInput.min;
+                }
                 startDateInput.addEventListener('change', function () {
                     if (!this.value) return;
                     endDateInput.min = this.value;

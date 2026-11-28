@@ -66,12 +66,12 @@ class PaymentController extends Controller
 
         abort_unless((int) $invoice->contract?->owner_id === (int) $owner->id, 403);
 
-        if ($invoice->status === 'paid') {
-            return back()->with('error', 'Hóa đơn này đã được thanh toán trước đó.');
-        }
-
-        DB::transaction(function () use ($invoice) {
-            Payment::create([
+        $recorded = DB::transaction(function () use ($invoice) {
+            $invoice = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+            if (in_array($invoice->status, ['paid', 'cancelled'], true) || $invoice->payments()->whereIn('status', ['pending', 'success'])->exists()) {
+                return false;
+            }
+            $payment = Payment::create([
                 'payment_code' => 'PAY-' . strtoupper(Str::random(8)),
                 'invoice_id' => $invoice->id,
                 'payer_id' => $invoice->contract->tenant_id,
@@ -82,6 +82,7 @@ class PaymentController extends Controller
             ]);
 
             $invoice->update(['status' => 'paid']);
+            $this->notifyCashPlatformFee($payment, $invoice);
 
             Notification::notify(
                 $invoice->contract->tenant_id,
@@ -91,7 +92,10 @@ class PaymentController extends Controller
                 'invoice',
                 $invoice->id
             );
+            return true;
         });
+
+        if (! $recorded) return back()->with('error', 'Hóa đơn đã thanh toán, đã hủy hoặc có giao dịch đang chờ xử lý.');
 
         return back()->with('success', 'Đã ghi nhận thanh toán tiền mặt thành công cho hóa đơn #' . $invoice->invoice_code);
     }
@@ -121,6 +125,10 @@ class PaymentController extends Controller
             }
             abort(422, $message);
         }
+        if ($status === 'success' && $payment->method === 'qr') {
+            if ($request->expectsJson()) abort(422, 'Giao dịch QR chỉ được xác nhận qua SePay.');
+            return back()->withErrors(['payment' => 'Giao dịch QR chỉ được xác nhận qua SePay.']);
+        }
 
         DB::transaction(function () use ($payment, $status) {
             $payment = Payment::query()->lockForUpdate()->findOrFail($payment->id);
@@ -130,6 +138,9 @@ class PaymentController extends Controller
             $payment->update(['status' => $status, 'paid_at' => $status === 'success' ? now() : null]);
             if ($status === 'success') {
                 $payment->invoice->update(['status' => 'paid']);
+                if ($payment->method === 'cash') {
+                    $this->notifyCashPlatformFee($payment, $payment->invoice);
+                }
                 Notification::notify(
                     $payment->invoice->contract->tenant_id,
                     'Thanh toán được xác nhận',
@@ -157,6 +168,20 @@ class PaymentController extends Controller
         }
 
         return response()->json(['message' => $message, 'data' => $payment->fresh()]);
+    }
+
+    private function notifyCashPlatformFee(Payment $payment, Invoice $invoice): void
+    {
+        if ($payment->fee_payment_status !== 'pending') return;
+
+        Notification::notify(
+            $invoice->contract->owner_id,
+            'Phí nền tảng cần nộp',
+            'Hóa đơn ' . $invoice->invoice_code . ' đã được ghi nhận trả tiền mặt. Phí nền tảng cần nộp: ' . number_format((float) $payment->platform_fee, 0, ',', '.') . ' đ.',
+            'payment',
+            'platform_fee',
+            $payment->id
+        );
     }
 
     private function actingOwner(Request $request): User

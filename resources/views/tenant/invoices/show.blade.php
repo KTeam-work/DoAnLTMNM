@@ -198,7 +198,7 @@
                 </li>
                 <li class="nav-item flex-fill text-center" role="presentation">
                   <button class="nav-link w-100 fw-bold py-2" id="pay-confirm-tab" data-bs-toggle="pill" data-bs-target="#tab-method-confirm" type="button" role="tab" aria-controls="tab-method-confirm" aria-selected="false" style="font-size: 12px;">
-                    Thanh toán bằng xác nhận
+                    Trả tiền mặt
                   </button>
                 </li>
               </ul>

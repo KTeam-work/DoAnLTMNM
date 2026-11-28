@@ -5,6 +5,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv2/rooms/index.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv2/rooms/compare.css') }}">
 @endpush
 
 @section('content')
@@ -257,6 +258,8 @@
 </section>
 
 <div class="page-wrap">
+    @if(session('compare_message'))<div class="alert alert-success" role="status">{{ session('compare_message') }} <a href="{{ route('rooms.compare') }}" data-no-ajax="true">Xem so sánh</a></div>@endif
+    @if(session('compare_error'))<div class="alert alert-warning" role="alert">{{ session('compare_error') }} <a href="{{ route('rooms.compare') }}" data-no-ajax="true">Xem danh sách</a></div>@endif
     <div class="page-header">
         <div>
             <h2 class="page-title">Danh sách phòng</h2>
@@ -266,9 +269,7 @@
             </div>
         </div>
 
-        <a href="{{ url('/tenant') }}" class="section-link">
-            ← Về trang chủ
-        </a>
+        <a href="{{ route('rooms.compare') }}" class="compare-open" data-no-ajax="true">So sánh phòng <span>{{ count(session('compare_rooms', [])) }}/3</span></a>
     </div>
 
     <div id="room-results"

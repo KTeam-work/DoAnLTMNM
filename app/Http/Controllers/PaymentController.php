@@ -65,8 +65,8 @@ class PaymentController extends Controller
         }
 
         //kiểm tra mã giao dịch SePay (ID / referenceCode) để chống webhook lặp
-        $sepayId = (string) ($request->input('id') ?? $request->input('referenceCode') ?? '');
-        if ($sepayId === '') {
+        $sepayId = trim((string) ($request->input('id') ?? $request->input('referenceCode') ?? ''));
+        if ($sepayId === '' || strlen($sepayId) > 100) {
             Log::warning('SePay Webhook: Missing SePay transaction ID', $request->all());
             return response()->json([
                 'success' => false,
@@ -76,8 +76,7 @@ class PaymentController extends Controller
 
         //kiểm tra xem ID giao dịch SePay này đã được áp dụng cho thanh toán nào chưa
         $alreadyProcessed = Payment::query()
-            ->where('transaction_code', $sepayId)
-            ->where('status', 'success')
+            ->where(fn ($q) => $q->where(fn ($q) => $q->where('transaction_code', $sepayId)->where('status', 'success'))->orWhere('fee_transaction_code', $sepayId))
             ->first();
 
         if ($alreadyProcessed) {
@@ -94,6 +93,13 @@ class PaymentController extends Controller
 
         //trích xuất chính xác payment_code từ content / description
         $content = (string) ($request->input('content') ?? $request->input('description') ?? '');
+        if (preg_match('/(?<![A-Z0-9])FEE([0-9]{1,18})(?![A-Z0-9])/i', $content, $feeMatch)) {
+            $isDemo = $request->attributes->get('local_fee_demo') === true && app()->environment(['local', 'testing']);
+            if (empty($configuredToken) && ! $isDemo) {
+                return response()->json(['success' => false, 'message' => 'Webhook token required for platform fee'], 401);
+            }
+            return $this->processPlatformFee($request, (int) $feeMatch[1], $sepayId, $isDemo);
+        }
         $paymentCode = $this->extractPaymentCode($content);
 
         if (!$paymentCode) {
@@ -135,6 +141,10 @@ class PaymentController extends Controller
                 ], 404);
             }
 
+            if ($payment->method !== 'qr') {
+                return response()->json(['success' => false, 'message' => 'Payment is not a QR payment'], 422);
+            }
+
 
             // nếu payment đã thành công trước đó (idempotent)
             if ($payment->status === 'success') {
@@ -169,6 +179,9 @@ class PaymentController extends Controller
                     'message' => "Insufficient amount. Expected: {$expectedAmount}, Received: {$paidAmount}"
                 ], 422);
             }
+
+            $claimed = DB::table('sepay_receipts')->insertOrIgnore(['transaction_code' => $sepayId, 'payment_id' => $payment->id, 'purpose' => 'invoice', 'created_at' => now(), 'updated_at' => now()]);
+            if (! $claimed) return response()->json(['success' => true, 'message' => 'Transaction already processed'], 200);
 
 
             //thời gian thanh toán
@@ -243,6 +256,44 @@ class PaymentController extends Controller
                 'payment_code' => $paymentCode,
                 'status' => 'success'
             ], 200);
+        });
+    }
+
+    private function processPlatformFee(Request $request, int $paymentId, string $sepayId, bool $isDemo)
+    {
+        if (! $isDemo) {
+            $configuredAccount = trim((string) config('services.sepay.bank_account'));
+            $receivedAccount = trim((string) $request->input('accountNumber', ''));
+            if ($configuredAccount === '' || $receivedAccount === '' || ! hash_equals($configuredAccount, $receivedAccount)) {
+                return response()->json(['success' => false, 'message' => 'Account number mismatch'], 422);
+            }
+        }
+        $amount = $request->input('transferAmount');
+        if (! is_numeric($amount) || ! is_finite((float) $amount) || (float) $amount <= 0) {
+            return response()->json(['success' => false, 'message' => 'Invalid transferAmount'], 422);
+        }
+        return DB::transaction(function () use ($request, $paymentId, $sepayId, $isDemo, $amount) {
+            $payment = Payment::query()->with('invoice.contract')->lockForUpdate()->find($paymentId);
+            if (! $payment || $payment->status !== 'success' || $payment->method !== 'cash' || $payment->platform_fee === null) {
+                return response()->json(['success' => false, 'message' => 'Platform fee not found'], 404);
+            }
+            if ($payment->fee_payment_status === 'paid') {
+                Log::warning('SePay: additional transfer for paid platform fee', ['payment_id' => $payment->id, 'sepay_id' => $sepayId]);
+                return response()->json(['success' => false, 'message' => 'Platform fee already paid; additional transfer requires review'], 409);
+            }
+            if ($payment->fee_payment_status !== 'pending') {
+                return response()->json(['success' => false, 'message' => 'Platform fee unavailable'], 422);
+            }
+            if ((float) $amount < (float) $payment->platform_fee) {
+                return response()->json(['success' => false, 'message' => 'Insufficient amount'], 422);
+            }
+            $claimed = DB::table('sepay_receipts')->insertOrIgnore(['transaction_code' => $sepayId, 'payment_id' => $payment->id, 'purpose' => 'platform_fee', 'created_at' => now(), 'updated_at' => now()]);
+            if (! $claimed) return response()->json(['success' => true, 'message' => 'Transaction already processed'], 200);
+            $payment->update(['fee_payment_status' => 'paid', 'fee_paid_at' => now(), 'fee_transaction_code' => $sepayId, 'fee_payment_source' => $isDemo ? 'demo' : 'sepay']);
+            if ($payment->invoice?->contract?->owner_id) {
+                Notification::notify($payment->invoice->contract->owner_id, 'Đã nộp phí nền tảng', 'Đã ghi nhận phí ' . number_format((float) $payment->platform_fee, 0, ',', '.') . ' đ cho giao dịch ' . $payment->payment_code . ($isDemo ? ' (mô phỏng).' : ' qua SePay.'), 'payment', 'platform_fee', $payment->id);
+            }
+            return response()->json(['success' => true, 'message' => 'Platform fee processed', 'status' => 'paid'], 200);
         });
     }
 

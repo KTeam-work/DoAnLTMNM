@@ -45,7 +45,7 @@ class OwnerRoomController extends Controller
         $properties = Property::query()
             ->where('owner_id', $owner->id)
             ->orderBy('name')
-            ->get(['id', 'name', 'district']);
+            ->get(['id', 'name', 'district', 'status']);
 
         $amenityProperties = DB::table('property_amenities')->join('properties', 'properties.id', '=', 'property_amenities.property_id')
             ->where('properties.owner_id', $owner->id)->where('property_amenities.status', 'active')
@@ -380,7 +380,9 @@ class OwnerRoomController extends Controller
                 ->with('error', 'Không thể xóa phòng đang có yêu cầu sửa chữa chưa hoàn thành.');
         }
 
+        $panoramaPath = $room->panorama_path;
         $room->delete();
+        if ($panoramaPath) \Illuminate\Support\Facades\Storage::disk('public')->delete($panoramaPath);
 
         return redirect()
             ->route('owner.rooms.index')

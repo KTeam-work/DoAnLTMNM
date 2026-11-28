@@ -731,6 +731,10 @@
 .showcase-summary-facts strong { color: #163b50; font-size: .9rem; }
 .showcase-appointment { display: block; padding: 14px; border-radius: 12px; background: #0c3452; color: #fff; font-size: .9rem; font-weight: 700; text-align: center; text-decoration: none; }
 .showcase-appointment:hover { background: #165a6b; color: #fff; }
+.showcase-chat-form { margin: 10px 0 0; }
+.showcase-chat { display: block; width: 100%; margin-top: 10px; padding: 13px 14px; border: 1.5px solid #0c6070; border-radius: 12px; background: #fff; color: #0c6070; font-size: .9rem; font-weight: 700; text-align: center; text-decoration: none; cursor: pointer; }
+.showcase-chat-form .showcase-chat { margin-top: 0; }
+.showcase-chat:hover, .showcase-chat:focus-visible { background: #eaf6f5; color: #084b59; }
 .showcase-details-link { display: block; padding-top: 13px; color: #176e7c; text-align: center; font-size: .85rem; font-weight: 700; text-decoration: none; }
 .detail-room-name { margin: 0 0 8px; color: #102a43; font-size: 1.45rem; font-weight: 800; }
 .detail-showcase a:focus-visible { outline: 3px solid #168497; outline-offset: 3px; }

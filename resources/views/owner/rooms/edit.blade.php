@@ -318,6 +318,19 @@
                     </button>
                 </div>
             </form>
+            <div class="border-top mt-4 pt-4">
+                <h2 class="h5 fw-bold">Ảnh phòng 360°</h2>
+                <p class="text-muted small">Tải ảnh toàn cảnh equirectangular tỷ lệ 2:1 (JPG, PNG hoặc WEBP, tối đa 15 MB). Ảnh thường không hiển thị đúng ở chế độ 360°.</p>
+                @if($room->panorama_path)
+                    <p class="text-success fw-semibold">Phòng đã có ảnh 360°.</p>
+                    <form action="{{ route('owner.rooms.panorama.destroy', $room) }}" method="POST" class="mb-3" data-no-ajax="true" onsubmit="return confirm('Xóa ảnh 360° của phòng?')">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger">Xóa ảnh 360°</button></form>
+                @endif
+                <form action="{{ route('owner.rooms.panorama.store', $room) }}" method="POST" enctype="multipart/form-data" data-no-ajax="true">
+                    @csrf <label for="room-panorama" class="form-label">{{ $room->panorama_path ? 'Thay ảnh 360°' : 'Chọn ảnh 360°' }}</label>
+                    <input class="form-control mb-2" id="room-panorama" name="panorama" type="file" accept="image/jpeg,image/png,image/webp" required>
+                    <button class="btn btn-outline-primary" type="submit">{{ $room->panorama_path ? 'Cập nhật ảnh 360°' : 'Tải ảnh 360°' }}</button>
+                </form>
+            </div>
         </section>
 
         {{-- CỘT THÔNG TIN BÊN PHẢI --}}

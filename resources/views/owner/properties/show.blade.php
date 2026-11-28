@@ -34,8 +34,8 @@
 
     {{-- QUAY LẠI --}}
     <a href="{{ route('owner.properties.index') }}" class="back-nav-btn">
-        <span>←</span>
-        <span>Quay lại danh sách nhà trọ</span>
+        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+        <span>Danh sách nhà trọ</span>
     </a>
 
     {{-- THÔNG BÁO FLASH --}}
@@ -50,7 +50,8 @@
     <div class="property-header-card">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
+                <div class="property-eyebrow">HỒ SƠ NHÀ TRỌ</div>
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
                     <span class="badge bg-light text-secondary border">Mã nhà #{{ $property->id }}</span>
                     @if ($property->status === 'active')
                         <span class="status-pill-active">Đang hoạt động</span>
@@ -62,24 +63,29 @@
 
                 <h1 class="page-main-title">{{ $property->name }}</h1>
                 <p class="page-main-desc">
-                    {{ $property->address }}, {{ $property->ward }}, {{ $property->district }}
+                    <i class="bi bi-geo-alt" aria-hidden="true"></i> {{ $propAddress ?: 'Chưa cập nhật địa chỉ' }}
                 </p>
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-                <a href="{{ route('owner.rooms.create', ['property_id' => $property->id]) }}" class="btn-outline-custom">
-                    <span>+ Thêm phòng mới</span>
-                </a>
+                @if($property->status === 'active')
+                    <a href="{{ route('owner.rooms.create', ['property_id' => $property->id]) }}" class="btn-outline-custom"><span><i class="bi bi-plus-lg" aria-hidden="true"></i> Thêm phòng mới</span></a>
+                @endif
                 <a href="{{ route('owner.properties.edit', $property->id) }}" class="btn-primary-dark">
-                    <span>Sửa thông tin</span>
+                    <span><i class="bi bi-pencil-square" aria-hidden="true"></i> Sửa thông tin</span>
                 </a>
             </div>
         </div>
     </div>
 
+    @if($property->status !== 'active')
+        <div class="alert alert-warning" role="status">Nhà trọ đang tạm ngưng: không thể thêm phòng hay nhận khách mới. Hợp đồng hiện tại vẫn được quản lý bình thường.</div>
+    @endif
+
     {{-- THANH 4 CHỈ SỐ NHANH --}}
     <div class="property-stats-grid">
         <div class="stat-metric-card">
+            <span class="stat-icon"><i class="bi bi-grid" aria-hidden="true"></i></span>
             <div class="stat-metric-label">Tổng số phòng</div>
             <div class="stat-metric-value">
                 {{ $totalRooms }} <span class="stat-metric-unit">phòng</span>
@@ -87,6 +93,7 @@
         </div>
 
         <div class="stat-metric-card">
+            <span class="stat-icon"><i class="bi bi-door-open" aria-hidden="true"></i></span>
             <div class="stat-metric-label">Phòng đang trống</div>
             <div class="stat-metric-value text-success">
                 {{ $availableRooms }} <span class="stat-metric-unit">phòng</span>
@@ -94,6 +101,7 @@
         </div>
 
         <div class="stat-metric-card">
+            <span class="stat-icon"><i class="bi bi-key" aria-hidden="true"></i></span>
             <div class="stat-metric-label">Đang cho thuê</div>
             <div class="stat-metric-value text-primary">
                 {{ $rentedRooms }} <span class="stat-metric-unit">phòng</span>
@@ -101,6 +109,7 @@
         </div>
 
         <div class="stat-metric-card">
+            <span class="stat-icon"><i class="bi bi-pie-chart" aria-hidden="true"></i></span>
             <div class="stat-metric-label">Tỷ lệ lấp đầy</div>
             <div class="stat-metric-value">
                 {{ $occupancyRate }}<span class="stat-metric-unit">%</span>
@@ -111,7 +120,7 @@
     {{-- THƯ VIỆN HÌNH ẢNH NHÀ TRỌ --}}
     <div class="content-panel-card">
         <div class="panel-card-head">
-            <h3 class="panel-card-title">Hình ảnh nhà trọ</h3>
+            <h3 class="panel-card-title"><span class="property-section-icon"><i class="bi bi-images" aria-hidden="true"></i></span> Hình ảnh nhà trọ</h3>
             @if ($property->images->isNotEmpty())
                 <span class="badge bg-light text-secondary border">
                     {{ $property->images->count() }} hình ảnh
@@ -134,7 +143,7 @@
                 </div>
 
                 <div class="prop-counter-badge" id="propImgCounter">
-                    Ảnh 1 / {{ $property->images->count() }}
+                    Ảnh {{ $property->images->search(fn ($img) => $img->id === $thumbImg->id) + 1 }} / {{ $property->images->count() }}
                 </div>
             </div>
 
@@ -142,18 +151,18 @@
             @if ($property->images->count() > 1)
                 <div class="prop-thumbnails-track">
                     @foreach ($property->images as $index => $img)
-                        <div class="prop-thumb-item {{ $img->id === $thumbImg->id ? 'active' : '' }}"
+                        <button type="button" class="prop-thumb-item {{ $img->id === $thumbImg->id ? 'active' : '' }}"
                              data-full-src="{{ asset('storage/' . $img->image_path) }}"
                              data-is-thumb="{{ $img->is_thumbnail ? '1' : '0' }}"
                              data-index="{{ $index + 1 }}"
-                             onclick="selectPropertyGalleryImage(this)">
+                             aria-label="Xem ảnh {{ $index + 1 }}" aria-pressed="{{ $img->id === $thumbImg->id ? 'true' : 'false' }}" onclick="selectPropertyGalleryImage(this)">
                             <img src="{{ asset('storage/' . $img->image_path) }}"
                                  alt="Ảnh {{ $index + 1 }}"
                                  loading="lazy">
                             @if ($img->is_thumbnail)
                                 <span class="prop-thumb-dot" title="Ảnh đại diện"></span>
                             @endif
-                        </div>
+                        </button>
                     @endforeach
                 </div>
             @endif
@@ -171,7 +180,7 @@
     {{-- THÔNG TIN CHI TIẾT & BẢN ĐỒ VỊ TRÍ --}}
     <div class="content-panel-card">
         <div class="panel-card-head">
-            <h3 class="panel-card-title">Thông tin tổng quan & Vị trí</h3>
+            <h3 class="panel-card-title"><span class="property-section-icon"><i class="bi bi-geo-alt" aria-hidden="true"></i></span> Thông tin &amp; vị trí</h3>
             @if ($propMapQuery)
                 <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($propMapQuery) }}" target="_blank" rel="noopener noreferrer" class="small text-decoration-none fw-bold text-primary">
                     Mở Google Maps ↗
@@ -282,7 +291,7 @@
     <div class="content-panel-card">
         <div class="panel-card-head">
             <div>
-                <h3 class="panel-card-title">Dịch vụ & Biểu phí áp dụng</h3>
+                <h3 class="panel-card-title"><span class="property-section-icon"><i class="bi bi-lightning-charge" aria-hidden="true"></i></span> Dịch vụ &amp; biểu phí áp dụng</h3>
                 <div class="small text-muted mt-1">Đơn giá điện, nước và dịch vụ cấu hình riêng cho nhà trọ này</div>
             </div>
             <a href="{{ route('owner.services.index', ['property_id' => $property->id]) }}" class="btn-outline-custom" style="padding: 6px 14px; font-size: 13px;">
@@ -319,14 +328,16 @@
     <div class="content-panel-card">
         <div class="panel-card-head">
             <div>
-                <h3 class="panel-card-title">Danh sách phòng thuộc nhà trọ</h3>
+                <h3 class="panel-card-title"><span class="property-section-icon"><i class="bi bi-grid" aria-hidden="true"></i></span> Danh sách phòng</h3>
                 <div class="small text-muted mt-1">Tổng cộng {{ $totalRooms }} phòng</div>
             </div>
 
             <div class="d-flex gap-2">
+                @if($property->status === 'active')
                 <a href="{{ route('owner.rooms.create', ['property_id' => $property->id]) }}" class="btn-primary-dark" style="padding: 8px 16px; font-size: 13px;">
                     + Thêm phòng mới
                 </a>
+                @endif
                 <a href="{{ route('owner.rooms.index', ['property_id' => $property->id]) }}" class="btn-outline-custom" style="padding: 8px 16px; font-size: 13px;">
                     Quản lý tất cả phòng
                 </a>
@@ -337,9 +348,11 @@
             <div class="empty-rooms-box">
                 <h6 class="fw-bold mb-1">Nhà trọ này chưa có phòng nào</h6>
                 <p class="small text-muted mb-3">Hãy tạo các phòng để bắt đầu quản lý người thuê và xuất bản tin đăng.</p>
+                @if($property->status === 'active')
                 <a href="{{ route('owner.rooms.create', ['property_id' => $property->id]) }}" class="btn-primary-dark">
                     + Thêm phòng đầu tiên
                 </a>
+                @endif
             </div>
         @else
             <div class="table-responsive">
@@ -438,8 +451,10 @@
 
         document.querySelectorAll('.prop-thumb-item').forEach(item => {
             item.classList.remove('active');
+            item.setAttribute('aria-pressed', 'false');
         });
         el.classList.add('active');
+        el.setAttribute('aria-pressed', 'true');
     }
 </script>
 @endif

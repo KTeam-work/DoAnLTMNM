@@ -98,7 +98,7 @@
                 {{-- TÀI CHÍNH --}}
                 <li class="nav-item dropdown">
                     <a
-                        class="app-nav-link dropdown-toggle text-decoration-none {{ request()->routeIs('owner.services.*', 'owner.utilities.*', 'owner.invoices.*', 'owner.payments.*') ? 'active' : '' }}"
+                        class="app-nav-link dropdown-toggle text-decoration-none {{ request()->routeIs('owner.services.*', 'owner.utilities.*', 'owner.invoices.*', 'owner.payments.*', 'owner.platform-fees.*') ? 'active' : '' }}"
                         href="#"
                         role="button"
                         data-bs-toggle="dropdown"
@@ -138,6 +138,7 @@
                                 Giao dịch
                             </a>
                         </li>
+                        <li><a class="dropdown-item {{ request()->routeIs('owner.platform-fees.*') ? 'active' : '' }}" href="{{ route('owner.platform-fees.index') }}">Phí nền tảng</a></li>
                     </ul>
                 </li>
 
@@ -188,6 +189,10 @@
                 </li>
 
                 {{-- TRỢ LÝ AI --}}
+                @php
+                    $unreadChatCount = auth()->check() ? \App\Models\ChatMessage::whereNull('read_at')->where('sender_id', '!=', auth()->id())->whereHas('conversation', fn ($q) => $q->where('owner_id', auth()->id())->orWhere('tenant_id', auth()->id()))->count() : 0;
+                @endphp
+                <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('chat.index') }}" data-no-ajax="true">Tin nhắn @if($unreadChatCount)<span class="badge bg-danger">{{ $unreadChatCount }}</span>@endif</a></li>
                 <li class="nav-item">
                     <a
                         class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"

@@ -96,6 +96,12 @@
                       </a>
                   </li>
                   <!-- TRỢ LÝ AI -->
+                  @if($currentUser && $currentUser->role === 'tenant')
+                      @php
+                          $unreadChatCount = \App\Models\ChatMessage::whereNull('read_at')->where('sender_id', '!=', $currentUser->id)->whereHas('conversation', fn ($q) => $q->where('tenant_id', $currentUser->id)->orWhere('owner_id', $currentUser->id))->count();
+                      @endphp
+                      <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('chat.index') }}" data-no-ajax="true">Tin nhắn @if($unreadChatCount)<span class="badge bg-danger">{{ $unreadChatCount }}</span>@endif</a></li>
+                  @endif
                   <li class="nav-item">
                       <a class="app-nav-link text-decoration-none
                           {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"

@@ -340,4 +340,54 @@
 
         }
 
+/* Tenant profile */
+.page-wrap { max-width: 1320px; margin: 32px auto 72px; padding: 0 28px; color: #102a43; }
+.back-link { display: inline-flex; gap: 9px; align-items: center; color: #61788b; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+.back-link:hover { color: #087e89; }
+.profile-card { position: relative; overflow: hidden; padding: 28px 32px; margin-bottom: 22px; border: 1px solid #d7e7e9; border-radius: 18px; background: linear-gradient(108deg, #f0f8f7 0%, #f8fbfb 57%, #e6f3f2 100%); box-shadow: 0 8px 28px rgba(15, 42, 65, .05); }
+.profile-card::after { content: ''; position: absolute; right: 17%; top: -92px; width: 235px; height: 235px; border: 1px solid rgba(61, 145, 145, .13); border-radius: 50%; box-shadow: 0 0 0 32px rgba(61, 145, 145, .035), 0 0 0 65px rgba(61, 145, 145, .025); pointer-events: none; }
+.profile-header { position: relative; z-index: 1; }
+.profile-left { gap: 20px; min-width: 0; }
+.avatar-large { width: 78px; height: 78px; border-radius: 21px; background: #0d4353; color: #fff; box-shadow: 0 8px 18px rgba(13, 67, 83, .16); font-size: 25px; text-transform: uppercase; }
+.profile-eyebrow { margin-bottom: 5px; color: #3f8c92; font-size: 10px; font-weight: 800; letter-spacing: .12em; }
+.profile-name { margin-bottom: 3px; font-size: 27px; line-height: 1.25; color: #102a43; }
+.profile-subtitle { color: #637d8e; font-size: 13px; margin-bottom: 10px; }
+.profile-badges { display: flex; flex-wrap: wrap; gap: 7px; }
+.badge-soft-success, .badge-soft-primary, .badge-soft-neutral { display: inline-flex; align-items: center; border-radius: 50px; padding: 5px 10px; font-size: 11px; font-weight: 700; }
+.badge-soft-success { background: #dcf2e8; color: #147a55; }
+.badge-soft-primary { background: #dceef1; color: #087687; }
+.badge-soft-neutral { background: #edf1f3; color: #627684; }
+.btn-edit { display: inline-flex; gap: 8px; align-items: center; white-space: nowrap; padding: 11px 16px; border: 1px solid #bcd2d7; border-radius: 10px; color: #193c50; background: rgba(255, 255, 255, .8); font-size: 13px; }
+.btn-edit:hover { background: #0d4353; border-color: #0d4353; }
+.content-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, .9fr); gap: 22px; align-items: start; }
+.panel-modern { padding: 23px 25px; margin-bottom: 20px; border: 1px solid #e0ebef; border-radius: 16px; box-shadow: 0 8px 24px rgba(15, 42, 65, .035); }
+.panel-title { display: flex; align-items: center; gap: 11px; color: #102a43; font-size: 16px; line-height: 1.3; margin-bottom: 18px; }
+.panel-title small { display: block; margin-top: 3px; color: #8294a2; font-size: 11px; font-weight: 400; }
+.section-icon { display: inline-flex; width: 38px; height: 38px; align-items: center; justify-content: center; flex: 0 0 38px; color: #16838a; background: #eaf5f4; border-radius: 11px; font-size: 19px; }
+.info-row { align-items: center; gap: 16px; padding: 12px 0; border-color: #edf2f4; }
+.info-label { color: #778d9c; font-size: 13px; }
+.info-value { color: #17354a; font-size: 13px; overflow-wrap: anywhere; }
+.contract-box { padding: 17px 18px; border-color: #dcebee; border-radius: 12px; background: #f5f9f9; }
+.contract-code { color: #087b83; margin-bottom: 14px; font-size: 13px; overflow-wrap: anywhere; }
+.contract-item { gap: 14px; padding: 4px 0; margin: 0; }
+.contract-value { color: #17354a; text-align: right; }
+.member-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.member-heading > .text-muted { margin-top: 10px; white-space: nowrap; }
+.member-avatar { background: #e8f4f3; color: #147f83; }
+.empty-state { padding: 18px; border-radius: 11px; background: #f7fafa; color: #80929d; font-size: 13px; text-align: center; }
+.btn-action { padding: 10px 15px; border: 1px solid #cddfe1; border-radius: 10px; color: #126e78; background: #f6fbfa; font-size: 13px; font-weight: 700; }
+.btn-action:hover { background: #e5f3f1; color: #0d5962; }
+.note-box { padding: 14px 16px; border: 0; border-left: 3px solid #a7d7ce; border-radius: 3px 10px 10px 3px; background: #f2f8f7; color: #5d7b7b; font-size: 12px; }
+@media (max-width: 768px) {
+    .page-wrap { padding: 0 16px; margin-top: 24px; }
+    .content-grid { grid-template-columns: 1fr; gap: 0; }
+    .profile-card { padding: 22px; }
+    .profile-header { align-items: stretch; }
+    .profile-left { align-items: center; }
+    .avatar-large { width: 60px; height: 60px; border-radius: 17px; font-size: 20px; }
+    .profile-name { font-size: 22px; }
+    .btn-edit { align-self: flex-start; }
+    .panel-modern { padding: 20px; }
+}
+
 

@@ -24,7 +24,7 @@ class PaymentController extends Controller
 
         $data = $request->validate([
             'invoice_id' => ['required', 'integer', 'exists:invoices,id'],
-            'method' => ['required', 'in:cash,bank_transfer,qr,online'],
+            'method' => ['required', 'in:cash'],
             'transaction_code' => ['nullable', 'string', 'max:100'],
         ]);
 
@@ -129,6 +129,10 @@ class PaymentController extends Controller
             ->latest('id')
             ->first();
 
+        if ($payment && $payment->method !== 'qr') {
+            return response()->json(['success' => false, 'message' => 'Hóa đơn đang có giao dịch khác chờ xác nhận.'], 422);
+        }
+
         if (!$payment) {
             $payment = DB::transaction(function () use ($invoice, $tenant) {
                 $payment = Payment::create([
@@ -218,6 +222,7 @@ class PaymentController extends Controller
      */
     public function simulateSepayWebhook(Request $request, $id)
     {
+        abort_unless(app()->environment(['local', 'testing']), 404);
         $tenant = $this->actingTenant($request);
 
         /** @var Invoice $invoice */
@@ -286,6 +291,9 @@ class PaymentController extends Controller
         $payment = Payment::query()->where('payment_code', $data['payment_code'])->with('invoice.contract')->first();
         if (! $payment) {
             return response()->json(['message' => 'Payment not found.'], 404);
+        }
+        if ($payment->method !== 'online') {
+            return response()->json(['message' => 'Unsupported payment method.'], 422);
         }
         if ((float) $data['amount'] !== (float) $payment->amount) {
             return response()->json(['message' => 'Amount mismatch.'], 422);

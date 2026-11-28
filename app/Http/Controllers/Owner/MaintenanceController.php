@@ -77,7 +77,7 @@ class MaintenanceController extends Controller
         ]);
 
         $allowed = [
-            'pending' => ['processing', 'completed', 'rejected'],
+            'pending' => ['processing', 'rejected'],
             'processing' => ['completed', 'rejected'],
             'completed' => ['completed', 'processing'],
         ];

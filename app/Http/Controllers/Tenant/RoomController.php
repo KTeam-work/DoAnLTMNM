@@ -29,6 +29,7 @@ class RoomController extends Controller
                 },
             ])
             ->where('status', 'available')
+            ->whereHas('property', fn ($query) => $query->where('status', 'active'))
             ->whereHas('rentalPosts', function (Builder $query) {
                 $query->where('status', 'published')
                     ->where(function (Builder $query) {
@@ -179,6 +180,7 @@ class RoomController extends Controller
                 },
             ])
             ->where('status', 'available')
+            ->whereHas('property', fn ($query) => $query->where('status', 'active'))
             ->whereHas('rentalPosts', function (Builder $query) {
                 $query->where('status', 'published')
                     ->where(function (Builder $query) {

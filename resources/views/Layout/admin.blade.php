@@ -107,6 +107,7 @@
                         </a>
                     </li>
 
+
                     <li class="nav-item">
                         <a
                             class="app-nav-link text-decoration-none {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"

@@ -20,7 +20,7 @@
       <a href="{{ route('owner.utilities.export', array_filter(['month' => $month, 'room_id' => $selectedRoomId, 'property_id' => $selectedPropertyId])) }}" id="utilitiesExcelLink" class="btn-outline-brand text-decoration-none d-inline-flex align-items-center gap-1" data-no-ajax="true">
         Xuất Excel
       </a>
-      <a class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId, 'property_id' => $selectedPropertyId])) }}" >Ghi chỉ số mới</a>
+      <a id="utilitiesCreateLink" class="btn-brand" href="{{ route('owner.utilities.create', array_filter(['month' => $month, 'room_id' => $selectedRoomId, 'property_id' => $selectedPropertyId])) }}" >Ghi chỉ số mới</a>
     </div>
   </div>
 
@@ -131,7 +131,7 @@
       </div>
       <div class="col-md-3 d-flex align-items-end gap-2">
         <button type="submit" class="btn-brand flex-grow-1" style="height: 44px; justify-content: center;">Lọc dữ liệu</button>
-        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none utility-ajax-link" style="height: 44px; display: inline-flex; align-items: center; white-space: nowrap;">Tất cả kỳ</a>
+        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none utility-ajax-link" data-no-ajax="true" style="height: 44px; display: inline-flex; align-items: center; white-space: nowrap;">Tất cả kỳ</a>
       </div>
     </form>
 
@@ -152,7 +152,7 @@
         &bull; Hiển thị: <strong class="text-dark">{{ $readings->count() }} bản ghi</strong>
       </div>
       @if($month)
-        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="small text-decoration-none utility-ajax-link" style="color: var(--brand-dark, #a85827); font-weight: 600;">Xem tất cả các tháng &rarr;</a>
+        <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="small text-decoration-none utility-ajax-link" data-no-ajax="true" style="color: var(--brand-dark, #a85827); font-weight: 600;">Xem tất cả các tháng &rarr;</a>
       @endif
     </div>
 
@@ -192,7 +192,7 @@
             <td>
               <div style="font-weight: 700; color: #4b3621;">Tháng {{ \Carbon\Carbon::parse($reading->month)->format('m/Y') }}</div>
               @if($reading->period_start && $reading->period_end)
-                <div class="cell-sub">Kỳ: {{ $reading->period_start->format('d/m/Y') }} – {{ $reading->period_end->format('d/m/Y') }}</div>
+                <div class="cell-sub">{{ $reading->reading_date_confirmed ? 'Kỳ' : 'Kỳ dự kiến cũ (chưa xác nhận)' }}: {{ $reading->period_start->format('d/m/Y') }} – {{ $reading->period_end->format('d/m/Y') }}</div>
               @endif
               <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
                 Ngày ghi: <span style="font-weight: 600; color: #0c2340;">{{ $reading->created_at ? $reading->created_at->format('d/m/Y') : \Carbon\Carbon::parse($reading->month)->format('d/m/Y') }}</span>
@@ -235,7 +235,7 @@
               </div>
               @if($month)
                 <div class="mt-2">
-                  <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none utility-ajax-link" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">Xem tất cả các kỳ khác</a>
+                  <a href="{{ route('owner.utilities.index', ['all' => 1]) }}" class="btn-outline-brand text-decoration-none utility-ajax-link" data-no-ajax="true" style="display: inline-flex; padding: 6px 14px; font-size: 0.9rem;">Xem tất cả các kỳ khác</a>
                 </div>
               @else
                 <div class="mt-2">
@@ -259,14 +259,16 @@
     if (!form || form.dataset.ajaxInitialized === 'true') return;
     form.dataset.ajaxInitialized = 'true';
 
-    let isFetching = false;
+    let activeRequest = null;
 
     async function applyUtilityFilter(url) {
-      if (isFetching) return;
-      isFetching = true;
+      if (activeRequest) activeRequest.abort();
+      const controller = new AbortController();
+      activeRequest = controller;
 
       try {
         const res = await fetch(url, {
+          signal: controller.signal,
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'text/html'
@@ -279,6 +281,7 @@
         }
 
         const html = await res.text();
+        if (activeRequest !== controller) return;
         const doc = new DOMParser().parseFromString(html, 'text/html');
 
         // 1. Cập nhật Stat Cards
@@ -301,10 +304,19 @@
         const curExcel = document.getElementById('utilitiesExcelLink');
         if (newExcel && curExcel) curExcel.href = newExcel.href;
 
+        const newCreate = doc.getElementById('utilitiesCreateLink');
+        const curCreate = document.getElementById('utilitiesCreateLink');
+        if (newCreate && curCreate) curCreate.href = newCreate.href;
+
         // 5. Cập nhật Select phòng tương ứng khu trọ
         const newRoomSelect = doc.getElementById('utilityRoomSelect');
         const curRoomSelect = document.getElementById('utilityRoomSelect');
         if (newRoomSelect && curRoomSelect) curRoomSelect.innerHTML = newRoomSelect.innerHTML;
+        for (const id of ['utilityPropertySelect', 'utilityRoomSelect', 'utilityMonthInput']) {
+          const source = doc.getElementById(id);
+          const target = document.getElementById(id);
+          if (source && target) target.value = source.value;
+        }
 
         // 6. Cập nhật URL trên thanh địa chỉ không tải lại trang
         window.history.pushState({}, '', url);
@@ -312,10 +324,11 @@
         // Rebind click events
         bindAjaxLinks();
       } catch (err) {
+        if (err.name === 'AbortError') return;
         console.error('Lỗi lọc điện nước AJAX:', err);
         window.location.href = url;
       } finally {
-        isFetching = false;
+        if (activeRequest === controller) activeRequest = null;
       }
     }
 
@@ -323,14 +336,17 @@
       const formData = new FormData(form);
       const params = new URLSearchParams();
       for (const [key, value] of formData.entries()) {
-        if (value) params.append(key, value);
+        if (value || key === 'month') params.append(key, value);
       }
       const targetUrl = form.action + (params.toString() ? '?' + params.toString() : '');
       applyUtilityFilter(targetUrl);
     }
 
     form.querySelectorAll('select, input').forEach(el => {
-      el.addEventListener('change', onFilterChange);
+      el.addEventListener('change', () => {
+        if (el.id === 'utilityPropertySelect') document.getElementById('utilityRoomSelect').value = '';
+        onFilterChange();
+      });
     });
 
     form.addEventListener('submit', function(e) {
