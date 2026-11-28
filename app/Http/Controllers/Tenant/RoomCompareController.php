@@ -27,7 +27,15 @@ class RoomCompareController extends Controller
     {
         $ids = $this->selected($request);
         $request->session()->put('compare_rooms', $ids);
-        $roomsById = $this->publicRooms()->whereIn('id', $ids)->with(['property', 'amenities', 'rentalPosts' => fn ($q) => $q->where('status', 'published')->where(fn ($q) => $q->whereNull('expired_at')->orWhere('expired_at', '>', now()))->with('images')])->get()->keyBy('id');
+        $roomsById = $this->publicRooms()->whereIn('id', $ids)->with([
+            'property',
+            'amenities',
+            'rentalPosts' => fn ($q) => $q->where('status', 'published')
+                ->where(fn ($q) => $q->whereNull('expired_at')->orWhere('expired_at', '>', now()))
+                ->orderByDesc('published_at')
+                ->orderByDesc('id')
+                ->with(['images' => fn ($q) => $q->reorder('is_thumbnail', 'desc')->orderBy('sort_order')]),
+        ])->get()->keyBy('id');
         $rooms = collect($ids)->map(fn ($id) => $roomsById->get($id))->filter()->values();
         return view('rooms.compare', compact('rooms'));
     }

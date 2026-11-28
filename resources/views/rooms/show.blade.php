@@ -117,7 +117,7 @@
 @push('styles')
          <link rel="stylesheet"
           href="{{ asset('css/tv2/rooms/show.css') }}?v={{ filemtime(public_path('css/tv2/rooms/show.css')) }}">
-         <link rel="stylesheet" href="{{ asset('css/tv2/rooms/compare.css') }}">
+         <link rel="stylesheet" href="{{ asset('css/tv2/rooms/compare.css') }}?v={{ filemtime(public_path('css/tv2/rooms/compare.css')) }}">
          @if($panoramaUrl ?? false)<link rel="stylesheet" href="{{ asset('vendor/pannellum/pannellum.css') }}">@endif
 @endpush 
 
