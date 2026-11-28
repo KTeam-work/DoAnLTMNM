@@ -26,6 +26,8 @@ class OwnerTenantsController extends Controller{
                 ->whereHas('rentedContracts', fn ($query) => $query->where('owner_id', $owner->id))
                 ->with(['rentedContracts' => fn ($query) => $query
                     ->where('owner_id', $owner->id)
+                    ->orderByRaw('CASE WHEN status = ? THEN 0 ELSE 1 END', ['active'])
+                    ->orderByDesc('created_at')
                     ->with(['room:id,name,room_code,property_id', 'members'])])
                 ->orderBy('name')
                 ->get()
@@ -97,6 +99,8 @@ public function show(Request $request, int $id)
         ->with([
             'rentedContracts' => function ($query) use ($owner) {
                 $query->where('owner_id', $owner->id)
+                    ->orderByRaw('CASE WHEN status = ? THEN 0 ELSE 1 END', ['active'])
+                    ->orderByDesc('created_at')
                     ->with([
                         'room.property',
                         'tenant:id,name,email,phone',
@@ -107,9 +111,7 @@ public function show(Request $request, int $id)
         ->findOrFail($id);
 
     // Lấy hợp đồng của người thuê với chủ trọ hiện tại
-    $contract = $tenant->rentedContracts
-        ->sortByDesc('created_at')
-        ->first();
+    $contract = $tenant->rentedContracts->first();
 
     // Thông tin phòng và nhà trọ
     $room = $contract?->room;

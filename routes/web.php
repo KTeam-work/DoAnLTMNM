@@ -11,6 +11,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
@@ -140,6 +141,7 @@ Route::middleware('auth')->group(function () {
 
         return view('admin.dashboard');
     })->name('admin.dashboard');
+
 
 
     Route::get('/admin/users', function () {
@@ -383,6 +385,10 @@ Route::redirect('/tenant', '/tenant/home')
 
 Route::get('/rooms', [RoomController::class, 'index'])
     ->name('rooms.index');
+
+Route::get('/rooms/compare', [\App\Http\Controllers\Tenant\RoomCompareController::class, 'index'])->name('rooms.compare');
+Route::post('/rooms/compare/{room}', [\App\Http\Controllers\Tenant\RoomCompareController::class, 'store'])->name('rooms.compare.store');
+Route::delete('/rooms/compare/{room}', [\App\Http\Controllers\Tenant\RoomCompareController::class, 'destroy'])->name('rooms.compare.destroy');
 
 Route::get('/rooms/{id}', [RoomController::class, 'show'])
     ->name('rooms.show');
@@ -795,6 +801,12 @@ Route::get(
     [OwnerPaymentController::class, 'index']
 )->name('owner.payments.index');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/owner/platform-fees', [\App\Http\Controllers\Owner\PlatformFeeController::class, 'index'])->name('owner.platform-fees.index');
+    Route::post('/owner/platform-fees/{payment}/simulate', [\App\Http\Controllers\Owner\PlatformFeeController::class, 'simulate'])->name('owner.platform-fees.simulate');
+    Route::get('/owner/platform-fees/{payment}/status', [\App\Http\Controllers\Owner\PlatformFeeController::class, 'status'])->name('owner.platform-fees.status');
+});
+
 Route::put(
     '/owner/payments/{payment}/confirm',
     [OwnerPaymentController::class, 'confirm']
@@ -861,6 +873,11 @@ Route::resource(
     OwnerRoomController::class
 )->names('owner.rooms');
 
+Route::middleware('auth')->group(function () {
+    Route::post('/owner/rooms/{room}/panorama', [\App\Http\Controllers\Owner\RoomPanoramaController::class, 'store'])->name('owner.rooms.panorama.store');
+    Route::delete('/owner/rooms/{room}/panorama', [\App\Http\Controllers\Owner\RoomPanoramaController::class, 'destroy'])->name('owner.rooms.panorama.destroy');
+});
+
 
 
 Route::resource(
@@ -917,6 +934,15 @@ Route::middleware('auth')->group(function () {
 // Chat box AI Trợ Ơi (Hỗ trợ cả khách chưa đăng nhập, người thuê, chủ trọ và admin)
 Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot.index');
 Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage'])->middleware(['throttle:30,1'])->name('chatbot.send');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/messages', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/messages/room/{room}', [ChatController::class, 'start'])->name('chat.start');
+    Route::post('/messages/contract/{contract}', [ChatController::class, 'startFromContract'])->name('chat.start-contract');
+    Route::get('/messages/{conversation}', [ChatController::class, 'index'])->name('chat.show');
+    Route::post('/messages/{conversation}', [ChatController::class, 'send'])->middleware('throttle:60,1')->name('chat.send');
+    Route::post('/messages/{conversation}/read', [ChatController::class, 'read'])->name('chat.read');
+});
 
 // QR 
 Route::post('/sepay/webhook', [PaymentController::class, 'webhook']);

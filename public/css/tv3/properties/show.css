@@ -475,3 +475,57 @@ body {
         font-size: 20px;
     }
 }
+
+/* Property overview */
+.property-detail-page { max-width: 1320px; margin: 30px auto 70px; padding: 0 24px; color: #102a43; }
+.property-detail-page .back-nav-btn { padding: 0; margin-bottom: 20px; border: 0; background: transparent; color: #71899a; font-size: 13px; }
+.property-detail-page .back-nav-btn:hover { background: transparent; color: #087e89; transform: none; }
+.property-header-card { position: relative; overflow: hidden; padding: 28px 30px; margin-bottom: 20px; border: 1px solid #d7e7e9; border-radius: 18px; background: linear-gradient(108deg, #f0f8f7, #f9fbfb 58%, #e6f3f2); box-shadow: 0 8px 28px rgba(15,42,65,.05); }
+.property-header-card::after { content: ''; position: absolute; right: 19%; top: -110px; width: 230px; height: 230px; border: 1px solid rgba(61,145,145,.12); border-radius: 50%; box-shadow: 0 0 0 32px rgba(61,145,145,.035), 0 0 0 65px rgba(61,145,145,.025); pointer-events: none; }
+.property-header-card > div { position: relative; z-index: 1; }
+.property-eyebrow { margin-bottom: 9px; color: #3f8c92; font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+.property-detail-page .page-main-title { margin: 9px 0 6px; color: #102a43; font-size: 27px; }
+.property-detail-page .page-main-desc { color: #6c8996; font-size: 13px; }
+.property-detail-page .page-main-desc i { color: #3b9292; margin-right: 3px; }
+.property-detail-page .status-pill-active, .property-detail-page .status-pill-inactive { padding: 4px 10px; font-size: 11px; }
+.property-detail-page .btn-primary-dark, .property-detail-page .btn-outline-custom { padding: 10px 15px; border-radius: 9px; font-size: 12px; box-shadow: none; }
+.property-detail-page .btn-primary-dark { background: #0d4353; }
+.property-detail-page .btn-primary-dark:hover { background: #135b67; }
+.property-detail-page .btn-outline-custom { border-color: #bfd4d8; color: #164455; background: rgba(255,255,255,.85); }
+.property-detail-page .property-stats-grid { gap: 14px; margin-bottom: 22px; }
+.property-detail-page .stat-metric-card { position: relative; min-width: 0; padding: 18px 18px 16px; border: 1px solid #e0ebef; border-radius: 14px; box-shadow: 0 8px 24px rgba(15,42,65,.035); }
+.property-detail-page .stat-metric-card:hover { transform: none; border-color: #cce2e1; }
+.property-detail-page .stat-icon { display: flex; align-items: center; justify-content: center; position: absolute; right: 16px; top: 16px; width: 34px; height: 34px; color: #16838a; background: #eaf5f4; border-radius: 10px; font-size: 16px; }
+.property-detail-page .stat-metric-label { padding-right: 35px; margin-bottom: 10px; color: #8397a2; font-size: 10px; letter-spacing: .04em; }
+.property-detail-page .stat-metric-value { color: #17354a; font-size: 25px; }
+.property-detail-page .stat-metric-unit { color: #8295a0; font-size: 11px; }
+.property-detail-page .content-panel-card { padding: 24px; margin-bottom: 20px; border: 1px solid #e0ebef; border-radius: 16px; box-shadow: 0 8px 24px rgba(15,42,65,.035); }
+.property-detail-page .panel-card-head { min-height: 40px; margin-bottom: 18px; padding-bottom: 15px; border-color: #edf2f4; }
+.property-detail-page .panel-card-title { display: flex; align-items: center; gap: 10px; color: #102a43; font-size: 16px; }
+.property-section-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 38px; width: 38px; height: 38px; border-radius: 11px; color: #16838a; background: #eaf5f4; font-size: 18px; }
+.property-detail-page .property-main-img-viewport { height: clamp(260px, 35vw, 410px); border: 1px solid #e4eeee; border-radius: 12px; background: #edf3f2; box-shadow: none; }
+.property-detail-page .property-main-img-viewport img { object-fit: contain; }
+.property-detail-page .prop-thumb-item { padding: 0; border-radius: 9px; border-color: #e0ebef; }
+.property-detail-page .prop-thumb-item.active { border-color: #268d8c; box-shadow: 0 0 0 3px rgba(38,141,140,.13); }
+.property-detail-page .prop-thumb-item:focus-visible { outline: 3px solid #268d8c; outline-offset: 3px; }
+.property-detail-page .info-field-label { color: #8397a2; font-size: 10px; }
+.property-detail-page .info-field-value { color: #17354a; font-size: 13px; }
+.property-detail-page .service-chip-item { gap: 10px; height: 100%; border-color: #e7eff1; border-radius: 11px; background: #f7fafb; }
+.property-detail-page .service-chip-name, .property-detail-page .service-chip-price { color: #17354a; font-size: 13px; }
+.property-detail-page .room-table-custom { min-width: 900px; }
+.property-detail-page .room-table-custom th { background: #f5f9f9; color: #8498a4; font-size: 10px; }
+.property-detail-page .room-table-custom td { padding: 14px 18px; border-color: #edf2f4; font-size: 13px; }
+@media (max-width: 991px) { .property-detail-page .property-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 575px) {
+    .property-detail-page { padding: 0 16px; margin-top: 22px; }
+    .property-detail-page .property-header-card { padding: 22px 20px; }
+    .property-detail-page .page-main-title { font-size: 22px; }
+    .property-detail-page .property-stats-grid { gap: 10px; }
+    .property-detail-page .stat-metric-card { padding: 14px 12px; }
+    .property-detail-page .stat-icon { top: 12px; right: 10px; width: 29px; height: 29px; }
+    .property-detail-page .stat-metric-label { font-size: 9px; }
+    .property-detail-page .stat-metric-value { font-size: 21px; }
+    .property-detail-page .content-panel-card { padding: 19px; }
+    .property-detail-page .property-main-img-viewport { height: 260px; }
+    .property-detail-page .panel-card-head > .d-flex { flex-wrap: wrap; }
+}

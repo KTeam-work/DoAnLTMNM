@@ -37,7 +37,7 @@ class OwnerRentalPostController extends Controller
 
         $availableRooms = Room::query()
             ->whereHas('property', function ($query) use ($ownerId) {
-                $query->where('owner_id', $ownerId);
+                $query->where('owner_id', $ownerId)->where('status', 'active');
             })
             ->where('status', 'available')
             ->whereDoesntHave('rentalPosts', function ($query) {
@@ -63,7 +63,7 @@ class OwnerRentalPostController extends Controller
         // Chỉ lấy các phòng CÒN TRỐNG (available) và chưa có tin đăng đang hoạt động
         $rooms = Room::query()
             ->whereHas('property', function ($query) {
-                $query->where('owner_id', Auth::id());
+                $query->where('owner_id', Auth::id())->where('status', 'active');
             })
             ->where('status', 'available')
             ->whereDoesntHave('rentalPosts', function ($query) {
@@ -93,6 +93,7 @@ public function store(Request $request)
                     Property::query()
                         ->select('id')
                         ->where('owner_id', Auth::id())
+                        ->where('status', 'active')
                 )->where('status', 'available')
             ),
         ],

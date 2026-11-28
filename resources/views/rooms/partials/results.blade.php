@@ -117,6 +117,7 @@
                             Xem phòng →
                         </a>
                     </div>
+                    <form action="{{ route('rooms.compare.store', $room) }}" method="POST" data-no-ajax="true" class="compare-add-form">@csrf<button type="submit" class="compare-add-btn">{{ in_array($room->id, session('compare_rooms', [])) ? 'Đã thêm vào so sánh' : '+ Thêm vào so sánh' }}</button></form>
                 </div>
             </article>
         </div>

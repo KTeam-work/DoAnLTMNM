@@ -55,7 +55,7 @@ class CompleteRentalJourneyTest extends TestCase
         $this->putJson(route('owner.contracts.initial-utilities', $contract), ['initial_electricity_reading' => 100, 'initial_water_reading' => 20])->assertOk();
 
         $this->travelTo(\Carbon\Carbon::parse('2026-12-26 09:00:00'));
-        $this->postJson(route('owner.utilities.store'), ['room_id' => $room->id, 'month' => '2026-12', 'electricity_new' => 140, 'electricity_price' => 3500, 'water_new' => 25, 'water_price' => 20000])->assertCreated();
+        $this->postJson(route('owner.utilities.store'), ['room_id' => $room->id, 'reading_date' => '2026-12-26', 'electricity_new' => 140, 'electricity_price' => 3500, 'water_new' => 25, 'water_price' => 20000])->assertCreated();
         $this->postJson(route('owner.invoices.store'), ['month' => '2026-12'])->assertCreated();
         $invoice = Invoice::where('contract_id', $contract->id)->firstOrFail();
         $this->assertEquals(1240000, $invoice->total);
@@ -72,7 +72,8 @@ class CompleteRentalJourneyTest extends TestCase
         $this->assertSame('completed', $ticket->fresh()->status);
 
         $this->travelTo(\Carbon\Carbon::parse('2027-11-26 09:00:00'));
-        $this->put(route('owner.contracts.terminate', $contract), ['termination_type' => 'normal', 'return_date' => '2027-11-26', 'deduction_amount' => 0])->assertSessionHasNoErrors()->assertRedirect();
+        $this->put(route('owner.contracts.terminate', $contract), ['termination_type' => 'normal', 'return_date' => '2027-11-26', 'deduction_amount' => 0, 'electricity_new' => 150, 'electricity_price' => 3500, 'water_new' => 27, 'water_price' => 20000])->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertEquals(75000, $contract->fresh()->termination->utility_total);
         $this->assertSame('terminated', $contract->fresh()->status);
         $this->assertSame('available', $room->fresh()->status);
         $this->assertSame('published', $post->fresh()->status);

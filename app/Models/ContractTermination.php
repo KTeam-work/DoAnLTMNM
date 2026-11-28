@@ -18,4 +18,9 @@ class ContractTermination extends Model
     {
         return $this->belongsTo(Contract::class);
     }
+
+    public function utilityInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'utility_invoice_id');
+    }
 }

@@ -57,7 +57,8 @@
     $endDate = $contract->end_date ?? null;
 
     $rentPrice = $contract
-        ? ($contract->rent_price
+        ? ($contract->rent
+            ?? $contract->rent_price
             ?? $contract->monthly_rent
             ?? $contract->rental_price
             ?? null)
@@ -125,8 +126,15 @@
 
     {{-- QUAY LẠI --}}
     <a href="{{ url('/owner/tenants') }}" class="back-link">
-        ← Quay lại danh sách người thuê
+        <i class="bi bi-arrow-left" aria-hidden="true"></i> Danh sách người thuê
     </a>
+
+    @if(session('success'))
+        <div class="alert alert-success" role="status">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+        <div class="alert alert-danger" role="alert"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+    @endif
 
     {{-- HỒ SƠ NGƯỜI THUÊ --}}
     <div class="profile-card">
@@ -139,6 +147,7 @@
                 </div>
 
                 <div>
+                    <div class="profile-eyebrow">HỒ SƠ NGƯỜI THUÊ</div>
                     <div class="profile-name">
                         {{ $fullName }}
                     </div>
@@ -150,7 +159,7 @@
 
                     <div class="profile-badges">
 
-                        <span class="badge-soft-success">
+                        <span class="{{ $isActive ? 'badge-soft-success' : 'badge-soft-neutral' }}">
                             ● {{ $isActive ? 'Đang ở' : ($contract ? 'Chưa xác nhận' : 'Chưa có hợp đồng') }}
                         </span>
 
@@ -164,7 +173,7 @@
             </div>
 
            <a href="{{ route('owner.tenants.edit', ['id' => $tenant->id]) }}" class="btn-edit">
-                    Chỉnh sửa hồ sơ
+                    <i class="bi bi-pencil-square" aria-hidden="true"></i> Chỉnh sửa hồ sơ
                 </a>
 
         </div>
@@ -180,7 +189,7 @@
             <div class="panel-modern">
 
                 <div class="panel-title">
-                    Thông tin cá nhân
+                    <span class="section-icon"><i class="bi bi-person" aria-hidden="true"></i></span><span>Thông tin cá nhân<small>Thông tin liên hệ và giấy tờ</small></span>
                 </div>
 
                 <div class="info-row">
@@ -247,7 +256,7 @@
             <div class="panel-modern">
 
                 <div class="panel-title">
-                    Hợp đồng thuê hiện tại
+                    <span class="section-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i></span><span>Hợp đồng thuê hiện tại<small>Chi tiết thỏa thuận thuê phòng</small></span>
                 </div>
 
                 @if($contract)
@@ -329,7 +338,7 @@
             <div class="panel-modern">
 
                 <div class="panel-title">
-                    Thông tin lưu trú
+                    <span class="section-icon"><i class="bi bi-house-door" aria-hidden="true"></i></span><span>Thông tin lưu trú<small>Phòng và thời gian thuê</small></span>
                 </div>
 
                 <div class="info-row">
@@ -364,7 +373,7 @@
                     <div class="info-label">Trạng thái</div>
                     <div class="info-value">
 
-                        <span class="badge-soft-success">
+                        <span class="{{ $isActive ? 'badge-soft-success' : 'badge-soft-neutral' }}">
                             {{ $isActive
                                 ? 'Đang ở'
                                 : ($contract ? 'Chưa xác nhận' : 'Chưa thuê phòng') }}
@@ -381,7 +390,7 @@
                 <div class="member-heading">
 
                     <div class="panel-title">
-                        Người ở cùng
+                        <span class="section-icon"><i class="bi bi-people" aria-hidden="true"></i></span><span>Người ở cùng<small>Thành viên trong hợp đồng</small></span>
                     </div>
 
                     <span class="text-muted small">
@@ -456,14 +465,14 @@
             <div class="panel-modern">
 
                 <div class="panel-title">
-                    Ghi chú
+                    <span class="section-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span><span>Ghi chú<small>Thông tin quản lý</small></span>
                 </div>
 
                 <div class="note-box">
 
                     @if($contract)
 
-                        Người thuê chính đang đứng tên hợp đồng
+                        Người thuê chính đứng tên hợp đồng
                         #{{ $contractCode }}. Các thông tin người ở cùng
                         được quản lý theo hợp đồng thuê.
 

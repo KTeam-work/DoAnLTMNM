@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/tv3/tenant/contracts/show.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/tv3/owner_contract_detail.css') }}">
     <style>
         .owner-avatar-tenant {
             width: 68px;
@@ -117,6 +118,7 @@
     <!-- HERO HEADER CARD -->
     <div class="contract-hero-card">
         <div>
+            <div class="contract-eyebrow">HỒ SƠ HỢP ĐỒNG</div>
             <h1 class="contract-hero-title">
                 Hợp đồng <span class="contract-code-badge">#{{ $contract->contract_code }}</span>
                 <span class="status-pill {{ $contract->status }}">
@@ -124,11 +126,11 @@
                 </span>
             </h1>
             <div class="contract-hero-meta">
-                <span>Phòng: <strong class="text-dark">{{ $contract->room->name ?? '—' }}</strong></span>
-                <span>Khu trọ: <strong class="text-dark">{{ $contract->room->property->name ?? 'Nhà trọ' }}</strong></span>
+                <span><i class="bi bi-door-open" aria-hidden="true"></i> Phòng <strong class="text-dark">{{ $contract->room->name ?? '—' }}</strong></span>
+                <span><i class="bi bi-buildings" aria-hidden="true"></i> <strong class="text-dark">{{ $contract->room->property->name ?? 'Nhà trọ' }}</strong></span>
                 @if($contract->room->property->address)
                     <span class="d-none d-md-inline text-truncate" style="max-width: 320px;">
-                        {{ $contract->room->property->address }}
+                        <i class="bi bi-geo-alt" aria-hidden="true"></i> {{ $contract->room->property->address }}
                     </span>
                 @endif
             </div>
@@ -172,7 +174,11 @@
             <div>
                 @if($contract->status === 'active')
                     <span class="badge bg-success-subtle text-success fw-bold px-2 py-1" style="font-size: 12px; border-radius: 6px;">
-                        Còn {{ $remainingDays }} ngày ({{ 100 - $progressPct }}% thời hạn)
+                        @if(now()->startOfDay()->lt($startDate->copy()->startOfDay()))
+                            Bắt đầu sau {{ (int) now()->startOfDay()->diffInDays($startDate->copy()->startOfDay()) }} ngày
+                        @else
+                            Còn {{ $remainingDays }} ngày ({{ 100 - $progressPct }}% thời hạn)
+                        @endif
                     </span>
                 @elseif($contract->status === 'expired')
                     <span class="badge bg-danger-subtle text-danger fw-bold px-2 py-1" style="font-size: 12px; border-radius: 6px;">
@@ -203,7 +209,7 @@
             <!-- 1. THÔNG TIN PHÒNG & CHI PHÍ -->
             <div class="modern-panel">
                 <div class="panel-header-modern">
-                    <h2 class="panel-title-modern">Thông tin phòng &amp; Chi phí thuê</h2>
+                    <h2 class="panel-title-modern"><span class="contract-section-icon"><i class="bi bi-house-door" aria-hidden="true"></i></span> Thông tin phòng &amp; chi phí thuê</h2>
                     <span class="text-muted small fw-semibold">Chi tiết điều khoản ký kết</span>
                 </div>
 
@@ -290,7 +296,7 @@
             <!-- 2. BẢNG GIÁ DỊCH VỤ & TIỆN ÍCH -->
             <div class="modern-panel">
                 <div class="panel-header-modern">
-                    <h2 class="panel-title-modern">Bảng giá dịch vụ &amp; Tiện ích</h2>
+                    <h2 class="panel-title-modern"><span class="contract-section-icon"><i class="bi bi-lightning-charge" aria-hidden="true"></i></span> Dịch vụ &amp; tiện ích</h2>
                     <span class="text-muted small fw-semibold">Biểu phí áp dụng hàng tháng</span>
                 </div>
 
@@ -347,7 +353,7 @@
             <!-- 3. ĐIỀU KHOẢN HỢP ĐỒNG -->
             <div class="modern-panel">
                 <div class="panel-header-modern">
-                    <h2 class="panel-title-modern">Điều khoản hợp đồng</h2>
+                    <h2 class="panel-title-modern"><span class="contract-section-icon"><i class="bi bi-file-earmark-text" aria-hidden="true"></i></span> Điều khoản hợp đồng</h2>
                     <span class="text-muted small fw-semibold">Quy định và nghĩa vụ</span>
                 </div>
 
@@ -391,6 +397,18 @@
                             <div class="tile-value text-success fw-bold">{{ number_format((float)$contract->termination->refund_amount) }} đ</div>
                         </div>
                     </div>
+                    @if($contract->termination->utility_total !== null)
+                        <div class="mt-3 p-3 rounded-3 bg-white">
+                            <strong>Điện nước khi trả phòng: {{ number_format((float) $contract->termination->utility_total) }} đ</strong>
+                            <div>Điện: {{ $contract->termination->electricity_old }} → {{ $contract->termination->electricity_new }} kWh × {{ number_format((float) $contract->termination->electricity_price) }} đ</div>
+                            <div>Nước: {{ $contract->termination->water_old }} → {{ $contract->termination->water_new }} m³ × {{ number_format((float) $contract->termination->water_price) }} đ</div>
+                            @if($contract->termination->utility_invoice_id)
+                                <div><a href="{{ route('owner.invoices.show', $contract->termination->utility_invoice_id) }}">Xem hóa đơn điện nước cuối kỳ</a></div>
+                            @else
+                                <small class="text-muted">Không phát sinh hóa đơn điện nước.</small>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -402,10 +420,7 @@
             <!-- THÔNG TIN NGƯỜI THUÊ (CHỦ HỢP ĐỒNG) -->
             <div class="modern-panel">
                 <div class="panel-header-modern">
-                    <h2 class="panel-title-modern">Đại diện thuê (Chủ HĐ)</h2>
-                    <span class="badge bg-success-subtle text-success fw-bold px-2 py-1" style="border-radius: 8px; font-size: 11px;">
-                        Đã xác thực
-                    </span>
+                    <h2 class="panel-title-modern"><span class="contract-section-icon"><i class="bi bi-person" aria-hidden="true"></i></span> Người đại diện</h2>
                 </div>
 
                 <div class="owner-card-profile">
@@ -439,7 +454,7 @@
             <!-- THÀNH VIÊN PHÒNG / NGƯỜI Ở CÙNG -->
             <div class="modern-panel">
                 <div class="panel-header-modern">
-                    <h2 class="panel-title-modern">Người ở cùng</h2>
+                    <h2 class="panel-title-modern"><span class="contract-section-icon"><i class="bi bi-people" aria-hidden="true"></i></span> Người ở cùng</h2>
                     <span class="badge bg-light text-dark border fw-bold px-2 py-1" style="border-radius: 8px; font-size: 11px;">
                         {{ 1 + $contract->members->count() }}/{{ $contract->room->max_people ?? '?' }} người
                     </span>
@@ -498,6 +513,7 @@
                             <hr class="my-3" style="border-color: #f1f5f9;">
                             <div class="add-member-section">
                                 <div class="fw-bold mb-2 text-dark" style="font-size: 13px;">+ Thêm người ở cùng phòng</div>
+                                <div class="text-muted small mb-2">CCCD/CMND và số điện thoại phải khác những người đã có trong hợp đồng.</div>
                                 <form method="POST" action="{{ route('owner.contracts.members', $contract) }}" class="row g-2">
                                     @csrf
                                     <input type="hidden" name="action" value="add">
@@ -735,12 +751,30 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-dark">Ngày kết thúc / Trả phòng thực tế <span class="text-danger">*</span></label>
-                        <input type="date" name="return_date" class="form-control" style="background-color: #f8fafc; cursor: not-allowed;" value="{{ date('Y-m-d') }}" readonly required>
-                        <div class="form-text text-muted" style="font-size: 11.5px;">Ngày trả phòng được cố định tự động theo ngày hiện tại thanh lý.</div>
+                        <input type="date" name="return_date" class="form-control" style="background-color: #f8fafc; cursor: not-allowed;" value="{{ now('Asia/Ho_Chi_Minh')->toDateString() }}" readonly required>
+                        <div class="form-text text-muted" style="font-size: 11.5px;">Ngày trả phòng là ngày thanh lý. Có thể thanh lý từ ngày sau ngày tạo hợp đồng và không trước ngày bắt đầu thuê hoặc kỳ ghi điện nước gần nhất.</div>
+                    </div>
+
+                    <div class="border rounded-3 p-3 mb-3" style="background:#f8fafc">
+                        <div class="fw-bold mb-1">Điện nước khi trả phòng</div>
+                        <div class="small text-muted mb-2">Chỉ số cũ: {{ $finalReading['reading'] ? 'kỳ ghi gần nhất' : 'lúc bắt đầu hợp đồng' }}. Nhập số trên đồng hồ lúc trả phòng.</div>
+                        @if($finalReading['uncertain'])
+                            <div class="alert alert-warning">Có chỉ số kỳ cũ chưa xác nhận ngày hoặc chưa gắn hợp đồng. Hãy kiểm tra dữ liệu điện nước trước khi thanh lý.</div>
+                        @endif
+                        <div class="row g-2">
+                            <div class="col-6"><label class="form-label small">Điện cũ (kWh)</label><input id="finalElectricOld" class="form-control" value="{{ $finalReading['electricity'] }}" readonly></div>
+                            <div class="col-6"><label class="form-label small">Điện mới (kWh) *</label><input type="number" name="electricity_new" id="finalElectricNew" class="form-control" min="{{ $finalReading['electricity'] }}" step="0.01" required></div>
+                            <div class="col-12"><label class="form-label small">Đơn giá điện (đ/kWh) *</label><input type="number" name="electricity_price" id="finalElectricPrice" class="form-control" min="0" step="0.01" value="{{ $finalReading['electricity_price'] }}" required></div>
+                            <div class="col-6"><label class="form-label small">Nước cũ (m³)</label><input id="finalWaterOld" class="form-control" value="{{ $finalReading['water'] }}" readonly></div>
+                            <div class="col-6"><label class="form-label small">Nước mới (m³) *</label><input type="number" name="water_new" id="finalWaterNew" class="form-control" min="{{ $finalReading['water'] }}" step="0.01" required></div>
+                            <div class="col-12"><label class="form-label small">Đơn giá nước (đ/m³) *</label><input type="number" name="water_price" id="finalWaterPrice" class="form-control" min="0" step="0.01" value="{{ $finalReading['water_price'] }}" required></div>
+                        </div>
+                        <div class="fw-bold mt-3">Tiền điện nước: <span id="finalUtilityTotal">Nhập chỉ số mới để tính</span></div>
+                        <div class="small text-muted">Nếu có phát sinh, hệ thống tạo hóa đơn riêng và thông báo cho người thuê thanh toán. Không tự trừ vào cọc.</div>
                     </div>
 
                     <div class="mb-3" id="deductionGroup">
-                        <label class="form-label small fw-bold text-dark" id="deductionLabel">Số tiền khấu trừ (bù điện nước, vi phạm, hỏng đồ đạc)</label>
+                        <label class="form-label small fw-bold text-dark" id="deductionLabel">Số tiền khấu trừ cọc khác (vi phạm, hỏng đồ đạc)</label>
                         <div class="input-group">
                             <input type="number" id="terminateDeduction" name="deduction_amount" class="form-control" min="0" max="{{ (float)$contract->deposit }}" value="0" step="1000">
                             <span class="input-group-text">đ</span>
@@ -750,7 +784,7 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-dark">Lý do khấu trừ (nếu có)</label>
-                        <input type="text" id="terminateReason" name="deduction_reason" class="form-control" placeholder="Ví dụ: Bù trừ hóa đơn điện nước cuối kỳ, hao mòn tài sản...">
+                        <input type="text" id="terminateReason" name="deduction_reason" class="form-control" placeholder="Ví dụ: Hỏng đồ đạc...">
                     </div>
 
                     <div class="mb-3">
@@ -786,6 +820,17 @@
         const optEarlyWrap = document.getElementById('optEarlyWrap');
         const refundBox = document.getElementById('refundBox');
         const refundBoxLabel = document.getElementById('refundBoxLabel');
+
+        const utilityFields = ['finalElectricOld', 'finalElectricNew', 'finalElectricPrice', 'finalWaterOld', 'finalWaterNew', 'finalWaterPrice'].map(id => document.getElementById(id));
+        function updateFinalUtility() {
+            const [eo, en, ep, wo, wn, wp] = utilityFields;
+            const output = document.getElementById('finalUtilityTotal');
+            if (!output || !en?.value || !wn?.value) { if (output) output.textContent = 'Nhập chỉ số mới để tính'; return; }
+            const electric = Number(en.value) - Number(eo.value), water = Number(wn.value) - Number(wo.value);
+            output.textContent = electric < 0 || water < 0 ? 'Chỉ số mới phải từ chỉ số cũ trở lên' : new Intl.NumberFormat('vi-VN').format(electric * Number(ep.value) + water * Number(wp.value)) + ' đ';
+        }
+        utilityFields.forEach(field => field?.addEventListener('input', updateFinalUtility));
+        updateFinalUtility();
 
         function updateRefund() {
             if (termTypeEarly && termTypeEarly.checked) {

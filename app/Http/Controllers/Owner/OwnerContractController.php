@@ -10,6 +10,8 @@ use App\Models\Notification;
 use App\Models\Room;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\UtilityReading;
+use App\Models\Invoice;
 use App\Services\ResendService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
@@ -18,6 +20,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class OwnerContractController extends Controller{
     public function index(Request $request)
@@ -73,11 +76,13 @@ class OwnerContractController extends Controller{
         }
 
         $rooms = Room::query()
-            ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id))
+            ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id)->where('status', 'active'))
             ->where('status', 'available')
             ->with('property:id,name')
             ->orderBy('name')
             ->get();
+        $selectedRoomId = old('room_id', $request->input('room_id'));
+        $selectedPropertyId = $rooms->firstWhere('id', $selectedRoomId)?->property_id;
 
         // Danh sách tất cả lịch hẹn xem phòng của chủ trọ (pending & confirmed)
         $appointments = DB::table('viewing_appointments as va')
@@ -148,18 +153,31 @@ class OwnerContractController extends Controller{
         }
 
         $services = Service::query()
-            ->where('owner_id', $owner->id)
-            ->where('status', 'active')
+            ->join('property_services as ps', 'ps.service_id', '=', 'services.id')
+            ->join('properties as p', 'p.id', '=', 'ps.property_id')
+            ->where('services.owner_id', $owner->id)
+            ->where('services.status', 'active')
+            ->where('ps.status', 'active')
+            ->where('p.owner_id', $owner->id)
+            ->where('p.status', 'active')
+            ->whereIn('ps.property_id', $rooms->pluck('property_id')->unique())
             // Điện và nước đã được tính theo chỉ số, không phải dịch vụ cố định của hợp đồng.
-            ->whereNotIn('unit', ['kWh', 'm³'])
-            ->orderBy('name')
-            ->get(['id', 'name', 'unit', 'price']);
+            ->whereNotIn('services.unit', ['kWh', 'm³'])
+            ->orderBy('ps.property_id')
+            ->orderBy('services.name')
+            ->get([
+                'services.id',
+                'services.name',
+                'services.unit',
+                'ps.price as price',
+                'ps.property_id',
+            ]);
 
         // Yêu cầu thuê (lịch xem phòng) mà người thuê gửi tới các phòng của chủ trọ.
         // Dùng để chọn nhanh người thuê + phòng khi tạo hợp đồng.
         $requests = $appointments->take(20);
 
-        return view('owner.contracts.create-form', compact('rooms', 'tenants', 'services', 'requests', 'appointmentsByRoom'));
+        return view('owner.contracts.create-form', compact('rooms', 'tenants', 'services', 'requests', 'appointmentsByRoom', 'selectedPropertyId'));
     }
 
     public function show(Request $request, Contract $contract)
@@ -171,13 +189,34 @@ class OwnerContractController extends Controller{
         if (! $request->user()) {
             $contract->load(['room.property', 'tenant:id,name,email,phone,identity_card', 'members', 'termination', 'services']);
 
-            return view('owner.contracts.detail', compact('contract'));
+            $finalReading = $this->finalUtilityBaseline($contract);
+            return view('owner.contracts.detail', compact('contract', 'finalReading'));
         }
 
         $this->ownedContract($request, $contract);
         $contract->load(['room.property', 'tenant:id,name,email,phone,identity_card', 'members', 'termination', 'services']);
 
-        return view('owner.contracts.detail', compact('contract'));
+        $finalReading = $this->finalUtilityBaseline($contract);
+        return view('owner.contracts.detail', compact('contract', 'finalReading'));
+    }
+
+    private function finalUtilityBaseline(Contract $contract): array
+    {
+        $reading = UtilityReading::query()->where('room_id', $contract->room_id)
+            ->where('contract_id', $contract->id)->orderByDesc('month')->first();
+        $legacy = UtilityReading::query()->where('room_id', $contract->room_id)->whereNull('contract_id')
+            ->whereDate('month', '>=', \Carbon\Carbon::parse($contract->start_date)->startOfMonth())
+            ->when($reading, fn ($query) => $query->whereDate('month', '>', $reading->month))
+            ->exists();
+        $prices = $contract->room ? app(OwnerUtilitiesController::class)->getPreviousReadingInfo($contract->room, now('Asia/Ho_Chi_Minh')->toDateString()) : [];
+        return [
+            'reading' => $reading,
+            'electricity' => (float) ($reading?->electricity_new ?? $contract->initial_electricity_reading),
+            'water' => (float) ($reading?->water_new ?? $contract->initial_water_reading),
+            'uncertain' => $legacy || ($reading && (! $reading->period_end || ! $reading->reading_date_confirmed)),
+            'electricity_price' => $reading?->electricity_price ?? ($prices['electricity_price'] ?? 3500),
+            'water_price' => $reading?->water_price ?? ($prices['water_price'] ?? 20000),
+        ];
     }
 
     public function store(Request $request)
@@ -193,7 +232,7 @@ class OwnerContractController extends Controller{
         $rules = [
             'tenant_mode' => ['nullable', 'in:existing,walkin'],
             'room_id' => ['required', 'integer', 'exists:rooms,id'],
-            'start_date' => ['required', 'date'],
+            'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after:start_date'],
             'rent' => ['required', 'numeric', 'min:0'],
             'deposit' => ['required', 'numeric', 'min:0'],
@@ -220,6 +259,7 @@ class OwnerContractController extends Controller{
             'room_id.exists' => 'Phòng được chọn không tồn tại trên hệ thống.',
             'start_date.required' => 'Vui lòng chọn ngày bắt đầu hợp đồng.',
             'start_date.date' => 'Ngày bắt đầu hợp đồng không hợp lệ.',
+            'start_date.after_or_equal' => 'Ngày bắt đầu hợp đồng không được trước ngày hôm nay.',
             'end_date.required' => 'Vui lòng chọn ngày kết thúc hợp đồng.',
             'end_date.date' => 'Ngày kết thúc hợp đồng không hợp lệ.',
             'end_date.after' => 'Ngày kết thúc hợp đồng phải sau ngày bắt đầu.',
@@ -263,9 +303,17 @@ class OwnerContractController extends Controller{
         if ($room->property->owner_id !== $owner->id) {
             return back()->withErrors(['room_id' => 'Phòng này không thuộc quyền quản lý của bạn.'])->withInput();
         }
+        if ($room->property->status !== 'active') {
+            return back()->withErrors(['room_id' => 'Nhà trọ đang tạm ngưng, không thể lập hợp đồng mới.'])->withInput();
+        }
 
         if (Contract::query()->where('room_id', $room->id)->where('status', 'active')->exists()) {
-            return back()->withErrors(['room_id' => 'Phòng này hiện đã có hợp đồng đang hoạt động.'])->withInput();
+            $message = 'Phòng này hiện đã có hợp đồng đang hoạt động.';
+            if ($request->expectsJson()) {
+                abort(422, $message);
+            }
+
+            return back()->withErrors(['room_id' => $message])->withInput();
         }
 
         $isNewAccount = false;
@@ -325,11 +373,17 @@ class OwnerContractController extends Controller{
 
         $selectedServiceIds = collect($data['service_ids'] ?? [])->map(fn ($id) => (int) $id)->unique()->values();
         $services = Service::query()
-            ->where('owner_id', $owner->id)
-            ->where('status', 'active')
-            ->whereNotIn('unit', ['kWh', 'm³'])
-            ->whereIn('id', $selectedServiceIds)
-            ->get(['id', 'price']);
+            ->join('property_services as ps', 'ps.service_id', '=', 'services.id')
+            ->join('properties as p', 'p.id', '=', 'ps.property_id')
+            ->where('services.owner_id', $owner->id)
+            ->where('services.status', 'active')
+            ->where('ps.status', 'active')
+            ->where('p.owner_id', $owner->id)
+            ->where('p.status', 'active')
+            ->where('ps.property_id', $room->property_id)
+            ->whereNotIn('services.unit', ['kWh', 'm³'])
+            ->whereIn('services.id', $selectedServiceIds)
+            ->get(['services.id', 'ps.price as price']);
         abort_unless($services->count() === $selectedServiceIds->count(), 422, 'Một hoặc nhiều dịch vụ không hợp lệ.');
 
         $status = $data['status'] ?? 'draft';
@@ -451,21 +505,25 @@ class OwnerContractController extends Controller{
             'identity_card.regex' => 'Số CCCD phải gồm đúng 12 chữ số (hoặc CMND 9 chữ số), không được là số âm hay chứa chữ cái.',
             'phone.regex' => 'Số điện thoại phải gồm đúng 10 chữ số, không được là số âm và phải bắt đầu bằng số 0.',
         ]);
-        $room = $contract->room;
-        $memberError = null;
-        if (1 + $contract->members()->count() >= $room->max_people) {
-            $memberError = 'Phòng đã đủ số người tối đa (' . $room->max_people . ' người).';
-        } elseif ($contract->members()->where('identity_card', $data['identity_card'])->exists()) {
-            $memberError = 'CCCD này đã có trong hợp đồng.';
-        }
-        if ($memberError) {
-            if (! $request->expectsJson()) {
-                return back()->withErrors(['member' => $memberError])->withInput();
+        $member = DB::transaction(function () use ($contract, $data) {
+            $locked = Contract::query()->with(['room', 'tenant'])->lockForUpdate()->findOrFail($contract->id);
+            if ($locked->status === 'terminated') {
+                throw ValidationException::withMessages(['member' => 'Hợp đồng đã thanh lý, không thể thay đổi người ở cùng.']);
             }
-            abort(422, $memberError);
-        }
-
-        $member = $contract->members()->create($data);
+            if (1 + $locked->members()->count() >= $locked->room->max_people) {
+                throw ValidationException::withMessages(['member' => 'Phòng đã đủ số người tối đa (' . $locked->room->max_people . ' người).']);
+            }
+            if (($locked->tenant?->identity_card && $locked->tenant->identity_card === $data['identity_card']) ||
+                $locked->members()->where('identity_card', $data['identity_card'])->exists()) {
+                throw ValidationException::withMessages(['identity_card' => 'CCCD/CMND này đã được sử dụng bởi người trong hợp đồng.']);
+            }
+            $phone = $data['phone'] ?? null;
+            if ($phone && (($locked->tenant?->phone && $locked->tenant->phone === $phone) ||
+                $locked->members()->where('phone', $phone)->exists())) {
+                throw ValidationException::withMessages(['phone' => 'Số điện thoại này đã được sử dụng bởi người trong hợp đồng.']);
+            }
+            return $locked->members()->create($data);
+        });
 
         if (! $request->expectsJson()) {
             return back()->with('success', 'Đã thêm người ở cùng thành công.');
@@ -491,6 +549,10 @@ class OwnerContractController extends Controller{
     {
         $this->ownedContract($request, $contract);
         abort_unless($contract->status === 'draft', 422, 'Hợp đồng này không ở trạng thái nháp.');
+        if ($contract->room?->property?->status !== 'active') {
+            if (! $request->expectsJson()) return back()->withErrors(['contract' => 'Nhà trọ đang tạm ngưng, không thể kích hoạt hợp đồng mới.']);
+            return response()->json(['message' => 'Nhà trọ đang tạm ngưng, không thể kích hoạt hợp đồng mới.'], 422);
+        }
 
         DB::transaction(function () use ($contract) {
             $contract->update([
@@ -543,6 +605,10 @@ class OwnerContractController extends Controller{
             'deduction_amount' => ['nullable', 'numeric', 'min:0'],
             'deduction_reason' => ['nullable', 'string'],
             'return_date' => ['required', 'date'],
+            'electricity_new' => ['required', 'numeric', 'min:0'],
+            'electricity_price' => ['required', 'numeric', 'min:0'],
+            'water_new' => ['required', 'numeric', 'min:0'],
+            'water_price' => ['required', 'numeric', 'min:0'],
             'note' => ['nullable', 'string'],
         ], [
             'return_date.required' => 'Vui lòng chọn ngày kết thúc / trả phòng thực tế.',
@@ -553,6 +619,27 @@ class OwnerContractController extends Controller{
         $termination = DB::transaction(function () use ($contract, $data, $terminationType) {
             $contract = Contract::query()->lockForUpdate()->with('room')->findOrFail($contract->id);
             abort_if($contract->status === 'terminated' || $contract->termination()->exists(), 422, 'Hợp đồng này đã được thanh lý trước đó.');
+
+            $createdDate = $contract->created_at->copy()->setTimezone('Asia/Ho_Chi_Minh')->startOfDay();
+            $earliestTermination = $createdDate->copy()->addDay();
+            $returnDate = \Carbon\Carbon::parse($data['return_date'], 'Asia/Ho_Chi_Minh')->startOfDay();
+            if (now('Asia/Ho_Chi_Minh')->startOfDay()->lt($earliestTermination) || $returnDate->lt($earliestTermination)) {
+                throw ValidationException::withMessages(['return_date' => 'Không thể thanh lý trong ngày tạo hợp đồng (' . $createdDate->format('d/m/Y') . '). Có thể thanh lý từ ngày ' . $earliestTermination->format('d/m/Y') . '.']);
+            }
+
+            $baseline = $this->finalUtilityBaseline($contract);
+            if ($baseline['uncertain']) {
+                throw ValidationException::withMessages(['electricity_new' => 'Có chỉ số kỳ cũ chưa xác nhận ngày hoặc chưa gắn hợp đồng. Hãy kiểm tra và xác nhận dữ liệu điện nước trước khi thanh lý.']);
+            }
+            $baselineDate = $baseline['reading']?->period_end ?? $contract->start_date;
+            if ($returnDate->lt(\Carbon\Carbon::parse($baselineDate)->startOfDay())) {
+                $dateLabel = $baseline['reading'] ? 'ngày ghi chỉ số gần nhất' : 'ngày bắt đầu hợp đồng';
+                throw ValidationException::withMessages(['return_date' => 'Ngày trả phòng ' . $returnDate->format('d/m/Y') . ' không được trước ' . $dateLabel . ' (' . \Carbon\Carbon::parse($baselineDate)->format('d/m/Y') . '). Vui lòng kiểm tra lại ngày trên hợp đồng và chỉ số điện nước.']);
+            }
+            if ($data['electricity_new'] < $baseline['electricity'] || $data['water_new'] < $baseline['water']) {
+                throw ValidationException::withMessages(['electricity_new' => 'Chỉ số điện và nước khi trả phòng không được nhỏ hơn chỉ số cũ.']);
+            }
+            $utilityTotal = round(($data['electricity_new'] - $baseline['electricity']) * $data['electricity_price'] + ($data['water_new'] - $baseline['water']) * $data['water_price'], 2);
 
             $deposit = (float) $contract->deposit;
 
@@ -580,7 +667,40 @@ class OwnerContractController extends Controller{
                 'refund_amount' => $refund,
                 'return_date' => $data['return_date'],
                 'note' => $data['note'] ?? null,
+                'utility_reading_id' => $baseline['reading']?->id,
+                'electricity_old' => $baseline['electricity'],
+                'electricity_new' => $data['electricity_new'],
+                'electricity_price' => $data['electricity_price'],
+                'water_old' => $baseline['water'],
+                'water_new' => $data['water_new'],
+                'water_price' => $data['water_price'],
+                'utility_total' => $utilityTotal,
             ]);
+
+            if ($utilityTotal > 0) {
+                $issueDate = now('Asia/Ho_Chi_Minh')->startOfDay();
+                $invoice = Invoice::query()->create([
+                    'invoice_code' => 'INV-TL-' . $termination->id . '-' . strtoupper(Str::random(8)),
+                    'contract_id' => $contract->id,
+                    'billing_month' => $returnDate->copy()->startOfMonth(),
+                    'issue_date' => $issueDate->toDateString(),
+                    'due_date' => $issueDate->copy()->addDays(5)->toDateString(),
+                    'subtotal' => $utilityTotal,
+                    'discount' => 0,
+                    'total' => $utilityTotal,
+                    'status' => 'unpaid',
+                ]);
+                $invoice->items()->createMany([
+                    ['type' => 'electricity', 'description' => 'Điện phát sinh đến ngày trả phòng (' . $baseline['electricity'] . ' → ' . $data['electricity_new'] . ' kWh)', 'quantity' => $data['electricity_new'] - $baseline['electricity'], 'unit_price' => $data['electricity_price'], 'amount' => round(($data['electricity_new'] - $baseline['electricity']) * $data['electricity_price'], 2)],
+                    ['type' => 'water', 'description' => 'Nước phát sinh đến ngày trả phòng (' . $baseline['water'] . ' → ' . $data['water_new'] . ' m³)', 'quantity' => $data['water_new'] - $baseline['water'], 'unit_price' => $data['water_price'], 'amount' => round(($data['water_new'] - $baseline['water']) * $data['water_price'], 2)],
+                ]);
+                $termination->update(['utility_invoice_id' => $invoice->id]);
+                if ($contract->tenant_id) {
+                    Notification::notify($contract->tenant_id, 'Hóa đơn điện nước khi trả phòng',
+                        'Hóa đơn ' . $invoice->invoice_code . ': ' . number_format($utilityTotal) . ' đ. Vui lòng mở hóa đơn để thanh toán; hạn thanh toán ' . $issueDate->copy()->addDays(5)->format('d/m/Y') . '.',
+                        'invoice', 'invoice', $invoice->id);
+                }
+            }
 
             $contract->update(['status' => 'terminated', 'terminated_at' => now()]);
             if ($contract->room) {

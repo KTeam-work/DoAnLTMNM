@@ -66,6 +66,8 @@ class Notification extends Model
                 'maintenance' => $this->reference_id ? route('tenant.maintenance.show', $this->reference_id) : null,
                 'contract' => $this->reference_id ? route('tenant.contracts.show', $this->reference_id) : null,
                 'rental_post' => route('owner.rental-posts.index'),
+                'platform_fee' => \Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->role === 'owner'
+                    ? route('owner.platform-fees.index') : null,
                 'user' => route('admin.users', ['status' => 'unlock_requested']),
                 'appointment' => \Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->role === 'owner'
                     ? route('owner.appointments.index')

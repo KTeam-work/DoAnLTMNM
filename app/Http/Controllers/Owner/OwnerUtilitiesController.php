@@ -211,15 +211,16 @@ class OwnerUtilitiesController extends Controller
         }
 
         $selectedPropertyId = $request->input('property_id');
-        $prefillMonth = $request->input('month', $reading ? Carbon::parse($reading->month)->format('Y-m') : now()->format('Y-m'));
-        $targetMonthDate = Carbon::parse($prefillMonth)->startOfMonth()->toDateString();
+        $prefillMonth = $request->input('month', $reading ? Carbon::parse($reading->month)->format('Y-m') : now('Asia/Ho_Chi_Minh')->format('Y-m'));
+        $today = now('Asia/Ho_Chi_Minh')->toDateString();
+        $prefillDate = old('reading_date', $request->input('reading_date', $prefillMonth === substr($today, 0, 7) ? $today : $prefillMonth . '-01'));
+        $prefillMonth = Carbon::parse($prefillDate)->format('Y-m');
 
         $properties = $owner
             ? \App\Models\Property::query()->where('owner_id', $owner->id)->orderBy('name')->get()
             : collect();
 
-        // Chỉ lấy những phòng ĐANG CÓ HỢP ĐỒNG HIỆU LỰC (đang được thuê)
-        // VÀ LOẠI BỎ các phòng đã có chỉ số trong tháng này (nếu không phải đang sửa bản ghi đó)
+        // Hiển thị phòng có hợp đồng hiệu lực; trạng thái trùng kỳ được kiểm tra theo ngày chọn.
         $rooms = $owner
             ? Room::query()
                 ->whereHas('property', fn ($query) => $query->where('owner_id', $owner->id))
@@ -227,7 +228,8 @@ class OwnerUtilitiesController extends Controller
                 ->when($selectedPropertyId && ! $reading, fn ($q) => $q->where('property_id', $selectedPropertyId))
                 ->with([
                     'property:id,name,owner_id',
-                    'contracts' => fn ($query) => $query->where('status', 'active')->with('tenant:id,name'),
+                    'contracts' => fn ($query) => $query->where('status', 'active')->orderByDesc('start_date')->orderByDesc('id')->with('tenant:id,name'),
+                    'utilityReadings' => fn ($query) => $query->orderByDesc('month'),
                 ])
                 ->orderBy('name')
                 ->get()
@@ -239,18 +241,33 @@ class OwnerUtilitiesController extends Controller
         }
 
         $prefillRoomId = $request->input('room_id', $reading?->room_id ?? $rooms->first()?->id);
-        $recordedRoomIds = UtilityReading::query()->whereIn('room_id', $rooms->pluck('id'))
-            ->whereDate('month', $targetMonthDate)->pluck('room_id')->map(fn ($id) => (int) $id)->all();
+
+        $suggestedDates = [];
+        foreach ($rooms as $room) {
+            $contract = $room->contracts->first();
+            if (! $contract) continue;
+            $start = Carbon::parse($contract->start_date)->startOfDay();
+            $latest = $room->utilityReadings->first(fn ($item) =>
+                $item->contract_id == $contract->id ||
+                ($item->contract_id === null && Carbon::parse($item->month)->greaterThanOrEqualTo($start->copy()->startOfMonth()))
+            );
+            $month = $latest ? Carbon::parse($latest->month)->startOfMonth()->addMonth() : $start->copy()->startOfMonth()->addMonth();
+            $suggestedDates[$room->id] = $month->day(min($start->day, $month->daysInMonth))->toDateString();
+        }
+        if (! $reading && ! old('reading_date') && ! $request->filled('reading_date') && ! $request->filled('month') && isset($suggestedDates[$prefillRoomId])) {
+            $prefillDate = $suggestedDates[$prefillRoomId];
+            $prefillMonth = substr($prefillDate, 0, 7);
+        }
 
         $initialPrevious = null;
         if (! $reading && $prefillRoomId && $owner) {
             $room = $rooms->firstWhere('id', (int) $prefillRoomId);
             if ($room) {
-                $initialPrevious = $this->getPreviousReadingInfo($room, $prefillMonth);
+                $initialPrevious = $this->getPreviousReadingInfo($room, $prefillDate, old('previous_reading_date'));
             }
         }
 
-        return view('owner.utilities.create', compact('rooms', 'properties', 'reading', 'prefillRoomId', 'prefillMonth', 'selectedPropertyId', 'initialPrevious', 'recordedRoomIds'));
+        return view('owner.utilities.create', compact('rooms', 'properties', 'reading', 'prefillRoomId', 'prefillMonth', 'prefillDate', 'selectedPropertyId', 'initialPrevious', 'suggestedDates'));
     }
 
     
@@ -260,14 +277,14 @@ class OwnerUtilitiesController extends Controller
     {
         $owner = $this->actingOwner($request);
         $roomId = $request->integer('room_id');
-        $month = $request->input('month', now()->format('Y-m'));
+        $input = $request->validate(['reading_date' => ['required', 'date_format:Y-m-d'], 'previous_reading_date' => ['nullable', 'date_format:Y-m-d']]);
 
         if (! $roomId) {
             return response()->json(['error' => 'Vui lòng chọn phòng.'], 400);
         }
 
         $room = $this->ownedRoom($owner, $roomId);
-        $info = $this->getPreviousReadingInfo($room, $month);
+        $info = $this->getPreviousReadingInfo($room, $input['reading_date'], $input['previous_reading_date'] ?? null);
 
         return response()->json($info);
     }
@@ -325,7 +342,11 @@ class OwnerUtilitiesController extends Controller
             abort(422, $message);
         }
 
-        $data['month'] = Carbon::parse($data['month'])->startOfMonth()->toDateString();
+        $readingDate = $data['reading_date'];
+        $legacyDate = $data['previous_reading_date'] ?? null;
+        unset($data['reading_date'], $data['previous_reading_date']);
+        $info = $this->getPreviousReadingInfo($room, $readingDate, $legacyDate);
+        $data['month'] = $info['billing_month'] ?? Carbon::parse($readingDate)->startOfMonth()->toDateString();
         if (UtilityReading::query()->where('room_id', $room->id)->whereDate('month', $data['month'])->exists()) {
             $message = 'Phòng này đã có chỉ số cho tháng ' . Carbon::parse($data['month'])->format('m/Y') . '.';
             if (! $request->expectsJson()) {
@@ -334,7 +355,6 @@ class OwnerUtilitiesController extends Controller
             abort(422, 'A reading already exists for this room and month.');
         }
 
-        $info = $this->getPreviousReadingInfo($room, $data['month']);
         if (! empty($info['cycle_error'])) {
             if (! $request->expectsJson()) return back()->withErrors(['month' => $info['cycle_error']])->withInput();
             return response()->json(['message' => $info['cycle_error'], 'errors' => ['month' => [$info['cycle_error']]]], 422);
@@ -342,6 +362,7 @@ class OwnerUtilitiesController extends Controller
         $data['contract_id'] = $info['contract_id'];
         $data['period_start'] = $info['period_start'];
         $data['period_end'] = $info['period_end'];
+        $data['reading_date_confirmed'] = true;
         $data['electricity_old'] = $info['electricity_old'];
         $data['water_old'] = $info['water_old'];
         if ($redirect = $this->invalidReadingsRedirect($request, $data)) {
@@ -350,8 +371,7 @@ class OwnerUtilitiesController extends Controller
         $reading = UtilityReading::query()->create($data);
 
         if (! $request->expectsJson()) {
-            $monthParam = Carbon::parse($data['month'])->format('Y-m');
-            return redirect()->route('owner.utilities.index', ['month' => $monthParam])
+            return redirect()->route('owner.utilities.index', ['all' => 1])
                 ->with('success', 'Đã ghi chỉ số điện nước tháng ' . Carbon::parse($data['month'])->format('m/Y') . '.');
         }
 
@@ -378,6 +398,11 @@ class OwnerUtilitiesController extends Controller
             return response()->json(['message' => $message], 422);
         }
         $data = $this->validatedReading($request, true);
+        if (isset($data['reading_date']) && (! $utilityReading->period_end || $data['reading_date'] !== $utilityReading->period_end->toDateString())) {
+            if (! $request->expectsJson()) return back()->withErrors(['reading_date' => 'Không thể đổi ngày chốt của bản ghi đã lưu.']);
+            return response()->json(['message' => 'Không thể đổi ngày chốt của bản ghi đã lưu.'], 422);
+        }
+        unset($data['reading_date'], $data['previous_reading_date']);
         abort_if($data === [], 422, 'Provide at least one utility reading field to update.');
         if (isset($data['room_id']) && (int) $data['room_id'] !== $utilityReading->room_id) {
             $message = 'Không thể chuyển chỉ số sang phòng khác.';
@@ -416,7 +441,7 @@ class OwnerUtilitiesController extends Controller
                 ? Carbon::parse($data['month'])->format('Y-m')
                 : Carbon::parse($utilityReading->month)->format('Y-m');
 
-            return redirect()->route('owner.utilities.index', ['month' => $monthParam])
+            return redirect()->route('owner.utilities.index', ['all' => 1])
                 ->with('success', 'Đã cập nhật chỉ số điện nước tháng ' . Carbon::parse($monthParam)->format('m/Y') . '.');
         }
 
@@ -468,7 +493,9 @@ class OwnerUtilitiesController extends Controller
 
         $validated = $request->validate([
             'room_id' => [$prefix, 'integer', 'exists:rooms,id'],
-            'month' => [$prefix, 'date'],
+            'month' => [$updating ? 'sometimes' : 'nullable', 'date'],
+            'reading_date' => [$updating ? 'sometimes' : 'required', 'date_format:Y-m-d'],
+            'previous_reading_date' => ['nullable', 'date_format:Y-m-d'],
             'electricity_old' => ['nullable', 'numeric', 'min:0'],
             'electricity_new' => [$prefix, 'numeric', 'min:0'],
             'electricity_price' => [$prefix, 'numeric', 'min:0'],
@@ -493,9 +520,22 @@ class OwnerUtilitiesController extends Controller
      * 2. Nếu chưa có -> tìm chỉ số ban đầu từ hợp đồng thuê đang hiệu lực
      * 3. Mặc định là 0
      */
-    public function getPreviousReadingInfo(Room $room, string $month): array
+    public function getPreviousReadingInfo(Room $room, string $readingDate, ?string $legacyDate = null): array
     {
-        $targetMonth = Carbon::parse($month)->startOfMonth()->toDateString();
+        $targetDate = Carbon::parse($readingDate)->startOfDay();
+        $contract = Contract::query()->where('room_id', $room->id)->where('status', 'active')
+            ->orderByDesc('start_date')->orderByDesc('id')->first();
+        $dueDate = null;
+        if ($contract) {
+            $start = Carbon::parse($contract->start_date)->startOfDay();
+            $latest = $room->utilityReadings()->where(function ($query) use ($contract, $start) {
+                $query->where('contract_id', $contract->id)
+                    ->orWhere(fn ($legacy) => $legacy->whereNull('contract_id')->whereDate('month', '>=', $start->copy()->startOfMonth()));
+            })->orderByDesc('month')->first();
+            $nextMonth = $latest ? Carbon::parse($latest->month)->startOfMonth()->addMonth() : $start->copy()->startOfMonth()->addMonth();
+            $dueDate = $nextMonth->day(min($start->day, $nextMonth->daysInMonth))->startOfDay();
+        }
+        $targetMonth = ($dueDate ?? $targetDate)->copy()->startOfMonth()->toDateString();
 
         if (! $room->relationLoaded('property')) {
             $room->load('property');
@@ -574,27 +614,61 @@ class OwnerUtilitiesController extends Controller
             }
         }
 
-        // Kỳ được xác định theo ngày bắt đầu của hợp đồng hiện hành.
-        $contract = Contract::query()->where('room_id', $room->id)->where('status', 'active')
-            ->orderByDesc('start_date')->orderByDesc('id')->first();
-        $cycle = $contract ? $this->utilityCycle($contract, $month) : null;
+        // Ngày chốt là ngày thực tế; tháng vẫn dùng để ghép hóa đơn.
         $meta = [
             'contract_id' => $contract?->id,
-            'period_start' => $cycle['start'] ?? null,
-            'period_end' => $cycle['end'] ?? null,
-            'cycle_error' => $cycle['error'] ?? ($contract ? null : 'Phòng chưa có hợp đồng đang hiệu lực.'),
+            'period_start' => null,
+            'period_end' => $targetDate->toDateString(),
+            'cycle_error' => $contract ? null : 'Phòng chưa có hợp đồng đang hiệu lực.',
+            'needs_previous_date' => false,
+            'billing_month' => $targetMonth,
+            'scheduled_date' => $dueDate?->toDateString(),
+            'termination_required' => false,
         ];
-        $startMonth = $contract ? Carbon::parse($contract->start_date)->startOfMonth() : null;
-        $previousMonth = Carbon::parse($targetMonth)->subMonthNoOverflow();
-        $firstCycle = $startMonth && $previousMonth->isSameMonth($startMonth);
         $previous = null;
-        if ($contract && ! $firstCycle && empty($meta['cycle_error'])) {
-            $previous = $room->utilityReadings()->whereDate('month', $previousMonth->toDateString())
-                ->where(function ($query) use ($contract, $startMonth) {
-                    $query->where('contract_id', $contract->id)
-                        ->orWhere(fn ($legacy) => $legacy->whereNull('contract_id')->whereDate('month', '>', $startMonth->toDateString()));
-                })->first();
-            if (! $previous) $meta['cycle_error'] = 'Chưa có chỉ số kỳ trước (' . $previousMonth->format('m/Y') . '). Hãy ghi kỳ trước trước khi tiếp tục.';
+        if ($contract) {
+            $contractStart = Carbon::parse($contract->start_date)->startOfDay();
+            $contractEnd = $contract->end_date ? Carbon::parse($contract->end_date)->startOfDay() : null;
+            if ($targetDate->lessThanOrEqualTo($contractStart) || ($contractEnd && $targetDate->greaterThan($contractEnd))) {
+                $meta['cycle_error'] = 'Ngày chốt phải sau ngày bắt đầu và trong thời hạn hợp đồng.';
+            }
+            $readingQuery = $room->utilityReadings()->where(function ($query) use ($contract, $contractStart) {
+                $query->where('contract_id', $contract->id)
+                    ->orWhere(fn ($legacy) => $legacy->whereNull('contract_id')->whereDate('month', '>=', $contractStart->copy()->startOfMonth()));
+            });
+            if ((clone $readingQuery)->whereDate('month', '>', $targetMonth)->exists()) {
+                $meta['cycle_error'] = 'Đã có chỉ số của kỳ sau. Không thể thêm một kỳ cũ vào giữa.';
+            }
+            $previous = (clone $readingQuery)->whereDate('month', '<', $targetMonth)->orderByDesc('month')->first();
+            $periodStart = $contractStart;
+            if ($previous) {
+                if ($previous->period_end && $previous->reading_date_confirmed) {
+                    $periodStart = $previous->period_end->copy()->startOfDay();
+                } else {
+                    $meta['needs_previous_date'] = true;
+                    if ($legacyDate) {
+                        $candidate = Carbon::parse($legacyDate)->startOfDay();
+                        if (! $candidate->isSameMonth($previous->month) || $candidate->lessThan($contractStart) || $candidate->greaterThanOrEqualTo($targetDate)) {
+                            $meta['cycle_error'] = 'Ngày chốt kỳ cũ phải thuộc tháng ' . $previous->month->format('m/Y') . ', trong hợp đồng và trước ngày chốt mới.';
+                        } else {
+                            $periodStart = $candidate;
+                        }
+                    } else {
+                        $meta['cycle_error'] = 'Ngày chốt kỳ trước chưa được xác nhận. Hãy nhập ngày chốt thực tế của kỳ trước.';
+                    }
+                }
+            }
+            if ($periodStart->greaterThanOrEqualTo($targetDate)) {
+                $meta['cycle_error'] = 'Ngày chốt mới phải sau ngày chốt kỳ trước.';
+            }
+            if ($dueDate && $targetDate->lessThan($dueDate->copy()->subDays(3))) {
+                $meta['cycle_error'] = 'Chưa đến thời gian ghi điện nước. Nếu người thuê trả phòng sớm, vui lòng xem hợp đồng để xử lý thanh lý.';
+                $meta['termination_required'] = true;
+            }
+            if ($dueDate && $targetDate->greaterThan($dueDate)) {
+                $meta['cycle_error'] = 'Ngày ghi phải từ ' . $dueDate->copy()->subDays(3)->format('d/m/Y') . ' đến ' . $dueDate->format('d/m/Y') . '.';
+            }
+            $meta['period_start'] = empty($meta['cycle_error']) ? $periodStart->toDateString() : null;
         }
 
         if ($previous) {
@@ -649,33 +723,6 @@ class OwnerUtilitiesController extends Controller
         ]);
     }
 
-    private function utilityCycle(Contract $contract, string $month): array
-    {
-        $startDate = Carbon::parse($contract->start_date)->startOfDay();
-        $monthDate = Carbon::parse($month)->startOfMonth();
-        if ($monthDate->lessThanOrEqualTo($startDate->copy()->startOfMonth())) {
-            return ['error' => 'Kỳ đầu tiên chốt vào tháng sau ngày bắt đầu hợp đồng.'];
-        }
-        $day = $startDate->day;
-        $previousMonth = $monthDate->copy()->subMonthNoOverflow();
-        $periodStart = $previousMonth->copy()->day(min($day, $previousMonth->daysInMonth));
-        $periodEnd = $monthDate->copy()->day(min($day, $monthDate->daysInMonth));
-        if ($contract->end_date) {
-            $endDate = Carbon::parse($contract->end_date)->startOfDay();
-            if ($endDate->lessThanOrEqualTo($periodStart) || $endDate->lessThan($monthDate)) {
-                return ['error' => 'Kỳ này nằm ngoài thời hạn hợp đồng.'];
-            }
-            if ($endDate->lessThan($periodEnd)) $periodEnd = $endDate;
-        }
-        return ['start' => $periodStart->toDateString(), 'end' => $periodEnd->toDateString(), 'error' => null];
-    }
-
-    private function previousReadings(Room $room, string $month): array
-    {
-        $info = $this->getPreviousReadingInfo($room, $month);
-
-        return [$info['electricity_old'], $info['water_old']];
-    }
 
     private function assertNewReadingsAreValid(array $data): void
     {

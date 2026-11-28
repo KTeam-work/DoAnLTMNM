@@ -79,7 +79,7 @@
             $totalTenants = $tenants->count() + $tenants->reduce(function ($carry, $t) {
                 return $carry + optional($t->rentedContracts)->flatMap->members->count();
             }, 0);
-            $staying = $tenants->count();
+            $staying = $tenants->filter(fn ($tenant) => $tenant->rentedContracts->first()?->status === 'active')->count();
         @endphp
         <!-- =====================================================
              SEGMENTED FILTER TABS (NO ICONS)
@@ -142,6 +142,7 @@
                         <option value="">Tất cả trạng thái</option>
                         <option value="active">Đang ở</option>
                         <option value="leaving">Sắp chuyển đi</option>
+                        <option value="pending">Chưa kích hoạt / chờ thanh lý</option>
                         <option value="left">Đã chuyển đi</option>
                     </select>
 
@@ -219,7 +220,13 @@
                                 $contract = $tenant->rentedContracts->first();
                                 $isExp = $contract && $contract->status === 'active' && $contract->end_date && \Carbon\Carbon::parse($contract->end_date)->diffInDays(now(), false) > -60;
                                 $hasActive = $contract && $contract->status === 'active';
-                                $statusVal = $isExp ? 'leaving' : ($hasActive ? 'active' : 'left');
+                                $isLeft = $contract && $contract->status === 'terminated';
+                                $statusVal = $isExp ? 'leaving' : ($hasActive ? 'active' : ($isLeft ? 'left' : 'pending'));
+                                $inactiveLabel = match ($contract?->status) {
+                                    'draft' => 'Chưa kích hoạt',
+                                    'expired' => 'Chờ thanh lý',
+                                    default => 'Chưa xác định',
+                                };
                             @endphp
                             <tr class="tenant-row" data-status="{{ $statusVal }}" data-expiring="{{ $isExp ? '1' : '0' }}" data-active-contract="{{ $hasActive ? '1' : '0' }}">
                                 <td>
@@ -251,8 +258,10 @@
                                         <span class="badge-soft-warning">● Sắp chuyển đi</span>
                                     @elseif($hasActive)
                                         <span class="badge-soft-success">● Đang ở</span>
-                                    @else
+                                    @elseif($isLeft)
                                         <span class="badge-soft-secondary">● Đã chuyển đi</span>
+                                    @else
+                                        <span class="badge-soft-secondary">● {{ $inactiveLabel }}</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -290,8 +299,10 @@
                                         <span class="badge-soft-warning">● Sắp chuyển đi</span>
                                     @elseif($hasActive)
                                         <span class="badge-soft-success">● Đang ở</span>
-                                    @else
+                                    @elseif($isLeft)
                                         <span class="badge-soft-secondary">● Đã chuyển đi</span>
+                                    @else
+                                        <span class="badge-soft-secondary">● {{ $inactiveLabel }}</span>
                                     @endif
                                 </td>
                                 <td class="text-end"><span class="text-muted small">—</span></td>
@@ -363,7 +374,9 @@
                 } else if (selectedStatus === 'leaving') {
                     matchesSelect = (rowStatus === 'leaving' || isExpiring);
                 } else if (selectedStatus === 'left') {
-                    matchesSelect = (rowStatus === 'left' || !hasActive);
+                    matchesSelect = rowStatus === 'left';
+                } else if (selectedStatus === 'pending') {
+                    matchesSelect = rowStatus === 'pending';
                 }
 
                 const matchesSearch = !currentQuery || text.includes(currentQuery);

@@ -162,8 +162,8 @@
                                                         $activeContract = $room->contracts->first();
                                                         $tenantName = $activeContract?->tenant?->name ?? 'Đang thuê';
                                                     @endphp
-                                                    <option value="{{ $room->id }}" data-property-id="{{ $room->property_id }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>
-                                                        {{ $room->name }} · {{ $room->property->name ?? '' }} (Khách: {{ $tenantName }}) — {{ in_array($room->id, $recordedRoomIds, true) ? 'Đã ghi kỳ này' : 'Chưa ghi kỳ này' }}
+                                                    <option value="{{ $room->id }}" data-property-id="{{ $room->property_id }}" data-suggested-date="{{ $suggestedDates[$room->id] ?? '' }}" {{ (string) old('room_id', $prefillRoomId) === (string) $room->id ? 'selected' : '' }}>
+                                                        {{ $room->name }} · {{ $room->property->name ?? '' }} (Khách: {{ $tenantName }})
                                                     </option>
                                                 @endforeach
                                             </optgroup>
@@ -172,8 +172,9 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Tháng ghi chỉ số <span>*</span></label>
-                                <input type="month" name="month" id="input-month" class="custom-input" value="{{ old('month', $prefillMonth) }}" lang="vi" title="Chọn tháng và năm ghi chỉ số" required>
+                                <label for="input-reading-date">Ngày chốt chỉ số <span>*</span></label>
+                                <input type="date" name="reading_date" id="input-reading-date" class="custom-input" value="{{ $prefillDate }}" required>
+                                <small class="text-muted">Ngày dự kiến theo hợp đồng. Có thể ghi từ 3 ngày trước đến đúng ngày dự kiến; hóa đơn thuộc tháng của kỳ dự kiến.</small>
                             </div>
                         </div>
                     @endif
@@ -198,6 +199,14 @@
                         @endif
                     </div>
                     <div id="cycle-error" class="alert alert-warning mt-2 mb-0" {{ empty($initialPrevious['cycle_error']) ? 'hidden' : '' }}>{{ $initialPrevious['cycle_error'] ?? '' }}</div>
+                    <a id="termination-link" class="btn btn-outline-primary mt-2" href="{{ !empty($initialPrevious['contract_id']) ? route('owner.contracts.show', $initialPrevious['contract_id']) : '#' }}" {{ empty($initialPrevious['termination_required']) ? 'hidden' : '' }}>Xem hợp đồng để xử lý thanh lý</a>
+                    @if(!$reading)
+                        <div id="legacy-date-group" class="form-group mt-2" {{ empty($initialPrevious['needs_previous_date']) ? 'hidden' : '' }}>
+                            <label for="previous-reading-date">Ngày chốt thực tế của kỳ cũ <span>*</span></label>
+                            <input type="date" id="previous-reading-date" name="previous_reading_date" class="custom-input" value="{{ old('previous_reading_date') }}">
+                            <small class="text-muted">Ngày chốt của bản ghi cũ chưa được xác nhận. Kiểm tra và nhập ngày thực tế để tính kỳ mới.</small>
+                        </div>
+                    @endif
 
                     <!-- CANH BAO TRUNG KY -->
                     <div id="duplicate-warning" class="alert alert-warning align-items-center justify-content-between mt-2 mb-0" style="display: {{ $alreadyExists ? 'flex' : 'none' }}; background: #fff8e6; border: 1px solid #ffd591; color: #873800; border-radius: 12px; padding: 12px 16px;">
@@ -389,7 +398,9 @@
 document.addEventListener('DOMContentLoaded', function () {
     const isEditing = {{ $reading ? 'true' : 'false' }};
     const selectRoom = document.getElementById('select-room');
-    const inputMonth = document.getElementById('input-month');
+    const inputDate = document.getElementById('input-reading-date');
+    const legacyDate = document.getElementById('previous-reading-date');
+    const legacyGroup = document.getElementById('legacy-date-group');
     const inputEOld = document.getElementById('electricity_old');
     const inputENew = document.getElementById('electricity_new');
     const inputEPrice = document.getElementById('electricity_price');
@@ -400,6 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const duplicateWarning = document.getElementById('duplicate-warning');
     const cyclePeriod = document.getElementById('cycle-period');
     const cycleError = document.getElementById('cycle-error');
+    const terminationLink = document.getElementById('termination-link');
     const submitReading = document.getElementById('btn-submit-reading');
     let previousRequest = null;
     const duplicateMonthSpan = document.getElementById('duplicate-month');
@@ -479,16 +491,18 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function fetchPrevious() {
-        if (isEditing || !selectRoom || !inputMonth) return;
+        if (isEditing || !selectRoom || !inputDate) return;
         const roomId = selectRoom.value;
-        const month = inputMonth.value;
-        if (!roomId || !month) return;
+        const date = inputDate.value;
+        if (!roomId || !date) { if (submitReading) submitReading.disabled = true; return; }
 
         if (previousRequest) previousRequest.abort();
         previousRequest = new AbortController();
         if (submitReading) submitReading.disabled = true;
 
-        fetch(`{{ route('owner.utilities.previous-reading') }}?room_id=${roomId}&month=${month}`, { signal: previousRequest.signal })
+        const params = new URLSearchParams({ room_id: roomId, reading_date: date });
+        if (legacyDate && legacyDate.value) params.set('previous_reading_date', legacyDate.value);
+        fetch(`{{ route('owner.utilities.previous-reading') }}?${params}`, { signal: previousRequest.signal })
             .then(res => { if (!res.ok) throw new Error('Không tải được kỳ điện nước'); return res.json(); })
             .then(data => {
                 if (cyclePeriod) {
@@ -497,6 +511,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!cyclePeriod.hidden) cyclePeriod.textContent = `Kỳ sử dụng: ${formatDate(data.period_start)} – ${formatDate(data.period_end)}`;
                 }
                 if (cycleError) { cycleError.hidden = !data.cycle_error; cycleError.textContent = data.cycle_error || ''; }
+                if (terminationLink) {
+                    terminationLink.hidden = !data.termination_required;
+                    if (data.contract_id) terminationLink.href = `{{ url('/owner/contracts') }}/${encodeURIComponent(data.contract_id)}`;
+                }
+                if (legacyGroup) legacyGroup.hidden = !data.needs_previous_date;
+                if (legacyDate) legacyDate.required = Boolean(data.needs_previous_date);
                 if (submitReading) submitReading.disabled = Boolean(data.cycle_error || data.already_exists);
                 if (data.electricity_old !== undefined) {
                     if (inputEOld) inputEOld.value = data.electricity_old;
@@ -519,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (duplicateWarning) {
                     if (data.already_exists) {
                         duplicateWarning.style.display = 'flex';
-                        if (duplicateMonthSpan) duplicateMonthSpan.textContent = data.existing_month || month;
+                        if (duplicateMonthSpan) duplicateMonthSpan.textContent = data.existing_month || date.slice(0, 7);
                         if (duplicateEditLink) duplicateEditLink.href = `{{ route('owner.utilities.create') }}?id=${data.existing_id}`;
                     } else {
                         duplicateWarning.style.display = 'none';
@@ -570,26 +590,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectRoom.value = firstVisibleRoom;
             }
 
+            suggestRoomDate();
             fetchPrevious();
         });
     }
 
-    if (selectRoom) selectRoom.addEventListener('change', fetchPrevious);
-    if (inputMonth) {
-        inputMonth.addEventListener('change', () => {
-            if (!isEditing) {
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('month', inputMonth.value);
-                if (filterProperty && filterProperty.value) {
-                    currentUrl.searchParams.set('property_id', filterProperty.value);
-                }
-                currentUrl.searchParams.delete('room_id');
-                window.location.href = currentUrl.toString();
-            } else {
-                fetchPrevious();
-            }
-        });
+    function suggestRoomDate() {
+        if (isEditing || !selectRoom || !inputDate) return;
+        const suggested = selectRoom.selectedOptions[0]?.dataset.suggestedDate;
+        if (suggested) inputDate.value = suggested;
+        if (legacyDate) legacyDate.value = '';
     }
+    if (selectRoom) selectRoom.addEventListener('change', () => { suggestRoomDate(); fetchPrevious(); });
+    if (inputDate) inputDate.addEventListener('change', fetchPrevious);
+    if (legacyDate) legacyDate.addEventListener('change', fetchPrevious);
 
     function normalizePrice(input) {
         if (!input) return;

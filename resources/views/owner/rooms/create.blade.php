@@ -16,7 +16,7 @@
     </div>
 
     @if ($properties->isEmpty())
-    <div class="alert alert-warning">Bạn chưa có khu trọ nào. Hãy tạo khu trọ trước khi thêm phòng.</div>
+    <div class="alert alert-warning">Bạn chưa có nhà trọ nào. Hãy tạo nhà trọ trước khi thêm phòng.</div>
     @else
     <div class="panel-premium-card">
       <div class="panel-premium-header">
@@ -42,9 +42,10 @@
               <select id="property_id" name="property_id" class="form-select" required>
                 <option value="">Chọn khu trọ</option>
                 @foreach ($properties as $property)
-                  <option value="{{ $property->id }}" data-room-code="{{ $property->next_room_code }}" @selected(old('property_id')==$property->id)>{{ $property->name }}</option>
+                  <option value="{{ $property->id }}" data-room-code="{{ $property->next_room_code }}" @selected(old('property_id')==$property->id)>{{ $property->name }}{{ $property->status === 'inactive' ? ' (Tạm ngưng - chưa thể đăng tin)' : '' }}</option>
                 @endforeach
               </select>
+              <div class="form-text">Nhà trọ tạm ngưng vẫn có thể thêm phòng; chỉ được đăng tin khi nhà hoạt động lại.</div>
             </div>
 
             <div class="col-md-6">
