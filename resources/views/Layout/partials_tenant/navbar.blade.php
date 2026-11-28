@@ -40,15 +40,22 @@
                           Trang chủ
                       </a>
                   </li>
-
                   <li class="nav-item">
                       <a class="app-nav-link text-decoration-none
-                                {{ request()->routeIs('rooms.*') ? 'active' : '' }}"
+                                {{ request()->routeIs('rooms.index', 'rooms.show') ? 'active' : '' }}"
                           href="{{ route('rooms.index') }}">
                           Tìm phòng
                       </a>
                   </li>
-                  
+
+                  <li class="nav-item">
+                      @php $compareCount = count(session('compare_rooms', [])); @endphp
+                      <a class="app-nav-link text-decoration-none
+                                {{ request()->routeIs('rooms.compare') ? 'active' : '' }}"
+                          href="{{ route('rooms.compare') }}" data-no-ajax="true">
+                          So sánh @if($compareCount > 0)<span class="badge bg-primary ms-1">{{ $compareCount }}/3</span>@endif
+                      </a>
+                  </li>
                   <li class="nav-item">
                       <a class="app-nav-link text-decoration-none
                         {{ request()->routeIs('favorites.*') ? 'active' : '' }}"
@@ -56,58 +63,35 @@
                           Yêu thích
                       </a>
                   </li>
-                  <li class="nav-item">
-                      <a class="app-nav-link text-decoration-none
-                          {{ request()->routeIs('appointments.*') ? 'active' : '' }}"
-                          href="{{ route('appointments.index') }}">
-                          Lịch xem phòng
+                  <li class="nav-item dropdown">
+                      <a class="app-nav-link dropdown-toggle text-decoration-none
+                          {{ request()->routeIs('appointments.*', 'chat.*', 'chatbot.*') ? 'active' : '' }}"
+                          href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          Lịch &amp; hỗ trợ
                       </a>
+                      <ul class="dropdown-menu">
+                          <li><a class="dropdown-item {{ request()->routeIs('appointments.*') ? 'active' : '' }}" href="{{ route('appointments.index') }}">Lịch xem phòng</a></li>
+                          @if($currentUser && $currentUser->role === 'tenant')
+                              @php
+                                  $unreadChatCount = \App\Models\ChatMessage::whereNull('read_at')->where('sender_id', '!=', $currentUser->id)->whereHas('conversation', fn ($q) => $q->where('tenant_id', $currentUser->id)->orWhere('owner_id', $currentUser->id))->count();
+                              @endphp
+                              <li><a class="dropdown-item {{ request()->routeIs('chat.*') ? 'active' : '' }}" href="{{ route('chat.index') }}" data-no-ajax="true">Tin nhắn @if($unreadChatCount)<span class="badge bg-danger">{{ $unreadChatCount }}</span>@endif</a></li>
+                          @endif
+                          <li><a class="dropdown-item {{ request()->routeIs('chatbot.*') ? 'active' : '' }}" href="{{ route('chatbot.index') }}">Trợ lý AI</a></li>
+                      </ul>
                   </li>
-                  <!-- HỢP ĐỒNG -->
-                  <li class="nav-item">
-                      <a class="app-nav-link text-decoration-none
-                          {{ request()->routeIs('tenant.contracts.*') ? 'active' : '' }}"
-                          href="{{ route('tenant.contracts.index') }}">
-                          Hợp đồng
+                  <li class="nav-item dropdown">
+                      <a class="app-nav-link dropdown-toggle text-decoration-none
+                          {{ request()->routeIs('tenant.contracts.*', 'tenant.invoices.*', 'tenant.maintenance.*', 'tenant.reviews.*') ? 'active' : '' }}"
+                          href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          Dịch vụ
                       </a>
-                  </li>
-                  <!-- HÓA ĐƠN -->
-                  <li class="nav-item">
-                      <a class="app-nav-link text-decoration-none
-                          {{ request()->routeIs('tenant.invoices.*') ? 'active' : '' }}"
-                          href="{{ route('tenant.invoices.index') }}">
-                          Hóa đơn
-                      </a>
-                  </li>
-                  <!-- SỬA CHỮA -->
-                  <li class="nav-item">
-                      <a class="app-nav-link text-decoration-none
-                          {{ request()->routeIs('tenant.maintenance.*') ? 'active' : '' }}"
-                          href="{{ route('tenant.maintenance.index') }}">
-                          Sửa chữa
-                      </a>
-                  </li>
-                  <!-- ĐÁNH GIÁ -->
-                  <li class="nav-item">
-                      <a class="app-nav-link text-decoration-none
-                          {{ request()->routeIs('tenant.reviews.*') ? 'active' : '' }}"
-                          href="{{ route('tenant.reviews.index') }}">
-                          Đánh giá
-                      </a>
-                  </li>
-                  <!-- TRỢ LÝ AI -->
-                  @if($currentUser && $currentUser->role === 'tenant')
-                      @php
-                          $unreadChatCount = \App\Models\ChatMessage::whereNull('read_at')->where('sender_id', '!=', $currentUser->id)->whereHas('conversation', fn ($q) => $q->where('tenant_id', $currentUser->id)->orWhere('owner_id', $currentUser->id))->count();
-                      @endphp
-                      <li class="nav-item"><a class="app-nav-link text-decoration-none" href="{{ route('chat.index') }}" data-no-ajax="true">Tin nhắn @if($unreadChatCount)<span class="badge bg-danger">{{ $unreadChatCount }}</span>@endif</a></li>
-                  @endif
-                  <li class="nav-item">
-                      <a class="app-nav-link text-decoration-none
-                          {{ request()->routeIs('chatbot.*') ? 'active' : '' }}"
-                          href="{{ route('chatbot.index') }}">
-                          Trợ lý AI
-                      </a>
+                      <ul class="dropdown-menu">
+                          <li><a class="dropdown-item {{ request()->routeIs('tenant.contracts.*') ? 'active' : '' }}" href="{{ route('tenant.contracts.index') }}">Hợp đồng</a></li>
+                          <li><a class="dropdown-item {{ request()->routeIs('tenant.invoices.*') ? 'active' : '' }}" href="{{ route('tenant.invoices.index') }}">Hóa đơn</a></li>
+                          <li><a class="dropdown-item {{ request()->routeIs('tenant.maintenance.*') ? 'active' : '' }}" href="{{ route('tenant.maintenance.index') }}">Sửa chữa</a></li>
+                          <li><a class="dropdown-item {{ request()->routeIs('tenant.reviews.*') ? 'active' : '' }}" href="{{ route('tenant.reviews.index') }}">Đánh giá</a></li>
+                      </ul>
                   </li>
               </ul>
 

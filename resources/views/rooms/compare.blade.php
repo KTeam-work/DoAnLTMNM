@@ -14,9 +14,16 @@
     <div class="compare-table-wrap"><table class="compare-table"><thead><tr><th scope="col">Thông tin</th>@foreach($rooms as $room)
       @php
         $path = $room->rentalPosts->first()?->images->first()?->image_path;
-        $image = $path ? (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//']) ? $path : asset('storage/'.ltrim($path, '/'))) : null;
+        $image = null;
+        if ($path) {
+            $image = \Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//'])
+                ? $path
+                : (\Illuminate\Support\Str::startsWith($path, ['storage/', '/storage/'])
+                    ? asset(ltrim($path, '/'))
+                    : asset('storage/'.ltrim($path, '/')));
+        }
       @endphp
-      <th scope="col"><div class="compare-room-card">@if($image)<img src="{{ $image }}" alt="Ảnh {{ $room->name }}" loading="lazy">@else<div class="compare-no-image">Chưa có ảnh</div>@endif<div class="compare-room-title">{{ $room->name }}</div><div class="compare-room-sub">{{ $room->property?->name }}</div><form action="{{ route('rooms.compare.destroy', $room) }}" method="POST" data-no-ajax="true">@csrf @method('DELETE')<button type="submit" class="compare-remove" aria-label="Bỏ {{ $room->name }} khỏi so sánh">Bỏ phòng</button></form></div></th>
+      <th scope="col"><div class="compare-room-card{{ $image ? ' has-image' : '' }}">@if($image)<img src="{{ $image }}" alt="Ảnh {{ $room->name }}" loading="lazy">@endif<div class="compare-room-title">{{ $room->name }}</div><div class="compare-room-sub">{{ $room->property?->name }}</div><form action="{{ route('rooms.compare.destroy', $room) }}" method="POST" data-no-ajax="true">@csrf @method('DELETE')<button type="submit" class="compare-remove" aria-label="Bỏ {{ $room->name }} khỏi so sánh">Bỏ phòng</button></form></div></th>
     @endforeach</tr></thead><tbody>
       <tr><th scope="row">Giá thuê</th>@foreach($rooms as $room)<td><strong class="compare-price">{{ number_format((float) $room->price, 0, ',', '.') }} đ</strong><small>/ tháng</small></td>@endforeach</tr>
       <tr><th scope="row">Tiền cọc</th>@foreach($rooms as $room)<td>{{ number_format((float) $room->deposit, 0, ',', '.') }} đ</td>@endforeach</tr>

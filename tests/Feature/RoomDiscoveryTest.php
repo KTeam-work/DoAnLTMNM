@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Property;
 use App\Models\RentalPost;
+use App\Models\RentalPostImage;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -41,7 +42,7 @@ class RoomDiscoveryTest extends TestCase
         $this->post(route('rooms.compare.store', $hidden))->assertNotFound();
         foreach ([$one, $two, $three] as $room) $this->from(route('rooms.index'))->post(route('rooms.compare.store', $room))->assertRedirect();
         $this->from(route('rooms.index'))->post(route('rooms.compare.store', $four))->assertSessionHas('compare_error');
-        $this->get(route('rooms.compare'))->assertOk()->assertSee('Phòng Một')->assertSee('Phòng Hai')->assertSee('Phòng Ba')->assertDontSee('Phòng Bốn');
+        $this->get(route('rooms.compare'))->assertOk()->assertSee('Phòng Một')->assertSee('Phòng Hai')->assertSee('Phòng Ba')->assertDontSee('Phòng Bốn')->assertDontSee('Chưa có ảnh');
         $two->update(['status' => 'rented']);
         $this->get(route('rooms.compare'))->assertOk()->assertDontSee('Phòng Hai')->assertSessionHas('compare_rooms', [$one->id, $three->id]);
         $this->from(route('rooms.compare'))->delete(route('rooms.compare.destroy', $one))->assertRedirect();
@@ -66,5 +67,37 @@ class RoomDiscoveryTest extends TestCase
         $this->delete(route('owner.rooms.panorama.destroy', $room))->assertRedirect();
         $this->assertNull($room->fresh()->panorama_path);
         $this->get(route('rooms.show', $room))->assertOk()->assertDontSee('Xem phòng 360°');
+    }
+
+    public function test_comparison_uses_the_room_thumbnail_and_omits_missing_images(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner', 'status' => 'active']);
+        $property = Property::create(['owner_id' => $owner->id, 'name' => 'Nhà A', 'type' => 'rooming_house', 'address' => 'Đường A', 'ward' => 'P1', 'district' => 'Q1', 'status' => 'active']);
+        $withPhoto = $this->room($property, 'Phòng Có Ảnh');
+        $withoutPhoto = $this->room($property, 'Phòng Không Ảnh');
+        $post = $withPhoto->rentalPosts()->firstOrFail();
+
+        RentalPostImage::create([
+            'rental_post_id' => $post->id,
+            'image_path' => 'rooms/other.jpg',
+            'is_thumbnail' => false,
+            'sort_order' => 0,
+        ]);
+        RentalPostImage::create([
+            'rental_post_id' => $post->id,
+            'image_path' => 'storage/rooms/cover.jpg',
+            'is_thumbnail' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->post(route('rooms.compare.store', $withPhoto));
+        $this->post(route('rooms.compare.store', $withoutPhoto));
+        $response = $this->get(route('rooms.compare'))
+            ->assertOk()
+            ->assertSee(asset('storage/rooms/cover.jpg'), false)
+            ->assertDontSee(asset('storage/rooms/other.jpg'), false)
+            ->assertDontSee('Chưa có ảnh');
+
+        $this->assertSame(1, substr_count($response->getContent(), '<img '));
     }
 }
